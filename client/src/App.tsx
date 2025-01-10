@@ -12,10 +12,10 @@ import { WeightTracker } from './components/WeightTracker';
 import { HealthyPlateGuide } from './components/HealthyPlateGuide';
 import { Login } from './components/Login';
 import { Profile } from './components/Profile';
-import { sampleRecipes } from './data/recipes';
 import { categorizeIngredient } from './utils/categorizeIngredient';
 import { getUnitPlural } from './utils/getUnitPlural';
 import { supabase } from './lib/supabase';
+import { useRecipes } from './hooks/useRecipes';
 
 function App() {
   const navigate = useNavigate();
@@ -30,6 +30,7 @@ function App() {
   });
   const [showLogin, setShowLogin] = useState(false);
   const [user, setUser] = useState<any>(null);
+  const { recipes, loading, error } = useRecipes();
 
   useEffect(() => {
     // Check initial auth state
@@ -155,6 +156,10 @@ function App() {
 
   const activeTab = location.pathname.split('/')[1] || 'recetas';
 
+  const handleRemoveFavorite = (recipe: FavoriteRecipe) => {
+    setFavorites(prev => prev.filter(f => f.Plato !== recipe.Plato));
+  };
+
   return (
     <div className="min-h-screen bg-gray-50">
       <Header 
@@ -177,12 +182,18 @@ function App() {
           <Route 
             path="/recetas" 
             element={
-              <RecipeList 
-                recipes={sampleRecipes}
-                onRecipeSelect={handleRecipeSelect}
-                favorites={favorites.map(f => f.Plato)}
-                onToggleFavorite={toggleFavorite}
-              />
+              loading ? (
+                <div>Cargando...</div>
+              ) : error ? (
+                <div>Error: {error.message}</div>
+              ) : (
+                <RecipeList 
+                  recipes={recipes}
+                  onRecipeSelect={handleRecipeSelect}
+                  favorites={favorites.map(f => f.Plato)}
+                  onToggleFavorite={toggleFavorite}
+                />
+              )
             }
           />
           <Route 
@@ -209,7 +220,7 @@ function App() {
             element={
               <Favorites 
                 favorites={favorites}
-                onRemoveFavorite={(recipe) => toggleFavorite(recipe)}
+                onRemoveFavorite={handleRemoveFavorite}
                 onUpdateFavorite={updateFavorite}
               />
             }
