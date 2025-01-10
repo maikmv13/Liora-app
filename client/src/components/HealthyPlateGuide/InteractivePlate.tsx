@@ -10,64 +10,97 @@ interface InteractivePlateProps {
 export function InteractivePlate({ foodGroups, selectedGroup, onSelectGroup }: InteractivePlateProps) {
   const [hoveredGroup, setHoveredGroup] = useState<string | null>(null);
 
+  // Función para calcular los paths SVG de las secciones del plato
+  const calculatePaths = () => {
+    const centerX = 50;
+    const centerY = 50;
+    const radius = 50;
+
+    // Convertir porcentajes a ángulos
+    let startAngle = -90; // Comenzar desde arriba
+    const paths = foodGroups.map(group => {
+      const angle = (group.percentage / 100) * 360;
+      const endAngle = startAngle + angle;
+      
+      // Convertir ángulos a radianes
+      const startRad = (startAngle * Math.PI) / 180;
+      const endRad = (endAngle * Math.PI) / 180;
+      
+      // Calcular puntos
+      const x1 = centerX + radius * Math.cos(startRad);
+      const y1 = centerY + radius * Math.sin(startRad);
+      const x2 = centerX + radius * Math.cos(endRad);
+      const y2 = centerY + radius * Math.sin(endRad);
+      
+      // Crear path
+      const largeArcFlag = angle > 180 ? 1 : 0;
+      const path = `
+        M ${centerX} ${centerY}
+        L ${x1} ${y1}
+        A ${radius} ${radius} 0 ${largeArcFlag} 1 ${x2} ${y2}
+        Z
+      `;
+      
+      startAngle = endAngle;
+      return { path, group };
+    });
+
+    return paths;
+  };
+
+  // Calcular posición de las etiquetas
+  const getLabelPosition = (percentage: number, index: number) => {
+    const totalGroups = foodGroups.length;
+    const angleOffset = -90; // Comenzar desde arriba
+    const totalAngle = 360;
+    
+    // Calcular el ángulo central de cada sección
+    let angleSum = 0;
+    for (let i = 0; i < index; i++) {
+      angleSum += (foodGroups[i].percentage / 100) * totalAngle;
+    }
+    const middleAngle = angleOffset + angleSum + ((percentage / 100) * totalAngle) / 2;
+    
+    // Convertir a radianes
+    const angleRad = (middleAngle * Math.PI) / 180;
+    
+    // Calcular posición
+    const distance = 35; // Distancia desde el centro (%)
+    const x = 50 + distance * Math.cos(angleRad);
+    const y = 50 + distance * Math.sin(angleRad);
+    
+    return { x, y };
+  };
+
   return (
     <div className="relative max-w-4xl mx-auto pt-20 pb-32">
-      {/* Plato principal */}
       <div className="relative aspect-square max-w-lg mx-auto">
         <div className="absolute inset-0 rounded-full bg-white shadow-[0_0_40px_rgba(0,0,0,0.1)] border-8 border-gray-100">
-          {/* Divisiones del plato */}
-          <svg className="absolute inset-0 w-full h-full" viewBox="0 0 100 100">
-            {/* Líneas divisorias */}
-            <path
-              d="M50,0 L50,100 M50,50 L100,50"
-              className="stroke-white stroke-[3]"
-              strokeLinecap="round"
-              fill="none"
-            />
-
-            {/* Verduras (50%) */}
-            <path
-              d="M0,0 L50,0 L50,50 L0,50 Z"
-              className={`${foodGroups[0].color} transition-colors duration-300 ${
-                hoveredGroup === 'vegetables' ? 'opacity-100' : 'opacity-90'
-              }`}
-              onMouseEnter={() => setHoveredGroup('vegetables')}
-              onMouseLeave={() => setHoveredGroup(null)}
-              onClick={() => onSelectGroup(foodGroups[0])}
-            />
-
-            {/* Proteínas (25%) */}
-            <path
-              d="M50,50 L100,50 L100,100 L50,100 Z"
-              className={`${foodGroups[1].color} transition-colors duration-300 ${
-                hoveredGroup === 'proteins' ? 'opacity-100' : 'opacity-90'
-              }`}
-              onMouseEnter={() => setHoveredGroup('proteins')}
-              onMouseLeave={() => setHoveredGroup(null)}
-              onClick={() => onSelectGroup(foodGroups[1])}
-            />
-
-            {/* Carbohidratos (25%) */}
-            <path
-              d="M50,0 L100,0 L100,50 L50,50 Z"
-              className={`${foodGroups[2].color} transition-colors duration-300 ${
-                hoveredGroup === 'carbs' ? 'opacity-100' : 'opacity-90'
-              }`}
-              onMouseEnter={() => setHoveredGroup('carbs')}
-              onMouseLeave={() => setHoveredGroup(null)}
-              onClick={() => onSelectGroup(foodGroups[2])}
-            />
+          {/* SVG para las secciones del plato */}
+          <svg
+            className="absolute inset-0 w-full h-full"
+            viewBox="0 0 100 100"
+            style={{ transform: 'rotate(-90deg)' }}
+          >
+            {calculatePaths().map(({ path, group }, index) => (
+              <path
+                key={group.id}
+                d={path}
+                className={`${group.color} transition-colors duration-300 ${
+                  hoveredGroup === group.id ? 'opacity-100' : 'opacity-90'
+                }`}
+                onMouseEnter={() => setHoveredGroup(group.id)}
+                onMouseLeave={() => setHoveredGroup(null)}
+                onClick={() => onSelectGroup(group)}
+                style={{ transform: 'rotate(90deg)' }}
+              />
+            ))}
           </svg>
 
-          {/* Etiquetas permanentes */}
-          {foodGroups.map((group) => {
+          {/* Etiquetas */}
+          {foodGroups.map((group, index) => {
+            const position = getLabelPosition(group.percentage, index);
             const isActive = hoveredGroup === group.id;
-            const positions = {
-              vegetables: { top: '25%', left: '10%' },
-              proteins: { bottom: '25%', right: '10%' },
-              carbs: { top: '25%', right: '10%' }
-            };
-            const pos = positions[group.id as keyof typeof positions];
 
             return (
               <div
@@ -75,7 +108,11 @@ export function InteractivePlate({ foodGroups, selectedGroup, onSelectGroup }: I
                 className={`absolute transition-all duration-300 ${
                   isActive ? 'scale-110' : 'scale-100'
                 }`}
-                style={pos}
+                style={{
+                  left: `${position.x}%`,
+                  top: `${position.y}%`,
+                  transform: 'translate(-50%, -50%)'
+                }}
               >
                 <div className={`flex items-center space-x-2 bg-white/90 backdrop-blur-sm px-3 py-2 rounded-xl shadow-lg border-2 ${
                   group.color.replace('bg', 'border').replace('500', '200')
@@ -94,14 +131,13 @@ export function InteractivePlate({ foodGroups, selectedGroup, onSelectGroup }: I
             );
           })}
 
-          {/* Borde decorativo y sombra interior */}
-          <div className="absolute inset-0 rounded-full border-8 border-white/20 shadow-[inset_0_0_20px_rgba(0,0,0,0.1)]" />
-          
           {/* Centro del plato */}
           <div className="absolute inset-[15%] rounded-full bg-white/90 backdrop-blur-sm shadow-lg border-4 border-gray-50 flex items-center justify-center">
             <div className="text-center p-4">
               <div className="w-16 h-16 mx-auto mb-2 rounded-xl bg-gradient-to-br from-rose-50 to-orange-50 flex items-center justify-center">
-                {hoveredGroup ? foodGroups.find(g => g.id === hoveredGroup)?.icon : foodGroups[0].icon}
+                {hoveredGroup 
+                  ? foodGroups.find(g => g.id === hoveredGroup)?.icon 
+                  : foodGroups[0].icon}
               </div>
               <p className="text-sm font-medium text-gray-600">
                 {hoveredGroup 
