@@ -1,3 +1,5 @@
+import { Dispatch, SetStateAction } from 'react';
+
 export type MealType = 'desayuno' | 'comida' | 'cena';
 export type FilterMealType = 'comida' | 'cena' | 'all';
 export type DinnerMealType = 'comida' | 'cena';
@@ -79,19 +81,11 @@ interface BaseFavoriteRecipe extends Omit<Recipe, 'isFavorite'> {
   addedAt: string;
 }
 
-// Tipo para crear favoritos
-export type NewFavoriteRecipe = BaseFavoriteRecipe & {
+// Tipo para favoritos (tanto nuevos como existentes)
+export type FavoriteRecipe = BaseFavoriteRecipe & {
   isFavorite: boolean;
 };
 
-// Tipo para favoritos existentes
-export type FavoriteRecipe = BaseFavoriteRecipe & {
-  isFavorite: true;
-};
-
-// Tipo auxiliar para el filtro de comidas
-export type MealFilter = FilterMealType;
-
-// Agregar un tipo para el estado del filtro
+// Tipo para el filtro de comidas
 export type FilterState = FilterMealType;
-export type FilterAction = (type: FilterState) => void;
+export type FilterAction = Dispatch<SetStateAction<FilterMealType>>;
