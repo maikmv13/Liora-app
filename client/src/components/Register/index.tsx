@@ -3,9 +3,10 @@ import { ChevronLeft, User, UserCog, Mail, Lock, Eye, EyeOff, Briefcase, FileChe
 import { supabase } from '../../lib/supabase';
 
 interface RegisterProps {
-  onClose: () => void;
-  onBack: () => void;
-  initialUserType: 'user' | 'nutritionist' | null;
+  readonly onClose: () => void;
+  readonly onRegisterSuccess?: () => void;
+  readonly preSelectedUserType: 'user' | 'nutritionist' | null;
+  readonly onBack?: () => void;
 }
 
 interface FormData {
@@ -17,8 +18,8 @@ interface FormData {
   licenseNumber?: string;
 }
 
-export function Register({ onClose, onBack, initialUserType }: RegisterProps) {
-  const [userType, setUserType] = useState<'user' | 'nutritionist' | null>(initialUserType);
+export function Register({ onClose, onRegisterSuccess, preSelectedUserType, onBack }: RegisterProps) {
+  const [userType, setUserType] = useState<'user' | 'nutritionist' | null>(preSelectedUserType);
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [error, setError] = useState('');
@@ -343,7 +344,7 @@ export function Register({ onClose, onBack, initialUserType }: RegisterProps) {
 
             <button
               type="button"
-              onClick={onBack}
+              onClick={onBack || onClose}
               className="w-full py-2.5 text-gray-600 hover:bg-gray-50 rounded-xl transition-colors text-sm"
             >
               ¿Ya tienes cuenta? Inicia sesión

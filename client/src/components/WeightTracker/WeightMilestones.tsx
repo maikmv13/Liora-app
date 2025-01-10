@@ -16,6 +16,11 @@ interface WeightMilestonesProps {
   targetWeight: number;
   streakDays: number;
   totalLoss: number;
+  completedGoals: Array<{
+    date: string;
+    weight: number;
+    targetWeight: number;
+  }>;
 }
 
 export function WeightMilestones({

@@ -156,8 +156,9 @@ export function WeightChart({ data, targetWeight, completedGoals }: WeightChartP
       }
     },
     interaction: {
+      mode: 'nearest' as const,
       intersect: false,
-      mode: 'index'
+      nearest: true
     }
   };
 
