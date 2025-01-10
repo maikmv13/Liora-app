@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { Routes, Route, Navigate, useNavigate, useLocation } from 'react-router-dom';
 import { Recipe, MenuItem, ShoppingItem, FavoriteRecipe } from './types';
 import { Header } from './components/Header';
 import { Navigation } from './components/Navigation';
@@ -10,12 +11,15 @@ import { Favorites } from './components/Favorites';
 import { WeightTracker } from './components/WeightTracker';
 import { HealthyPlateGuide } from './components/HealthyPlateGuide';
 import { Login } from './components/Login';
+import { Profile } from './components/Profile';
 import { sampleRecipes } from './data/recipes';
 import { categorizeIngredient } from './utils/categorizeIngredient';
 import { getUnitPlural } from './utils/getUnitPlural';
+import { supabase } from './lib/supabase';
 
 function App() {
-  const [activeTab, setActiveTab] = useState('recetas');
+  const navigate = useNavigate();
+  const location = useLocation();
   const [searchTerm, setSearchTerm] = useState('');
   const [weeklyMenu, setWeeklyMenu] = useState<MenuItem[]>([]);
   const [selectedRecipe, setSelectedRecipe] = useState<Recipe | null>(null);
@@ -25,6 +29,21 @@ function App() {
     return saved ? JSON.parse(saved) : [];
   });
   const [showLogin, setShowLogin] = useState(false);
+  const [user, setUser] = useState<any>(null);
+
+  useEffect(() => {
+    // Check initial auth state
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setUser(session?.user ?? null);
+    });
+
+    // Listen for auth changes
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      setUser(session?.user ?? null);
+    });
+
+    return () => subscription.unsubscribe();
+  }, []);
 
   useEffect(() => {
     localStorage.setItem('favorites', JSON.stringify(favorites));
@@ -37,7 +56,7 @@ function App() {
   const handleAddToMenuFromModal = (recipe: Recipe) => {
     addToMenu(recipe, 'Lunes', 'comida');
     setSelectedRecipe(null);
-    setActiveTab('menu');
+    navigate('/menu');
   };
 
   const addToMenu = (recipe: Recipe | null, day: string, meal: 'comida' | 'cena') => {
@@ -134,60 +153,82 @@ function App() {
     }));
   }, [weeklyMenu]);
 
+  const activeTab = location.pathname.split('/')[1] || 'recetas';
+
   return (
     <div className="min-h-screen bg-gray-50">
       <Header 
         searchTerm={searchTerm}
         onSearchChange={setSearchTerm}
         activeTab={activeTab}
-        onTabChange={setActiveTab}
+        onTabChange={(tab) => navigate(`/${tab}`)}
         onLogin={() => setShowLogin(true)}
+        user={user}
+        onProfile={() => navigate('/perfil')}
       />
       <Navigation 
         activeTab={activeTab}
-        onTabChange={setActiveTab}
+        onTabChange={(tab) => navigate(`/${tab}`)}
       />
 
       <main className="container mx-auto px-4 py-8">
-        {activeTab === 'recetas' && (
-          <RecipeList 
-            recipes={sampleRecipes}
-            onRecipeSelect={handleRecipeSelect}
-            favorites={favorites.map(f => f.Plato)}
-            onToggleFavorite={toggleFavorite}
+        <Routes>
+          <Route path="/" element={<Navigate to="/recetas" replace />} />
+          <Route 
+            path="/recetas" 
+            element={
+              <RecipeList 
+                recipes={sampleRecipes}
+                onRecipeSelect={handleRecipeSelect}
+                favorites={favorites.map(f => f.Plato)}
+                onToggleFavorite={toggleFavorite}
+              />
+            }
           />
-        )}
-
-        {activeTab === 'menu' && (
-          <WeeklyMenu 
-            weeklyMenu={weeklyMenu}
-            onRecipeSelect={handleRecipeSelect}
-            onAddToMenu={addToMenu}
+          <Route 
+            path="/menu" 
+            element={
+              <WeeklyMenu 
+                weeklyMenu={weeklyMenu}
+                onRecipeSelect={handleRecipeSelect}
+                onAddToMenu={addToMenu}
+              />
+            }
           />
-        )}
-
-        {activeTab === 'compra' && (
-          <ShoppingList 
-            items={shoppingItems}
-            onToggleItem={toggleShoppingItem}
+          <Route 
+            path="/compra" 
+            element={
+              <ShoppingList 
+                items={shoppingItems}
+                onToggleItem={toggleShoppingItem}
+              />
+            }
           />
-        )}
-
-        {activeTab === 'favoritos' && (
-          <Favorites 
-            favorites={favorites}
-            onRemoveFavorite={(recipe) => toggleFavorite(recipe)}
-            onUpdateFavorite={updateFavorite}
+          <Route 
+            path="/favoritos" 
+            element={
+              <Favorites 
+                favorites={favorites}
+                onRemoveFavorite={(recipe) => toggleFavorite(recipe)}
+                onUpdateFavorite={updateFavorite}
+              />
+            }
           />
-        )}
-
-        {activeTab === 'peso' && (
-          <WeightTracker />
-        )}
-
-        {activeTab === 'plato' && (
-          <HealthyPlateGuide />
-        )}
+          <Route 
+            path="/peso" 
+            element={<WeightTracker />}
+          />
+          <Route 
+            path="/plato" 
+            element={<HealthyPlateGuide />}
+          />
+          <Route 
+            path="/perfil" 
+            element={
+              user ? <Profile /> : <Navigate to="/recetas" replace />
+            }
+          />
+        </Routes>
       </main>
 
       {selectedRecipe && (
@@ -201,7 +242,13 @@ function App() {
       )}
 
       {showLogin && (
-        <Login onClose={() => setShowLogin(false)} />
+        <Login 
+          onClose={() => setShowLogin(false)} 
+          onLoginSuccess={() => {
+            setShowLogin(false);
+            navigate('/perfil');
+          }}
+        />
       )}
     </div>
   );
