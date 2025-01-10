@@ -25,6 +25,7 @@ export type Recipe = {
   instructions: Record<string, string>;
   url: string | null;
   pdf_url: string | null;
+  isFavorite: boolean;
   
   // Campos legacy para compatibilidad
   Plato: string;
@@ -40,14 +41,13 @@ export type Recipe = {
   'Tiempo de preparación': string;
   Instrucciones: Record<string, string>;
   PDF_Url: string;
-  isFavorite?: boolean;
 };
 
 export type MenuItem = {
   recipe: Recipe;
   day: string;
   type: MealType;
-  meal?: MealType; // Para compatibilidad
+  meal: MealType;
 };
 
 export type ShoppingItem = {
@@ -57,21 +57,21 @@ export type ShoppingItem = {
   checked: boolean;
   category: string;
   recipes: string[];
-  // Campos legacy
-  nombre?: string;
-  cantidad?: number;
-  unidad?: string;
-  comprado?: boolean;
-  categoria?: string;
-  dias?: string[];
+  
+  // Campos legacy (requeridos para compatibilidad)
+  nombre: string;
+  cantidad: number;
+  unidad: string;
+  comprado: boolean;
+  categoria: string;
+  dias: string[];
 };
 
 export type FavoriteRecipe = Recipe & {
-  isFavorite: boolean;
-  // Campos adicionales para favoritos
-  notes?: string;
-  rating?: number;
-  lastCooked?: string;
-  tags?: string[];
-  addedAt?: string;
+  isFavorite: true;
+  notes: string;
+  rating: number;
+  lastCooked: string;
+  tags: string[];
+  addedAt: string;
 }; 

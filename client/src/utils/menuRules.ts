@@ -8,7 +8,7 @@ export type MenuRules = {
 
 export const menuRules: Record<MealType, MenuRules> = {
   desayuno: {
-    allowedCategories: ['Desayunos']
+    allowedCategories: ['Desayunos', 'Vegetariano']
   },
   comida: {
     allowedCategories: ['Aves', 'Carnes', 'Pastas y Arroces', 'Pescados', 'Legumbres'],
