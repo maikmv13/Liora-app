@@ -7,15 +7,17 @@ import { weekDays } from '../WeeklyMenu2/utils';
 import { categoryOrder } from '../../data/categories';
 
 interface ShoppingListProps {
-  items: ShoppingItem[];
-  onToggleItem: (nombre: string, dia?: string) => void;
+  readonly items: ShoppingItem[];
+  readonly onToggleItem: (nombre: string, dia?: string) => void;
 }
+
+type WeekDay = 'Lunes' | 'Martes' | 'Miércoles' | 'Jueves' | 'Viernes' | 'Sábado' | 'Domingo';
 
 export function ShoppingList({ items, onToggleItem }: ShoppingListProps) {
   const [showCompleted, setShowCompleted] = useState(true);
   const [expandedCategories, setExpandedCategories] = useState<string[]>([]);
   const [viewMode, setViewMode] = useState<'weekly' | 'daily'>('weekly');
-  const [selectedDay, setSelectedDay] = useState(weekDays[0]);
+  const [selectedDay, setSelectedDay] = useState<WeekDay>('Lunes');
   const [servings, setServings] = useState(2);
 
   const adjustedItems = items.map(item => ({

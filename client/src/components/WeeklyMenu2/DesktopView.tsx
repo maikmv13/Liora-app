@@ -2,13 +2,14 @@ import React from 'react';
 import { MenuItem } from '../../types';
 import { DayCard } from './DayCard';
 import { weekDays } from './utils';
+import { DAYS, type WeekDay } from './constants';
 
 interface DesktopViewProps {
-  weekDays: string[];
+  weekDays: typeof DAYS;
   weeklyMenu: MenuItem[];
   onMealClick: (day: string, meal: 'comida' | 'cena') => void;
   onRemoveMeal: (day: string, meal: 'comida' | 'cena') => void;
-  onViewRecipe: (recipe: MenuItem) => void;
+  onViewRecipe: (menuItem: MenuItem) => void;
 }
 
 export function DesktopView({ 

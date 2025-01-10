@@ -21,8 +21,11 @@ interface MenuHistory {
   menu: MenuItem[];
 }
 
+const DAYS = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domingo'] as const;
+type WeekDay = typeof DAYS[number];
+
 export function WeeklyMenu2({ weeklyMenu, onRecipeSelect, onAddToMenu }: WeeklyMenu2Props) {
-  const [selectedDay, setSelectedDay] = useState(weekDays[0]);
+  const [selectedDay, setSelectedDay] = useState<WeekDay>('Lunes');
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [selectedMealInfo, setSelectedMealInfo] = useState<{
     day: string;

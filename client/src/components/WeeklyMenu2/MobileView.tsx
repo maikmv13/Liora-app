@@ -2,15 +2,16 @@ import React from 'react';
 import { ChevronLeft, ChevronRight, X, Plus, Flame, Eye, PenSquare } from 'lucide-react';
 import { MenuItem } from '../../types';
 import { getMealIcon } from './utils';
+import { DAYS, type WeekDay } from './constants';
 
 interface MobileViewProps {
-  selectedDay: string;
-  weekDays: string[];
+  selectedDay: WeekDay;
+  weekDays: typeof DAYS;
   weeklyMenu: MenuItem[];
-  onDayChange: (day: string) => void;
+  onDayChange: (day: WeekDay) => void;
   onMealClick: (day: string, meal: 'comida' | 'cena') => void;
   onRemoveMeal: (day: string, meal: 'comida' | 'cena') => void;
-  onViewRecipe: (recipe: MenuItem) => void;
+  onViewRecipe: (menuItem: MenuItem) => void;
 }
 
 export function MobileView({ 
