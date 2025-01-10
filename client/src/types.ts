@@ -1,8 +1,10 @@
+export type MealType = 'desayuno' | 'comida' | 'cena';
+
 export type Recipe = {
   id: string;
   name: string;
   side_dish: string | null;
-  meal_type: 'desayuno' | 'comida' | 'cena' | 'snack';
+  meal_type: MealType;
   category: 'Carnes' | 'Pescados' | 'Vegetariano' | 'Pasta' | 'Sopas' | 'Ensaladas';
   servings: number;
   ingredients: {
@@ -27,11 +29,14 @@ export type Recipe = {
   // Campos legacy para compatibilidad
   Plato: string;
   Acompañamiento: string;
-  Tipo: 'desayuno' | 'comida' | 'cena' | 'snack';
+  Tipo: MealType;
   Categoria: string;
   Comensales: number;
   Ingredientes: any[];
   Calorias: string;
+  Proteínas: string;
+  Carbohidratos: string;
+  Grasas: string;
   'Tiempo de preparación': string;
   Instrucciones: Record<string, string>;
   PDF_Url: string;
@@ -41,10 +46,9 @@ export type Recipe = {
 export type MenuItem = {
   recipe: Recipe;
   day: string;
-  type: 'desayuno' | 'comida' | 'cena';
+  type: MealType;
+  meal?: MealType; // Para compatibilidad
 };
-
-export type MealType = 'desayuno' | 'comida' | 'cena';
 
 export type ShoppingItem = {
   name: string;
@@ -53,8 +57,21 @@ export type ShoppingItem = {
   checked: boolean;
   category: string;
   recipes: string[];
+  // Campos legacy
+  nombre?: string;
+  cantidad?: number;
+  unidad?: string;
+  comprado?: boolean;
+  categoria?: string;
+  dias?: string[];
 };
 
 export type FavoriteRecipe = Recipe & {
   isFavorite: boolean;
+  // Campos adicionales para favoritos
+  notes?: string;
+  rating?: number;
+  lastCooked?: string;
+  tags?: string[];
+  addedAt?: string;
 }; 
