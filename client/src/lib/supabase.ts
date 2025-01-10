@@ -1,28 +1,10 @@
 import { createClient } from '@supabase/supabase-js';
 import type { Database } from '../types/supabase';
 
-if (!import.meta.env.VITE_SUPABASE_URL) {
-  throw new Error('Missing environment variable: VITE_SUPABASE_URL');
-}
+const supabaseUrl = 'https://geqjccqfayuwcmsgaxun.supabase.co';
+const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdlcWpjY3FmYXl1d2Ntc2dheHVuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzY1MTEyOTIsImV4cCI6MjA1MjA4NzI5Mn0.BQil-q1bm8plruXU7j0maqG7E1EAPuuDvmPILJ08Wp8';
 
-if (!import.meta.env.VITE_SUPABASE_ANON_KEY) {
-  throw new Error('Missing environment variable: VITE_SUPABASE_ANON_KEY');
-}
-
-export const supabase = createClient<Database>(
-  import.meta.env.VITE_SUPABASE_URL,
-  import.meta.env.VITE_SUPABASE_ANON_KEY,
-  {
-    auth: {
-      autoRefreshToken: true,
-      persistSession: true,
-      detectSessionInUrl: true
-    },
-    db: {
-      schema: 'public'
-    }
-  }
-);
+export const supabase = createClient<Database>(supabaseUrl, supabaseKey);
 
 // Helper para manejar errores de Supabase
 export const handleSupabaseError = (error: any) => {

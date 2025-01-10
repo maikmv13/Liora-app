@@ -26,6 +26,7 @@ INSERT INTO recipes (
   fiber,
   proteins,
   sodium,
+  prep_time,
   instructions,
   url,
   pdf_url
@@ -45,6 +46,7 @@ INSERT INTO recipes (
   '0.49',
   '38.46',
   '400',
+  '45',
   '{"1": "Precalienta el horno a 180ºC", "2": "Pela la cebolla y córtala por la mitad", "3": "Corta el limón y exprime", "4": "Agrega los muslos de pollo", "5": "Cocina el arroz", "6": "Sirve todo junto"}'::jsonb,
   'https://www.hellofresh.es/recipes/pollo-limon-arroz-verduras-6373c35108cf0b02479225cf',
   'https://www.hellofresh.es/recipecards/card/pollo-limon-arroz-verduras-6373c35108cf0b02479225cf-39969b5d.pdf'

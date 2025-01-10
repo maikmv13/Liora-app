@@ -37,7 +37,7 @@ export function useRecipes() {
             )
           `);
 
-        console.log('Raw data from Supabase:', data); // Debug
+        console.log('Raw data:', data, 'Error:', error); // Debug
 
         if (error) throw error;
         

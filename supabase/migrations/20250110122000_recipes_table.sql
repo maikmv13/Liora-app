@@ -53,7 +53,8 @@ CREATE TABLE recipes (
 -- Crear tabla de ingredientes
 CREATE TABLE ingredients (
   id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
-  name text NOT NULL UNIQUE
+  name text NOT NULL UNIQUE,
+  category text DEFAULT 'Otros'
 );
 
 -- Crear tabla de relación recetas-ingredientes
