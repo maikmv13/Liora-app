@@ -91,7 +91,30 @@ export function RecipeList({ recipes, onRecipeSelect, favorites, onToggleFavorit
         {sortedRecipes.map((recipe) => (
           <RecipeCard 
             key={recipe.Plato} 
-            recipe={recipe}
+            recipe={{
+              id: recipe.Plato,
+              name: recipe.Plato,
+              side_dish: recipe.Acompañamiento || null,
+              meal_type: recipe.Tipo as "comida" | "cena" | "desayuno" | "snack",
+              category: recipe.Categoria as "Carnes" | "Pescados" | "Vegetariano" | "Pasta" | "Sopas" | "Ensaladas",
+              servings: recipe.Comensales,
+              calories: parseInt(recipe.Calorias).toString(),
+              prep_time: recipe["Tiempo de preparación"],
+              energy_kj: recipe["Valor energético (kJ)"],
+              fats: recipe.Grasas,
+              saturated_fats: recipe.Saturadas,
+              carbohydrates: recipe.Carbohidratos,
+              sugars: recipe.Azúcares,
+              fiber: recipe.Fibra,
+              proteins: recipe.Proteínas,
+              sodium: recipe.Sodio,
+              instructions: recipe.Instrucciones,
+              url: recipe.Url,
+              pdf_url: recipe.PDF_Url,
+              updated_at: new Date().toISOString(),
+              created_at: new Date().toISOString(),
+              isFavorite: recipe.isFavorite
+            }}
             onClick={() => onRecipeSelect(recipe)}
             onToggleFavorite={() => onToggleFavorite(recipe)}
           />
