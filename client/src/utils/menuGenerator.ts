@@ -1,11 +1,11 @@
 import { Recipe, MenuItem, MealType } from '../types';
 
 // Reglas para la generación del menú
-const mealRules = {
+const mealRules: Record<MealType, MenuRules> = {
   comida: {
     allowedCategories: ['Aves', 'Carnes', 'Pastas y Arroces', 'Pescados', 'Legumbres'],
     restrictedCategories: {
-      'Fast Food': { startDay: 4 } // Solo permitido desde el jueves
+      'Fast Food': { startDay: 4 }
     },
     weeklyLimits: {
       'Carnes': 3,
@@ -15,16 +15,13 @@ const mealRules = {
   cena: {
     allowedCategories: ['Ensaladas', 'Sopas y Cremas', 'Vegetariano', 'Pastas y Arroces'],
     restrictedCategories: {
-      'Fast Food': { startDay: 4 } // Solo permitido desde el jueves
+      'Fast Food': { startDay: 4 }
     }
   }
-};
+} as const;
 
 // Categorías que se consideran proteínas
 const proteinCategories = ['Aves', 'Carnes', 'Pescados', 'Legumbres'];
-
-// Categorías saludables que deben aparecer al menos una vez por semana
-const healthyCategories = ['Sopas y Cremas', 'Ensaladas', 'Vegetariano'];
 
 interface MenuStats {
   categoryCount: Record<string, number>;
@@ -32,6 +29,16 @@ interface MenuStats {
   healthyCategoriesUsed: Set<string>;
   proteinMealsToday: number;
   weeklyLimitCount: Record<string, number>;
+}
+
+interface MenuRules {
+  allowedCategories: string[];
+  restrictedCategories: {
+    'Fast Food': { startDay: number; };
+  };
+  weeklyLimits?: {
+    [K in 'Carnes' | 'Pescados']: number;
+  };
 }
 
 function isValidSelection(
@@ -62,8 +69,11 @@ function isValidSelection(
   }
 
   // Verificar límites semanales para carnes y pescados
-  if (mealType === 'comida' && rules.weeklyLimits && rules.weeklyLimits[recipe.Categoria] !== undefined) {
-    if (stats.weeklyLimitCount[recipe.Categoria] >= rules.weeklyLimits[recipe.Categoria]) {
+  if (mealType === 'comida' && 
+      rules.weeklyLimits && 
+      (recipe.Categoria === 'Carnes' || recipe.Categoria === 'Pescados') &&
+      rules.weeklyLimits[recipe.Categoria as 'Carnes' | 'Pescados'] !== undefined) {
+    if (stats.weeklyLimitCount[recipe.Categoria] >= rules.weeklyLimits[recipe.Categoria as 'Carnes' | 'Pescados']) {
       return false;
     }
   }
@@ -85,5 +95,10 @@ function isValidSelection(
 
   return true;
 }
+
+const checkWeeklyLimits = (rules: MenuRules) => {
+  if (!rules.weeklyLimits) return true;
+  // resto del código...
+};
 
 // ... resto del código del generador de menú se mantiene igual ...

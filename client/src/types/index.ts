@@ -1,11 +1,11 @@
 export type MealType = 'comida' | 'cena';
 
-export type Ingredient = {
+export interface Ingredient {
   Nombre: string;
   Cantidad: number;
   Unidad: string;
-  Categoria: string;
-};
+  Categoria?: string;
+}
 
 export type Instructions = {
   [key: string]: string;
