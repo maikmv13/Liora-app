@@ -117,4 +117,4 @@ CREATE POLICY "Solo admins pueden modificar recipe_ingredients"
 CREATE TRIGGER update_recipes_updated_at
   BEFORE UPDATE ON recipes
   FOR EACH ROW
-  EXECUTE PROCEDURE handle_updated_at(); 
+  EXECUTE PROCEDURE handle_updated_at();
