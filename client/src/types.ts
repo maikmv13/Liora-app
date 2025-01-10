@@ -69,13 +69,23 @@ export type ShoppingItem = {
   dias: string[];
 };
 
-export type FavoriteRecipe = Omit<Recipe, 'isFavorite'> & {
-  isFavorite: true;
+// Base para recetas favoritas
+interface BaseFavoriteRecipe extends Omit<Recipe, 'isFavorite'> {
   notes?: string;
   rating: number;
   lastCooked?: string;
   tags?: string[];
   addedAt: string;
+}
+
+// Tipo para crear favoritos
+export type NewFavoriteRecipe = BaseFavoriteRecipe & {
+  isFavorite: boolean;
+};
+
+// Tipo para favoritos existentes
+export type FavoriteRecipe = BaseFavoriteRecipe & {
+  isFavorite: true;
 };
 
 // Tipo auxiliar para el filtro de comidas

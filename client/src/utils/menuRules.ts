@@ -6,9 +6,7 @@ export type MenuRules = {
   weeklyLimits?: Record<string, number>;
 };
 
-type MenuRulesConfig = Pick<Record<MealType, MenuRules>, 'comida' | 'cena'>;
-
-export const menuRules: MenuRulesConfig = {
+export const menuRules = {
   comida: {
     allowedCategories: ['Aves', 'Carnes', 'Pastas y Arroces', 'Pescados', 'Legumbres'],
     restrictedCategories: {
@@ -25,4 +23,4 @@ export const menuRules: MenuRulesConfig = {
       'Sopas': 2
     }
   }
-}; 
+} as const; 
