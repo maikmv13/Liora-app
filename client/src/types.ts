@@ -23,4 +23,38 @@ export type Recipe = {
   instructions: Record<string, string>;
   url: string | null;
   pdf_url: string | null;
+  
+  // Campos legacy para compatibilidad
+  Plato: string;
+  Acompañamiento: string;
+  Tipo: 'desayuno' | 'comida' | 'cena' | 'snack';
+  Categoria: string;
+  Comensales: number;
+  Ingredientes: any[];
+  Calorias: string;
+  'Tiempo de preparación': string;
+  Instrucciones: Record<string, string>;
+  PDF_Url: string;
+  isFavorite?: boolean;
+};
+
+export type MenuItem = {
+  recipe: Recipe;
+  day: string;
+  type: 'desayuno' | 'comida' | 'cena';
+};
+
+export type MealType = 'desayuno' | 'comida' | 'cena';
+
+export type ShoppingItem = {
+  name: string;
+  quantity: number;
+  unit: string;
+  checked: boolean;
+  category: string;
+  recipes: string[];
+};
+
+export type FavoriteRecipe = Recipe & {
+  isFavorite: boolean;
 }; 
