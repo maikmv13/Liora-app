@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import type { Recipe, MenuItem } from '../../types/index';
+import type { Recipe, MenuItem } from '../../types';
 import { MobileView } from './MobileView';
 import { DesktopView } from './DesktopView';
 import { RecipeSelectorSidebar } from './RecipeSelectorSidebar';
