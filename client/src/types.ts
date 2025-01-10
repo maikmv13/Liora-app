@@ -1,5 +1,6 @@
 export type MealType = 'desayuno' | 'comida' | 'cena';
 export type FilterMealType = 'comida' | 'cena' | 'all';
+export type DinnerMealType = 'comida' | 'cena';
 
 export type Recipe = {
   id: string;
@@ -48,7 +49,7 @@ export type MenuItem = {
   recipe: Recipe;
   day: string;
   type?: MealType;
-  meal: 'comida' | 'cena';
+  meal: DinnerMealType;
 };
 
 export type ShoppingItem = {
@@ -90,3 +91,7 @@ export type FavoriteRecipe = BaseFavoriteRecipe & {
 
 // Tipo auxiliar para el filtro de comidas
 export type MealFilter = FilterMealType;
+
+// Agregar un tipo para el estado del filtro
+export type FilterState = FilterMealType;
+export type FilterAction = (type: FilterState) => void;

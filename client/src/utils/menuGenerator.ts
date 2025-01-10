@@ -1,7 +1,9 @@
-import { Recipe, MenuItem, MealType } from '../types';
+import { Recipe, MenuItem } from '../types';
+
+type DinnerMealType = 'comida' | 'cena';
 
 // Reglas para la generación del menú
-const mealRules: Record<MealType, MenuRules> = {
+const mealRules: Record<DinnerMealType, MenuRules> = {
   comida: {
     allowedCategories: ['Aves', 'Carnes', 'Pastas y Arroces', 'Pescados', 'Legumbres'],
     restrictedCategories: {
@@ -43,7 +45,7 @@ interface MenuRules {
 
 function isValidSelection(
   recipe: Recipe,
-  mealType: MealType,
+  mealType: DinnerMealType,
   day: string,
   dayIndex: number,
   stats: MenuStats,
@@ -72,8 +74,8 @@ function isValidSelection(
   if (mealType === 'comida' && 
       rules.weeklyLimits && 
       (recipe.Categoria === 'Carnes' || recipe.Categoria === 'Pescados') &&
-      rules.weeklyLimits[recipe.Categoria as 'Carnes' | 'Pescados'] !== undefined) {
-    if (stats.weeklyLimitCount[recipe.Categoria] >= rules.weeklyLimits[recipe.Categoria as 'Carnes' | 'Pescados']) {
+      rules.weeklyLimits[recipe.Categoria] !== undefined) {
+    if (stats.weeklyLimitCount[recipe.Categoria] >= rules.weeklyLimits[recipe.Categoria]) {
       return false;
     }
   }
@@ -102,3 +104,7 @@ const checkWeeklyLimits = (rules: MenuRules) => {
 };
 
 // ... resto del código del generador de menú se mantiene igual ...
+
+export function generateMenu(recipes: Recipe[], mealType: DinnerMealType) {
+  // ...
+}
