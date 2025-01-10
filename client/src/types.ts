@@ -25,7 +25,7 @@ export type Recipe = {
   instructions: Record<string, string>;
   url: string | null;
   pdf_url: string | null;
-  isFavorite: boolean;
+  isFavorite?: boolean;
   
   // Campos legacy para compatibilidad
   Plato: string;
@@ -46,19 +46,20 @@ export type Recipe = {
 export type MenuItem = {
   recipe: Recipe;
   day: string;
-  type: MealType;
+  type?: MealType;
   meal: MealType;
 };
 
 export type ShoppingItem = {
-  name: string;
-  quantity: number;
-  unit: string;
-  checked: boolean;
-  category: string;
-  recipes: string[];
+  // Campos nuevos
+  name?: string;
+  quantity?: number;
+  unit?: string;
+  checked?: boolean;
+  category?: string;
+  recipes?: string[];
   
-  // Campos legacy (requeridos para compatibilidad)
+  // Campos legacy
   nombre: string;
   cantidad: number;
   unidad: string;
@@ -68,10 +69,13 @@ export type ShoppingItem = {
 };
 
 export type FavoriteRecipe = Recipe & {
-  isFavorite: true;
-  notes: string;
+  isFavorite: boolean;
+  notes?: string;
   rating: number;
-  lastCooked: string;
-  tags: string[];
+  lastCooked?: string;
+  tags?: string[];
   addedAt: string;
-}; 
+};
+
+// Tipo auxiliar para el filtro de comidas
+export type MealFilter = MealType | 'all';
