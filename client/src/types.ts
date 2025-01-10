@@ -1,4 +1,5 @@
 export type MealType = 'desayuno' | 'comida' | 'cena';
+export type FilterMealType = 'comida' | 'cena' | 'all';
 
 export type Recipe = {
   id: string;
@@ -25,7 +26,7 @@ export type Recipe = {
   instructions: Record<string, string>;
   url: string | null;
   pdf_url: string | null;
-  isFavorite?: boolean;
+  isFavorite: boolean;
   
   // Campos legacy para compatibilidad
   Plato: string;
@@ -47,7 +48,7 @@ export type MenuItem = {
   recipe: Recipe;
   day: string;
   type?: MealType;
-  meal: MealType;
+  meal: 'comida' | 'cena';
 };
 
 export type ShoppingItem = {
@@ -68,8 +69,8 @@ export type ShoppingItem = {
   dias: string[];
 };
 
-export type FavoriteRecipe = Recipe & {
-  isFavorite: boolean;
+export type FavoriteRecipe = Omit<Recipe, 'isFavorite'> & {
+  isFavorite: true;
   notes?: string;
   rating: number;
   lastCooked?: string;
@@ -78,4 +79,4 @@ export type FavoriteRecipe = Recipe & {
 };
 
 // Tipo auxiliar para el filtro de comidas
-export type MealFilter = MealType | 'all';
+export type MealFilter = FilterMealType;
