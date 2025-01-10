@@ -1,8 +1,9 @@
 import { useEffect, useState } from 'react';
 import { supabase } from '../lib/supabase';
 import type { Database } from '../types/supabase';
+import type { Recipe } from '../types';
 
-type Recipe = Database['public']['Tables']['recipes']['Row'];
+type SupabaseRecipe = Database['public']['Tables']['recipes']['Row'];
 
 export function useRecipes() {
   const [recipes, setRecipes] = useState<Recipe[]>([]);
@@ -26,7 +27,31 @@ export function useRecipes() {
           `);
 
         if (error) throw error;
-        setRecipes(data || []);
+        
+        // Convertir el formato de Supabase al formato esperado por la aplicación
+        const convertedRecipes: Recipe[] = (data || []).map(recipe => ({
+          Plato: recipe.name,
+          Acompañamiento: recipe.side_dish || '',
+          Tipo: recipe.meal_type as any,
+          Categoria: recipe.category,
+          Comensales: recipe.servings,
+          Ingredientes: [], // Aquí deberías mapear recipe_ingredients
+          Calorias: recipe.calories || '0',
+          "Valor energético (kJ)": recipe.energy_kj || '0',
+          Grasas: recipe.fats || '0',
+          Saturadas: recipe.saturated_fats || '0',
+          Carbohidratos: recipe.carbohydrates || '0',
+          Azúcares: recipe.sugars || '0',
+          Fibra: recipe.fiber || '0',
+          Proteínas: recipe.proteins || '0',
+          Sodio: recipe.sodium || '0',
+          "Tiempo de preparación": recipe.prep_time || '30',
+          Instrucciones: recipe.instructions as any,
+          Url: recipe.url || '',
+          PDF_Url: recipe.pdf_url || ''
+        }));
+
+        setRecipes(convertedRecipes);
       } catch (e) {
         setError(e as Error);
       } finally {
