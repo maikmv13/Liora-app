@@ -3,7 +3,6 @@ import { Recipe, MealType, meal_category } from '../../types';
 import { RecipeCard } from '../RecipeCard';
 import { ChefHat } from 'lucide-react';
 import { RecipeFilters } from './RecipeFilters';
-import { useRecipes } from '../../hooks/useRecipes';
 
 const categories: Array<{id: meal_category, emoji: string, label: string}> = [
   { id: 'Carnes', emoji: '🥩', label: 'Carnes' },
@@ -15,13 +14,13 @@ const categories: Array<{id: meal_category, emoji: string, label: string}> = [
 ];
 
 interface RecipeListProps {
+  recipes: Recipe[];
   onRecipeSelect: (recipe: Recipe) => void;
   favorites: string[];
   onToggleFavorite: (recipe: Recipe) => void;
 }
 
-export function RecipeList({ onRecipeSelect, favorites, onToggleFavorite }: RecipeListProps) {
-  const { recipes, loading, error } = useRecipes();
+export function RecipeList({ recipes, onRecipeSelect, favorites, onToggleFavorite }: RecipeListProps) {
   const [selectedCategory, setSelectedCategory] = useState('Todas');
   const [selectedMealType, setSelectedMealType] = useState<'all' | MealType>('all');
   const [sortBy, setSortBy] = useState<'popular' | 'calories' | 'time' | null>(null);
@@ -32,23 +31,6 @@ export function RecipeList({ onRecipeSelect, favorites, onToggleFavorite }: Reci
     if (mealType === 'comida') return '🌞 Las mejores recetas para tus comidas';
     return '🌙 Cenas ligeras y deliciosas';
   };
-
-  if (loading) {
-    return (
-      <div className="text-center py-12">
-        <ChefHat size={32} className="mx-auto animate-spin text-rose-500" />
-        <p className="mt-4 text-gray-600">Cargando recetas...</p>
-      </div>
-    );
-  }
-
-  if (error) {
-    return (
-      <div className="text-center py-12 text-red-500">
-        <p>Error al cargar las recetas: {error.message}</p>
-      </div>
-    );
-  }
 
   const filteredRecipes = recipes.filter(recipe => {
     const matchesCategory = selectedCategory === 'Todas' || recipe.Categoria === selectedCategory;
