@@ -182,18 +182,12 @@ function App() {
           <Route 
             path="/recetas" 
             element={
-              loading ? (
-                <div>Cargando...</div>
-              ) : error ? (
-                <div>Error: {error.message}</div>
-              ) : (
-                <RecipeList 
-                  recipes={recipes}
-                  onRecipeSelect={handleRecipeSelect}
-                  favorites={favorites.map(f => f.Plato)}
-                  onToggleFavorite={toggleFavorite}
-                />
-              )
+              <RecipeList 
+                recipes={recipes}
+                onRecipeSelect={handleRecipeSelect}
+                favorites={favorites.map(f => f.Plato)}
+                onToggleFavorite={toggleFavorite}
+              />
             }
           />
           <Route 
