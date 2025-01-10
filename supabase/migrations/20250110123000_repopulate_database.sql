@@ -8,23 +8,26 @@ ALTER TABLE recipes ENABLE ROW LEVEL SECURITY;
 ALTER TABLE ingredients ENABLE ROW LEVEL SECURITY;
 ALTER TABLE recipe_ingredients ENABLE ROW LEVEL SECURITY;
 
-DROP POLICY IF EXISTS "Todos pueden leer recetas" ON recipes;
-CREATE POLICY "Todos pueden leer recetas"
-  ON recipes FOR SELECT
-  TO anon
-  USING (true);
+DROP POLICY IF EXISTS "Permitir acceso público a recetas" ON recipes;
+CREATE POLICY "Permitir acceso público a recetas"
+  ON recipes
+  FOR ALL
+  USING (true)
+  WITH CHECK (true);
 
-DROP POLICY IF EXISTS "Todos pueden leer ingredientes" ON ingredients;
-CREATE POLICY "Todos pueden leer ingredientes"
-  ON ingredients FOR SELECT
-  TO anon
-  USING (true);
+DROP POLICY IF EXISTS "Permitir acceso público a ingredientes" ON ingredients;
+CREATE POLICY "Permitir acceso público a ingredientes"
+  ON ingredients
+  FOR ALL
+  USING (true)
+  WITH CHECK (true);
 
-DROP POLICY IF EXISTS "Todos pueden leer recipe_ingredients" ON recipe_ingredients;
-CREATE POLICY "Todos pueden leer recipe_ingredients"
-  ON recipe_ingredients FOR SELECT
-  TO anon
-  USING (true);
+DROP POLICY IF EXISTS "Permitir acceso público a recipe_ingredients" ON recipe_ingredients;
+CREATE POLICY "Permitir acceso público a recipe_ingredients"
+  ON recipe_ingredients
+  FOR ALL
+  USING (true)
+  WITH CHECK (true);
 
 -- Insertar todas las recetas
 INSERT INTO recipes (
