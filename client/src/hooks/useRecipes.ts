@@ -22,16 +22,15 @@ export function useRecipes() {
   useEffect(() => {
     async function fetchRecipes() {
       try {
-        console.log('URL de Supabase:', supabase.supabaseUrl); // Verificar URL
         console.log('Iniciando fetch de recetas...'); 
 
-        // Primero verificar que la tabla existe
-        const { data: tables } = await supabase
+        // Verificar que la tabla existe
+        const { data: tables, error: countError } = await supabase
           .from('recipes')
           .select('count');
-        console.log('Tabla recipes existe:', tables);
+        console.log('Tabla recipes existe:', tables, countError);
 
-        const query = supabase
+        const { data, error } = await supabase
           .from('recipes')
           .select(`
             *,
@@ -45,18 +44,7 @@ export function useRecipes() {
             )
           `);
 
-        console.log('Query URL:', query.url); // Ver la URL completa de la query
-        
-        const { data, error } = await query;
-
-        console.log('Respuesta completa:', {
-          url: supabase.supabaseUrl,
-          data,
-          error,
-          status: error?.code,
-          message: error?.message,
-          details: error?.details
-        });
+        console.log('Respuesta:', { data, error });
 
         if (error) throw error;
         
