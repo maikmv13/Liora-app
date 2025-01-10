@@ -1,57 +1,75 @@
 // Orden definido para las categorías
 export const categoryOrder = [
-  'Frutas y Verduras',
-  'Carnes',
-  'Pescados y Mariscos',
-  'Lácteos y Huevos',
-  'Panadería',
-  'Pasta y Arroz',
-  'Legumbres',
+  'Carnicería',
+  'Pescadería',
+  'Charcutería',
+  'Vegetales y Legumbres',
+  'Frutas',
+  'Cereales y Derivados',
+  'Lácteos y Derivados',
+  'Líquidos y Caldos',
   'Condimentos y Especias',
-  'Conservas',
-  'Bebidas',
-  'Snacks y Dulces',
-  'Otros'
+  'Salsas y Aderezos',
+  'Frutos Secos',
+  'Otras Categorías'
 ] as const;
 
 // Definición de categorías de alimentos
 export const foodCategories = {
-  'Frutas y Verduras': [
-    'manzana', 'plátano', 'naranja', 'limón', 'tomate', 'lechuga', 'cebolla', 'ajo',
-    'zanahoria', 'pimiento', 'pepino', 'calabacín', 'berenjena', 'patata', 'espinaca'
+  'Carnicería': [
+    'bacon', 'carne de ternera', 'carne picada', 'chorizo', 'filetes de ternera',
+    'lomo de cerdo', 'muslos de pollo', 'panceta', 'pechuga de pollo',
+    'pollo entero', 'raxo', 'solomillo de cerdo', 'lomo'
   ],
-  'Carnes': [
-    'pollo', 'ternera', 'cerdo', 'cordero', 'pavo', 'jamón', 'chorizo', 'salchicha',
-    'hamburguesa', 'carne picada'
+  'Pescadería': [
+    'bonito', 'gambas', 'gulas', 'langostinos', 'salmón', 'bacalao'
   ],
-  'Pescados y Mariscos': [
-    'salmón', 'atún', 'merluza', 'bacalao', 'dorada', 'lubina', 'gambas', 'mejillones',
-    'calamares', 'pulpo'
+  'Charcutería': [
+    'jamón ibérico', 'jamón serrano', 'jamón york', 'morcilla'
   ],
-  'Lácteos y Huevos': [
-    'leche', 'yogur', 'queso', 'huevos', 'mantequilla', 'nata', 'requesón', 'crema'
+  'Vegetales y Legumbres': [
+    'aceitunas', 'ajo', 'albahaca fresca', 'apio', 'berenjena', 'boniato',
+    'brócoli', 'brotes de espinacas', 'brotes de soja', 'calabacín', 'calabaza',
+    'cebolla', 'cebolla roja', 'cebollino', 'chalota', 'champiñones', 'setas',
+    'cilantro fresco', 'cogollos de lechuga', 'espinacas', 'guisantes',
+    'judías', 'lechuga', 'lentejas', 'maíz', 'patatas', 'pepino',
+    'perejil fresco', 'pimiento', 'puerro', 'rúcula', 'tomate',
+    'tomate cherry', 'tomate frito', 'zanahoria'
   ],
-  'Panadería': [
-    'pan', 'baguette', 'pan rallado', 'harina', 'levadura', 'masa'
+  'Frutas': [
+    'fresas', 'lima', 'limón', 'manzana'
   ],
-  'Pasta y Arroz': [
-    'pasta', 'espagueti', 'macarrones', 'arroz', 'fideos', 'cuscús', 'quinoa'
+  'Cereales y Derivados': [
+    'arroz', 'espaguetis', 'gnocchi', 'harina', 'macarrones', 'masa de pizza',
+    'masa quebrada', 'pan de brioche', 'pan de chapata', 'pan de hamburguesa',
+    'pan de molde', 'pan duro', 'pan rallado', 'panecillos de brioche',
+    'panko', 'placas de lasaña', 'tortillas de trigo'
   ],
-  'Legumbres': [
-    'garbanzos', 'lentejas', 'judías', 'alubias', 'guisantes', 'habas'
+  'Lácteos y Derivados': [
+    'mantequilla', 'crema agria', 'pecorino', 'queso', 'queso cheddar',
+    'queso crema', 'queso de cabra', 'queso feta', 'queso griego',
+    'queso mozzarella', 'queso parmesano', 'queso rallado', 'huevos'
+  ],
+  'Líquidos y Caldos': [
+    'caldo de carne', 'caldo de pescado', 'caldo de pollo', 'caldo de ternera',
+    'caldo de verduras', 'leche', 'nata líquida'
   ],
   'Condimentos y Especias': [
-    'sal', 'pimienta', 'aceite', 'vinagre', 'orégano', 'tomillo', 'romero',
-    'perejil', 'albahaca', 'curry', 'pimentón'
+    'azafrán', 'azúcar', 'chili en escamas', 'cilantro', 'comino',
+    'confitura de fresa', 'eneldo', 'jalapeños', 'jengibre', 'laurel',
+    'menta fresca', 'miel', 'especias', 'mostaza', 'nuez moscada',
+    'orégano', 'perejil', 'pesto', 'pimentón', 'romero',
+    'sazonador barbacoa', 'tomillo'
   ],
-  'Conservas': [
-    'tomate frito', 'atún en lata', 'sardinas', 'maíz', 'aceitunas', 'pepinillos'
+  'Salsas y Aderezos': [
+    'bechamel', 'guacamole', 'kétchup', 'mayonesa', 'salsa barbacoa',
+    'salsa de soja', 'vinagre balsámico', 'vinagre de vino tinto',
+    'vino blanco'
   ],
-  'Bebidas': [
-    'agua', 'vino', 'cerveza', 'refresco', 'zumo'
+  'Frutos Secos': [
+    'almendras', 'arándanos secos', 'cacahuetes', 'nueces', 'pasas'
   ],
-  'Snacks y Dulces': [
-    'galletas', 'chocolate', 'patatas fritas', 'frutos secos', 'caramelos'
-  ],
-  'Otros': [] // Categoría por defecto para ingredientes no clasificados
+  'Otras Categorías': [
+    'nachos', 'papel de horno', 'ingredientes al gusto'
+  ]
 } as const;

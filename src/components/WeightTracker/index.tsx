@@ -21,7 +21,10 @@ interface CompletedGoal {
 
 export function WeightTracker() {
   const [isFirstTime, setIsFirstTime] = useState(() => {
-    return !localStorage.getItem('weightEntries');
+    // Comprobar si existe algún dato guardado
+    const hasWeightEntries = localStorage.getItem('weightEntries');
+    const hasTargetWeight = localStorage.getItem('targetWeight');
+    return !hasWeightEntries && !hasTargetWeight;
   });
 
   const [entries, setEntries] = useState<WeightEntry[]>(() => {

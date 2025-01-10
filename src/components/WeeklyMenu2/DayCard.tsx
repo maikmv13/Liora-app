@@ -30,7 +30,7 @@ export function DayCard({
   const isToday = today.toLowerCase() === day.toLowerCase();
 
   return (
-    <div className={`bg-white/80 backdrop-blur-sm rounded-2xl shadow-sm overflow-hidden border transition-all duration-300 ${
+    <div className={`bg-white/90 backdrop-blur-sm rounded-2xl shadow-sm overflow-hidden border-2 transition-all duration-300 ${
       isToday 
         ? 'border-rose-200 ring-2 ring-rose-100/50' 
         : 'border-rose-100/20 hover:border-rose-200'
@@ -43,7 +43,7 @@ export function DayCard({
             <h3 className="text-sm font-medium text-gray-900">{day}</h3>
           </div>
           {isToday && (
-            <span className="text-xs font-medium text-rose-600 bg-rose-100 px-2 py-0.5 rounded-full">
+            <span className="text-[10px] font-medium text-rose-600 bg-rose-100 px-1.5 py-0.5 rounded-full">
               Hoy
             </span>
           )}
@@ -78,9 +78,9 @@ export function DayCard({
       {/* Footer con resumen del día */}
       {menuItems.length > 0 && (
         <div className="px-3 py-2 bg-gradient-to-r from-gray-50 to-rose-50/30 border-t border-rose-100/20">
-          <div className="flex items-center justify-between text-xs">
+          <div className="flex items-center justify-between text-[10px]">
             <div className="flex items-center space-x-1 text-gray-600">
-              <ChefHat size={14} className="text-rose-400" />
+              <ChefHat size={12} className="text-rose-400" />
               <span>{menuItems.length} platos</span>
             </div>
             {totalCalorias > 0 && (

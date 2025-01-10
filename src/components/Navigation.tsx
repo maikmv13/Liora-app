@@ -4,9 +4,10 @@ import { ChefHat, Calendar, ShoppingCart, Heart, Scale } from 'lucide-react';
 interface NavigationProps {
   activeTab: string;
   onTabChange: (tab: string) => void;
+  orientation?: 'horizontal' | 'vertical';
 }
 
-export function Navigation({ activeTab, onTabChange }: NavigationProps) {
+export function Navigation({ activeTab, onTabChange, orientation = 'horizontal' }: NavigationProps) {
   const [isVisible, setIsVisible] = useState(true);
   const [lastScrollY, setLastScrollY] = useState(0);
   const [scrollingUp, setScrollingUp] = useState(false);
@@ -17,31 +18,31 @@ export function Navigation({ activeTab, onTabChange }: NavigationProps) {
       id: 'recetas', 
       icon: ChefHat, 
       label: 'Recetas',
-      description: 'Explora recetas'
+      description: 'Explorar'
     },
     { 
       id: 'menu', 
       icon: Calendar, 
       label: 'Menú',
-      description: 'Planifica tu semana'
+      description: 'Planificar'
     },
     { 
       id: 'compra', 
       icon: ShoppingCart, 
       label: 'Compra',
-      description: 'Lista de la compra'
+      description: 'Lista'
     },
-    { 
+    {
       id: 'favoritos', 
       icon: Heart, 
       label: 'Favoritos',
-      description: 'Tus recetas favoritas'
+      description: 'Guardados'
     },
     {
       id: 'peso',
       icon: Scale,
       label: 'Peso',
-      description: 'Control de peso'
+      description: 'Control'
     }
   ];
 
@@ -67,9 +68,32 @@ export function Navigation({ activeTab, onTabChange }: NavigationProps) {
   }, [lastScrollY, scrollUpDistance]);
 
   useEffect(() => {
-    window.addEventListener('scroll', handleScroll);
-    return () => window.removeEventListener('scroll', handleScroll);
-  }, [handleScroll]);
+    if (orientation === 'horizontal') {
+      window.addEventListener('scroll', handleScroll);
+      return () => window.removeEventListener('scroll', handleScroll);
+    }
+  }, [handleScroll, orientation]);
+
+  if (orientation === 'vertical') {
+    return (
+      <div className="space-y-1">
+        {navItems.map(({ id, icon: Icon, label }) => (
+          <button
+            key={id}
+            onClick={() => onTabChange(id)}
+            className={`w-full flex items-center space-x-3 px-4 py-2.5 rounded-lg transition-colors ${
+              activeTab === id
+                ? 'bg-rose-50 text-rose-600'
+                : 'text-gray-600 hover:bg-gray-50'
+            }`}
+          >
+            <Icon size={20} />
+            <span className="font-medium">{label}</span>
+          </button>
+        ))}
+      </div>
+    );
+  }
 
   return (
     <nav className={`bg-white/80 backdrop-blur-md shadow-sm sticky z-40 border-b border-rose-100/20 transition-all duration-300 ${
@@ -87,7 +111,7 @@ export function Navigation({ activeTab, onTabChange }: NavigationProps) {
                   : 'text-gray-400 hover:text-rose-400'
               }`}
             >
-              <div className="flex flex-col items-center justify-center space-y-1">
+              <div className="flex flex-col md:flex-row items-center md:justify-start md:px-4 md:space-x-2">
                 <div className={`p-2 rounded-xl transition-all duration-300 ${
                   activeTab === id 
                     ? 'bg-rose-50' 
@@ -102,7 +126,7 @@ export function Navigation({ activeTab, onTabChange }: NavigationProps) {
                     }`} 
                   />
                 </div>
-                <div className="flex flex-col items-center">
+                <div className="flex flex-col items-center md:items-start">
                   <span className="font-medium text-xs md:text-sm">{label}</span>
                   <span className="hidden md:block text-xs text-gray-400 group-hover:text-rose-400 transition-colors">
                     {description}

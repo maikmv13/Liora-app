@@ -56,8 +56,8 @@ export function MobileView({
               onClick={() => onDayChange(day)}
               className={`flex-none px-4 py-2 rounded-xl transition-colors whitespace-nowrap ${
                 selectedDay === day
-                  ? 'bg-rose-50 text-rose-600 font-medium'
-                  : 'bg-white/80 backdrop-blur-sm text-gray-600 hover:bg-rose-50/50'
+                  ? 'bg-rose-50 text-rose-600 font-medium border-2 border-rose-200'
+                  : 'bg-white/90 backdrop-blur-sm text-gray-600 hover:bg-rose-50/50 border border-rose-100'
               }`}
             >
               {day}
@@ -72,8 +72,8 @@ export function MobileView({
         );
 
         return (
-          <div key={meal} className="bg-white/80 backdrop-blur-sm rounded-xl border border-rose-100/20 overflow-hidden">
-            <div className="flex items-center justify-between p-3 border-b border-rose-100/20">
+          <div key={meal} className="bg-white/90 backdrop-blur-sm rounded-xl border-2 border-rose-100/20 overflow-hidden hover:border-rose-200 transition-colors">
+            <div className="flex items-center justify-between p-3 border-b border-rose-100/20 bg-gradient-to-r from-orange-50 to-rose-50">
               <div className="flex items-center space-x-2 text-gray-600">
                 {getMealIcon(meal)}
                 <span className="font-medium text-sm">{meal.charAt(0).toUpperCase() + meal.slice(1)}</span>
@@ -83,7 +83,7 @@ export function MobileView({
               <div className="p-3">
                 <div className="flex items-center justify-between mb-2">
                   <p className="font-medium text-gray-900">{menuItem.recipe.Plato}</p>
-                  <div className="flex items-center space-x-1 bg-rose-50 px-2 py-0.5 rounded-lg">
+                  <div className="flex items-center space-x-1 bg-rose-50 px-2 py-0.5 rounded-lg border border-rose-200">
                     <Flame size={12} className="text-rose-500" />
                     <span className="text-xs font-medium text-rose-600">{menuItem.recipe.Calorias}</span>
                   </div>
@@ -93,21 +93,21 @@ export function MobileView({
                 <div className="flex gap-2">
                   <button
                     onClick={() => onViewRecipe(menuItem)}
-                    className="flex-1 flex items-center justify-center space-x-2 p-2 bg-rose-50 text-rose-500 rounded-lg hover:bg-rose-100 transition-colors"
+                    className="flex-1 flex items-center justify-center space-x-2 p-2 bg-rose-50 text-rose-500 rounded-lg hover:bg-rose-100 transition-colors border border-rose-200"
                   >
                     <Eye size={18} />
                     <span className="text-sm font-medium">Ver receta</span>
                   </button>
                   <button
                     onClick={() => onMealClick(selectedDay, meal)}
-                    className="flex-1 flex items-center justify-center space-x-2 p-2 bg-rose-50 text-rose-500 rounded-lg hover:bg-rose-100 transition-colors"
+                    className="flex-1 flex items-center justify-center space-x-2 p-2 bg-rose-50 text-rose-500 rounded-lg hover:bg-rose-100 transition-colors border border-rose-200"
                   >
                     <PenSquare size={18} />
                     <span className="text-sm font-medium">Cambiar</span>
                   </button>
                   <button
                     onClick={() => onRemoveMeal(selectedDay, meal)}
-                    className="flex items-center justify-center p-2 bg-red-50 text-red-500 rounded-lg hover:bg-red-100 transition-colors"
+                    className="flex items-center justify-center p-2 bg-red-50 text-red-500 rounded-lg hover:bg-red-100 transition-colors border border-red-200"
                   >
                     <X size={18} />
                   </button>

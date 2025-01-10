@@ -8,6 +8,7 @@ import { WeeklyMenu2 as WeeklyMenu } from './components/WeeklyMenu2';
 import { ShoppingList } from './components/ShoppingList';
 import { Favorites } from './components/Favorites';
 import { WeightTracker } from './components/WeightTracker';
+import { HealthyPlateGuide } from './components/HealthyPlateGuide';
 import { sampleRecipes } from './data/recipes';
 import { categorizeIngredient } from './utils/categorizeIngredient';
 import { getUnitPlural } from './utils/getUnitPlural';
@@ -179,6 +180,10 @@ function App() {
 
         {activeTab === 'peso' && (
           <WeightTracker />
+        )}
+
+        {activeTab === 'plato' && (
+          <HealthyPlateGuide />
         )}
       </main>
 

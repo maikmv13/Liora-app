@@ -1,3 +1,5 @@
+export type MealType = 'comida' | 'cena';
+
 export type Ingredient = {
   Nombre: string;
   Cantidad: number;
@@ -12,7 +14,7 @@ export type Instructions = {
 export type Recipe = {
   Plato: string;
   Acompañamiento: string;
-  Tipo: string;
+  Tipo: MealType;
   Categoria: string;
   Comensales: number;
   Ingredientes: Ingredient[];
@@ -34,7 +36,7 @@ export type Recipe = {
 
 export type MenuItem = {
   recipe: Recipe;
-  meal: 'comida' | 'cena';
+  meal: MealType;
   day: string;
 };
 

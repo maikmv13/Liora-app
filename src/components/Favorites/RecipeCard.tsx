@@ -1,6 +1,7 @@
 import React from 'react';
 import { Clock, Users, ChefHat, Flame, Star, Edit2, Trash2 } from 'lucide-react';
 import { FavoriteRecipe } from '../../types';
+import { categoryColors } from '../../utils/categoryColors';
 
 interface RecipeCardProps {
   recipe: FavoriteRecipe;
@@ -17,8 +18,15 @@ export function RecipeCard({ recipe, onSelect, onEdit, onRemove }: RecipeCardPro
     }).format(new Date(dateString));
   };
 
+  const colors = categoryColors[recipe.Categoria as keyof typeof categoryColors] || {
+    bg: 'bg-gray-50',
+    text: 'text-gray-600',
+    border: 'border-gray-100',
+    hover: 'hover:bg-gray-100'
+  };
+
   return (
-    <div className="bg-white/80 backdrop-blur-sm rounded-2xl shadow-sm hover:shadow-md transition-all border border-rose-100/20 overflow-hidden group">
+    <div className="bg-white/90 backdrop-blur-sm rounded-2xl shadow-sm hover:shadow-md transition-all border border-rose-100/20 overflow-hidden group">
       <div className="p-4">
         <div className="flex items-start justify-between mb-3">
           <button
@@ -47,7 +55,7 @@ export function RecipeCard({ recipe, onSelect, onEdit, onRemove }: RecipeCardPro
         </div>
 
         <div className="flex items-center justify-between mb-3">
-          <span className="inline-flex items-center px-2.5 py-1 rounded-lg text-xs font-medium bg-orange-50 text-orange-600 border border-orange-100">
+          <span className={`inline-flex items-center px-2.5 py-1 rounded-lg text-xs font-medium ${colors.bg} ${colors.text} ${colors.border}`}>
             {recipe.Categoria}
           </span>
           {recipe.rating && (
@@ -62,6 +70,16 @@ export function RecipeCard({ recipe, onSelect, onEdit, onRemove }: RecipeCardPro
           <p className="text-sm text-gray-600 mb-3 line-clamp-2 italic">
             "{recipe.notes}"
           </p>
+        )}
+
+        {recipe.tags && recipe.tags.length > 0 && (
+          <div className="flex flex-wrap gap-1 mb-3">
+            {recipe.tags.map(tag => (
+              <span key={tag} className="inline-flex items-center px-2 py-0.5 rounded-lg text-xs font-medium bg-gray-100 text-gray-600">
+                {tag}
+              </span>
+            ))}
+          </div>
         )}
 
         <div className="flex items-center justify-between text-xs text-gray-500">

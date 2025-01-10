@@ -1,17 +1,24 @@
 import React, { useState, useEffect } from 'react';
 import { Recipe, MenuItem } from '../../types';
-import { Header } from './Header';
 import { MobileView } from './MobileView';
 import { DesktopView } from './DesktopView';
 import { RecipeSelectorSidebar } from './RecipeSelectorSidebar';
 import { RecipeModal } from '../RecipeModal';
+import { MenuHistory } from './MenuHistory';
 import { weekDays } from './utils';
 import { sampleRecipes } from '../../data/recipes';
+import { Calendar, Wand2, Share2, Loader2 } from 'lucide-react';
 
 interface WeeklyMenu2Props {
   weeklyMenu: MenuItem[];
   onRecipeSelect: (recipe: Recipe) => void;
   onAddToMenu: (recipe: Recipe | null, day: string, meal: 'comida' | 'cena') => void;
+}
+
+interface MenuHistory {
+  id: string;
+  date: string;
+  menu: MenuItem[];
 }
 
 export function WeeklyMenu2({ weeklyMenu, onRecipeSelect, onAddToMenu }: WeeklyMenu2Props) {
@@ -26,6 +33,14 @@ export function WeeklyMenu2({ weeklyMenu, onRecipeSelect, onAddToMenu }: WeeklyM
   const [lastGenerated, setLastGenerated] = useState<string | null>(
     localStorage.getItem('lastMenuGenerated')
   );
+  const [menuHistory, setMenuHistory] = useState<MenuHistory[]>(() => {
+    const saved = localStorage.getItem('menuHistory');
+    return saved ? JSON.parse(saved) : [];
+  });
+
+  useEffect(() => {
+    localStorage.setItem('menuHistory', JSON.stringify(menuHistory));
+  }, [menuHistory]);
 
   const formatDate = (date: Date) => {
     return new Intl.DateTimeFormat('es-ES', {
@@ -59,6 +74,16 @@ export function WeeklyMenu2({ weeklyMenu, onRecipeSelect, onAddToMenu }: WeeklyM
 
   const handleGenerateMenu = async () => {
     if (isGenerating) return;
+    
+    // Guardar el menú actual en el historial si tiene elementos
+    if (weeklyMenu.length > 0) {
+      const newHistoryEntry: MenuHistory = {
+        id: Date.now().toString(),
+        date: new Date().toISOString(),
+        menu: [...weeklyMenu]
+      };
+      setMenuHistory(prev => [newHistoryEntry, ...prev]);
+    }
     
     setIsGenerating(true);
     try {
@@ -114,41 +139,83 @@ export function WeeklyMenu2({ weeklyMenu, onRecipeSelect, onAddToMenu }: WeeklyM
       day: 'numeric'
     }).format(new Date());
 
-    let menuContent;
-    if (selectedDay) {
-      // Menú diario
-      const dayMenu = weeklyMenu.filter(item => item.day === selectedDay);
-      const comida = dayMenu.find(item => item.meal === 'comida');
-      const cena = dayMenu.find(item => item.meal === 'cena');
-      
-      menuContent = `🍽️ *Menú para ${selectedDay}*\n📅 Generado el ${today}\n\n` +
-        `${comida ? `🍳 *Comida:* ${comida.recipe.Plato}\n` : ''}` +
-        `${cena ? `🌙 *Cena:* ${cena.recipe.Plato}\n` : ''}`;
-    } else {
-      // Menú semanal
-      menuContent = `🍽️ *Menú Semanal*\n📅 Generado el ${today}\n\n` + 
-        weekDays.map(day => {
-          const dayMenu = weeklyMenu.filter(item => item.day === day);
-          const comida = dayMenu.find(item => item.meal === 'comida');
-          const cena = dayMenu.find(item => item.meal === 'cena');
-          
-          return `*${day}*\n${comida ? `🍳 Comida: ${comida.recipe.Plato}\n` : ''}${cena ? `🌙 Cena: ${cena.recipe.Plato}\n` : ''}\n`;
-        }).join('');
-    }
+    let menuContent = `🍽️ *Menú Semanal*\n📅 Generado el ${today}\n\n` + 
+      weekDays.map(day => {
+        const dayMenu = weeklyMenu.filter(item => item.day === day);
+        const comida = dayMenu.find(item => item.meal === 'comida');
+        const cena = dayMenu.find(item => item.meal === 'cena');
+        
+        return `*${day}*\n${comida ? `🍳 Comida: ${comida.recipe.Plato}\n` : ''}${cena ? `🌙 Cena: ${cena.recipe.Plato}\n` : ''}\n`;
+      }).join('');
 
     const encodedMessage = encodeURIComponent(menuContent);
     const whatsappUrl = `https://wa.me/?text=${encodedMessage}`;
     window.open(whatsappUrl, '_blank');
   };
 
+  const handleRestoreMenu = async (menu: MenuItem[]) => {
+    // Limpiar el menú actual
+    for (const day of weekDays) {
+      for (const meal of ['comida', 'cena'] as const) {
+        onAddToMenu(null, day, meal);
+        await new Promise(resolve => setTimeout(resolve, 50));
+      }
+    }
+    
+    // Restaurar el menú del historial
+    for (const item of menu) {
+      onAddToMenu(item.recipe, item.day, item.meal);
+      await new Promise(resolve => setTimeout(resolve, 50));
+    }
+  };
+
   return (
     <div className="space-y-6">
-      <Header 
-        onGenerateMenu={handleGenerateMenu}
-        onExport={handleExport}
-        isGenerating={isGenerating}
-        lastGenerated={lastGenerated ? formatDate(new Date(lastGenerated)) : null}
-      />
+      <div className="flex flex-col md:flex-row md:justify-between md:items-start gap-4">
+        <div className="flex items-center space-x-3">
+          <div className="bg-rose-50 w-12 h-12 md:w-14 md:h-14 rounded-2xl flex items-center justify-center">
+            <Calendar size={24} className="text-rose-500 md:w-7 md:h-7" />
+          </div>
+          <div>
+            <h2 className="text-2xl md:text-3xl font-bold text-gray-900">Menú Semanal</h2>
+            <p className="text-sm md:text-base text-gray-600 mt-1">
+              📅 Planifica tus comidas para la semana
+            </p>
+          </div>
+        </div>
+        <div className="flex flex-col sm:flex-row gap-3">
+          <button 
+            onClick={handleGenerateMenu}
+            disabled={isGenerating}
+            className={`flex items-center justify-center space-x-2 px-4 py-2.5 rounded-xl transition-colors ${
+              isGenerating
+                ? 'bg-rose-100 text-rose-400 cursor-not-allowed'
+                : 'bg-gradient-to-r from-orange-400 via-pink-500 to-rose-500 text-white hover:from-orange-500 hover:via-pink-600 hover:to-rose-600'
+            }`}
+          >
+            {isGenerating ? (
+              <Loader2 size={20} className="animate-spin" />
+            ) : (
+              <Wand2 size={20} />
+            )}
+            <span>{isGenerating ? 'Generando...' : 'Generar Menú'}</span>
+          </button>
+          <button 
+            onClick={handleExport}
+            className="flex items-center justify-center space-x-2 px-4 py-2.5 bg-white/80 backdrop-blur-sm text-rose-500 rounded-xl hover:bg-white/90 transition-colors border border-rose-100 shadow-sm"
+          >
+            <Share2 size={20} />
+            <span>Compartir</span>
+          </button>
+        </div>
+      </div>
+
+      {lastGenerated && (
+        <div className="flex items-center space-x-2 text-sm text-gray-500 bg-rose-50/50 px-3 py-2 rounded-lg">
+          <Calendar size={16} className="text-rose-400" />
+          <span>Último menú generado: {formatDate(new Date(lastGenerated))}</span>
+        </div>
+      )}
 
       <div className="hidden md:block">
         <DesktopView
@@ -171,6 +238,12 @@ export function WeeklyMenu2({ weeklyMenu, onRecipeSelect, onAddToMenu }: WeeklyM
           onViewRecipe={handleViewRecipe}
         />
       </div>
+
+      <MenuHistory
+        history={menuHistory}
+        onRestore={handleRestoreMenu}
+        onDelete={(id) => setMenuHistory(prev => prev.filter(menu => menu.id !== id))}
+      />
 
       {selectedMealInfo && (
         <RecipeSelectorSidebar

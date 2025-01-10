@@ -28,15 +28,15 @@ export function WeightOnboarding({ onComplete }: WeightOnboardingProps) {
               <div className="w-16 h-16 bg-gradient-to-br from-orange-100 to-rose-100 rounded-2xl flex items-center justify-center mx-auto mb-4">
                 <Scale size={32} className="text-rose-500" />
               </div>
-              <h2 className="text-2xl font-bold text-gray-900">Bienvenido/a</h2>
+              <h2 className="text-2xl font-bold text-gray-900">¡Hola! 👋</h2>
               <p className="text-gray-600 mt-2">
-                Para empezar, necesitamos saber tu peso actual
+                Vamos a empezar tu viaje hacia un estilo de vida más saludable 🌟
               </p>
             </div>
 
             <div className="bg-gradient-to-br from-rose-50 to-orange-50 p-4 rounded-xl">
               <label className="block text-sm font-medium text-rose-900 mb-2">
-                Peso actual (kg)
+                ¿Cuál es tu peso actual? ⚖️
               </label>
               <input
                 type="number"
@@ -47,13 +47,16 @@ export function WeightOnboarding({ onComplete }: WeightOnboardingProps) {
                 placeholder="Ej: 70.5"
                 required
               />
+              <p className="text-xs text-rose-600 mt-2">
+                💡 Tip: Pésate por la mañana antes de desayunar para mayor precisión
+              </p>
             </div>
 
             <button
               type="submit"
               className="w-full flex items-center justify-center space-x-2 py-3 bg-gradient-to-r from-orange-400 via-pink-500 to-rose-500 text-white rounded-xl hover:from-orange-500 hover:via-pink-600 hover:to-rose-600 transition-colors"
             >
-              <span>Continuar</span>
+              <span>¡Empecemos! 🚀</span>
               <ChevronRight size={20} />
             </button>
           </form>
@@ -63,15 +66,15 @@ export function WeightOnboarding({ onComplete }: WeightOnboardingProps) {
               <div className="w-16 h-16 bg-gradient-to-br from-orange-100 to-rose-100 rounded-2xl flex items-center justify-center mx-auto mb-4">
                 <Target size={32} className="text-rose-500" />
               </div>
-              <h2 className="text-2xl font-bold text-gray-900">Establece tu objetivo</h2>
+              <h2 className="text-2xl font-bold text-gray-900">¡Genial! 🎯</h2>
               <p className="text-gray-600 mt-2">
-                ¿Cuál es tu peso objetivo?
+                Ahora vamos a establecer tu objetivo para personalizar tu experiencia
               </p>
             </div>
 
             <div className="bg-gradient-to-br from-rose-50 to-orange-50 p-4 rounded-xl">
               <label className="block text-sm font-medium text-rose-900 mb-2">
-                Peso objetivo (kg)
+                ¿Cuál es tu peso objetivo? 🎯
               </label>
               <input
                 type="number"
@@ -82,15 +85,38 @@ export function WeightOnboarding({ onComplete }: WeightOnboardingProps) {
                 placeholder="Ej: 65.0"
                 required
               />
+              <div className="mt-3 space-y-2">
+                <p className="text-xs text-rose-600 flex items-center">
+                  <span className="mr-2">💪</span>
+                  Establece metas realistas y alcanzables
+                </p>
+                <p className="text-xs text-rose-600 flex items-center">
+                  <span className="mr-2">🎯</span>
+                  Cambios graduales son más sostenibles
+                </p>
+                <p className="text-xs text-rose-600 flex items-center">
+                  <span className="mr-2">📈</span>
+                  Podrás ajustar tu objetivo más adelante
+                </p>
+              </div>
             </div>
 
-            <button
-              type="submit"
-              className="w-full flex items-center justify-center space-x-2 py-3 bg-gradient-to-r from-orange-400 via-pink-500 to-rose-500 text-white rounded-xl hover:from-orange-500 hover:via-pink-600 hover:to-rose-600 transition-colors"
-            >
-              <span>Comenzar</span>
-              <ChevronRight size={20} />
-            </button>
+            <div className="space-y-3">
+              <button
+                type="submit"
+                className="w-full flex items-center justify-center space-x-2 py-3 bg-gradient-to-r from-orange-400 via-pink-500 to-rose-500 text-white rounded-xl hover:from-orange-500 hover:via-pink-600 hover:to-rose-600 transition-colors"
+              >
+                <span>¡Comenzar mi viaje! 🚀</span>
+                <ChevronRight size={20} />
+              </button>
+              <button
+                type="button"
+                onClick={() => setStep(1)}
+                className="w-full py-2.5 text-rose-500 hover:bg-rose-50 rounded-xl transition-colors text-sm"
+              >
+                ← Volver atrás
+              </button>
+            </div>
           </form>
         )}
       </div>

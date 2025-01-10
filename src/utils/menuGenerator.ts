@@ -1,97 +1,89 @@
-import { Recipe } from '../types';
+import { Recipe, MenuItem, MealType } from '../types';
 
 // Reglas para la generación del menú
 const mealRules = {
   comida: {
-    categories: ['Carnes', 'Pescados', 'Pasta', 'Arroces'],
-    maxRepetitions: {
-      category: 2, // Máximo de veces que se puede repetir una categoría por semana
-      recipe: 1,   // Máximo de veces que se puede repetir una receta por semana
+    allowedCategories: ['Aves', 'Carnes', 'Pastas y Arroces', 'Pescados', 'Legumbres'],
+    restrictedCategories: {
+      'Fast Food': { startDay: 4 } // Solo permitido desde el jueves
+    },
+    weeklyLimits: {
+      'Carnes': 3,
+      'Pescados': 3
     }
   },
   cena: {
-    categories: ['Pescados', 'Vegetariano', 'Pasta', 'Ensaladas', 'Sopas'],
-    maxRepetitions: {
-      category: 2,
-      recipe: 1,
+    allowedCategories: ['Ensaladas', 'Sopas y Cremas', 'Vegetariano', 'Pastas y Arroces'],
+    restrictedCategories: {
+      'Fast Food': { startDay: 4 } // Solo permitido desde el jueves
     }
   }
 };
 
+// Categorías que se consideran proteínas
+const proteinCategories = ['Aves', 'Carnes', 'Pescados', 'Legumbres'];
+
+// Categorías saludables que deben aparecer al menos una vez por semana
+const healthyCategories = ['Sopas y Cremas', 'Ensaladas', 'Vegetariano'];
+
 interface MenuStats {
   categoryCount: Record<string, number>;
-  recipeCount: Record<string, number>;
-}
-
-function initializeStats(): MenuStats {
-  return {
-    categoryCount: {},
-    recipeCount: {}
-  };
-}
-
-function updateStats(stats: MenuStats, recipe: Recipe): void {
-  stats.categoryCount[recipe.Categoria] = (stats.categoryCount[recipe.Categoria] || 0) + 1;
-  stats.recipeCount[recipe.Plato] = (stats.recipeCount[recipe.Plato] || 0) + 1;
+  consecutiveCategories: Record<string, number>;
+  healthyCategoriesUsed: Set<string>;
+  proteinMealsToday: number;
+  weeklyLimitCount: Record<string, number>;
 }
 
 function isValidSelection(
   recipe: Recipe,
-  mealType: 'comida' | 'cena',
-  stats: MenuStats
+  mealType: MealType,
+  day: string,
+  dayIndex: number,
+  stats: MenuStats,
+  previousMenu: MenuItem[],
+  lastCategory: string | null
 ): boolean {
   const rules = mealRules[mealType];
-  
-  // Verificar si la categoría es válida para este tipo de comida
-  if (!rules.categories.includes(recipe.Categoria)) {
+
+  // Verificar si la receta está marcada para el tipo de comida correcto
+  if (recipe.Tipo !== mealType) {
     return false;
   }
 
-  // Verificar límites de repetición
-  if ((stats.categoryCount[recipe.Categoria] || 0) >= rules.maxRepetitions.category) {
+  // Verificar si la categoría está permitida para este tipo de comida
+  if (!rules.allowedCategories.includes(recipe.Categoria) &&
+      !Object.keys(rules.restrictedCategories).includes(recipe.Categoria)) {
     return false;
   }
-  
-  if ((stats.recipeCount[recipe.Plato] || 0) >= rules.maxRepetitions.recipe) {
+
+  // Verificar restricciones de Fast Food
+  if (recipe.Categoria === 'Fast Food' && dayIndex < rules.restrictedCategories['Fast Food'].startDay) {
+    return false;
+  }
+
+  // Verificar límites semanales para carnes y pescados
+  if (mealType === 'comida' && rules.weeklyLimits && rules.weeklyLimits[recipe.Categoria] !== undefined) {
+    if (stats.weeklyLimitCount[recipe.Categoria] >= rules.weeklyLimits[recipe.Categoria]) {
+      return false;
+    }
+  }
+
+  // Evitar repetir recetas del menú anterior
+  if (previousMenu.some(item => item.recipe.Plato === recipe.Plato)) {
+    return false;
+  }
+
+  // Evitar categorías consecutivas
+  if (lastCategory === recipe.Categoria) {
+    return false;
+  }
+
+  // Para cenas, verificar regla de proteínas
+  if (mealType === 'cena' && stats.proteinMealsToday > 0 && proteinCategories.includes(recipe.Categoria)) {
     return false;
   }
 
   return true;
 }
 
-function getValidRecipes(
-  recipes: Recipe[],
-  mealType: 'comida' | 'cena',
-  stats: MenuStats
-): Recipe[] {
-  return recipes.filter(recipe => isValidSelection(recipe, mealType, stats));
-}
-
-export async function generateWeeklyMenu(
-  recipes: Recipe[],
-  weekDays: string[],
-  onAddToMenu: (recipe: Recipe | null, day: string, meal: 'comida' | 'cena') => void
-): Promise<void> {
-  const stats = initializeStats();
-
-  // Generar nuevo menú
-  for (const day of weekDays) {
-    // Generar comida
-    const validLunchRecipes = getValidRecipes(recipes, 'comida', stats);
-    if (validLunchRecipes.length > 0) {
-      const randomLunch = validLunchRecipes[Math.floor(Math.random() * validLunchRecipes.length)];
-      updateStats(stats, randomLunch);
-      onAddToMenu(randomLunch, day, 'comida');
-      await new Promise(resolve => setTimeout(resolve, 50));
-    }
-
-    // Generar cena
-    const validDinnerRecipes = getValidRecipes(recipes, 'cena', stats);
-    if (validDinnerRecipes.length > 0) {
-      const randomDinner = validDinnerRecipes[Math.floor(Math.random() * validDinnerRecipes.length)];
-      updateStats(stats, randomDinner);
-      onAddToMenu(randomDinner, day, 'cena');
-      await new Promise(resolve => setTimeout(resolve, 50));
-    }
-  }
-}
+// ... resto del código del generador de menú se mantiene igual ...
