@@ -1,18 +1,18 @@
 import React, { useState, useEffect } from 'react';
-import { Recipe, MenuItem } from '../../types';
+import type { Recipe, MenuItem } from '../../types/index';
 import { MobileView } from './MobileView';
 import { DesktopView } from './DesktopView';
 import { RecipeSelectorSidebar } from './RecipeSelectorSidebar';
 import { RecipeModal } from '../RecipeModal';
 import { MenuHistory } from './MenuHistory';
 import { weekDays } from './utils';
-import { sampleRecipes } from '../../data/recipes';
+import { getRecipes } from '../../services/recipes';
 import { Calendar, Wand2, Share2, Loader2 } from 'lucide-react';
 
 interface WeeklyMenu2Props {
-  weeklyMenu: MenuItem[];
-  onRecipeSelect: (recipe: Recipe) => void;
-  onAddToMenu: (recipe: Recipe | null, day: string, meal: 'comida' | 'cena') => void;
+  readonly weeklyMenu: MenuItem[];
+  readonly onRecipeSelect: (recipe: Recipe) => void;
+  readonly onAddToMenu: (recipe: Recipe | null, day: string, meal: 'comida' | 'cena') => void;
 }
 
 interface MenuHistory {
@@ -40,6 +40,13 @@ export function WeeklyMenu2({ weeklyMenu, onRecipeSelect, onAddToMenu }: WeeklyM
     const saved = localStorage.getItem('menuHistory');
     return saved ? JSON.parse(saved) : [];
   });
+  const [recipes, setRecipes] = useState<Recipe[]>([]);
+
+  useEffect(() => {
+    getRecipes().then(recipes => {
+      setRecipes(recipes as unknown as Recipe[]);
+    });
+  }, []);
 
   useEffect(() => {
     localStorage.setItem('menuHistory', JSON.stringify(menuHistory));
@@ -104,7 +111,7 @@ export function WeeklyMenu2({ weeklyMenu, onRecipeSelect, onAddToMenu }: WeeklyM
       // Generar nuevo menú
       for (const day of weekDays) {
         for (const meal of ['comida', 'cena'] as const) {
-          const validRecipes = sampleRecipes.filter(recipe => {
+          const validRecipes = recipes.filter((recipe: Recipe) => {
             const isValidForMeal = meal === 'comida' 
               ? ['Carnes', 'Pescados', 'Pasta', 'Arroces'].includes(recipe.Categoria)
               : ['Pescados', 'Vegetariano', 'Pasta', 'Ensaladas', 'Sopas'].includes(recipe.Categoria);
