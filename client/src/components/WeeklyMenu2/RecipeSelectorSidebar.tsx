@@ -1,7 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { X, Search, ChevronRight, Filter, Flame } from 'lucide-react';
 import { Recipe } from '../../types';
-import { sampleRecipes } from '../../data/recipes';
+import { useRecipes } from '../../hooks/useRecipes';
 
 const categories = [
   'Todas',
@@ -31,11 +31,12 @@ export function RecipeSelectorSidebar({
   selectedDay,
   selectedMeal
 }: RecipeSelectorSidebarProps) {
+  const { recipes, loading } = useRecipes();
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('Todas');
   const [showFilters, setShowFilters] = useState(false);
 
-  const filteredRecipes = sampleRecipes.filter(recipe => {
+  const filteredRecipes = recipes.filter(recipe => {
     const matchesSearch = recipe.Plato.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesCategory = selectedCategory === 'Todas' || recipe.Categoria === selectedCategory;
     return matchesSearch && matchesCategory;

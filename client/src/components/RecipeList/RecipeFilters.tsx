@@ -2,16 +2,16 @@ import React from 'react';
 import { ChefHat, Moon, Sun, Heart, Flame, Clock } from 'lucide-react';
 import { MealType } from '../../types';
 
-interface RecipeFiltersProps {
+type RecipeFiltersProps = Readonly<{
   selectedCategory: string;
   selectedMealType: 'all' | MealType;
   sortBy: 'popular' | 'calories' | 'time' | null;
   searchTerm: string;
   onCategoryChange: (category: string) => void;
-  onMealTypeChange: (type: 'all' | MealType) => void;
-  onSortChange: (sort: 'popular' | 'calories' | 'time') => void;
+  onMealTypeChange: (mealType: 'all' | MealType) => void;
+  onSortChange: (sort: 'popular' | 'calories' | 'time' | null) => void;
   onSearchChange: (search: string) => void;
-}
+}>;
 
 const categories = [
   { id: 'Todas', emoji: '🍽️', label: 'Todas' },
@@ -108,7 +108,7 @@ export function RecipeFilters({
           {sortOptions.map(option => (
             <button
               key={option.id}
-              onClick={() => onSortChange(option.id as 'popular' | 'calories' | 'time')}
+              onClick={() => onSortChange(option.id as 'popular' | 'calories' | 'time' | null)}
               className={`flex-none flex items-center space-x-2 px-4 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 whitespace-nowrap ${
                 sortBy === option.id
                   ? 'bg-orange-100 text-orange-700 shadow-inner'

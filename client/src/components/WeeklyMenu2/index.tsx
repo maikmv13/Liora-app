@@ -8,6 +8,7 @@ import { MenuHistory } from './MenuHistory';
 import { weekDays } from './utils';
 import { getRecipes } from '../../services/recipes';
 import { Calendar, Wand2, Share2, Loader2 } from 'lucide-react';
+import { useRecipes } from '../../hooks/useRecipes';
 
 interface WeeklyMenu2Props {
   readonly weeklyMenu: MenuItem[];
@@ -25,6 +26,7 @@ const DAYS = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', '
 type WeekDay = typeof DAYS[number];
 
 export function WeeklyMenu2({ weeklyMenu, onRecipeSelect, onAddToMenu }: WeeklyMenu2Props) {
+  const { recipes, loading } = useRecipes();
   const [selectedDay, setSelectedDay] = useState<WeekDay>('Lunes');
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [selectedMealInfo, setSelectedMealInfo] = useState<{
@@ -40,13 +42,6 @@ export function WeeklyMenu2({ weeklyMenu, onRecipeSelect, onAddToMenu }: WeeklyM
     const saved = localStorage.getItem('menuHistory');
     return saved ? JSON.parse(saved) : [];
   });
-  const [recipes, setRecipes] = useState<Recipe[]>([]);
-
-  useEffect(() => {
-    getRecipes().then(recipes => {
-      setRecipes(recipes as unknown as Recipe[]);
-    });
-  }, []);
 
   useEffect(() => {
     localStorage.setItem('menuHistory', JSON.stringify(menuHistory));
@@ -83,7 +78,7 @@ export function WeeklyMenu2({ weeklyMenu, onRecipeSelect, onAddToMenu }: WeeklyM
   };
 
   const handleGenerateMenu = async () => {
-    if (isGenerating) return;
+    if (isGenerating || loading) return;
     
     // Guardar el menú actual en el historial si tiene elementos
     if (weeklyMenu.length > 0) {
@@ -196,19 +191,19 @@ export function WeeklyMenu2({ weeklyMenu, onRecipeSelect, onAddToMenu }: WeeklyM
         <div className="flex flex-col sm:flex-row gap-3">
           <button 
             onClick={handleGenerateMenu}
-            disabled={isGenerating}
+            disabled={isGenerating || loading}
             className={`flex items-center justify-center space-x-2 px-4 py-2.5 rounded-xl transition-colors ${
-              isGenerating
+              isGenerating || loading
                 ? 'bg-rose-100 text-rose-400 cursor-not-allowed'
                 : 'bg-gradient-to-r from-orange-400 via-pink-500 to-rose-500 text-white hover:from-orange-500 hover:via-pink-600 hover:to-rose-600'
             }`}
           >
-            {isGenerating ? (
+            {isGenerating || loading ? (
               <Loader2 size={20} className="animate-spin" />
             ) : (
               <Wand2 size={20} />
             )}
-            <span>{isGenerating ? 'Generando...' : 'Generar Menú'}</span>
+            <span>{isGenerating || loading ? 'Generando...' : 'Generar Menú'}</span>
           </button>
           <button 
             onClick={handleExport}

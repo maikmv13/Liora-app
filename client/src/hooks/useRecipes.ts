@@ -5,6 +5,15 @@ import type { Recipe } from '../types';
 
 type SupabaseRecipe = Database['public']['Tables']['recipes']['Row'];
 
+interface RecipeIngredient {
+  quantity: number;
+  unit: string;
+  ingredients: {
+    name: string;
+    category?: string;
+  };
+}
+
 export function useRecipes() {
   const [recipes, setRecipes] = useState<Recipe[]>([]);
   const [loading, setLoading] = useState(true);
@@ -32,10 +41,15 @@ export function useRecipes() {
         const convertedRecipes: Recipe[] = (data || []).map(recipe => ({
           Plato: recipe.name,
           Acompañamiento: recipe.side_dish || '',
-          Tipo: recipe.meal_type as any,
+          Tipo: recipe.meal_type,
           Categoria: recipe.category,
           Comensales: recipe.servings,
-          Ingredientes: [], // Aquí deberías mapear recipe_ingredients
+          Ingredientes: recipe.recipe_ingredients?.map((ri: RecipeIngredient) => ({
+            Nombre: ri.ingredients.name,
+            Cantidad: ri.quantity,
+            Unidad: ri.unit,
+            Categoria: ri.ingredients.category || 'Otros'
+          })) || [],
           Calorias: recipe.calories || '0',
           "Valor energético (kJ)": recipe.energy_kj || '0',
           Grasas: recipe.fats || '0',

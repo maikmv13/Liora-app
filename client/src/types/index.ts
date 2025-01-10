@@ -11,7 +11,7 @@ export type Instructions = {
   [key: string]: string;
 };
 
-export type Recipe = {
+export interface Recipe {
   Plato: string;
   Acompañamiento: string;
   Tipo: MealType;
@@ -32,7 +32,7 @@ export type Recipe = {
   Url: string;
   PDF_Url: string;
   isFavorite?: boolean;
-};
+}
 
 export type MenuItem = {
   recipe: Recipe;
