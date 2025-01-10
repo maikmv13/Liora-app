@@ -4,7 +4,18 @@ import type { Database } from '../types/supabase';
 const supabaseUrl = 'https://geqjccqfayuwcmsgaxun.supabase.co';
 const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdlcWpjY3FmYXl1d2Ntc2dheHVuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzY1MTEyOTIsImV4cCI6MjA1MjA4NzI5Mn0.BQil-q1bm8plruXU7j0maqG7E1EAPuuDvmPILJ08Wp8';
 
-export const supabase = createClient<Database>(supabaseUrl, supabaseKey);
+export const supabase = createClient<Database>(
+  supabaseUrl,
+  supabaseKey,
+  {
+    auth: {
+      persistSession: false // Deshabilitar persistencia para pruebas
+    },
+    db: {
+      schema: 'public'
+    }
+  }
+);
 
 // Helper para manejar errores de Supabase
 export const handleSupabaseError = (error: any) => {
