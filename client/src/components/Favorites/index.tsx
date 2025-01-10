@@ -6,14 +6,10 @@ import { RecipeModal } from '../RecipeModal';
 import { EditRecipeModal } from './EditRecipeModal';
 import { RecipeFilters } from '../RecipeList/RecipeFilters';
 import { NewRecipeModal } from './NewRecipeModal';
+import { useFavorites } from '../../hooks/useFavorites';
 
-interface FavoritesProps {
-  favorites: FavoriteRecipe[];
-  onRemoveFavorite: (recipe: FavoriteRecipe) => void;
-  onUpdateFavorite: (recipe: FavoriteRecipe) => void;
-}
-
-export function Favorites({ favorites, onRemoveFavorite, onUpdateFavorite }: FavoritesProps) {
+export function Favorites() {
+  const { favorites, loading, removeFavorite, updateFavorite } = useFavorites();
   const [selectedCategory, setSelectedCategory] = useState('Todas');
   const [selectedMealType, setSelectedMealType] = useState<'all' | 'comida' | 'cena'>('all');
   const [sortBy, setSortBy] = useState<'popular' | 'calories' | 'time' | null>(null);
@@ -118,7 +114,7 @@ export function Favorites({ favorites, onRemoveFavorite, onUpdateFavorite }: Fav
                 isFavorite: true
               }}
               onClick={() => setSelectedRecipe(recipe)}
-              onToggleFavorite={() => onRemoveFavorite(recipe)}
+              onToggleFavorite={() => removeFavorite(recipe)}
             />
           ))}
         </div>
@@ -131,7 +127,7 @@ export function Favorites({ favorites, onRemoveFavorite, onUpdateFavorite }: Fav
           onAddToMenu={() => {}}
           isFavorite={true}
           onToggleFavorite={() => {
-            onRemoveFavorite(selectedRecipe);
+            removeFavorite(selectedRecipe);
             setSelectedRecipe(null);
           }}
         />
@@ -142,7 +138,7 @@ export function Favorites({ favorites, onRemoveFavorite, onUpdateFavorite }: Fav
           recipe={editingRecipe}
           onClose={() => setEditingRecipe(null)}
           onSave={(updatedRecipe) => {
-            onUpdateFavorite(updatedRecipe);
+            updateFavorite(updatedRecipe);
             setEditingRecipe(null);
           }}
         />
@@ -152,7 +148,7 @@ export function Favorites({ favorites, onRemoveFavorite, onUpdateFavorite }: Fav
         <NewRecipeModal
           onClose={() => setShowNewRecipeModal(false)}
           onSave={(newRecipe) => {
-            onUpdateFavorite({
+            updateFavorite({
               ...newRecipe,
               addedAt: new Date().toISOString(),
               rating: 0
