@@ -9,10 +9,16 @@ export const supabase = createClient<Database>(
   supabaseKey,
   {
     auth: {
-      persistSession: false // Deshabilitar persistencia para pruebas
+      persistSession: false
     },
     db: {
       schema: 'public'
+    },
+    global: {
+      headers: {
+        'apikey': supabaseKey,
+        'Authorization': `Bearer ${supabaseKey}`
+      }
     }
   }
 );
