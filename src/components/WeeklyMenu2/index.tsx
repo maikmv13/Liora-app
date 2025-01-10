@@ -107,20 +107,37 @@ export function WeeklyMenu2({ weeklyMenu, onRecipeSelect, onAddToMenu }: WeeklyM
   };
 
   const handleExport = () => {
-    // Crear el mensaje para WhatsApp
-    const menuContent = "🍽️ *Menú Semanal* 📅\n\n" + weekDays.map(day => {
-      const dayMenu = weeklyMenu.filter(item => item.day === day);
+    const today = new Intl.DateTimeFormat('es-ES', { 
+      weekday: 'long',
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric'
+    }).format(new Date());
+
+    let menuContent;
+    if (selectedDay) {
+      // Menú diario
+      const dayMenu = weeklyMenu.filter(item => item.day === selectedDay);
       const comida = dayMenu.find(item => item.meal === 'comida');
       const cena = dayMenu.find(item => item.meal === 'cena');
       
-      return `*${day}*\n${comida ? `🍳 Comida: ${comida.recipe.Plato}\n` : ''}${cena ? `🌙 Cena: ${cena.recipe.Plato}\n` : ''}\n`;
-    }).join('');
+      menuContent = `🍽️ *Menú para ${selectedDay}*\n📅 Generado el ${today}\n\n` +
+        `${comida ? `🍳 *Comida:* ${comida.recipe.Plato}\n` : ''}` +
+        `${cena ? `🌙 *Cena:* ${cena.recipe.Plato}\n` : ''}`;
+    } else {
+      // Menú semanal
+      menuContent = `🍽️ *Menú Semanal*\n📅 Generado el ${today}\n\n` + 
+        weekDays.map(day => {
+          const dayMenu = weeklyMenu.filter(item => item.day === day);
+          const comida = dayMenu.find(item => item.meal === 'comida');
+          const cena = dayMenu.find(item => item.meal === 'cena');
+          
+          return `*${day}*\n${comida ? `🍳 Comida: ${comida.recipe.Plato}\n` : ''}${cena ? `🌙 Cena: ${cena.recipe.Plato}\n` : ''}\n`;
+        }).join('');
+    }
 
-    // Codificar el mensaje para la URL de WhatsApp
     const encodedMessage = encodeURIComponent(menuContent);
     const whatsappUrl = `https://wa.me/?text=${encodedMessage}`;
-
-    // Abrir WhatsApp en una nueva pestaña
     window.open(whatsappUrl, '_blank');
   };
 

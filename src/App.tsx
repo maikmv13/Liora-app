@@ -7,6 +7,7 @@ import { RecipeModal } from './components/RecipeModal';
 import { WeeklyMenu2 as WeeklyMenu } from './components/WeeklyMenu2';
 import { ShoppingList } from './components/ShoppingList';
 import { Favorites } from './components/Favorites';
+import { WeightTracker } from './components/WeightTracker';
 import { sampleRecipes } from './data/recipes';
 import { categorizeIngredient } from './utils/categorizeIngredient';
 import { getUnitPlural } from './utils/getUnitPlural';
@@ -105,12 +106,10 @@ function App() {
       const newItems = prev.map(item => {
         if (item.nombre === nombre) {
           if (dia) {
-            // Si se especifica un día, solo toggle si el item pertenece a ese día
             if (item.dias.includes(dia)) {
               return { ...item, comprado: !item.comprado };
             }
           } else {
-            // Si no se especifica día, toggle el estado
             return { ...item, comprado: !item.comprado };
           }
         }
@@ -137,6 +136,8 @@ function App() {
       <Header 
         searchTerm={searchTerm}
         onSearchChange={setSearchTerm}
+        activeTab={activeTab}
+        onTabChange={setActiveTab}
       />
       <Navigation 
         activeTab={activeTab}
@@ -174,6 +175,10 @@ function App() {
             onRemoveFavorite={(recipe) => toggleFavorite(recipe)}
             onUpdateFavorite={updateFavorite}
           />
+        )}
+
+        {activeTab === 'peso' && (
+          <WeightTracker />
         )}
       </main>
 

@@ -1,5 +1,5 @@
 import React from 'react';
-import { ChevronLeft, ChevronRight, X, Plus, Flame } from 'lucide-react';
+import { ChevronLeft, ChevronRight, X, Plus, Flame, Eye, PenSquare } from 'lucide-react';
 import { MenuItem } from '../../types';
 import { getMealIcon } from './utils';
 
@@ -10,6 +10,7 @@ interface MobileViewProps {
   onDayChange: (day: string) => void;
   onMealClick: (day: string, meal: 'comida' | 'cena') => void;
   onRemoveMeal: (day: string, meal: 'comida' | 'cena') => void;
+  onViewRecipe: (recipe: MenuItem) => void;
 }
 
 export function MobileView({ 
@@ -18,7 +19,8 @@ export function MobileView({
   weeklyMenu,
   onDayChange,
   onMealClick,
-  onRemoveMeal
+  onRemoveMeal,
+  onViewRecipe
 }: MobileViewProps) {
   return (
     <div className="space-y-4">
@@ -47,12 +49,12 @@ export function MobileView({
           </button>
         </div>
 
-        <div className="flex gap-2 overflow-x-auto pb-2 -mx-4 px-4">
+        <div className="flex gap-2 overflow-x-auto pb-2 -mx-4 px-4 scrollbar-hide">
           {weekDays.map(day => (
             <button
               key={day}
               onClick={() => onDayChange(day)}
-              className={`flex-none px-4 py-2 rounded-xl transition-colors ${
+              className={`flex-none px-4 py-2 rounded-xl transition-colors whitespace-nowrap ${
                 selectedDay === day
                   ? 'bg-rose-50 text-rose-600 font-medium'
                   : 'bg-white/80 backdrop-blur-sm text-gray-600 hover:bg-rose-50/50'
@@ -76,28 +78,40 @@ export function MobileView({
                 {getMealIcon(meal)}
                 <span className="font-medium text-sm">{meal.charAt(0).toUpperCase() + meal.slice(1)}</span>
               </div>
-              {menuItem && (
-                <button
-                  onClick={() => onRemoveMeal(selectedDay, meal)}
-                  className="p-1.5 hover:bg-red-50 rounded-lg transition-colors"
-                >
-                  <X size={16} className="text-red-500" />
-                </button>
-              )}
             </div>
             {menuItem ? (
-              <div
-                onClick={() => onMealClick(selectedDay, meal)}
-                className="p-3 cursor-pointer hover:bg-rose-50/50 transition-colors"
-              >
-                <div className="flex items-center justify-between mb-1">
+              <div className="p-3">
+                <div className="flex items-center justify-between mb-2">
                   <p className="font-medium text-gray-900">{menuItem.recipe.Plato}</p>
                   <div className="flex items-center space-x-1 bg-rose-50 px-2 py-0.5 rounded-lg">
                     <Flame size={12} className="text-rose-500" />
                     <span className="text-xs font-medium text-rose-600">{menuItem.recipe.Calorias}</span>
                   </div>
                 </div>
-                <p className="text-sm text-gray-500">{menuItem.recipe.Acompañamiento}</p>
+                <p className="text-sm text-gray-500 mb-3">{menuItem.recipe.Acompañamiento}</p>
+                
+                <div className="flex gap-2">
+                  <button
+                    onClick={() => onViewRecipe(menuItem)}
+                    className="flex-1 flex items-center justify-center space-x-2 p-2 bg-rose-50 text-rose-500 rounded-lg hover:bg-rose-100 transition-colors"
+                  >
+                    <Eye size={18} />
+                    <span className="text-sm font-medium">Ver receta</span>
+                  </button>
+                  <button
+                    onClick={() => onMealClick(selectedDay, meal)}
+                    className="flex-1 flex items-center justify-center space-x-2 p-2 bg-rose-50 text-rose-500 rounded-lg hover:bg-rose-100 transition-colors"
+                  >
+                    <PenSquare size={18} />
+                    <span className="text-sm font-medium">Cambiar</span>
+                  </button>
+                  <button
+                    onClick={() => onRemoveMeal(selectedDay, meal)}
+                    className="flex items-center justify-center p-2 bg-red-50 text-red-500 rounded-lg hover:bg-red-100 transition-colors"
+                  >
+                    <X size={18} />
+                  </button>
+                </div>
               </div>
             ) : (
               <button

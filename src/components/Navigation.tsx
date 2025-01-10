@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { ChefHat, Calendar, ShoppingCart, Heart } from 'lucide-react';
+import React, { useState, useEffect, useCallback } from 'react';
+import { ChefHat, Calendar, ShoppingCart, Heart, Scale } from 'lucide-react';
 
 interface NavigationProps {
   activeTab: string;
@@ -9,6 +9,8 @@ interface NavigationProps {
 export function Navigation({ activeTab, onTabChange }: NavigationProps) {
   const [isVisible, setIsVisible] = useState(true);
   const [lastScrollY, setLastScrollY] = useState(0);
+  const [scrollingUp, setScrollingUp] = useState(false);
+  const [scrollUpDistance, setScrollUpDistance] = useState(0);
 
   const navItems = [
     { 
@@ -34,29 +36,44 @@ export function Navigation({ activeTab, onTabChange }: NavigationProps) {
       icon: Heart, 
       label: 'Favoritos',
       description: 'Tus recetas favoritas'
+    },
+    {
+      id: 'peso',
+      icon: Scale,
+      label: 'Peso',
+      description: 'Control de peso'
     }
   ];
 
-  useEffect(() => {
-    const handleScroll = () => {
-      const currentScrollY = window.scrollY;
-      
-      if (currentScrollY > lastScrollY) {
+  const handleScroll = useCallback(() => {
+    const currentScrollY = window.scrollY;
+    const scrollingDown = currentScrollY > lastScrollY;
+    
+    if (scrollingDown) {
+      setScrollingUp(false);
+      setScrollUpDistance(0);
+      if (currentScrollY > 100) {
         setIsVisible(false);
-      } else {
+      }
+    } else {
+      setScrollingUp(true);
+      setScrollUpDistance(prev => prev + (lastScrollY - currentScrollY));
+      if (scrollUpDistance > 50) {
         setIsVisible(true);
       }
-      
-      setLastScrollY(currentScrollY);
-    };
+    }
+    
+    setLastScrollY(currentScrollY);
+  }, [lastScrollY, scrollUpDistance]);
 
-    window.addEventListener('scroll', handleScroll, { passive: true });
+  useEffect(() => {
+    window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
-  }, [lastScrollY]);
+  }, [handleScroll]);
 
   return (
-    <nav className={`bg-white/80 backdrop-blur-md shadow-sm sticky z-40 border-b border-rose-100/20 transition-all duration-200 ${
-      isVisible ? 'top-[49px] md:top-[72px]' : '-top-20'
+    <nav className={`bg-white/80 backdrop-blur-md shadow-sm sticky z-40 border-b border-rose-100/20 transition-all duration-300 ${
+      isVisible ? 'top-[48px] md:top-[56px]' : '-top-20'
     }`}>
       <div className="container mx-auto px-4">
         <div className="flex">
@@ -64,20 +81,20 @@ export function Navigation({ activeTab, onTabChange }: NavigationProps) {
             <button
               key={id}
               onClick={() => onTabChange(id)}
-              className={`group flex-1 py-2 md:py-4 transition-all duration-200 relative ${
+              className={`group flex-1 py-3 md:py-4 transition-all duration-200 relative ${
                 activeTab === id
                   ? 'text-rose-500'
                   : 'text-gray-400 hover:text-rose-400'
               }`}
             >
-              <div className="flex flex-col items-center justify-center space-y-0.5 md:space-y-1">
-                <div className={`p-1.5 md:p-2 rounded-xl transition-all duration-300 ${
+              <div className="flex flex-col items-center justify-center space-y-1">
+                <div className={`p-2 rounded-xl transition-all duration-300 ${
                   activeTab === id 
                     ? 'bg-rose-50' 
                     : 'group-hover:bg-rose-50/50'
                 }`}>
                   <Icon 
-                    size={18} 
+                    size={20} 
                     className={`transition-all duration-300 ${
                       activeTab === id 
                         ? 'transform scale-110' 
@@ -86,7 +103,7 @@ export function Navigation({ activeTab, onTabChange }: NavigationProps) {
                   />
                 </div>
                 <div className="flex flex-col items-center">
-                  <span className="font-medium text-xs">{label}</span>
+                  <span className="font-medium text-xs md:text-sm">{label}</span>
                   <span className="hidden md:block text-xs text-gray-400 group-hover:text-rose-400 transition-colors">
                     {description}
                   </span>
