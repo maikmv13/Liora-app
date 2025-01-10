@@ -7,9 +7,16 @@ interface HeaderProps {
   onSearchChange: (value: string) => void;
   activeTab: string;
   onTabChange: (tab: string) => void;
+  onLogin: () => void;
 }
 
-export function Header({ searchTerm, onSearchChange, activeTab, onTabChange }: HeaderProps) {
+export function Header({ 
+  searchTerm, 
+  onSearchChange, 
+  activeTab, 
+  onTabChange,
+  onLogin 
+}: HeaderProps) {
   const [showSearch, setShowSearch] = useState(false);
   const [showMobileMenu, setShowMobileMenu] = useState(false);
   const [deferredPrompt, setDeferredPrompt] = useState<any>(null);
@@ -98,16 +105,17 @@ export function Header({ searchTerm, onSearchChange, activeTab, onTabChange }: H
                 <span className="text-sm font-medium">Vida Sana</span>
               </button>
               <button
-                onClick={() => setShowMobileMenu(!showMobileMenu)}
-                className="md:hidden p-2 hover:bg-white/10 rounded-lg transition-colors"
-              >
-                {showMobileMenu ? <X size={20} /> : <Menu size={20} />}
-              </button>
-              <button
+                onClick={onLogin}
                 className="hidden md:flex items-center space-x-2 bg-white/10 backdrop-blur-md px-4 py-2 rounded-lg border border-white/20 hover:bg-white/20 transition-all duration-200"
               >
                 <LogIn size={18} />
                 <span className="text-sm font-medium">Iniciar sesión</span>
+              </button>
+              <button
+                onClick={() => setShowMobileMenu(!showMobileMenu)}
+                className="md:hidden p-2 hover:bg-white/10 rounded-lg transition-colors"
+              >
+                {showMobileMenu ? <X size={20} /> : <Menu size={20} />}
               </button>
             </div>
           </div>
@@ -193,6 +201,7 @@ export function Header({ searchTerm, onSearchChange, activeTab, onTabChange }: H
                   </button>
                 )}
                 <button
+                  onClick={onLogin}
                   className="w-full flex items-center justify-center space-x-2 p-3 bg-rose-50 text-rose-600 rounded-xl font-medium hover:bg-rose-100 transition-colors"
                 >
                   <LogIn size={20} />

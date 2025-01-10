@@ -9,6 +9,7 @@ import { ShoppingList } from './components/ShoppingList';
 import { Favorites } from './components/Favorites';
 import { WeightTracker } from './components/WeightTracker';
 import { HealthyPlateGuide } from './components/HealthyPlateGuide';
+import { Login } from './components/Login';
 import { sampleRecipes } from './data/recipes';
 import { categorizeIngredient } from './utils/categorizeIngredient';
 import { getUnitPlural } from './utils/getUnitPlural';
@@ -23,16 +24,11 @@ function App() {
     const saved = localStorage.getItem('favorites');
     return saved ? JSON.parse(saved) : [];
   });
+  const [showLogin, setShowLogin] = useState(false);
 
-  const addToMenu = (recipe: Recipe | null, day: string, meal: 'comida' | 'cena') => {
-    setWeeklyMenu(prev => {
-      if (recipe === null) {
-        return prev.filter(item => !(item.day === day && item.meal === meal));
-      }
-      const filtered = prev.filter(item => !(item.day === day && item.meal === meal));
-      return [...filtered, { recipe, day, meal }];
-    });
-  };
+  useEffect(() => {
+    localStorage.setItem('favorites', JSON.stringify(favorites));
+  }, [favorites]);
 
   const handleRecipeSelect = (recipe: Recipe) => {
     setSelectedRecipe(recipe);
@@ -42,6 +38,16 @@ function App() {
     addToMenu(recipe, 'Lunes', 'comida');
     setSelectedRecipe(null);
     setActiveTab('menu');
+  };
+
+  const addToMenu = (recipe: Recipe | null, day: string, meal: 'comida' | 'cena') => {
+    setWeeklyMenu(prev => {
+      if (recipe === null) {
+        return prev.filter(item => !(item.day === day && item.meal === meal));
+      }
+      const filtered = prev.filter(item => !(item.day === day && item.meal === meal));
+      return [...filtered, { recipe, day, meal }];
+    });
   };
 
   const toggleFavorite = (recipe: Recipe) => {
@@ -68,40 +74,6 @@ function App() {
     );
   };
 
-  const getShoppingList = () => {
-    const ingredients = new Map<string, ShoppingItem>();
-    
-    weeklyMenu.forEach(({ recipe, day }) => {
-      recipe.Ingredientes.forEach(ing => {
-        const key = ing.Nombre;
-        const current = ingredients.get(key);
-        
-        if (current) {
-          if (current.unidad === ing.Unidad) {
-            current.cantidad += ing.Cantidad;
-            if (!current.dias.includes(day)) {
-              current.dias.push(day);
-            }
-          }
-        } else {
-          ingredients.set(key, { 
-            nombre: ing.Nombre,
-            cantidad: ing.Cantidad,
-            unidad: ing.Unidad,
-            categoria: categorizeIngredient(ing.Nombre),
-            comprado: false,
-            dias: [day]
-          });
-        }
-      });
-    });
-
-    return Array.from(ingredients.values()).map(item => ({
-      ...item,
-      unidad: getUnitPlural(item.unidad, item.cantidad)
-    }));
-  };
-
   const toggleShoppingItem = (nombre: string, dia?: string) => {
     setShoppingItems(prev => {
       const newItems = prev.map(item => {
@@ -121,16 +93,46 @@ function App() {
   };
 
   useEffect(() => {
+    const getShoppingList = () => {
+      const ingredients = new Map<string, ShoppingItem>();
+      
+      weeklyMenu.forEach(({ recipe, day }) => {
+        recipe.Ingredientes.forEach(ing => {
+          const key = ing.Nombre;
+          const current = ingredients.get(key);
+          
+          if (current) {
+            if (current.unidad === ing.Unidad) {
+              current.cantidad += ing.Cantidad;
+              if (!current.dias.includes(day)) {
+                current.dias.push(day);
+              }
+            }
+          } else {
+            ingredients.set(key, { 
+              nombre: ing.Nombre,
+              cantidad: ing.Cantidad,
+              unidad: ing.Unidad,
+              categoria: categorizeIngredient(ing.Nombre),
+              comprado: false,
+              dias: [day]
+            });
+          }
+        });
+      });
+
+      return Array.from(ingredients.values()).map(item => ({
+        ...item,
+        unidad: getUnitPlural(item.unidad, item.cantidad)
+      }));
+    };
+
     const newItems = getShoppingList();
     setShoppingItems(newItems.map(newItem => {
       const existingItem = shoppingItems.find(item => item.nombre === newItem.nombre);
       return existingItem ? { ...newItem, comprado: existingItem.comprado } : newItem;
     }));
   }, [weeklyMenu]);
-
-  useEffect(() => {
-    localStorage.setItem('favorites', JSON.stringify(favorites));
-  }, [favorites]);
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -139,6 +141,7 @@ function App() {
         onSearchChange={setSearchTerm}
         activeTab={activeTab}
         onTabChange={setActiveTab}
+        onLogin={() => setShowLogin(true)}
       />
       <Navigation 
         activeTab={activeTab}
@@ -195,6 +198,10 @@ function App() {
           isFavorite={favorites.some(f => f.Plato === selectedRecipe.Plato)}
           onToggleFavorite={() => toggleFavorite(selectedRecipe)}
         />
+      )}
+
+      {showLogin && (
+        <Login onClose={() => setShowLogin(false)} />
       )}
     </div>
   );
