@@ -22,6 +22,7 @@ export function useRecipes() {
   useEffect(() => {
     async function fetchRecipes() {
       try {
+        console.log('Fetching recipes...'); // Debug
         const { data, error } = await supabase
           .from('recipes')
           .select(`
@@ -30,10 +31,13 @@ export function useRecipes() {
               quantity,
               unit,
               ingredients (
-                name
+                name,
+                category
               )
             )
           `);
+
+        console.log('Raw data from Supabase:', data); // Debug
 
         if (error) throw error;
         
@@ -60,13 +64,15 @@ export function useRecipes() {
           Proteínas: recipe.proteins || '0',
           Sodio: recipe.sodium || '0',
           "Tiempo de preparación": recipe.prep_time || '30',
-          Instrucciones: recipe.instructions as any,
+          Instrucciones: recipe.instructions,
           Url: recipe.url || '',
           PDF_Url: recipe.pdf_url || ''
         }));
 
+        console.log('Converted recipes:', convertedRecipes); // Debug
         setRecipes(convertedRecipes);
       } catch (e) {
+        console.error('Error fetching recipes:', e); // Debug
         setError(e as Error);
       } finally {
         setLoading(false);

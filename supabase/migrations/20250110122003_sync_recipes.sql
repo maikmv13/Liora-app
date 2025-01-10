@@ -1,4 +1,9 @@
--- Insertar datos de ejemplo en recipes
+-- Primero limpiamos las tablas existentes
+DELETE FROM recipe_ingredients;
+DELETE FROM recipes;
+DELETE FROM ingredients;
+
+-- Insertar todas las recetas
 INSERT INTO recipes (
   name,
   side_dish,
@@ -93,9 +98,9 @@ INSERT INTO recipes (
   '{"1": "Precalienta el horno a 200ºC", "2": "Pela las Patatas y córtalas", "3": "Corta los Pimiento rojo", "4": "Pela y pica los ajos", "5": "Coloca el pollo en una bandeja", "6": "Mezcla las Patatas y los Pimiento rojo"}'::jsonb,
   '',
   ''
-) ON CONFLICT (name) DO NOTHING;
+);
 
--- Actualizar la lista de ingredientes
+-- Insertar todos los ingredientes
 INSERT INTO ingredients (name) VALUES 
   ('Muslos de pollo'),
   ('Limón'),
@@ -122,28 +127,89 @@ INSERT INTO ingredients (name) VALUES
   ('Carne de cerdo picada')
 ON CONFLICT (name) DO NOTHING;
 
--- Relacionar todos los ingredientes con sus recetas
+-- Relacionar ingredientes con la primera receta (Pollo al limón)
+WITH recipe_1 AS (SELECT id FROM recipes WHERE name = 'Pollo al limón con tomillo')
 INSERT INTO recipe_ingredients (recipe_id, ingredient_id, quantity, unit)
 SELECT 
-  r.id,
+  (SELECT id FROM recipe_1),
   i.id,
   CASE i.name
-    WHEN 'Salsa barbacoa' THEN 2
-    WHEN 'Sazonador barbacoa' THEN 1
-    WHEN 'Caldo de pollo' THEN 1
-    WHEN 'Panko' THEN 25
-    WHEN 'Carne de cerdo picada' THEN 250
-    ELSE 1 -- Valor por defecto para evitar NULLs
+    WHEN 'Muslos de pollo' THEN 280
+    WHEN 'Limón' THEN 1
+    WHEN 'Mostaza' THEN 1
+    WHEN 'Miel' THEN 2
+    WHEN 'Arroz' THEN 150
+    WHEN 'Brócoli' THEN 250
+    WHEN 'Tomillo' THEN 1
+    WHEN 'Cebolla roja' THEN 1
+    WHEN 'Harina' THEN 10
+    WHEN 'Ajo' THEN 1
   END,
   CASE i.name
-    WHEN 'Salsa barbacoa' THEN 'sobre'
-    WHEN 'Sazonador barbacoa' THEN 'sobre'
-    WHEN 'Caldo de pollo' THEN 'sobre'
-    WHEN 'Panko' THEN 'gramo'
-    WHEN 'Carne de cerdo picada' THEN 'gramo'
-    ELSE 'unidad' -- Valor por defecto para evitar NULLs
+    WHEN 'Muslos de pollo' THEN 'gramo'
+    WHEN 'Limón' THEN 'unidad'
+    WHEN 'Mostaza' THEN 'sobre'
+    WHEN 'Miel' THEN 'cucharada'
+    WHEN 'Arroz' THEN 'gramo'
+    WHEN 'Brócoli' THEN 'gramo'
+    WHEN 'Tomillo' THEN 'unidad'
+    WHEN 'Cebolla roja' THEN 'unidad'
+    WHEN 'Harina' THEN 'gramo'
+    WHEN 'Ajo' THEN 'unidad'
   END::unit_type
-FROM recipes r, ingredients i
-WHERE r.name = 'Albóndigas caseras de cerdo a la barbacoa'
-  AND i.name IN ('Salsa barbacoa', 'Sazonador barbacoa', 'Caldo de pollo', 'Panko', 'Carne de cerdo picada')
-ON CONFLICT (recipe_id, ingredient_id) DO NOTHING;
+FROM ingredients i
+WHERE i.name IN ('Muslos de pollo', 'Limón', 'Mostaza', 'Miel', 'Arroz', 'Brócoli', 'Tomillo', 'Cebolla roja', 'Harina', 'Ajo');
+
+-- Relacionar ingredientes con la segunda receta (Pollo al ajillo)
+WITH recipe_2 AS (SELECT id FROM recipes WHERE name = 'Pollo al ajillo')
+INSERT INTO recipe_ingredients (recipe_id, ingredient_id, quantity, unit)
+SELECT 
+  (SELECT id FROM recipe_2),
+  i.id,
+  CASE i.name
+    WHEN 'Muslos de pollo' THEN 250
+    WHEN 'Arroz' THEN 150
+    WHEN 'Perejil' THEN 1
+    WHEN 'Cebolla' THEN 1
+    WHEN 'Tomillo' THEN 1
+    WHEN 'Ajo' THEN 3
+    WHEN 'Harina' THEN 20
+  END,
+  CASE i.name
+    WHEN 'Muslos de pollo' THEN 'gramo'
+    WHEN 'Arroz' THEN 'gramo'
+    WHEN 'Perejil' THEN 'unidad'
+    WHEN 'Cebolla' THEN 'unidad'
+    WHEN 'Tomillo' THEN 'unidad'
+    WHEN 'Ajo' THEN 'unidad'
+    WHEN 'Harina' THEN 'gramo'
+  END::unit_type
+FROM ingredients i
+WHERE i.name IN ('Muslos de pollo', 'Arroz', 'Perejil', 'Cebolla', 'Tomillo', 'Ajo', 'Harina');
+
+-- Relacionar ingredientes con la tercera receta (Pollo asado)
+WITH recipe_3 AS (SELECT id FROM recipes WHERE name = 'Pollo asado al horno')
+INSERT INTO recipe_ingredients (recipe_id, ingredient_id, quantity, unit)
+SELECT 
+  (SELECT id FROM recipe_3),
+  i.id,
+  CASE i.name
+    WHEN 'Pollo entero' THEN 1500
+    WHEN 'Patatas' THEN 800
+    WHEN 'Pimiento rojo' THEN 2
+    WHEN 'Pimiento verde' THEN 2
+    WHEN 'Romero' THEN 1
+    WHEN 'Tomillo' THEN 1
+    WHEN 'Limón' THEN 1
+  END,
+  CASE i.name
+    WHEN 'Pollo entero' THEN 'gramo'
+    WHEN 'Patatas' THEN 'gramo'
+    WHEN 'Pimiento rojo' THEN 'unidad'
+    WHEN 'Pimiento verde' THEN 'unidad'
+    WHEN 'Romero' THEN 'unidad'
+    WHEN 'Tomillo' THEN 'unidad'
+    WHEN 'Limón' THEN 'unidad'
+  END::unit_type
+FROM ingredients i
+WHERE i.name IN ('Pollo entero', 'Patatas', 'Pimiento rojo', 'Pimiento verde', 'Romero', 'Tomillo', 'Limón');

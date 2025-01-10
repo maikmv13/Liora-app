@@ -21,7 +21,7 @@ interface RecipeListProps {
 }
 
 export function RecipeList({ onRecipeSelect, favorites, onToggleFavorite }: RecipeListProps) {
-  const { recipes, loading } = useRecipes();
+  const { recipes, loading, error } = useRecipes();
   const [selectedCategory, setSelectedCategory] = useState('Todas');
   const [selectedMealType, setSelectedMealType] = useState<'all' | MealType>('all');
   const [sortBy, setSortBy] = useState<'popular' | 'calories' | 'time' | null>(null);
@@ -38,6 +38,14 @@ export function RecipeList({ onRecipeSelect, favorites, onToggleFavorite }: Reci
       <div className="text-center py-12">
         <ChefHat size={32} className="mx-auto animate-spin text-rose-500" />
         <p className="mt-4 text-gray-600">Cargando recetas...</p>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="text-center py-12 text-red-500">
+        <p>Error al cargar las recetas: {error.message}</p>
       </div>
     );
   }

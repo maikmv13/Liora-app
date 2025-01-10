@@ -1,4 +1,5 @@
 project_id = "geqjccqfayuwcmsgaxun"
+
 [api]
 enabled = true
 port = 54321
@@ -26,3 +27,23 @@ site_url = "http://localhost:5173"
 additional_redirect_urls = ["https://localhost:5173"]
 jwt_expiry = 3600
 enable_signup = true
+
+[auth.email]
+enable_signup = true
+double_confirm_changes = true
+enable_confirmations = false
+
+[auth.email.template.invite]
+content_path = ""
+
+[auth.email.template.confirmation]
+content_path = ""
+
+[auth.email.template.recovery]
+content_path = ""
+
+[auth.email.template.email_change]
+content_path = ""
+
+[auth.email.template.password_change]
+content_path = ""
