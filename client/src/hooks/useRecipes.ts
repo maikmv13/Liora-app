@@ -22,25 +22,50 @@ export function useRecipes() {
   useEffect(() => {
     async function fetchRecipes() {
       try {
-        console.log('Fetching recipes...'); // Debug
-        const { data, error } = await supabase
+        console.log('URL de Supabase:', supabase.supabaseUrl); // Verificar URL
+        console.log('Iniciando fetch de recetas...'); 
+
+        // Primero verificar que la tabla existe
+        const { data: tables } = await supabase
+          .from('recipes')
+          .select('count');
+        console.log('Tabla recipes existe:', tables);
+
+        const query = supabase
           .from('recipes')
           .select(`
             *,
-            recipe_ingredients!inner (
+            recipe_ingredients (
               quantity,
               unit,
-              ingredients!inner (
+              ingredients (
                 name,
                 category
               )
             )
           `);
 
-        console.log('Raw data from Supabase:', JSON.stringify(data, null, 2)); // Debug detallado
+        console.log('Query URL:', query.url); // Ver la URL completa de la query
+        
+        const { data, error } = await query;
+
+        console.log('Respuesta completa:', {
+          url: supabase.supabaseUrl,
+          data,
+          error,
+          status: error?.code,
+          message: error?.message,
+          details: error?.details
+        });
 
         if (error) throw error;
         
+        if (!data || data.length === 0) {
+          console.log('No recipes found in database');
+          setRecipes([]);
+          return;
+        }
+
         // Convertir el formato de Supabase al formato esperado por la aplicación
         const convertedRecipes: Recipe[] = (data || []).map(recipe => {
           console.log('Processing recipe:', recipe); // Debug por receta
@@ -75,7 +100,7 @@ export function useRecipes() {
         console.log('Converted recipes:', convertedRecipes); // Debug
         setRecipes(convertedRecipes);
       } catch (e) {
-        console.error('Error fetching recipes:', e); // Debug
+        console.error('Error completo:', e);
         setError(e as Error);
       } finally {
         setLoading(false);
