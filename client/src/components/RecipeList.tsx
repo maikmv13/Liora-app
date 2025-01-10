@@ -1,32 +1,30 @@
 import React, { useState } from 'react';
-import { Recipe, MealType } from '../types';
+import { Recipe, MealType, meal_category } from '../types';
 import { RecipeCard } from './RecipeCard';
-import { Filter, ChefHat, Moon, Sun, Heart, Flame, Clock } from 'lucide-react';
+import { ChefHat, Moon, Sun, Heart, Flame, Clock } from 'lucide-react';
 
-interface RecipeListProps {
+type RecipeListProps = Readonly<{
   recipes: Recipe[];
   onRecipeSelect: (recipe: Recipe) => void;
   favorites: string[];
   onToggleFavorite: (recipe: Recipe) => void;
-}
+}>;
 
-const categories = [
-  { id: 'Todas', emoji: '🍽️', label: 'Todas' },
-  { id: 'Aves', emoji: '🍗', label: 'Aves' },
+const categories: Array<{id: meal_category, emoji: string, label: string}> = [
   { id: 'Carnes', emoji: '🥩', label: 'Carnes' },
-  { id: 'Ensaladas', emoji: '🥗', label: 'Ensaladas' },
-  { id: 'Fast Food', emoji: '🍔', label: 'Fast Food' },
-  { id: 'Legumbres', emoji: '🫘', label: 'Legumbres' },
-  { id: 'Pastas y Arroces', emoji: '🍝', label: 'Pastas y Arroces' },
   { id: 'Pescados', emoji: '🐟', label: 'Pescados' },
-  { id: 'Sopas y Cremas', emoji: '🥣', label: 'Sopas y Cremas' },
-  { id: 'Vegetariano', emoji: '🥬', label: 'Vegetariano' }
+  { id: 'Vegetariano', emoji: '🥬', label: 'Vegetariano' },
+  { id: 'Pasta', emoji: '🍝', label: 'Pasta' },
+  { id: 'Sopas', emoji: '🥣', label: 'Sopas' },
+  { id: 'Ensaladas', emoji: '🥗', label: 'Ensaladas' }
 ];
 
 const mealTypes = [
-  { id: 'all', label: 'Todas', icon: ChefHat, description: 'Todas las recetas' },
-  { id: 'comida', label: 'Comidas', icon: Sun, description: 'Platos principales' },
-  { id: 'cena', label: 'Cenas', icon: Moon, description: 'Cenas ligeras' }
+  { id: 'all', label: 'Todas', icon: ChefHat },
+  { id: 'comida', label: 'Comidas', icon: Sun },
+  { id: 'cena', label: 'Cenas', icon: Moon },
+  { id: 'desayuno', label: 'Desayunos', icon: Sun },
+  { id: 'snack', label: 'Snacks', icon: Moon }
 ];
 
 const sortOptions = [
@@ -43,7 +41,7 @@ export function RecipeList({ recipes, onRecipeSelect, favorites, onToggleFavorit
 
   const filteredRecipes = recipes.filter(recipe => {
     const matchesCategory = selectedCategory === 'Todas' || recipe.Categoria === selectedCategory;
-    const matchesMealType = selectedMealType === 'all' || recipe.Tipo.toLowerCase() === selectedMealType;
+    const matchesMealType = selectedMealType === 'all' || recipe.Tipo === selectedMealType;
     const matchesSearch = recipe.Plato.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          recipe.Categoria.toLowerCase().includes(searchTerm.toLowerCase());
     return matchesCategory && matchesMealType && matchesSearch;
@@ -54,10 +52,10 @@ export function RecipeList({ recipes, onRecipeSelect, favorites, onToggleFavorit
 
   const sortedRecipes = [...filteredRecipes].sort((a, b) => {
     if (sortBy === 'calories') {
-      return parseInt(a.Calorias) - parseInt(b.Calorias);
+      return parseInt(a.Calorias || '0') - parseInt(b.Calorias || '0');
     }
     if (sortBy === 'time') {
-      const getMinutes = (time: string) => parseInt(time) || 30;
+      const getMinutes = (time: string) => parseInt(time || '30');
       return getMinutes(a["Tiempo de preparación"]) - getMinutes(b["Tiempo de preparación"]);
     }
     return 0;
@@ -162,7 +160,30 @@ export function RecipeList({ recipes, onRecipeSelect, favorites, onToggleFavorit
         {sortedRecipes.map((recipe) => (
           <RecipeCard 
             key={recipe.Plato} 
-            recipe={recipe}
+            recipe={{
+              id: recipe.Plato,
+              name: recipe.Plato,
+              side_dish: recipe.Acompañamiento || null,
+              meal_type: recipe.Tipo as "comida" | "cena" | "desayuno" | "snack",
+              category: recipe.Categoria as "Carnes" | "Pescados" | "Vegetariano" | "Pasta" | "Sopas" | "Ensaladas",
+              servings: recipe.Comensales,
+              calories: parseInt(recipe.Calorias).toString(),
+              prep_time: recipe["Tiempo de preparación"],
+              energy_kj: recipe["Valor energético (kJ)"],
+              fats: recipe.Grasas,
+              saturated_fats: recipe.Saturadas,
+              carbohydrates: recipe.Carbohidratos,
+              sugars: recipe.Azúcares,
+              fiber: recipe.Fibra,
+              proteins: recipe.Proteínas,
+              sodium: recipe.Sodio,
+              instructions: recipe.Instrucciones,
+              url: recipe.Url,
+              pdf_url: recipe.PDF_Url,
+              updated_at: new Date().toISOString(),
+              created_at: new Date().toISOString(),
+              isFavorite: recipe.isFavorite
+            }}
             onClick={() => onRecipeSelect(recipe)}
             onToggleFavorite={() => onToggleFavorite(recipe)}
           />

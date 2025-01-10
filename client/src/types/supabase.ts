@@ -41,35 +41,38 @@ export interface Database {
           updated_at?: string
         }
       }
-      favorites: {
+      recipes: {
         Row: {
           id: string
-          user_id: string
-          recipe_id: string
+          name: string
+          side_dish: string | null
+          meal_type: 'desayuno' | 'comida' | 'cena' | 'snack'
+          category: 'Carnes' | 'Pescados' | 'Vegetariano' | 'Pasta' | 'Sopas' | 'Ensaladas'
+          servings: number
+          calories: string | null
+          energy_kj: string | null
+          fats: string | null
+          saturated_fats: string | null
+          carbohydrates: string | null
+          sugars: string | null
+          fiber: string | null
+          proteins: string | null
+          sodium: string | null
+          prep_time: string | null
+          instructions: Json
+          url: string | null
+          pdf_url: string | null
           created_at: string
+          updated_at: string
         }
         Insert: {
-          id?: string
-          user_id: string
-          recipe_id: string
-          created_at?: string
+          // ... similar structure to Row but with optional fields
         }
         Update: {
-          id?: string
-          user_id?: string
-          recipe_id?: string
-          created_at?: string
+          // ... similar structure to Row but all fields optional
         }
       }
-    }
-    Views: {
-      [_ in never]: never
-    }
-    Functions: {
-      [_ in never]: never
-    }
-    Enums: {
-      [_ in never]: never
+      // ... similar structure for ingredients and recipe_ingredients
     }
   }
 }

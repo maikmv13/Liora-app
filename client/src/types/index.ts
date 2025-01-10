@@ -56,3 +56,24 @@ export type FavoriteRecipe = Recipe & {
   rating?: number;
   tags?: string[];
 };
+
+export type Database = {
+  public: {
+    Tables: {
+      recipes: {
+        Row: {
+          // ... propiedades de la receta ...
+          name: string;
+          category: string;
+          servings: number;
+          prep_time?: string;
+          calories: number;
+          meal_type: string;
+          side_dish?: string;
+        }
+      }
+    }
+  }
+};
+
+export type meal_category = 'Carnes' | 'Pescados' | 'Vegetariano' | 'Pasta' | 'Sopas' | 'Ensaladas' | 'Todas';

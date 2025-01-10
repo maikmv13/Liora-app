@@ -28,7 +28,7 @@ CREATE TYPE meal_type AS ENUM (
 -- Crear tabla de recetas
 CREATE TABLE recipes (
   id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
-  name text NOT NULL,
+  name text NOT NULL UNIQUE,
   side_dish text,
   meal_type meal_type NOT NULL,
   category meal_category NOT NULL,
