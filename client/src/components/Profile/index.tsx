@@ -1,7 +1,7 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
   User, UserCog, Mail, Calendar, FileCheck, Briefcase, Settings, LogOut, 
-  ChefHat, Heart, ShoppingCart, Scale, Activity, Trophy, Star 
+  ChefHat, Heart, ShoppingCart, Scale, Activity, Trophy, Star, Edit2, Save, X
 } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 
@@ -24,18 +24,14 @@ interface Stats {
 export function Profile() {
   const [profile, setProfile] = useState<ProfileData | null>(null);
   const [loading, setLoading] = useState(true);
+  const [editing, setEditing] = useState(false);
+  const [editedProfile, setEditedProfile] = useState<Partial<ProfileData>>({});
   const [stats, setStats] = useState<Stats>({
     recipes: 0,
     favorites: 0,
     shoppingLists: 0,
     weightEntries: 0
   });
-  const [achievements, setAchievements] = useState([
-    { id: 1, title: 'Primera receta', description: 'Añadiste tu primera receta', icon: ChefHat, achieved: true },
-    { id: 2, title: 'Coleccionista', description: '10 recetas favoritas', icon: Heart, achieved: true },
-    { id: 3, title: 'Planificador', description: 'Creaste 5 listas de compra', icon: ShoppingCart, achieved: false },
-    { id: 4, title: 'Constante', description: '30 días registrando peso', icon: Scale, achieved: false }
-  ]);
 
   useEffect(() => {
     loadProfile();
@@ -59,6 +55,10 @@ export function Profile() {
           ...profileData,
           email: user.email || ''
         });
+        setEditedProfile({
+          ...profileData,
+          email: user.email || ''
+        });
       }
     } catch (error) {
       console.error('Error loading profile:', error);
@@ -68,13 +68,57 @@ export function Profile() {
   };
 
   const loadStats = async () => {
-    // TODO: Implement actual stats loading from Supabase
-    setStats({
-      recipes: 12,
-      favorites: 8,
-      shoppingLists: 4,
-      weightEntries: 15
-    });
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
+
+      // Cargar favoritos
+      const { data: favorites } = await supabase
+        .from('favorites')
+        .select('*')
+        .eq('user_id', user.id);
+
+      // Cargar registros de peso (ejemplo)
+      const { data: weightEntries } = await supabase
+        .from('weight_entries')
+        .select('*')
+        .eq('user_id', user.id);
+
+      setStats({
+        recipes: 0, // Por ahora no hay recetas propias
+        favorites: favorites?.length || 0,
+        shoppingLists: 0, // Por implementar
+        weightEntries: weightEntries?.length || 0
+      });
+    } catch (error) {
+      console.error('Error loading stats:', error);
+    }
+  };
+
+  const handleSaveProfile = async () => {
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error('No user found');
+
+      const { error } = await supabase
+        .from('profiles')
+        .update({
+          full_name: editedProfile.full_name,
+          specialization: editedProfile.specialization,
+          license_number: editedProfile.license_number
+        })
+        .eq('user_id', user.id);
+
+      if (error) throw error;
+
+      setProfile(prev => ({
+        ...prev!,
+        ...editedProfile
+      }));
+      setEditing(false);
+    } catch (error) {
+      console.error('Error updating profile:', error);
+    }
   };
 
   const handleLogout = async () => {
@@ -122,7 +166,7 @@ export function Profile() {
           {/* Profile Card */}
           <div className="bg-white/90 backdrop-blur-sm rounded-2xl border border-rose-100/20 overflow-hidden">
             {/* Header */}
-            <div className={`bg-gradient-to-r ${gradientColors} p-6 text-white`}>
+            <div className={`bg-gradient-to-r ${gradientColors} p-6 text-white relative`}>
               <div className="flex items-center space-x-4">
                 <div className="bg-white/10 p-4 rounded-xl">
                   {isNutritionist ? (
@@ -131,12 +175,60 @@ export function Profile() {
                     <User size={32} />
                   )}
                 </div>
-                <div>
-                  <h1 className="text-2xl font-bold">{profile.full_name}</h1>
-                  <p className="text-white/80">
-                    {isNutritionist ? 'Nutricionista' : 'Usuario'}
-                  </p>
-                </div>
+                {editing ? (
+                  <div className="flex-1">
+                    <input
+                      type="text"
+                      value={editedProfile.full_name || ''}
+                      onChange={(e) => setEditedProfile(prev => ({ ...prev, full_name: e.target.value }))}
+                      className="w-full bg-white/20 text-white placeholder-white/60 px-3 py-1.5 rounded-lg border border-white/30 focus:ring-2 focus:ring-white/50"
+                      placeholder="Tu nombre completo"
+                    />
+                    <p className="text-white/80 mt-1">
+                      {isNutritionist ? 'Nutricionista' : 'Usuario'}
+                    </p>
+                  </div>
+                ) : (
+                  <div>
+                    <h1 className="text-2xl font-bold">{profile.full_name}</h1>
+                    <p className="text-white/80">
+                      {isNutritionist ? 'Nutricionista' : 'Usuario'}
+                    </p>
+                  </div>
+                )}
+              </div>
+
+              {/* Edit buttons */}
+              <div className="absolute top-4 right-4 flex space-x-2">
+                {editing ? (
+                  <>
+                    <button
+                      onClick={handleSaveProfile}
+                      className="p-2 bg-white/20 hover:bg-white/30 rounded-lg transition-colors"
+                      title="Guardar cambios"
+                    >
+                      <Save size={20} />
+                    </button>
+                    <button
+                      onClick={() => {
+                        setEditing(false);
+                        setEditedProfile(profile);
+                      }}
+                      className="p-2 bg-white/20 hover:bg-white/30 rounded-lg transition-colors"
+                      title="Cancelar"
+                    >
+                      <X size={20} />
+                    </button>
+                  </>
+                ) : (
+                  <button
+                    onClick={() => setEditing(true)}
+                    className="p-2 bg-white/20 hover:bg-white/30 rounded-lg transition-colors"
+                    title="Editar perfil"
+                  >
+                    <Edit2 size={20} />
+                  </button>
+                )}
               </div>
             </div>
 
@@ -168,30 +260,53 @@ export function Profile() {
                         Información profesional
                       </h2>
                       <div className="space-y-4">
-                        <div className="flex items-center space-x-3">
-                          <Briefcase className="w-5 h-5 text-gray-400" />
-                          <span className="text-gray-600">{profile.specialization}</span>
-                        </div>
-                        <div className="flex items-center space-x-3">
-                          <FileCheck className="w-5 h-5 text-gray-400" />
-                          <span className="text-gray-600">
-                            Licencia: {profile.license_number}
-                          </span>
-                        </div>
+                        {editing ? (
+                          <>
+                            <div>
+                              <label className="block text-sm font-medium text-gray-700 mb-1">
+                                Especialización
+                              </label>
+                              <input
+                                type="text"
+                                value={editedProfile.specialization || ''}
+                                onChange={(e) => setEditedProfile(prev => ({ ...prev, specialization: e.target.value }))}
+                                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-rose-500"
+                                placeholder="Ej: Nutrición deportiva"
+                              />
+                            </div>
+                            <div>
+                              <label className="block text-sm font-medium text-gray-700 mb-1">
+                                Número de licencia
+                              </label>
+                              <input
+                                type="text"
+                                value={editedProfile.license_number || ''}
+                                onChange={(e) => setEditedProfile(prev => ({ ...prev, license_number: e.target.value }))}
+                                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-rose-500"
+                                placeholder="Ej: 123456-N"
+                              />
+                            </div>
+                          </>
+                        ) : (
+                          <>
+                            <div className="flex items-center space-x-3">
+                              <Briefcase className="w-5 h-5 text-gray-400" />
+                              <span className="text-gray-600">{profile.specialization}</span>
+                            </div>
+                            <div className="flex items-center space-x-3">
+                              <FileCheck className="w-5 h-5 text-gray-400" />
+                              <span className="text-gray-600">
+                                Licencia: {profile.license_number}
+                              </span>
+                            </div>
+                          </>
+                        )}
                       </div>
                     </div>
                   )}
                 </div>
 
-                <div className="space-y-4">
-                  <button
-                    onClick={() => {/* TODO: Implementar edición de perfil */}}
-                    className="w-full flex items-center justify-center space-x-2 p-3 bg-gray-50 text-gray-700 rounded-xl hover:bg-gray-100 transition-colors"
-                  >
-                    <Settings size={20} />
-                    <span>Editar perfil</span>
-                  </button>
-
+                <div>
                   <button
                     onClick={handleLogout}
                     className="w-full flex items-center justify-center space-x-2 p-3 bg-red-50 text-red-600 rounded-xl hover:bg-red-100 transition-colors"
@@ -255,72 +370,26 @@ export function Profile() {
             </div>
           </div>
 
-          {/* Activity and Achievements */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {/* Recent Activity */}
-            <div className="bg-white/90 backdrop-blur-sm rounded-2xl border border-rose-100/20 p-6">
-              <h2 className="text-lg font-semibold text-gray-900 mb-4 flex items-center space-x-2">
-                <Activity size={20} className="text-rose-500" />
-                <span>Actividad reciente</span>
-              </h2>
-              <div className="space-y-4">
-                <div className="flex items-center justify-between p-3 bg-rose-50/50 rounded-xl">
-                  <div className="flex items-center space-x-3">
-                    <Heart size={16} className="text-rose-500" />
-                    <span className="text-sm text-gray-600">Añadiste una receta a favoritos</span>
-                  </div>
-                  <span className="text-xs text-gray-500">Hace 2h</span>
+          {/* Recent Activity */}
+          <div className="bg-white/90 backdrop-blur-sm rounded-2xl border border-rose-100/20 p-6">
+            <h2 className="text-lg font-semibold text-gray-900 mb-4 flex items-center space-x-2">
+              <Activity size={20} className="text-rose-500" />
+              <span>Actividad reciente</span>
+            </h2>
+            <div className="space-y-4">
+              <div className="flex items-center justify-between p-3 bg-rose-50/50 rounded-xl">
+                <div className="flex items-center space-x-3">
+                  <Heart size={16} className="text-rose-500" />
+                  <span className="text-sm text-gray-600">Añadiste una receta a favoritos</span>
                 </div>
-                <div className="flex items-center justify-between p-3 bg-rose-50/50 rounded-xl">
-                  <div className="flex items-center space-x-3">
-                    <Scale size={16} className="text-rose-500" />
-                    <span className="text-sm text-gray-600">Nuevo registro de peso</span>
-                  </div>
-                  <span className="text-xs text-gray-500">Hace 1d</span>
-                </div>
-                <div className="flex items-center justify-between p-3 bg-rose-50/50 rounded-xl">
-                  <div className="flex items-center space-x-3">
-                    <ShoppingCart size={16} className="text-rose-500" />
-                    <span className="text-sm text-gray-600">Creaste una lista de compra</span>
-                  </div>
-                  <span className="text-xs text-gray-500">Hace 2d</span>
-                </div>
+                <span className="text-xs text-gray-500">Hace 2h</span>
               </div>
-            </div>
-
-            {/* Achievements */}
-            <div className="bg-white/90 backdrop-blur-sm rounded-2xl border border-rose-100/20 p-6">
-              <h2 className="text-lg font-semibold text-gray-900 mb-4 flex items-center space-x-2">
-                <Trophy size={20} className="text-rose-500" />
-                <span>Logros</span>
-              </h2>
-              <div className="space-y-4">
-                {achievements.map(achievement => (
-                  <div 
-                    key={achievement.id}
-                    className={`flex items-center justify-between p-3 rounded-xl ${
-                      achievement.achieved ? 'bg-amber-50/50' : 'bg-gray-50'
-                    }`}
-                  >
-                    <div className="flex items-center space-x-3">
-                      <achievement.icon 
-                        size={16} 
-                        className={achievement.achieved ? 'text-amber-500' : 'text-gray-400'} 
-                      />
-                      <div>
-                        <p className={`text-sm font-medium ${
-                          achievement.achieved ? 'text-amber-700' : 'text-gray-500'
-                        }`}>
-                          {achievement.title}
-                        </p>
-                        <p className="text-xs text-gray-500">{achievement.description}</p>
-                      </div>
-                    </div>
-                    {achievement.achieved && (
-                      <Star size={16} className="text-amber-500 fill-amber-500" />
-                    )}
-                  </div>
-                ))}
+              <div className="flex items-center justify-between p-3 bg-rose-50/50 rounded-xl">
+                <div className="flex items-center space-x-3">
+                  <Scale size={16} className="text-rose-500" />
+                  <span className="text-sm text-gray-600">Nuevo registro de peso</span>
+                </div>
+                <span className="text-xs text-gray-500">Hace 1d</span>
               </div>
             </div>
           </div>

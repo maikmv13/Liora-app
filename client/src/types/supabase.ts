@@ -9,36 +9,36 @@ export type Json =
 export interface Database {
   public: {
     Tables: {
-      profiles: {
+      favorites: {
         Row: {
           id: string
           user_id: string
-          full_name: string
-          user_type: 'user' | 'nutritionist'
-          specialization: string | null
-          license_number: string | null
+          recipe_id: string
           created_at: string
-          updated_at: string
+          notes: string | null
+          rating: number | null
+          last_cooked: string | null
+          tags: string[] | null
         }
         Insert: {
           id?: string
           user_id: string
-          full_name: string
-          user_type: 'user' | 'nutritionist'
-          specialization?: string | null
-          license_number?: string | null
+          recipe_id: string
           created_at?: string
-          updated_at?: string
+          notes?: string | null
+          rating?: number | null
+          last_cooked?: string | null
+          tags?: string[] | null
         }
         Update: {
           id?: string
           user_id?: string
-          full_name?: string
-          user_type?: 'user' | 'nutritionist'
-          specialization?: string | null
-          license_number?: string | null
+          recipe_id?: string
           created_at?: string
-          updated_at?: string
+          notes?: string | null
+          rating?: number | null
+          last_cooked?: string | null
+          tags?: string[] | null
         }
       }
       recipes: {
@@ -65,14 +65,23 @@ export interface Database {
           created_at: string
           updated_at: string
         }
-        Insert: {
-          // ... similar structure to Row but with optional fields
-        }
-        Update: {
-          // ... similar structure to Row but all fields optional
+      }
+      recipe_ingredients: {
+        Row: {
+          id: string
+          recipe_id: string
+          ingredient_id: string
+          quantity: number
+          unit: string
         }
       }
-      // ... similar structure for ingredients and recipe_ingredients
+      ingredients: {
+        Row: {
+          id: string
+          name: string
+          category: string | null
+        }
+      }
     }
   }
 }
