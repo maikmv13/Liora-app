@@ -3,7 +3,6 @@ import { Routes, Route, Navigate, useNavigate, useLocation } from 'react-router-
 import { Recipe, MenuItem, ShoppingItem, FavoriteRecipe, MealType } from './types';
 import { Header } from './components/Header';
 import { Navigation } from './components/Navigation';
-import { RecipeList } from './components/RecipeList';
 import { RecipeModal } from './components/RecipeModal';
 import { WeeklyMenu2 as WeeklyMenu } from './components/WeeklyMenu2';
 import { ShoppingList } from './components/ShoppingList';
@@ -14,7 +13,6 @@ import { Login } from './components/Login';
 import { Profile } from './components/Profile';
 import { supabase } from './lib/supabase';
 import { useRecipes } from './hooks/useRecipes';
-import { ChefHat } from 'lucide-react';
 import { RecipeContent } from './components/RecipeList/RecipeContent';
 import { mapRecipeToCardProps } from './components/RecipeCard';
 
