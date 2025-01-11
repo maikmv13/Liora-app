@@ -2,8 +2,13 @@ import React from 'react';
 import { Clock, Users, ChefHat, Flame, Heart, Sun, Moon } from 'lucide-react';
 import { Recipe, RecipeCardProps } from '../types';
 import { categoryColors } from '../utils/categoryColors';
+import { supabase } from '../lib/supabase';
 
 export function RecipeCard({ recipe, onClick, onToggleFavorite }: RecipeCardProps) {
+  console.log('Recipe data:', JSON.stringify(recipe, null, 2));
+  console.log('Image URL:', recipe.image_url);
+  console.log('Full image path:', `${import.meta.env.VITE_SUPABASE_URL}/storage/v1/object/public/recipes/${recipe.image_url}`);
+
   const colors = categoryColors[recipe.category as keyof typeof categoryColors] || {
     bg: 'bg-gray-50',
     text: 'text-gray-600',
@@ -15,12 +20,20 @@ export function RecipeCard({ recipe, onClick, onToggleFavorite }: RecipeCardProp
     <div className="bg-white/90 backdrop-blur-sm rounded-2xl shadow-sm hover:shadow-lg transition-all transform hover:-translate-y-1 cursor-pointer overflow-hidden border-2 border-rose-100/20 group">
       {/* Imagen de la receta */}
       <div className="relative aspect-video w-full overflow-hidden">
-        {recipe.image_url ? (
+        {recipe.image_url && typeof recipe.image_url === 'string' ? (
           <img
-            src={recipe.image_url}
+            src={recipe.image_url.startsWith('http')
+              ? recipe.image_url 
+              : `${import.meta.env.VITE_SUPABASE_URL}/storage/v1/object/public/recipes/${recipe.image_url}`
+            }
             alt={recipe.name}
             className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
             loading="lazy"
+            onError={(e) => {
+              e.currentTarget.onerror = null;
+              e.currentTarget.parentElement?.classList.add('fallback-image');
+              e.currentTarget.style.display = 'none';
+            }}
           />
         ) : (
           <div className="w-full h-full bg-gradient-to-br from-rose-50 to-orange-50 flex items-center justify-center">
@@ -112,7 +125,7 @@ export const mapRecipeToCardProps = (recipe: Recipe): RecipeCardProps['recipe'] 
   instructions: recipe.Instrucciones,
   url: recipe.Url,
   pdf_url: recipe.PDF_Url,
-  image_url: recipe.image_url,
+  image_url: recipe.image_url || undefined,
   created_at: new Date().toISOString(),
   updated_at: new Date().toISOString()
 });
