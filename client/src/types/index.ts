@@ -1,24 +1,13 @@
-export type MealType = 'comida' | 'cena';
-
-export interface Ingredient {
-  Nombre: string;
-  Cantidad: number;
-  Unidad: string;
-  Categoria?: string;
-}
-
-export type Instructions = {
-  [key: string]: string;
-};
+export type MealType = 'desayuno' | 'comida' | 'cena' | 'snack';
 
 export interface Recipe {
   Plato: string;
-  Acompañamiento: string;
+  Acompañamiento: string | null;
   Tipo: MealType;
   Categoria: string;
   Comensales: number;
-  Ingredientes: Ingredient[];
   Calorias: string;
+  "Tiempo de preparación": string;
   "Valor energético (kJ)": string;
   Grasas: string;
   Saturadas: string;
@@ -27,53 +16,67 @@ export interface Recipe {
   Fibra: string;
   Proteínas: string;
   Sodio: string;
-  "Tiempo de preparación": string;
-  Instrucciones: Instructions;
-  Url: string;
-  PDF_Url: string;
-  isFavorite?: boolean;
+  Instrucciones: Record<string, string>;
+  Ingredientes: Array<{
+    Nombre: string;
+    Cantidad: number;
+    Unidad: string;
+    Categoria?: string;
+  }>;
+  Url?: string;
+  PDF_Url?: string;
+  image_url?: string;
 }
 
-export type MenuItem = {
+export interface MenuItem {
   recipe: Recipe;
-  meal: MealType;
   day: string;
-};
+  meal: MealType;
+}
 
-export type ShoppingItem = {
+export interface ShoppingItem {
   nombre: string;
   cantidad: number;
   unidad: string;
   categoria: string;
   comprado: boolean;
   dias: string[];
-};
+}
 
-export type FavoriteRecipe = Recipe & {
+export interface FavoriteRecipe extends Recipe {
   addedAt: string;
-  lastCooked?: string;
   notes?: string;
-  rating?: number;
+  rating: number;
+  lastCooked?: string;
   tags?: string[];
-};
+}
 
-export type Database = {
-  public: {
-    Tables: {
-      recipes: {
-        Row: {
-          // ... propiedades de la receta ...
-          name: string;
-          category: string;
-          servings: number;
-          prep_time?: string;
-          calories: number;
-          meal_type: string;
-          side_dish?: string;
-        }
-      }
-    }
-  }
-};
-
-export type meal_category = 'Carnes' | 'Pescados' | 'Vegetariano' | 'Pasta' | 'Sopas' | 'Ensaladas' | 'Todas';
+export interface RecipeCardProps {
+  recipe: {
+    id: string;
+    name: string;
+    side_dish: string | null;
+    meal_type: MealType;
+    category: "Carnes" | "Pescados" | "Pasta" | "Vegetariano" | "Ensaladas" | "Sopas";
+    servings: number;
+    calories: string;
+    prep_time: string;
+    energy_kj: string;
+    fats: string;
+    saturated_fats: string;
+    carbohydrates: string;
+    sugars: string;
+    fiber: string;
+    proteins: string;
+    sodium: string;
+    instructions: Record<string, string>;
+    url?: string;
+    pdf_url?: string;
+    image_url?: string;
+    created_at: string;
+    updated_at: string;
+    isFavorite?: boolean;
+  };
+  onClick: () => void;
+  onToggleFavorite: () => void;
+}

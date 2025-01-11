@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Routes, Route, Navigate, useNavigate, useLocation } from 'react-router-dom';
-import { Recipe, MenuItem, ShoppingItem, FavoriteRecipe } from './types';
+import { Recipe, MenuItem, ShoppingItem, FavoriteRecipe, MealType } from './types';
 import { Header } from './components/Header';
 import { Navigation } from './components/Navigation';
 import { RecipeList } from './components/RecipeList';
@@ -16,6 +16,7 @@ import { supabase } from './lib/supabase';
 import { useRecipes } from './hooks/useRecipes';
 import { ChefHat } from 'lucide-react';
 import { RecipeContent } from './components/RecipeList/RecipeContent';
+import { mapRecipeToCardProps } from './components/RecipeCard';
 
 function App() {
   const navigate = useNavigate();
@@ -292,7 +293,7 @@ function App() {
 
       {selectedRecipe && (
         <RecipeModal 
-          recipe={selectedRecipe}
+          recipe={mapRecipeToCardProps(selectedRecipe)}
           onClose={() => setSelectedRecipe(null)}
           onAddToMenu={handleAddToMenuFromModal}
           isFavorite={favorites.some(f => f.Plato === selectedRecipe.Plato)}

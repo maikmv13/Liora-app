@@ -1,13 +1,13 @@
 import React, { useState } from 'react';
-import { MenuItem } from '../../types';
+import { MenuItem, MealType } from '../../types';
 import { MealCell } from './MealCell';
 import { ChefHat, Calendar } from 'lucide-react';
 
 interface DayCardProps {
   day: string;
   menuItems: MenuItem[];
-  onMealClick: (meal: 'desayuno' | 'comida' | 'cena' | 'snack') => void;
-  onRemoveMeal: (meal: 'desayuno' | 'comida' | 'cena' | 'snack') => void;
+  onMealClick: (meal: 'comida' | 'cena') => void;
+  onRemoveMeal: (meal: 'comida' | 'cena') => void;
   onViewRecipe: (recipe: MenuItem) => void;
 }
 
@@ -67,8 +67,8 @@ export function DayCard({
                   meal={meal}
                   menuItem={menuItem}
                   isHovered={hoveredMeal === meal}
-                  onMealClick={() => onMealClick(meal)}
-                  onRemove={() => onRemoveMeal(meal)}
+                  onMealClick={() => onMealClick(meal as 'comida' | 'cena')}
+                  onRemove={() => onRemoveMeal(meal as 'comida' | 'cena')}
                   onViewRecipe={() => menuItem && onViewRecipe(menuItem)}
                   variant="compact"
                 />
@@ -115,8 +115,8 @@ export function DayCard({
                   meal={meal}
                   menuItem={menuItem}
                   isHovered={hoveredMeal === meal}
-                  onMealClick={() => onMealClick(meal)}
-                  onRemove={() => onRemoveMeal(meal)}
+                  onMealClick={() => onMealClick(meal as 'comida' | 'cena')}
+                  onRemove={() => onRemoveMeal(meal as 'comida' | 'cena')}
                   onViewRecipe={() => menuItem && onViewRecipe(menuItem)}
                   variant="compact"
                 />

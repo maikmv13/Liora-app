@@ -1,10 +1,10 @@
 import React from 'react';
 import { X, Plus, Flame, Eye, PenSquare } from 'lucide-react';
-import { MenuItem } from '../../types';
+import { MenuItem, MealType } from '../../types';
 import { getMealIcon, getMealLabel } from './utils';
 
 interface MealCellProps {
-  meal: 'desayuno' | 'comida' | 'cena' | 'snack';
+  meal: MealType;
   menuItem?: MenuItem;
   isHovered: boolean;
   onMealClick: () => void;

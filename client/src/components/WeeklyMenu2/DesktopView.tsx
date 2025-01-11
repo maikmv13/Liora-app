@@ -1,5 +1,5 @@
 import React from 'react';
-import { MenuItem } from '../../types';
+import { MenuItem, MealType } from '../../types';
 import { DayCard } from './DayCard';
 import { weekDays } from './utils';
 import { DAYS, type WeekDay } from './constants';

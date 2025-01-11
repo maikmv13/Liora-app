@@ -1,14 +1,14 @@
 import React, { useState, useEffect } from 'react';
-import type { Recipe, MenuItem } from '../../types';
+import type { Recipe, MenuItem, MealType } from '../../types';
 import { MobileView } from './MobileView';
 import { DesktopView } from './DesktopView';
 import { RecipeSelectorSidebar } from './RecipeSelectorSidebar';
 import { RecipeModal } from '../RecipeModal';
 import { MenuHistory } from './MenuHistory';
 import { weekDays } from './utils';
-import { getRecipes } from '../../services/recipes';
 import { Calendar, Wand2, Share2, Loader2 } from 'lucide-react';
 import { useRecipes } from '../../hooks/useRecipes';
+import { mapRecipeToCardProps } from '../RecipeCard';
 
 interface WeeklyMenu2Props {
   readonly weeklyMenu: MenuItem[];
@@ -169,7 +169,7 @@ export function WeeklyMenu2({ weeklyMenu, onRecipeSelect, onAddToMenu }: WeeklyM
     
     // Restaurar el menú del historial
     for (const item of menu) {
-      onAddToMenu(item.recipe, item.day, item.meal);
+      onAddToMenu(item.recipe, item.day, item.meal as 'comida' | 'cena');
       await new Promise(resolve => setTimeout(resolve, 50));
     }
   };
@@ -265,7 +265,7 @@ export function WeeklyMenu2({ weeklyMenu, onRecipeSelect, onAddToMenu }: WeeklyM
 
       {viewingRecipe && (
         <RecipeModal
-          recipe={viewingRecipe.recipe}
+          recipe={mapRecipeToCardProps(viewingRecipe.recipe)}
           onClose={() => setViewingRecipe(null)}
           onAddToMenu={() => {}}
         />

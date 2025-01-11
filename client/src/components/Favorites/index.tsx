@@ -6,6 +6,7 @@ import { RecipeModal } from '../RecipeModal';
 import { EditRecipeModal } from './EditRecipeModal';
 import { RecipeFilters } from '../RecipeList/RecipeFilters';
 import { NewRecipeModal } from './NewRecipeModal';
+import { mapRecipeToCardProps } from '../RecipeCard';
 
 interface FavoritesProps {
   favorites: FavoriteRecipe[];
@@ -75,7 +76,7 @@ export function Favorites({ favorites, onRemoveFavorite, onUpdateFavorite }: Fav
         sortBy={sortBy}
         searchTerm={searchTerm}
         onCategoryChange={setSelectedCategory}
-        onMealTypeChange={setSelectedMealType}
+        onMealTypeChange={(mealType) => setSelectedMealType(mealType as 'comida' | 'cena' | 'all')}
         onSortChange={setSortBy}
         onSearchChange={setSearchTerm}
       />
@@ -126,14 +127,9 @@ export function Favorites({ favorites, onRemoveFavorite, onUpdateFavorite }: Fav
 
       {selectedRecipe && (
         <RecipeModal
-          recipe={selectedRecipe}
+          recipe={mapRecipeToCardProps(selectedRecipe)}
           onClose={() => setSelectedRecipe(null)}
           onAddToMenu={() => {}}
-          isFavorite={true}
-          onToggleFavorite={() => {
-            onRemoveFavorite(selectedRecipe);
-            setSelectedRecipe(null);
-          }}
         />
       )}
 

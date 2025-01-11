@@ -1,13 +1,7 @@
 import React from 'react';
 import { Clock, Users, ChefHat, Flame, Heart, Sun, Moon } from 'lucide-react';
-import { Database } from '../types/supabase';
+import { Recipe, RecipeCardProps } from '../types';
 import { categoryColors } from '../utils/categoryColors';
-
-type RecipeCardProps = Readonly<{
-  recipe: Database['public']['Tables']['recipes']['Row'] & { isFavorite?: boolean };
-  onClick: () => void;
-  onToggleFavorite: () => void;
-}>;
 
 export function RecipeCard({ recipe, onClick, onToggleFavorite }: RecipeCardProps) {
   const colors = categoryColors[recipe.category as keyof typeof categoryColors] || {
@@ -97,3 +91,28 @@ export function RecipeCard({ recipe, onClick, onToggleFavorite }: RecipeCardProp
     </div>
   );
 }
+
+export const mapRecipeToCardProps = (recipe: Recipe): RecipeCardProps['recipe'] => ({
+  id: recipe.Plato,
+  name: recipe.Plato,
+  side_dish: recipe.Acompañamiento,
+  meal_type: recipe.Tipo,
+  category: recipe.Categoria as RecipeCardProps['recipe']['category'],
+  servings: recipe.Comensales,
+  calories: recipe.Calorias,
+  prep_time: recipe["Tiempo de preparación"],
+  energy_kj: recipe["Valor energético (kJ)"],
+  fats: recipe.Grasas,
+  saturated_fats: recipe.Saturadas,
+  carbohydrates: recipe.Carbohidratos,
+  sugars: recipe.Azúcares,
+  fiber: recipe.Fibra,
+  proteins: recipe.Proteínas,
+  sodium: recipe.Sodio,
+  instructions: recipe.Instrucciones,
+  url: recipe.Url,
+  pdf_url: recipe.PDF_Url,
+  image_url: recipe.image_url,
+  created_at: new Date().toISOString(),
+  updated_at: new Date().toISOString()
+});

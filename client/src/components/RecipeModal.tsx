@@ -1,14 +1,37 @@
 import React from 'react';
 import { Clock, Users, ChefHat, X, Heart, Calendar, Flame, Leaf, Cookie, Beef, Scale, Soup, UtensilsCrossed } from 'lucide-react';
-import { Database } from '../types/supabase';
+import { Recipe, RecipeCardProps } from '../types';
 
 interface RecipeModalProps {
-  recipe: Database['public']['Tables']['recipes']['Row'];
+  recipe: RecipeCardProps['recipe'];
   onClose: () => void;
-  onAddToMenu?: (recipe: Database['public']['Tables']['recipes']['Row']) => void;
+  onAddToMenu: (recipe: Recipe) => void;
   isFavorite?: boolean;
   onToggleFavorite?: () => void;
 }
+
+const mapToRecipe = (cardRecipe: RecipeCardProps['recipe']): Recipe => ({
+  Plato: cardRecipe.id,
+  Acompañamiento: cardRecipe.side_dish,
+  Tipo: cardRecipe.meal_type,
+  Categoria: cardRecipe.category,
+  Comensales: cardRecipe.servings,
+  Calorias: cardRecipe.calories,
+  "Tiempo de preparación": cardRecipe.prep_time,
+  "Valor energético (kJ)": cardRecipe.energy_kj,
+  Grasas: cardRecipe.fats,
+  Saturadas: cardRecipe.saturated_fats,
+  Carbohidratos: cardRecipe.carbohydrates,
+  Azúcares: cardRecipe.sugars,
+  Fibra: cardRecipe.fiber,
+  Proteínas: cardRecipe.proteins,
+  Sodio: cardRecipe.sodium,
+  Instrucciones: cardRecipe.instructions,
+  Ingredientes: [],
+  Url: cardRecipe.url,
+  PDF_Url: cardRecipe.pdf_url,
+  image_url: cardRecipe.image_url
+});
 
 export function RecipeModal({ 
   recipe, 
@@ -191,7 +214,7 @@ export function RecipeModal({
           {onAddToMenu && (
             <div className="flex flex-col sm:flex-row gap-4 pt-6 border-t border-rose-100">
               <button 
-                onClick={() => onAddToMenu(recipe)}
+                onClick={() => onAddToMenu(mapToRecipe(recipe))}
                 className="flex-1 bg-gradient-to-r from-orange-400 via-pink-500 to-rose-500 text-white py-3 px-6 rounded-xl font-medium hover:from-orange-500 hover:via-pink-600 hover:to-rose-600 transition-colors flex items-center justify-center space-x-2 shadow-sm"
               >
                 <Calendar size={20} />
