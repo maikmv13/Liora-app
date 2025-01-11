@@ -5,8 +5,10 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "tsc && vite build",
-    "preview": "vite preview"
+    "build": "vite build",
+    "preview": "vite preview",
+    "type-check": "tsc --noEmit",
+    "generate-types": "supabase gen types typescript --project-id tu-project-id > src/types/supabase.ts"
   },
   "dependencies": {
     "react": "18.2.0",

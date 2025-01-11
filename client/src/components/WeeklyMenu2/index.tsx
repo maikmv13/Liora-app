@@ -265,7 +265,14 @@ export function WeeklyMenu2({ weeklyMenu, onRecipeSelect, onAddToMenu }: WeeklyM
 
       {viewingRecipe && (
         <RecipeModal
-          recipe={viewingRecipe.recipe}
+          recipe={{
+            id: viewingRecipe.recipe.Id || '',
+            name: viewingRecipe.recipe.Plato,
+            side_dish: viewingRecipe.recipe.Guarnicion,
+            meal_type: viewingRecipe.recipe.TipoComida || 'comida',
+            category: viewingRecipe.recipe.Categoria,
+            // ... mapea el resto de propiedades necesarias
+          }}
           onClose={() => setViewingRecipe(null)}
           onAddToMenu={() => {}}
         />

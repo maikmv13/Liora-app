@@ -15,6 +15,7 @@ import { Profile } from './components/Profile';
 import { supabase } from './lib/supabase';
 import { useRecipes } from './hooks/useRecipes';
 import { ChefHat } from 'lucide-react';
+import { RecipeContent } from './components/RecipeContent';
 
 function App() {
   const navigate = useNavigate();
@@ -129,7 +130,7 @@ function App() {
   };
 
   // Add to menu functions
-  const addToMenu = (recipe: Recipe | null, day: string, meal: 'comida' | 'cena') => {
+  const addToMenu = (recipe: Recipe | null, day: string, meal: MealType) => {
     setWeeklyMenu(prev => {
       if (recipe === null) {
         return prev.filter(item => !(item.day === day && item.meal === meal));
@@ -233,27 +234,14 @@ function App() {
           <Route 
             path="/recetas" 
             element={
-              loading ? (
-                <div className="text-center py-12">
-                  <ChefHat size={32} className="mx-auto animate-spin text-rose-500" />
-                  <p className="mt-4 text-gray-600">Cargando recetas...</p>
-                </div>
-              ) : error ? (
-                <div className="text-center py-12 text-red-500">
-                  <p>Error al cargar las recetas: {error.message}</p>
-                </div>
-              ) : recipes.length === 0 ? (
-                <div className="text-center py-12">
-                  <p className="text-gray-600">No se encontraron recetas</p>
-                </div>
-              ) : (
-                <RecipeList 
-                  recipes={recipes}
-                  onRecipeSelect={setSelectedRecipe}
-                  favorites={favorites.map(f => f.Plato)}
-                  onToggleFavorite={toggleFavorite}
-                />
-              )
+              <RecipeContent
+                loading={loading}
+                error={error}
+                recipes={recipes}
+                onRecipeSelect={setSelectedRecipe}
+                favorites={favorites.map(f => f.Plato)}
+                onToggleFavorite={toggleFavorite}
+              />
             }
           />
           <Route 
