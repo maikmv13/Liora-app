@@ -31,7 +31,6 @@ export interface Recipe {
   Instrucciones: Instructions;
   Url: string;
   PDF_Url: string;
-  image_url: string | null; // Añadimos el campo image_url
   isFavorite?: boolean;
 }
 
@@ -63,6 +62,7 @@ export type Database = {
     Tables: {
       recipes: {
         Row: {
+          // ... propiedades de la receta ...
           name: string;
           category: string;
           servings: number;
@@ -70,7 +70,6 @@ export type Database = {
           calories: number;
           meal_type: string;
           side_dish?: string;
-          image_url?: string | null;
         }
       }
     }

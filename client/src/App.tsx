@@ -15,7 +15,7 @@ import { Profile } from './components/Profile';
 import { supabase } from './lib/supabase';
 import { useRecipes } from './hooks/useRecipes';
 import { ChefHat } from 'lucide-react';
-import { RecipeContent } from './components/RecipeContent';
+import { RecipeContent } from './components/RecipeList/RecipeContent';
 
 function App() {
   const navigate = useNavigate();
