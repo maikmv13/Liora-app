@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React from 'react';
 import { ChefHat, Calendar, ShoppingCart, Heart, Scale } from 'lucide-react';
 
 interface NavigationProps {
@@ -8,11 +8,6 @@ interface NavigationProps {
 }
 
 export function Navigation({ activeTab, onTabChange, orientation = 'horizontal' }: NavigationProps) {
-  const [isVisible, setIsVisible] = useState(true);
-  const [lastScrollY, setLastScrollY] = useState(0);
-  const [scrollingUp, setScrollingUp] = useState(false);
-  const [scrollUpDistance, setScrollUpDistance] = useState(0);
-
   const navItems = [
     { 
       id: 'recetas', 
@@ -46,34 +41,6 @@ export function Navigation({ activeTab, onTabChange, orientation = 'horizontal' 
     }
   ];
 
-  const handleScroll = useCallback(() => {
-    const currentScrollY = window.scrollY;
-    const scrollingDown = currentScrollY > lastScrollY;
-    
-    if (scrollingDown) {
-      setScrollingUp(false);
-      setScrollUpDistance(0);
-      if (currentScrollY > 100) {
-        setIsVisible(false);
-      }
-    } else {
-      setScrollingUp(true);
-      setScrollUpDistance(prev => prev + (lastScrollY - currentScrollY));
-      if (scrollUpDistance > 50) {
-        setIsVisible(true);
-      }
-    }
-    
-    setLastScrollY(currentScrollY);
-  }, [lastScrollY, scrollUpDistance]);
-
-  useEffect(() => {
-    if (orientation === 'horizontal') {
-      window.addEventListener('scroll', handleScroll);
-      return () => window.removeEventListener('scroll', handleScroll);
-    }
-  }, [handleScroll, orientation]);
-
   if (orientation === 'vertical') {
     return (
       <div className="space-y-1">
@@ -83,8 +50,8 @@ export function Navigation({ activeTab, onTabChange, orientation = 'horizontal' 
             onClick={() => onTabChange(id)}
             className={`w-full flex items-center space-x-3 px-4 py-2.5 rounded-lg transition-colors ${
               activeTab === id
-                ? 'bg-rose-50 text-rose-600'
-                : 'text-gray-600 hover:bg-gray-50'
+                ? 'bg-white/10 text-white'
+                : 'text-white/80 hover:bg-white/10'
             }`}
           >
             <Icon size={20} />
@@ -96,9 +63,11 @@ export function Navigation({ activeTab, onTabChange, orientation = 'horizontal' 
   }
 
   return (
-    <nav className={`bg-white/80 backdrop-blur-md shadow-sm sticky z-40 border-b border-rose-100/20 transition-all duration-300 ${
-      isVisible ? 'top-[48px] md:top-[56px]' : '-top-20'
-    }`}>
+    <nav className={`
+      fixed z-40 w-full bg-white border-t border-rose-100
+      md:sticky md:top-14 md:border-t-0 md:border-b md:border-rose-100
+      ${orientation === 'horizontal' ? 'bottom-0' : ''}
+    `}>
       <div className="container mx-auto px-4">
         <div className="flex">
           {navItems.map(({ id, icon: Icon, label, description }) => (
@@ -134,7 +103,7 @@ export function Navigation({ activeTab, onTabChange, orientation = 'horizontal' 
                 </div>
               </div>
               {activeTab === id && (
-                <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-gradient-to-r from-orange-400 via-pink-500 to-rose-500" />
+                <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-gradient-to-r from-orange-400 via-pink-500 to-rose-500 md:top-0 md:bottom-auto" />
               )}
             </button>
           ))}

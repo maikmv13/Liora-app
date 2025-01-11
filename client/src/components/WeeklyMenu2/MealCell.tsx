@@ -1,15 +1,16 @@
 import React from 'react';
 import { X, Plus, Flame, Eye, PenSquare } from 'lucide-react';
 import { MenuItem } from '../../types';
-import { getMealIcon } from './utils';
+import { getMealIcon, getMealLabel } from './utils';
 
 interface MealCellProps {
-  meal: 'comida' | 'cena';
+  meal: 'desayuno' | 'comida' | 'cena' | 'snack';
   menuItem?: MenuItem;
   isHovered: boolean;
   onMealClick: () => void;
   onRemove: () => void;
   onViewRecipe: () => void;
+  variant?: 'compact' | 'prominent';
 }
 
 export function MealCell({ 
@@ -18,22 +19,31 @@ export function MealCell({
   isHovered, 
   onMealClick, 
   onRemove,
-  onViewRecipe 
+  onViewRecipe,
+  variant = 'prominent'
 }: MealCellProps) {
+  const isCompact = variant === 'compact';
+
   if (menuItem) {
     return (
-      <div className="p-3 hover:bg-rose-50/50 transition-all duration-200 relative">
+      <div className={`p-3 hover:bg-rose-50/50 transition-all duration-200 relative ${
+        isCompact ? 'py-2' : ''
+      }`}>
         <div className="flex items-center justify-between mb-2">
           <div className="flex items-center space-x-2 text-gray-600">
             {getMealIcon(meal)}
-            <span className="text-xs font-medium">{meal.charAt(0).toUpperCase() + meal.slice(1)}</span>
+            <span className={`font-medium ${isCompact ? 'text-[11px]' : 'text-xs'}`}>
+              {getMealLabel(meal)}
+            </span>
           </div>
           <div className="inline-flex items-center space-x-1 bg-rose-50 px-1.5 py-0.5 rounded-lg border border-rose-200 whitespace-nowrap">
             <Flame size={10} className="text-rose-500 flex-shrink-0" />
             <span className="text-[10px] font-medium text-rose-600">{menuItem.recipe.Calorias}</span>
           </div>
         </div>
-        <p className="text-sm font-medium text-gray-900 line-clamp-2 group-hover:text-rose-600 transition-colors">
+        <p className={`font-medium text-gray-900 line-clamp-2 group-hover:text-rose-600 transition-colors ${
+          isCompact ? 'text-xs' : 'text-sm'
+        }`}>
           {menuItem.recipe.Plato}
         </p>
         
@@ -72,15 +82,21 @@ export function MealCell({
   return (
     <button
       onClick={onMealClick}
-      className="w-full p-3 text-left hover:bg-rose-50/50 transition-all duration-200"
+      className={`w-full text-left hover:bg-rose-50/50 transition-all duration-200 ${
+        isCompact ? 'p-2' : 'p-3'
+      }`}
     >
       <div className="flex items-center space-x-2 mb-1 text-gray-400">
         {getMealIcon(meal)}
-        <span className="text-xs font-medium">{meal.charAt(0).toUpperCase() + meal.slice(1)}</span>
+        <span className={`font-medium ${isCompact ? 'text-[11px]' : 'text-xs'}`}>
+          {getMealLabel(meal)}
+        </span>
       </div>
       <div className="flex items-center space-x-1 text-rose-500">
-        <Plus size={14} />
-        <span className="text-xs font-medium">Añadir plato</span>
+        <Plus size={isCompact ? 12 : 14} />
+        <span className={`font-medium ${isCompact ? 'text-[11px]' : 'text-xs'}`}>
+          Añadir {meal.toLowerCase()}
+        </span>
       </div>
     </button>
   );

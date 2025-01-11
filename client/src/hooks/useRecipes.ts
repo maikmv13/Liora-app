@@ -59,7 +59,8 @@ export function useRecipes() {
           "Tiempo de preparación": recipe.prep_time || '30',
           Instrucciones: recipe.instructions,
           Url: recipe.url || '',
-          PDF_Url: recipe.pdf_url || ''
+          PDF_Url: recipe.pdf_url || '',
+          image_url: recipe.image_url || null // Añadimos la URL de la imagen
         }));
 
         setRecipes(convertedRecipes);

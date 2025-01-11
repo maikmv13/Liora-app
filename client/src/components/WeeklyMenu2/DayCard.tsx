@@ -6,8 +6,8 @@ import { ChefHat, Calendar } from 'lucide-react';
 interface DayCardProps {
   day: string;
   menuItems: MenuItem[];
-  onMealClick: (meal: 'comida' | 'cena') => void;
-  onRemoveMeal: (meal: 'comida' | 'cena') => void;
+  onMealClick: (meal: 'desayuno' | 'comida' | 'cena' | 'snack') => void;
+  onRemoveMeal: (meal: 'desayuno' | 'comida' | 'cena' | 'snack') => void;
   onViewRecipe: (recipe: MenuItem) => void;
 }
 
@@ -52,13 +52,38 @@ export function DayCard({
 
       {/* Contenido de las comidas */}
       <div className="divide-y divide-rose-100/10">
-        {(['comida', 'cena'] as const).map((meal) => {
+        {/* Desayuno - Más sutil */}
+        <div className="bg-amber-50/20 border-b border-amber-100/20">
+          {(['desayuno'] as const).map((meal) => {
+            const menuItem = menuItems.find(item => item.meal === meal);
+            return (
+              <div 
+                key={meal}
+                className="relative"
+                onMouseEnter={() => setHoveredMeal(meal)}
+                onMouseLeave={() => setHoveredMeal(null)}
+              >
+                <MealCell
+                  meal={meal}
+                  menuItem={menuItem}
+                  isHovered={hoveredMeal === meal}
+                  onMealClick={() => onMealClick(meal)}
+                  onRemove={() => onRemoveMeal(meal)}
+                  onViewRecipe={() => menuItem && onViewRecipe(menuItem)}
+                  variant="compact"
+                />
+              </div>
+            );
+          })}
+        </div>
+
+        {/* Comidas principales - Más prominentes */}
+        {(['comida'] as const).map((meal) => {
           const menuItem = menuItems.find(item => item.meal === meal);
-          
           return (
             <div 
               key={meal}
-              className="relative"
+              className="relative bg-white"
               onMouseEnter={() => setHoveredMeal(meal)}
               onMouseLeave={() => setHoveredMeal(null)}
             >
@@ -69,6 +94,55 @@ export function DayCard({
                 onMealClick={() => onMealClick(meal)}
                 onRemove={() => onRemoveMeal(meal)}
                 onViewRecipe={() => menuItem && onViewRecipe(menuItem)}
+                variant="prominent"
+              />
+            </div>
+          );
+        })}
+
+        {/* Snack - Entre comida y cena, más sutil */}
+        <div className="bg-emerald-50/20 border-t border-b border-emerald-100/20">
+          {(['snack'] as const).map((meal) => {
+            const menuItem = menuItems.find(item => item.meal === meal);
+            return (
+              <div 
+                key={meal}
+                className="relative"
+                onMouseEnter={() => setHoveredMeal(meal)}
+                onMouseLeave={() => setHoveredMeal(null)}
+              >
+                <MealCell
+                  meal={meal}
+                  menuItem={menuItem}
+                  isHovered={hoveredMeal === meal}
+                  onMealClick={() => onMealClick(meal)}
+                  onRemove={() => onRemoveMeal(meal)}
+                  onViewRecipe={() => menuItem && onViewRecipe(menuItem)}
+                  variant="compact"
+                />
+              </div>
+            );
+          })}
+        </div>
+
+        {/* Cena - Prominente como la comida */}
+        {(['cena'] as const).map((meal) => {
+          const menuItem = menuItems.find(item => item.meal === meal);
+          return (
+            <div 
+              key={meal}
+              className="relative bg-white"
+              onMouseEnter={() => setHoveredMeal(meal)}
+              onMouseLeave={() => setHoveredMeal(null)}
+            >
+              <MealCell
+                meal={meal}
+                menuItem={menuItem}
+                isHovered={hoveredMeal === meal}
+                onMealClick={() => onMealClick(meal)}
+                onRemove={() => onRemoveMeal(meal)}
+                onViewRecipe={() => menuItem && onViewRecipe(menuItem)}
+                variant="prominent"
               />
             </div>
           );

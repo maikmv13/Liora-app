@@ -12,8 +12,6 @@ import { WeightTracker } from './components/WeightTracker';
 import { HealthyPlateGuide } from './components/HealthyPlateGuide';
 import { Login } from './components/Login';
 import { Profile } from './components/Profile';
-import { categorizeIngredient } from './utils/categorizeIngredient';
-import { getUnitPlural } from './utils/getUnitPlural';
 import { supabase } from './lib/supabase';
 import { useRecipes } from './hooks/useRecipes';
 import { ChefHat } from 'lucide-react';
@@ -25,21 +23,20 @@ function App() {
   const [weeklyMenu, setWeeklyMenu] = useState<MenuItem[]>([]);
   const [selectedRecipe, setSelectedRecipe] = useState<Recipe | null>(null);
   const [shoppingItems, setShoppingItems] = useState<ShoppingItem[]>([]);
-  const [favorites, setFavorites] = useState<FavoriteRecipe[]>(() => {
-    const saved = localStorage.getItem('favorites');
-    return saved ? JSON.parse(saved) : [];
-  });
+  const [favorites, setFavorites] = useState<FavoriteRecipe[]>([]);
   const [showLogin, setShowLogin] = useState(false);
   const [user, setUser] = useState<any>(null);
   const { recipes, loading, error } = useRecipes();
 
+  // Get active tab from current location
+  const activeTab = location.pathname.split('/')[1] || 'recetas';
+
+  // Auth state management
   useEffect(() => {
-    // Check initial auth state
     supabase.auth.getSession().then(({ data: { session } }) => {
       setUser(session?.user ?? null);
     });
 
-    // Listen for auth changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
       setUser(session?.user ?? null);
     });
@@ -47,20 +44,91 @@ function App() {
     return () => subscription.unsubscribe();
   }, []);
 
+  // Load favorites when user is authenticated
   useEffect(() => {
-    localStorage.setItem('favorites', JSON.stringify(favorites));
-  }, [favorites]);
+    const loadFavorites = async () => {
+      if (!user) {
+        setFavorites([]);
+        return;
+      }
 
-  const handleRecipeSelect = (recipe: Recipe) => {
-    setSelectedRecipe(recipe);
+      try {
+        const { data, error } = await supabase
+          .from('favorites')
+          .select('*')
+          .eq('user_id', user.id);
+
+        if (error) throw error;
+
+        const favoriteRecipes = data.map(fav => {
+          const recipe = recipes.find(r => r.Plato === fav.recipe_id);
+          if (!recipe) return null;
+          
+          return {
+            ...recipe,
+            addedAt: fav.created_at,
+            notes: fav.notes,
+            rating: fav.rating,
+            lastCooked: fav.last_cooked,
+            tags: fav.tags
+          };
+        }).filter(Boolean) as FavoriteRecipe[];
+
+        setFavorites(favoriteRecipes);
+      } catch (err) {
+        console.error('Error loading favorites:', err);
+      }
+    };
+
+    loadFavorites();
+  }, [user, recipes]);
+
+  const toggleFavorite = async (recipe: Recipe) => {
+    if (!user) {
+      setShowLogin(true);
+      return;
+    }
+
+    try {
+      const isFavorite = favorites.some(fav => fav.Plato === recipe.Plato);
+
+      if (isFavorite) {
+        // Remove from favorites
+        const { error } = await supabase
+          .from('favorites')
+          .delete()
+          .eq('user_id', user.id)
+          .eq('recipe_id', recipe.Plato);
+
+        if (error) throw error;
+
+        setFavorites(prev => prev.filter(fav => fav.Plato !== recipe.Plato));
+      } else {
+        // Add to favorites
+        const { error } = await supabase
+          .from('favorites')
+          .insert({
+            user_id: user.id,
+            recipe_id: recipe.Plato,
+            created_at: new Date().toISOString()
+          });
+
+        if (error) throw error;
+
+        const favoriteRecipe: FavoriteRecipe = {
+          ...recipe,
+          addedAt: new Date().toISOString(),
+          rating: 0
+        };
+
+        setFavorites(prev => [...prev, favoriteRecipe]);
+      }
+    } catch (err) {
+      console.error('Error toggling favorite:', err);
+    }
   };
 
-  const handleAddToMenuFromModal = (recipe: Recipe) => {
-    addToMenu(recipe, 'Lunes', 'comida');
-    setSelectedRecipe(null);
-    navigate('/menu');
-  };
-
+  // Add to menu functions
   const addToMenu = (recipe: Recipe | null, day: string, meal: 'comida' | 'cena') => {
     setWeeklyMenu(prev => {
       if (recipe === null) {
@@ -71,28 +139,18 @@ function App() {
     });
   };
 
-  const toggleFavorite = (recipe: Recipe) => {
-    setFavorites(prev => {
-      const isFavorite = prev.some(fav => fav.Plato === recipe.Plato);
-      if (isFavorite) {
-        return prev.filter(fav => fav.Plato !== recipe.Plato);
-      } else {
-        const newFavorite: FavoriteRecipe = {
-          ...recipe,
-          addedAt: new Date().toISOString(),
-          rating: 0
-        };
-        return [...prev, newFavorite];
-      }
-    });
+  const handleAddToMenuFromModal = (recipe: Recipe) => {
+    addToMenu(recipe, 'Lunes', 'comida');
+    setSelectedRecipe(null);
+    navigate('/menu');
   };
 
-  const updateFavorite = (updatedRecipe: FavoriteRecipe) => {
-    setFavorites(prev => 
-      prev.map(recipe => 
-        recipe.Plato === updatedRecipe.Plato ? updatedRecipe : recipe
-      )
-    );
+  const handleRemoveFavorite = (recipe: FavoriteRecipe) => {
+    setFavorites(prev => prev.filter(f => f.Plato !== recipe.Plato));
+  };
+
+  const handleUpdateFavorite = (recipe: FavoriteRecipe) => {
+    setFavorites(prev => prev.map(f => f.Plato === recipe.Plato ? recipe : f));
   };
 
   const toggleShoppingItem = (nombre: string, dia?: string) => {
@@ -134,7 +192,7 @@ function App() {
               nombre: ing.Nombre,
               cantidad: ing.Cantidad,
               unidad: ing.Unidad,
-              categoria: categorizeIngredient(ing.Nombre),
+              categoria: ing.Categoria || 'Otros',
               comprado: false,
               dias: [day]
             });
@@ -142,10 +200,7 @@ function App() {
         });
       });
 
-      return Array.from(ingredients.values()).map(item => ({
-        ...item,
-        unidad: getUnitPlural(item.unidad, item.cantidad)
-      }));
+      return Array.from(ingredients.values());
     };
 
     const newItems = getShoppingList();
@@ -154,12 +209,6 @@ function App() {
       return existingItem ? { ...newItem, comprado: existingItem.comprado } : newItem;
     }));
   }, [weeklyMenu]);
-
-  const activeTab = location.pathname.split('/')[1] || 'recetas';
-
-  const handleRemoveFavorite = (recipe: FavoriteRecipe) => {
-    setFavorites(prev => prev.filter(f => f.Plato !== recipe.Plato));
-  };
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -172,6 +221,7 @@ function App() {
         user={user}
         onProfile={() => navigate('/perfil')}
       />
+      
       <Navigation 
         activeTab={activeTab}
         onTabChange={(tab) => navigate(`/${tab}`)}
@@ -199,7 +249,7 @@ function App() {
               ) : (
                 <RecipeList 
                   recipes={recipes}
-                  onRecipeSelect={handleRecipeSelect}
+                  onRecipeSelect={setSelectedRecipe}
                   favorites={favorites.map(f => f.Plato)}
                   onToggleFavorite={toggleFavorite}
                 />
@@ -211,7 +261,7 @@ function App() {
             element={
               <WeeklyMenu 
                 weeklyMenu={weeklyMenu}
-                onRecipeSelect={handleRecipeSelect}
+                onRecipeSelect={setSelectedRecipe}
                 onAddToMenu={addToMenu}
               />
             }
@@ -231,7 +281,7 @@ function App() {
               <Favorites 
                 favorites={favorites}
                 onRemoveFavorite={handleRemoveFavorite}
-                onUpdateFavorite={updateFavorite}
+                onUpdateFavorite={handleUpdateFavorite}
               />
             }
           />

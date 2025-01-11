@@ -9,36 +9,36 @@ export type Json =
 export interface Database {
   public: {
     Tables: {
-      favorites: {
+      profiles: {
         Row: {
           id: string
           user_id: string
-          recipe_id: string
+          full_name: string
+          user_type: 'user' | 'nutritionist'
+          specialization: string | null
+          license_number: string | null
           created_at: string
-          notes: string | null
-          rating: number | null
-          last_cooked: string | null
-          tags: string[] | null
+          updated_at: string
         }
         Insert: {
           id?: string
           user_id: string
-          recipe_id: string
+          full_name: string
+          user_type: 'user' | 'nutritionist'
+          specialization?: string | null
+          license_number?: string | null
           created_at?: string
-          notes?: string | null
-          rating?: number | null
-          last_cooked?: string | null
-          tags?: string[] | null
+          updated_at?: string
         }
         Update: {
           id?: string
           user_id?: string
-          recipe_id?: string
+          full_name?: string
+          user_type?: 'user' | 'nutritionist'
+          specialization?: string | null
+          license_number?: string | null
           created_at?: string
-          notes?: string | null
-          rating?: number | null
-          last_cooked?: string | null
-          tags?: string[] | null
+          updated_at?: string
         }
       }
       recipes: {
@@ -62,24 +62,9 @@ export interface Database {
           instructions: Json
           url: string | null
           pdf_url: string | null
+          image_url: string | null
           created_at: string
           updated_at: string
-        }
-      }
-      recipe_ingredients: {
-        Row: {
-          id: string
-          recipe_id: string
-          ingredient_id: string
-          quantity: number
-          unit: string
-        }
-      }
-      ingredients: {
-        Row: {
-          id: string
-          name: string
-          category: string | null
         }
       }
     }

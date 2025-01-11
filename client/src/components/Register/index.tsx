@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { ChevronLeft, User, UserCog, Mail, Lock, Eye, EyeOff, Briefcase, FileCheck, Loader2 } from 'lucide-react';
+import { Eye, EyeOff, Mail, Lock, ChevronLeft, User, UserCog, Loader2, Briefcase, FileCheck } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 
 interface RegisterProps {
@@ -49,42 +49,36 @@ export function Register({ onClose, onRegisterSuccess, preSelectedUserType, onBa
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
-    
-    if (!userType) {
-      setError('Por favor, selecciona un tipo de usuario');
-      return;
-    }
-
-    // Validate required fields
-    if (!formData.email || !formData.password || !formData.fullName) {
-      setError('Por favor, completa todos los campos requeridos');
-      return;
-    }
-
-    // Validate password
-    const passwordError = validatePassword(formData.password);
-    if (passwordError) {
-      setError(passwordError);
-      return;
-    }
-
-    // Validate passwords match
-    if (formData.password !== formData.confirmPassword) {
-      setError('Las contraseñas no coinciden');
-      return;
-    }
-
-    // Validate nutritionist fields
-    if (userType === 'nutritionist' && (!formData.specialization || !formData.licenseNumber)) {
-      setError('Por favor, completa los campos de especialización y número de licencia');
-      return;
-    }
-
     setLoading(true);
 
     try {
-      // Register user with Supabase Auth
-      const { data: authData, error: authError } = await supabase.auth.signUp({
+      if (!userType) {
+        throw new Error('Por favor, selecciona un tipo de usuario');
+      }
+
+      // Validar campos requeridos
+      if (!formData.email || !formData.password || !formData.fullName) {
+        throw new Error('Por favor, completa todos los campos requeridos');
+      }
+
+      // Validar contraseña
+      const passwordError = validatePassword(formData.password);
+      if (passwordError) {
+        throw new Error(passwordError);
+      }
+
+      // Validar que las contraseñas coincidan
+      if (formData.password !== formData.confirmPassword) {
+        throw new Error('Las contraseñas no coinciden');
+      }
+
+      // Validar campos de nutricionista
+      if (userType === 'nutritionist' && (!formData.specialization || !formData.licenseNumber)) {
+        throw new Error('Por favor, completa los campos de especialización y número de licencia');
+      }
+
+      // 1. Registrar usuario en Auth
+      const { data: authData, error: signUpError } = await supabase.auth.signUp({
         email: formData.email,
         password: formData.password,
         options: {
@@ -95,28 +89,32 @@ export function Register({ onClose, onRegisterSuccess, preSelectedUserType, onBa
         }
       });
 
-      if (authError) throw authError;
+      if (signUpError) throw signUpError;
+      if (!authData.user) throw new Error('No se pudo crear el usuario');
 
-      if (authData.user) {
-        // Create profile
-        const { error: profileError } = await supabase
-          .from('profiles')
-          .insert([{
-            user_id: authData.user.id,
-            full_name: formData.fullName,
-            user_type: userType,
-            specialization: userType === 'nutritionist' ? formData.specialization : null,
-            license_number: userType === 'nutritionist' ? formData.licenseNumber : null
-          }]);
+      // 2. Crear perfil en la tabla profiles
+      const { error: profileError } = await supabase
+        .from('profiles')
+        .insert({
+          user_id: authData.user.id,
+          full_name: formData.fullName,
+          user_type: userType,
+          specialization: userType === 'nutritionist' ? formData.specialization : null,
+          license_number: userType === 'nutritionist' ? formData.licenseNumber : null
+        });
 
-        if (profileError) throw profileError;
-
-        // Success - show confirmation message and close
-        alert('Registro exitoso. Por favor, verifica tu correo electrónico para continuar.');
-        onClose();
+      if (profileError) {
+        // Si hay error al crear el perfil, intentar eliminar el usuario auth
+        await supabase.auth.admin.deleteUser(authData.user.id);
+        throw profileError;
       }
+
+      // Éxito - mostrar mensaje y cerrar
+      alert('Registro exitoso. Ya puedes iniciar sesión.');
+      onRegisterSuccess?.();
+      onClose();
     } catch (err) {
-      console.error('Registration error:', err);
+      console.error('Error en el registro:', err);
       setError(err instanceof Error ? err.message : 'Error al registrar usuario');
     } finally {
       setLoading(false);
