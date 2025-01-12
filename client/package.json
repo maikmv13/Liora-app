@@ -15,7 +15,8 @@
     "@supabase/supabase-js": "2.39.3",
     "lucide-react": "0.344.0",
     "chart.js": "4.4.1",
-    "react-chartjs-2": "5.2.0"
+    "react-chartjs-2": "5.2.0",
+    "canvas-confetti": "^1.6.0"
   },
   "devDependencies": {
     "@types/react": "18.2.55",
@@ -26,6 +27,7 @@
     "tailwindcss": "3.4.1",
     "autoprefixer": "10.4.18",
     "postcss": "8.4.35",
-    "@types/node": "20.11.16"
+    "@types/node": "20.11.16",
+    "@types/canvas-confetti": "^1.6.0"
   }
 }
