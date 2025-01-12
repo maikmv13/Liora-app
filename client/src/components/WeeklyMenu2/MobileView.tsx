@@ -1,6 +1,6 @@
 import React from 'react';
 import { ChevronLeft, ChevronRight, X, Plus, Flame, Eye, PenSquare } from 'lucide-react';
-import { MenuItem } from '../../types';
+import { MenuItem, MealType } from '../../types';
 import { getMealIcon } from './utils';
 import { DAYS, type WeekDay } from './constants';
 
@@ -9,8 +9,8 @@ interface MobileViewProps {
   weekDays: typeof DAYS;
   weeklyMenu: MenuItem[];
   onDayChange: (day: WeekDay) => void;
-  onMealClick: (day: string, meal: 'comida' | 'cena') => void;
-  onRemoveMeal: (day: string, meal: 'comida' | 'cena') => void;
+  onMealClick: (day: string, meal: MealType) => void;
+  onRemoveMeal: (day: string, meal: MealType) => void;
   onViewRecipe: (menuItem: MenuItem) => void;
 }
 
@@ -91,7 +91,9 @@ export function MobileView({
                     </span>
                   </div>
                 </div>
-                <p className="text-sm text-gray-500 mb-3">{menuItem.recipe.side_dish && <div>Con {menuItem.recipe.side_dish}</div>}</p>
+                <p className="text-sm text-gray-500">
+                  {menuItem.recipe.side_dish && `Con ${menuItem.recipe.side_dish}`}
+                </p>
                 
                 <div className="flex gap-2">
                   <button

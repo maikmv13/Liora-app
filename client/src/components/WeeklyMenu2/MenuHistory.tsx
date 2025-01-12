@@ -1,19 +1,52 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Copy, Trash2, Calendar, Utensils, Moon, Flame } from 'lucide-react';
 import { MenuItem } from '../../types';
 import { weekDays } from './utils';
+import { getMenuHistory, deleteMenu, restoreMenu } from '../../services/weeklyMenu';
+import type { WeeklyMenuDB } from '../../services/weeklyMenu';
 
 interface MenuHistoryProps {
-  history: {
-    id: string;
-    date: string;
-    menu: MenuItem[];
-  }[];
   onRestore: (menu: MenuItem[]) => void;
-  onDelete: (id: string) => void;
 }
 
-export function MenuHistory({ history, onRestore, onDelete }: MenuHistoryProps) {
+export function MenuHistory({ onRestore }: MenuHistoryProps) {
+  const [history, setHistory] = useState<WeeklyMenuDB[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    loadHistory();
+  }, []);
+
+  const loadHistory = async () => {
+    try {
+      const data = await getMenuHistory();
+      setHistory(data);
+    } catch (error) {
+      console.error('Error al cargar el historial:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleRestore = async (menuId: string, menuItems: MenuItem[]) => {
+    try {
+      await restoreMenu(menuId);
+      onRestore(menuItems);
+      loadHistory();
+    } catch (error) {
+      console.error('Error al restaurar el menú:', error);
+    }
+  };
+
+  const handleDelete = async (menuId: string) => {
+    try {
+      await deleteMenu(menuId);
+      setHistory(prev => prev.filter(menu => menu.id !== menuId));
+    } catch (error) {
+      console.error('Error al eliminar el menú:', error);
+    }
+  };
+
   const formatDate = (date: string) => {
     return new Intl.DateTimeFormat('es-ES', {
       day: 'numeric',
@@ -33,7 +66,13 @@ export function MenuHistory({ history, onRestore, onDelete }: MenuHistoryProps) 
     return menu.reduce((total, item) => total + parseInt(item.recipe.calories?.replace(/\D/g, '') || '0'), 0);
   };
 
-  if (history.length === 0) return null;
+  if (loading) {
+    return <div className="text-center py-4">Cargando historial...</div>;
+  }
+
+  if (history.length === 0) {
+    return <div className="text-center py-4 text-gray-500">No hay menús guardados</div>;
+  }
 
   return (
     <div className="space-y-4">
@@ -61,12 +100,12 @@ export function MenuHistory({ history, onRestore, onDelete }: MenuHistoryProps) 
                     </h4>
                     <div className="flex items-center space-x-2 mt-1">
                       <p className="text-sm text-gray-500">
-                        Generado el {formatDate(historyMenu.date)}
+                        Generado el {formatDate(historyMenu.created_at)}
                       </p>
                       <div className="flex items-center space-x-1 bg-rose-50 px-1.5 py-0.5 rounded-lg border border-rose-200">
                         <Flame size={10} className="text-rose-500" />
                         <span className="text-[10px] font-medium text-rose-600">
-                          {calculateTotalCalories(historyMenu.menu)} kcal/semana
+                          {calculateTotalCalories(historyMenu.menu_items)} kcal/semana
                         </span>
                       </div>
                     </div>
@@ -74,14 +113,14 @@ export function MenuHistory({ history, onRestore, onDelete }: MenuHistoryProps) 
                 </div>
                 <div className="flex gap-2">
                   <button
-                    onClick={() => onRestore(historyMenu.menu)}
+                    onClick={() => handleRestore(historyMenu.id, historyMenu.menu_items)}
                     className="p-2 text-emerald-500 hover:bg-emerald-50 rounded-lg transition-colors border border-emerald-200"
                     title="Usar este menú"
                   >
                     <Copy size={18} />
                   </button>
                   <button
-                    onClick={() => onDelete(historyMenu.id)}
+                    onClick={() => handleDelete(historyMenu.id)}
                     className="p-2 text-rose-500 hover:bg-rose-50 rounded-lg transition-colors border border-rose-200"
                     title="Eliminar del historial"
                   >
@@ -95,10 +134,10 @@ export function MenuHistory({ history, onRestore, onDelete }: MenuHistoryProps) 
             <div className="p-4">
               <div className="grid gap-3">
                 {weekDays.map(day => {
-                  const dayMenu = historyMenu.menu.filter(item => item.day === day);
+                  const dayMenu = historyMenu.menu_items.filter(item => item.day === day);
                   const comida = dayMenu.find(item => item.meal === 'comida');
                   const cena = dayMenu.find(item => item.meal === 'cena');
-                  const dayCalories = calculateDayCalories(historyMenu.menu, day);
+                  const dayCalories = calculateDayCalories(historyMenu.menu_items, day);
                   
                   return (
                     <div key={day} className="grid grid-cols-1 md:grid-cols-6 gap-2 md:gap-4 items-center">

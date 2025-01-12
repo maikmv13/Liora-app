@@ -7,8 +7,8 @@ import { DAYS, type WeekDay } from './constants';
 interface DesktopViewProps {
   weekDays: typeof DAYS;
   weeklyMenu: MenuItem[];
-  onMealClick: (day: string, meal: 'comida' | 'cena') => void;
-  onRemoveMeal: (day: string, meal: 'comida' | 'cena') => void;
+  onMealClick: (day: string, meal: MealType) => void;
+  onRemoveMeal: (day: string, meal: MealType) => void;
   onViewRecipe: (menuItem: MenuItem) => void;
 }
 

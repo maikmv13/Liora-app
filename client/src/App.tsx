@@ -63,9 +63,24 @@ function App() {
   };
 
   const handleAddToMenu = (recipe: Recipe | null, day: string, meal: MealType) => {
-    if (recipe) {
-      setWeeklyMenu(prev => [...prev, { recipe, day, meal }]);
-    }
+    setWeeklyMenu(prevMenu => {
+      if (recipe === null) {
+        // Eliminar el item del menú
+        return prevMenu.filter(item => !(item.day === day && item.meal === meal));
+      }
+      
+      // Añadir o actualizar item
+      const newItem = { day, meal, recipe };
+      const exists = prevMenu.some(item => item.day === day && item.meal === meal);
+      
+      if (exists) {
+        return prevMenu.map(item => 
+          item.day === day && item.meal === meal ? newItem : item
+        );
+      }
+      
+      return [...prevMenu, newItem];
+    });
   };
 
   const toggleShoppingItem = (id: string) => {

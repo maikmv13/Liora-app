@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { X, Search, ChevronRight, Filter, Flame } from 'lucide-react';
-import { Recipe } from '../../types';
+import { Recipe, MealType } from '../../types';
 import { useRecipes } from '../../hooks/useRecipes';
 
 const categories = [
@@ -21,7 +21,7 @@ interface RecipeSelectorSidebarProps {
   onClose: () => void;
   onSelectRecipe: (recipe: Recipe) => void;
   selectedDay: string;
-  selectedMeal: 'comida' | 'cena';
+  selectedMeal: MealType;
 }
 
 export function RecipeSelectorSidebar({ 

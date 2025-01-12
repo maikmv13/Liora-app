@@ -10,19 +10,13 @@ import { Calendar, Wand2, Share2, Loader2 } from 'lucide-react';
 import { useRecipes } from '../../hooks/useRecipes';
 import { mapRecipeToCardProps } from '../RecipeCard';
 import { generateCompleteMenu } from '../../services/menuGenerator';
-import { archiveMenu, createWeeklyMenu } from '../../services/weeklyMenu';
+import { archiveMenu, createWeeklyMenu, getActiveMenu } from '../../services/weeklyMenu';
 
 interface WeeklyMenu2Props {
   readonly weeklyMenu: MenuItem[];
   readonly onRecipeSelect: (recipe: Recipe) => void;
   readonly onAddToMenu: (recipe: Recipe | null, day: string, meal: MealType) => void;
   readonly forUserId?: string;
-}
-
-interface MenuHistory {
-  id: string;
-  date: string;
-  menu: MenuItem[];
 }
 
 const DAYS = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domingo'] as const;
@@ -34,33 +28,36 @@ export function WeeklyMenu2({ weeklyMenu, onRecipeSelect, onAddToMenu, forUserId
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [selectedMealInfo, setSelectedMealInfo] = useState<{
     day: string;
-    meal: 'comida' | 'cena';
+    meal: MealType;
   } | null>(null);
   const [viewingRecipe, setViewingRecipe] = useState<MenuItem | null>(null);
   const [isGenerating, setIsGenerating] = useState(false);
   const [lastGenerated, setLastGenerated] = useState<string | null>(
     localStorage.getItem('lastMenuGenerated')
   );
-  const [menuHistory, setMenuHistory] = useState<MenuHistory[]>(() => {
-    const saved = localStorage.getItem('menuHistory');
-    return saved ? JSON.parse(saved) : [];
-  });
   const [currentMenuId, setCurrentMenuId] = useState<string | null>(null);
 
+  // Cargar el menú activo al iniciar
   useEffect(() => {
-    localStorage.setItem('menuHistory', JSON.stringify(menuHistory));
-  }, [menuHistory]);
+    const loadActiveMenu = async () => {
+      try {
+        const activeMenu = await getActiveMenu(forUserId);
+        if (activeMenu) {
+          setCurrentMenuId(activeMenu.id);
+          // Restaurar el menú activo
+          activeMenu.menu_items.forEach(item => {
+            onAddToMenu(item.recipe, item.day, item.meal);
+          });
+        }
+      } catch (error) {
+        console.error('Error al cargar el menú activo:', error);
+      }
+    };
 
-  const formatDate = (date: Date) => {
-    return new Intl.DateTimeFormat('es-ES', {
-      day: 'numeric',
-      month: 'long',
-      hour: '2-digit',
-      minute: '2-digit'
-    }).format(date);
-  };
+    loadActiveMenu();
+  }, [forUserId]);
 
-  const handleMealClick = (day: string, meal: 'comida' | 'cena') => {
+  const handleMealClick = (day: string, meal: MealType) => {
     setSelectedMealInfo({ day, meal });
     setSidebarOpen(true);
   };
@@ -73,7 +70,13 @@ export function WeeklyMenu2({ weeklyMenu, onRecipeSelect, onAddToMenu, forUserId
     }
   };
 
-  const handleRemoveMeal = (day: string, meal: 'comida' | 'cena') => {
+  const handleRemoveMeal = (day: string, meal: MealType) => {
+    console.log('Removing meal in WeeklyMenu2:', { day, meal });
+    // Limpiar explícitamente el menú
+    const updatedMenu = weeklyMenu.filter(
+      item => !(item.day === day && item.meal === meal)
+    );
+    // Llamar a onAddToMenu con null para eliminar
     onAddToMenu(null, day, meal);
   };
 
@@ -81,33 +84,63 @@ export function WeeklyMenu2({ weeklyMenu, onRecipeSelect, onAddToMenu, forUserId
     setViewingRecipe(menuItem);
   };
 
+  const clearMenu = () => {
+    weekDays.forEach(day => {
+      ['desayuno', 'comida', 'snack', 'cena'].forEach(meal => {
+        onAddToMenu(null, day, meal as MealType);
+      });
+    });
+  };
+
   const handleGenerateMenu = async () => {
     if (isGenerating || loading) return;
     
     setIsGenerating(true);
     try {
+      clearMenu();
+
       // Archivar el menú actual si existe
-      if (weeklyMenu.length > 0) {
+      if (currentMenuId) {
         await archiveMenu(currentMenuId);
       }
 
-      // Generar nuevo menú
+      // Generar y guardar nuevo menú
       const newMenu = await generateCompleteMenu(recipes);
-      
-      // Guardar en Supabase
       const savedMenu = await createWeeklyMenu(newMenu, forUserId);
       setCurrentMenuId(savedMenu.id);
       
-      // Actualizar la UI
+      // Actualizar UI
       for (const menuItem of newMenu) {
         await new Promise(resolve => setTimeout(resolve, 50));
         onAddToMenu(menuItem.recipe, menuItem.day, menuItem.meal);
       }
     } finally {
       setIsGenerating(false);
-      localStorage.setItem('lastMenuGenerated', new Date().toISOString());
       setLastGenerated(new Date().toISOString());
     }
+  };
+
+  const handleRestoreMenu = (menuItems: MenuItem[]) => {
+    // Limpiar el menú actual
+    weekDays.forEach(day => {
+      ['comida', 'cena', 'desayuno', 'snack'].forEach(meal => {
+        onAddToMenu(null, day, meal as MealType);
+      });
+    });
+    
+    // Restaurar el menú seleccionado
+    menuItems.forEach(item => {
+      onAddToMenu(item.recipe, item.day, item.meal);
+    });
+  };
+
+  const formatDate = (date: Date) => {
+    return new Intl.DateTimeFormat('es-ES', {
+      day: 'numeric',
+      month: 'long',
+      hour: '2-digit',
+      minute: '2-digit'
+    }).format(date);
   };
 
   const handleExport = () => {
@@ -130,22 +163,6 @@ export function WeeklyMenu2({ weeklyMenu, onRecipeSelect, onAddToMenu, forUserId
     const encodedMessage = encodeURIComponent(menuContent);
     const whatsappUrl = `https://wa.me/?text=${encodedMessage}`;
     window.open(whatsappUrl, '_blank');
-  };
-
-  const handleRestoreMenu = async (menu: MenuItem[]) => {
-    // Limpiar el menú actual
-    for (const day of weekDays) {
-      for (const meal of ['comida', 'cena'] as const) {
-        onAddToMenu(null, day, meal);
-        await new Promise(resolve => setTimeout(resolve, 50));
-      }
-    }
-    
-    // Restaurar el menú del historial
-    for (const item of menu) {
-      onAddToMenu(item.recipe, item.day, item.meal as 'comida' | 'cena');
-      await new Promise(resolve => setTimeout(resolve, 50));
-    }
   };
 
   return (
@@ -218,11 +235,7 @@ export function WeeklyMenu2({ weeklyMenu, onRecipeSelect, onAddToMenu, forUserId
         />
       </div>
 
-      <MenuHistory
-        history={menuHistory}
-        onRestore={handleRestoreMenu}
-        onDelete={(id) => setMenuHistory(prev => prev.filter(menu => menu.id !== id))}
-      />
+      <MenuHistory onRestore={handleRestoreMenu} />
 
       {selectedMealInfo && (
         <RecipeSelectorSidebar
