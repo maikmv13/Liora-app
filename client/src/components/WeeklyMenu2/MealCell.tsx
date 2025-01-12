@@ -38,13 +38,13 @@ export function MealCell({
           </div>
           <div className="inline-flex items-center space-x-1 bg-rose-50 px-1.5 py-0.5 rounded-lg border border-rose-200 whitespace-nowrap">
             <Flame size={10} className="text-rose-500 flex-shrink-0" />
-            <span className="text-[10px] font-medium text-rose-600">{menuItem.recipe.Calorias}</span>
+            <span className="text-[10px] font-medium text-rose-600">{menuItem.recipe.calories}</span>
           </div>
         </div>
         <p className={`font-medium text-gray-900 line-clamp-2 group-hover:text-rose-600 transition-colors ${
           isCompact ? 'text-xs' : 'text-sm'
         }`}>
-          {menuItem.recipe.Plato}
+          {menuItem.recipe.name}
         </p>
         
         {isHovered && (

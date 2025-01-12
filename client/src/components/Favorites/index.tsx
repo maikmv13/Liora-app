@@ -24,25 +24,25 @@ export function Favorites({ favorites, onRemoveFavorite, onUpdateFavorite }: Fav
   const [editingRecipe, setEditingRecipe] = useState<FavoriteRecipe | null>(null);
 
   const filteredRecipes = favorites.filter(recipe => {
-    const matchesCategory = selectedCategory === 'Todas' || recipe.Categoria === selectedCategory;
-    const matchesMealType = selectedMealType === 'all' || recipe.Tipo.toLowerCase() === selectedMealType;
-    const matchesSearch = recipe.Plato.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         recipe.Categoria.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesCategory = selectedCategory === 'Todas' || recipe.category === selectedCategory;
+    const matchesMealType = selectedMealType === 'all' || recipe.meal_type.toLowerCase() === selectedMealType;
+    const matchesSearch = recipe.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                         recipe.category.toLowerCase().includes(searchTerm.toLowerCase());
     return matchesCategory && matchesMealType && matchesSearch;
   });
 
   const sortedRecipes = [...filteredRecipes].sort((a, b) => {
     if (sortBy === 'calories') {
-      return parseInt(a.Calorias) - parseInt(b.Calorias);
+      return parseInt(a.calories || '0') - parseInt(b.calories || '0');
     }
     if (sortBy === 'time') {
       const getMinutes = (time: string) => parseInt(time) || 30;
-      return getMinutes(a["Tiempo de preparación"]) - getMinutes(b["Tiempo de preparación"]);
+      return getMinutes(a.prep_time || '') - getMinutes(b.prep_time || '');
     }
     if (sortBy === 'popular') {
       return (b.rating || 0) - (a.rating || 0);
     }
-    return new Date(b.addedAt).getTime() - new Date(a.addedAt).getTime();
+    return new Date(b.created_at || '').getTime() - new Date(a.created_at || '').getTime();
   });
 
   return (
@@ -93,30 +93,12 @@ export function Favorites({ favorites, onRemoveFavorite, onUpdateFavorite }: Fav
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
           {sortedRecipes.map((recipe) => (
             <RecipeCard
-              key={recipe.Plato}
+              key={recipe.id}
               recipe={{
-                id: recipe.Plato,
-                name: recipe.Plato,
-                side_dish: recipe.Acompañamiento || null,
-                meal_type: recipe.Tipo as "comida" | "cena" | "desayuno" | "snack",
-                category: recipe.Categoria as "Carnes" | "Pescados" | "Vegetariano" | "Pasta" | "Sopas" | "Ensaladas",
-                servings: recipe.Comensales,
-                calories: parseInt(recipe.Calorias).toString(),
-                prep_time: recipe["Tiempo de preparación"],
-                energy_kj: recipe["Valor energético (kJ)"],
-                fats: recipe.Grasas,
-                saturated_fats: recipe.Saturadas,
-                carbohydrates: recipe.Carbohidratos,
-                sugars: recipe.Azúcares,
-                fiber: recipe.Fibra,
-                proteins: recipe.Proteínas,
-                sodium: recipe.Sodio,
-                instructions: recipe.Instrucciones,
-                url: recipe.Url,
-                pdf_url: recipe.PDF_Url,
+                ...recipe,
+                isFavorite: true,
                 updated_at: new Date().toISOString(),
-                created_at: new Date().toISOString(),
-                isFavorite: true
+                created_at: recipe.created_at || new Date().toISOString()
               }}
               onClick={() => setSelectedRecipe(recipe)}
               onToggleFavorite={() => onRemoveFavorite(recipe)}
@@ -150,8 +132,11 @@ export function Favorites({ favorites, onRemoveFavorite, onUpdateFavorite }: Fav
           onSave={(newRecipe) => {
             onUpdateFavorite({
               ...newRecipe,
-              addedAt: new Date().toISOString(),
-              rating: 0
+              created_at: new Date().toISOString(),
+              rating: 0,
+              last_cooked: null,
+              notes: '',
+              tags: []
             });
             setShowNewRecipeModal(false);
           }}

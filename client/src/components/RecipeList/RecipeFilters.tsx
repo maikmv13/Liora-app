@@ -23,13 +23,18 @@ const categories = [
   { id: 'Pastas y Arroces', emoji: '🍝', label: 'Pastas y Arroces' },
   { id: 'Pescados', emoji: '🐟', label: 'Pescados' },
   { id: 'Sopas y Cremas', emoji: '🥣', label: 'Sopas y Cremas' },
-  { id: 'Vegetariano', emoji: '🥬', label: 'Vegetariano' }
+  { id: 'Vegetariano', emoji: '🥬', label: 'Vegetariano' },
+  { id: 'Desayuno', emoji: '🥐', label: 'Desayuno' },
+  { id: 'Huevos', emoji: '🥚', label: 'Huevos' },
+  { id: 'Snack', emoji: '🥨', label: 'Snack' }
 ];
 
 const mealTypes = [
   { id: 'all', label: 'Todas', icon: ChefHat, description: 'Todas las recetas' },
+  { id: 'desayuno', label: 'Desayunos', icon: Sun, description: 'Desayunos y brunch' },
   { id: 'comida', label: 'Comidas', icon: Sun, description: 'Platos principales' },
-  { id: 'cena', label: 'Cenas', icon: Moon, description: 'Cenas ligeras' }
+  { id: 'cena', label: 'Cenas', icon: Moon, description: 'Cenas ligeras' },
+  { id: 'snack', label: 'Snacks', icon: Moon, description: 'Aperitivos y meriendas' }
 ];
 
 const sortOptions = [

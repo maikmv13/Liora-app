@@ -22,25 +22,25 @@ export function ShoppingList({ items, onToggleItem }: ShoppingListProps) {
 
   const adjustedItems = items.map(item => ({
     ...item,
-    cantidad: (item.cantidad / 2) * servings
+    cantidad: (item.quantity / 2) * servings
   }));
 
   const filteredItems = viewMode === 'weekly' 
     ? adjustedItems 
-    : adjustedItems.filter(item => item.dias.includes(selectedDay));
+    : adjustedItems.filter(item => item.days.includes(selectedDay));
 
   const itemsByCategory = filteredItems.reduce((acc, item) => {
-    if (!acc[item.categoria]) {
-      acc[item.categoria] = [];
+    if (!acc[item.category]) {
+      acc[item.category] = [];
     }
     
     if (viewMode === 'daily') {
-      acc[item.categoria].push({
+      acc[item.category].push({
         ...item,
-        dias: [selectedDay]
+        days: [selectedDay]
       });
     } else {
-      acc[item.categoria].push(item);
+      acc[item.category].push(item);
     }
     
     return acc;
@@ -48,7 +48,7 @@ export function ShoppingList({ items, onToggleItem }: ShoppingListProps) {
 
   const sortedCategories = categoryOrder.filter(categoria => 
     itemsByCategory[categoria] && 
-    (showCompleted || itemsByCategory[categoria].some(item => !item.comprado))
+    (showCompleted || itemsByCategory[categoria].some(item => !item.checked))
   );
 
   const toggleCategory = (categoria: string) => {
@@ -59,7 +59,7 @@ export function ShoppingList({ items, onToggleItem }: ShoppingListProps) {
     );
   };
 
-  const completedCount = filteredItems.filter(item => item.comprado).length;
+  const completedCount = filteredItems.filter(item => item.checked).length;
 
   const handleExport = () => {
     const today = new Intl.DateTimeFormat('es-ES', { 
@@ -77,7 +77,7 @@ export function ShoppingList({ items, onToggleItem }: ShoppingListProps) {
       .map(categoria => {
         const items = itemsByCategory[categoria];
         const itemsList = items
-          .map(item => `${item.comprado ? '✅' : '⬜'} ${item.nombre}: ${item.cantidad} ${item.unidad}`)
+          .map(item => `${item.checked ? '✅' : '⬜'} ${item.name}: ${item.quantity} ${item.unit}`)
           .join('\n');
         return `*${categoria}*\n${itemsList}\n`;
       })
@@ -185,7 +185,7 @@ export function ShoppingList({ items, onToggleItem }: ShoppingListProps) {
           const items = itemsByCategory[categoria];
           const visibleItems = showCompleted 
             ? items 
-            : items.filter(item => !item.comprado);
+            : items.filter(item => !item.checked);
 
           if (visibleItems.length === 0) return null;
 

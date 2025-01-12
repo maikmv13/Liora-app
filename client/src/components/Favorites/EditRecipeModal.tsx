@@ -11,7 +11,7 @@ interface EditRecipeModalProps {
 export function EditRecipeModal({ recipe, onClose, onSave }: EditRecipeModalProps) {
   const [notes, setNotes] = useState(recipe.notes || '');
   const [rating, setRating] = useState(recipe.rating || 0);
-  const [lastCooked, setLastCooked] = useState(recipe.lastCooked || '');
+  const [lastCooked, setLastCooked] = useState(recipe.last_cooked || '');
   const [tags, setTags] = useState<string[]>(recipe.tags || []);
   const [newTag, setNewTag] = useState('');
 
@@ -31,7 +31,7 @@ export function EditRecipeModal({ recipe, onClose, onSave }: EditRecipeModalProp
       ...recipe,
       notes,
       rating,
-      lastCooked,
+      last_cooked: lastCooked,
       tags
     });
   };
@@ -42,8 +42,8 @@ export function EditRecipeModal({ recipe, onClose, onSave }: EditRecipeModalProp
         <div className="p-6">
           <div className="flex justify-between items-start mb-6">
             <div>
-              <h2 className="text-2xl font-bold text-gray-900">{recipe.Plato}</h2>
-              <p className="text-gray-600 mt-1">{recipe.Categoria}</p>
+              <h2 className="text-2xl font-bold text-gray-900">{recipe.name}</h2>
+              <p className="text-gray-600 mt-1">{recipe.category}</p>
             </div>
             <button 
               onClick={onClose}

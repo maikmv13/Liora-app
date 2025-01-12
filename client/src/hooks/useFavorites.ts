@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '../lib/supabase';
-import type { FavoriteRecipe } from '../types';
+import type { FavoriteRecipe, Recipe } from '../types/recipe';
 
 export function useFavorites() {
   const [favorites, setFavorites] = useState<FavoriteRecipe[]>([]);
@@ -13,41 +13,40 @@ export function useFavorites() {
         const { data: { session } } = await supabase.auth.getSession();
         if (!session) {
           setFavorites([]);
+          setLoading(false);
           return;
         }
 
         const { data, error } = await supabase
           .from('favorites')
           .select(`
-            *,
-            recipe:recipes (
-              *,
-              recipe_ingredients (
-                quantity,
-                unit,
-                ingredients (
-                  name,
-                  category
-                )
-              )
-            )
+            id,
+            user_id,
+            recipe_id,
+            created_at,
+            notes,
+            rating,
+            last_cooked,
+            tags,
+            recipes (*)
           `)
           .eq('user_id', session.user.id);
 
         if (error) throw error;
 
         const convertedFavorites: FavoriteRecipe[] = (data || []).map(fav => ({
-          ...fav.recipe,
-          addedAt: fav.created_at,
-          lastCooked: fav.last_cooked,
-          notes: fav.notes,
-          rating: fav.rating,
-          tags: fav.tags
+          ...fav.recipes,
+          created_at: fav.created_at ?? new Date().toISOString(),
+          last_cooked: fav.last_cooked,
+          notes: fav.notes ?? '',
+          rating: fav.rating ?? 0,
+          tags: fav.tags ?? []
         }));
 
         setFavorites(convertedFavorites);
       } catch (e) {
         setError(e as Error);
+        console.error('Error fetching favorites:', e);
       } finally {
         setLoading(false);
       }
@@ -56,7 +55,7 @@ export function useFavorites() {
     fetchFavorites();
   }, []);
 
-  const addFavorite = async (recipe: FavoriteRecipe) => {
+  const addFavorite = async (recipe: Recipe) => {
     try {
       const { data: { session } } = await supabase.auth.getSession();
       if (!session) throw new Error('No hay sesión activa');
@@ -65,21 +64,33 @@ export function useFavorites() {
         .from('favorites')
         .insert({
           user_id: session.user.id,
-          recipe_id: recipe.Plato,
-          notes: recipe.notes,
-          rating: recipe.rating,
-          tags: recipe.tags,
-          last_cooked: recipe.lastCooked
+          recipe_id: recipe.id,
+          created_at: new Date().toISOString(),
+          notes: '',
+          rating: 0,
+          tags: [],
+          last_cooked: null
         });
 
       if (error) throw error;
-      setFavorites(prev => [...prev, recipe]);
+
+      const newFavorite: FavoriteRecipe = {
+        ...recipe,
+        created_at: new Date().toISOString(),
+        last_cooked: null,
+        notes: '',
+        rating: 0,
+        tags: []
+      };
+
+      setFavorites(prev => [...prev, newFavorite]);
     } catch (e) {
       console.error('Error adding favorite:', e);
+      throw e;
     }
   };
 
-  const removeFavorite = async (recipe: FavoriteRecipe) => {
+  const removeFavorite = async (recipe: Recipe) => {
     try {
       const { data: { session } } = await supabase.auth.getSession();
       if (!session) throw new Error('No hay sesión activa');
@@ -88,12 +99,13 @@ export function useFavorites() {
         .from('favorites')
         .delete()
         .eq('user_id', session.user.id)
-        .eq('recipe_id', recipe.Plato);
+        .eq('recipe_id', recipe.id);
 
       if (error) throw error;
-      setFavorites(prev => prev.filter(f => f.Plato !== recipe.Plato));
+      setFavorites(prev => prev.filter(f => f.id !== recipe.id));
     } catch (e) {
       console.error('Error removing favorite:', e);
+      throw e;
     }
   };
 
@@ -108,15 +120,16 @@ export function useFavorites() {
           notes: recipe.notes,
           rating: recipe.rating,
           tags: recipe.tags,
-          last_cooked: recipe.lastCooked
+          last_cooked: recipe.last_cooked
         })
         .eq('user_id', session.user.id)
-        .eq('recipe_id', recipe.Plato);
+        .eq('recipe_id', recipe.id);
 
       if (error) throw error;
-      setFavorites(prev => prev.map(f => f.Plato === recipe.Plato ? recipe : f));
+      setFavorites(prev => prev.map(f => f.id === recipe.id ? recipe : f));
     } catch (e) {
       console.error('Error updating favorite:', e);
+      throw e;
     }
   };
 

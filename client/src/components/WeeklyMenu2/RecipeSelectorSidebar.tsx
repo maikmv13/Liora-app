@@ -37,8 +37,8 @@ export function RecipeSelectorSidebar({
   const [showFilters, setShowFilters] = useState(false);
 
   const filteredRecipes = recipes.filter(recipe => {
-    const matchesSearch = recipe.Plato.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesCategory = selectedCategory === 'Todas' || recipe.Categoria === selectedCategory;
+    const matchesSearch = recipe.name.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesCategory = selectedCategory === 'Todas' || recipe.category === selectedCategory;
     return matchesSearch && matchesCategory;
   });
 
@@ -106,7 +106,7 @@ export function RecipeSelectorSidebar({
           <div className="grid grid-cols-1 gap-2 p-4">
             {filteredRecipes.map((recipe) => (
               <button
-                key={recipe.Plato}
+                key={recipe.name}
                 onClick={() => {
                   onSelectRecipe(recipe);
                   onClose();
@@ -115,15 +115,15 @@ export function RecipeSelectorSidebar({
               >
                 <div className="flex-1 min-w-0">
                   <h3 className="font-medium text-gray-900 group-hover:text-rose-600 transition-colors line-clamp-2">
-                    {recipe.Plato}
+                    {recipe.name}
                   </h3>
                   <div className="flex items-center space-x-3 mt-2">
                     <span className="inline-flex items-center px-2 py-1 rounded-lg text-xs font-medium bg-orange-50 text-orange-600 border border-orange-100">
-                      {recipe.Categoria}
+                      {recipe.category}
                     </span>
                     <span className="flex items-center space-x-1 text-sm text-rose-500">
                       <Flame size={14} />
-                      <span>{recipe.Calorias}</span>
+                      <span>{recipe.calories}</span>
                     </span>
                   </div>
                 </div>

@@ -1,0 +1,22 @@
+export const oldToNewProps = {
+  Plato: 'name',
+  Categoria: 'category',
+  Calorias: 'calories',
+  Acompañamiento: 'side_dish',
+  Tipo: 'meal_type',
+  Comensales: 'servings',
+  Instrucciones: 'instructions',
+  'Tiempo de preparación': 'prep_time',
+  'Valor energético (kJ)': 'energy_kj',
+  Grasas: 'fats',
+  Saturadas: 'saturated_fats',
+  Carbohidratos: 'carbohydrates',
+  Azúcares: 'sugars',
+  Fibra: 'fiber',
+  Proteínas: 'proteins',
+  Sodio: 'sodium',
+  Url: 'url',
+  PDF_Url: 'pdf_url',
+  lastCooked: 'last_cooked',
+  addedAt: 'created_at'
+} as const; 

@@ -108,8 +108,8 @@ export function WeeklyMenu({ weeklyMenu, onRecipeSelect, onAddToMenu }: WeeklyMe
                 onClick={() => handleMealClick(selectedDay, meal as 'comida' | 'cena')}
                 className="cursor-pointer"
               >
-                <p className="font-medium text-gray-900">{menuItem.recipe.Plato}</p>
-                <p className="text-sm text-gray-500 mt-1">{menuItem.recipe.Calorias}</p>
+                <p className="font-medium text-gray-900">{menuItem.recipe.name}</p>
+                <p className="text-sm text-gray-500 mt-1">{menuItem.recipe.calories}</p>
               </div>
             ) : (
               <button
@@ -157,9 +157,9 @@ export function WeeklyMenu({ weeklyMenu, onRecipeSelect, onAddToMenu }: WeeklyMe
                         <span className="text-xs font-medium">{meal.charAt(0).toUpperCase() + meal.slice(1)}</span>
                       </div>
                       <p className="text-sm font-medium text-gray-900 line-clamp-2 group-hover:text-emerald-600 transition-colors">
-                        {menuItem.recipe.Plato}
+                        {menuItem.recipe.name}
                       </p>
-                      <p className="text-xs text-gray-500 mt-1">{menuItem.recipe.Calorias}</p>
+                      <p className="text-xs text-gray-500 mt-1">{menuItem.recipe.calories}</p>
                       
                       {isHovered && (
                         <button 

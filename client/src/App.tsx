@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { Routes, Route, Navigate, useNavigate, useLocation } from 'react-router-dom';
-import { Recipe, MenuItem, ShoppingItem, FavoriteRecipe, MealType } from './types';
+import { Recipe, MenuItem, ShoppingItem, MealType } from './types';
 import { Header } from './components/Header';
 import { Navigation } from './components/Navigation';
 import { RecipeModal } from './components/RecipeModal';
-import { WeeklyMenu2 as WeeklyMenu } from './components/WeeklyMenu2';
+import { WeeklyMenu2 } from './components/WeeklyMenu2';
 import { ShoppingList } from './components/ShoppingList';
 import { Favorites } from './components/Favorites';
 import { HealthyPlateGuide } from './components/HealthyPlateGuide';
@@ -12,10 +12,11 @@ import { Login } from './components/Login';
 import { Profile } from './components/Profile';
 import { supabase } from './lib/supabase';
 import { useRecipes } from './hooks/useRecipes';
+import { useFavorites } from './hooks/useFavorites';
 import { RecipeContent } from './components/RecipeList/RecipeContent';
 import { mapRecipeToCardProps } from './components/RecipeCard';
-import { HealthProvider } from './components/context/HealthContext';
 import { HealthTracker } from './components/HealthTracker';
+import { HealthProvider } from './components/context/HealthContext';
 
 function App() {
   const navigate = useNavigate();
@@ -24,15 +25,17 @@ function App() {
   const [weeklyMenu, setWeeklyMenu] = useState<MenuItem[]>([]);
   const [selectedRecipe, setSelectedRecipe] = useState<Recipe | null>(null);
   const [shoppingItems, setShoppingItems] = useState<ShoppingItem[]>([]);
-  const [favorites, setFavorites] = useState<FavoriteRecipe[]>([]);
   const [showLogin, setShowLogin] = useState(false);
   const [user, setUser] = useState<any>(null);
-  const { recipes, loading, error } = useRecipes();
+  const { recipes, loading: recipesLoading, error: recipesError } = useRecipes();
+  const { 
+    favorites, 
+    loading: favoritesLoading, 
+    addFavorite, 
+    removeFavorite, 
+    updateFavorite 
+  } = useFavorites();
 
-  // Get active tab from current location
-  const activeTab = location.pathname.split('/')[1] || 'recetas';
-
-  // Auth state management
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
       setUser(session?.user ?? null);
@@ -45,178 +48,40 @@ function App() {
     return () => subscription.unsubscribe();
   }, []);
 
-  // Load favorites when user is authenticated
-  useEffect(() => {
-    const loadFavorites = async () => {
-      if (!user) {
-        setFavorites([]);
-        return;
-      }
-
-      try {
-        const { data, error } = await supabase
-          .from('favorites')
-          .select('*')
-          .eq('user_id', user.id);
-
-        if (error) throw error;
-
-        const favoriteRecipes = data.map(fav => {
-          const recipe = recipes.find(r => r.Plato === fav.recipe_id);
-          if (!recipe) return null;
-          
-          return {
-            ...recipe,
-            addedAt: fav.created_at,
-            notes: fav.notes,
-            rating: fav.rating,
-            lastCooked: fav.last_cooked,
-            tags: fav.tags
-          };
-        }).filter(Boolean) as FavoriteRecipe[];
-
-        setFavorites(favoriteRecipes);
-      } catch (err) {
-        console.error('Error loading favorites:', err);
-      }
-    };
-
-    loadFavorites();
-  }, [user, recipes]);
-
-  const toggleFavorite = async (recipe: Recipe) => {
+  const handleToggleFavorite = async (recipe: Recipe) => {
     if (!user) {
       setShowLogin(true);
       return;
     }
 
-    try {
-      const isFavorite = favorites.some(fav => fav.Plato === recipe.Plato);
-
-      if (isFavorite) {
-        // Remove from favorites
-        const { error } = await supabase
-          .from('favorites')
-          .delete()
-          .eq('user_id', user.id)
-          .eq('recipe_id', recipe.Plato);
-
-        if (error) throw error;
-
-        setFavorites(prev => prev.filter(fav => fav.Plato !== recipe.Plato));
-      } else {
-        // Add to favorites
-        const { error } = await supabase
-          .from('favorites')
-          .insert({
-            user_id: user.id,
-            recipe_id: recipe.Plato,
-            created_at: new Date().toISOString()
-          });
-
-        if (error) throw error;
-
-        const favoriteRecipe: FavoriteRecipe = {
-          ...recipe,
-          addedAt: new Date().toISOString(),
-          rating: 0
-        };
-
-        setFavorites(prev => [...prev, favoriteRecipe]);
-      }
-    } catch (err) {
-      console.error('Error toggling favorite:', err);
+    const isFavorite = favorites.some(fav => fav.id === recipe.id);
+    if (isFavorite) {
+      await removeFavorite(recipe);
+    } else {
+      await addFavorite(recipe);
     }
   };
 
-  // Add to menu functions
-  const addToMenu = (recipe: Recipe | null, day: string, meal: MealType) => {
-    setWeeklyMenu(prev => {
-      if (recipe === null) {
-        return prev.filter(item => !(item.day === day && item.meal === meal));
-      }
-      const filtered = prev.filter(item => !(item.day === day && item.meal === meal));
-      return [...filtered, { recipe, day, meal }];
-    });
+  const handleAddToMenu = (recipe: Recipe | null, day: string, meal: "comida" | "cena") => {
+    if (recipe) {
+      setWeeklyMenu(prev => [...prev, { recipe, day, meal }]);
+    }
   };
 
-  const handleAddToMenuFromModal = (recipe: Recipe) => {
-    addToMenu(recipe, 'Lunes', 'comida');
-    setSelectedRecipe(null);
-    navigate('/menu');
+  const toggleShoppingItem = (id: string) => {
+    setShoppingItems(prev => 
+      prev.map(item => 
+        item.id === id ? { ...item, checked: !item.checked } : item
+      )
+    );
   };
-
-  const handleRemoveFavorite = (recipe: FavoriteRecipe) => {
-    setFavorites(prev => prev.filter(f => f.Plato !== recipe.Plato));
-  };
-
-  const handleUpdateFavorite = (recipe: FavoriteRecipe) => {
-    setFavorites(prev => prev.map(f => f.Plato === recipe.Plato ? recipe : f));
-  };
-
-  const toggleShoppingItem = (nombre: string, dia?: string) => {
-    setShoppingItems(prev => {
-      const newItems = prev.map(item => {
-        if (item.nombre === nombre) {
-          if (dia) {
-            if (item.dias.includes(dia)) {
-              return { ...item, comprado: !item.comprado };
-            }
-          } else {
-            return { ...item, comprado: !item.comprado };
-          }
-        }
-        return item;
-      });
-      return newItems;
-    });
-  };
-
-  useEffect(() => {
-    const getShoppingList = () => {
-      const ingredients = new Map<string, ShoppingItem>();
-      
-      weeklyMenu.forEach(({ recipe, day }) => {
-        recipe.Ingredientes.forEach(ing => {
-          const key = ing.Nombre;
-          const current = ingredients.get(key);
-          
-          if (current) {
-            if (current.unidad === ing.Unidad) {
-              current.cantidad += ing.Cantidad;
-              if (!current.dias.includes(day)) {
-                current.dias.push(day);
-              }
-            }
-          } else {
-            ingredients.set(key, { 
-              nombre: ing.Nombre,
-              cantidad: ing.Cantidad,
-              unidad: ing.Unidad,
-              categoria: ing.Categoria || 'Otros',
-              comprado: false,
-              dias: [day]
-            });
-          }
-        });
-      });
-
-      return Array.from(ingredients.values());
-    };
-
-    const newItems = getShoppingList();
-    setShoppingItems(newItems.map(newItem => {
-      const existingItem = shoppingItems.find(item => item.nombre === newItem.nombre);
-      return existingItem ? { ...newItem, comprado: existingItem.comprado } : newItem;
-    }));
-  }, [weeklyMenu]);
 
   return (
     <div className="min-h-screen bg-gray-50">
       <Header 
         searchTerm={searchTerm}
         onSearchChange={setSearchTerm}
-        activeTab={activeTab}
+        activeTab={location.pathname.split('/')[1] || 'recetas'}
         onTabChange={(tab) => navigate(`/${tab}`)}
         onLogin={() => setShowLogin(true)}
         user={user}
@@ -224,7 +89,7 @@ function App() {
       />
       
       <Navigation 
-        activeTab={activeTab}
+        activeTab={location.pathname.split('/')[1] || 'recetas'}
         onTabChange={(tab) => navigate(`/${tab}`)}
       />
 
@@ -235,22 +100,22 @@ function App() {
             path="/recetas" 
             element={
               <RecipeContent
-                loading={loading}
-                error={error}
+                loading={recipesLoading}
+                error={recipesError}
                 recipes={recipes}
                 onRecipeSelect={setSelectedRecipe}
-                favorites={favorites.map(f => f.Plato)}
-                onToggleFavorite={toggleFavorite}
+                favorites={favorites.map(f => f.id)}
+                onToggleFavorite={handleToggleFavorite}
               />
             }
           />
           <Route 
             path="/menu" 
             element={
-              <WeeklyMenu 
+              <WeeklyMenu2 
                 weeklyMenu={weeklyMenu}
                 onRecipeSelect={setSelectedRecipe}
-                onAddToMenu={addToMenu}
+                onAddToMenu={handleAddToMenu}
               />
             }
           />
@@ -268,8 +133,8 @@ function App() {
             element={
               <Favorites 
                 favorites={favorites}
-                onRemoveFavorite={handleRemoveFavorite}
-                onUpdateFavorite={handleUpdateFavorite}
+                onRemoveFavorite={removeFavorite}
+                onUpdateFavorite={updateFavorite}
               />
             }
           />
@@ -287,11 +152,7 @@ function App() {
             path="/salud" 
             element={
               <HealthProvider>
-                <div className="p-4 md:p-6">
-                  <div className="max-w-6xl mx-auto">
-                    <HealthTracker />
-                  </div>
-                </div>
+                <HealthTracker />
               </HealthProvider>
             }
           />
@@ -302,9 +163,9 @@ function App() {
         <RecipeModal 
           recipe={mapRecipeToCardProps(selectedRecipe)}
           onClose={() => setSelectedRecipe(null)}
-          onAddToMenu={handleAddToMenuFromModal}
-          isFavorite={favorites.some(f => f.Plato === selectedRecipe.Plato)}
-          onToggleFavorite={() => toggleFavorite(selectedRecipe)}
+          onAddToMenu={(recipe) => handleAddToMenu(recipe, 'Lunes', 'comida')}
+          isFavorite={favorites.some(f => f.name === selectedRecipe.name)}
+          onToggleFavorite={() => handleToggleFavorite(selectedRecipe)}
         />
       )}
 

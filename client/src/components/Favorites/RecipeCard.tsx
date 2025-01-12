@@ -11,14 +11,15 @@ interface RecipeCardProps {
 }
 
 export function RecipeCard({ recipe, onSelect, onEdit, onRemove }: RecipeCardProps) {
-  const formatDate = (dateString: string) => {
+  const formatDate = (dateString: string | null) => {
+    if (!dateString) return '';
     return new Intl.DateTimeFormat('es-ES', {
       day: 'numeric',
       month: 'short'
     }).format(new Date(dateString));
   };
 
-  const colors = categoryColors[recipe.Categoria as keyof typeof categoryColors] || {
+  const colors = categoryColors[recipe.category as keyof typeof categoryColors] || {
     bg: 'bg-gray-50',
     text: 'text-gray-600',
     border: 'border-gray-100',
@@ -29,34 +30,31 @@ export function RecipeCard({ recipe, onSelect, onEdit, onRemove }: RecipeCardPro
     <div className="bg-white/90 backdrop-blur-sm rounded-2xl shadow-sm hover:shadow-md transition-all border border-rose-100/20 overflow-hidden group">
       <div className="p-4">
         <div className="flex items-start justify-between mb-3">
-          <button
-            onClick={onSelect}
-            className="flex-1 text-left"
-          >
+          <button onClick={onSelect} className="flex-1 text-left">
             <h3 className="text-lg font-bold text-gray-900 group-hover:text-rose-500 transition-colors line-clamp-2">
-              {recipe.Plato}
+              {recipe.name}
             </h3>
           </button>
           <div className="flex items-center space-x-2 bg-rose-50 px-2 py-1 rounded-lg ml-2">
             <Flame size={14} className="text-rose-500" />
-            <span className="text-xs font-medium text-rose-600">{recipe.Calorias}</span>
+            <span className="text-xs font-medium text-rose-600">{recipe.calories}</span>
           </div>
         </div>
         
         <div className="flex items-center space-x-4 text-sm text-gray-600 mb-3">
           <div className="flex items-center">
             <Users size={14} className="mr-1 text-rose-400" />
-            <span>{recipe.Comensales}</span>
+            <span>{recipe.servings}</span>
           </div>
           <div className="flex items-center">
             <Clock size={14} className="mr-1 text-rose-400" />
-            <span>30 min</span>
+            <span>{recipe.prep_time || '30 min'}</span>
           </div>
         </div>
 
         <div className="flex items-center justify-between mb-3">
           <span className={`inline-flex items-center px-2.5 py-1 rounded-lg text-xs font-medium ${colors.bg} ${colors.text} ${colors.border}`}>
-            {recipe.Categoria}
+            {recipe.category}
           </span>
           {recipe.rating && (
             <div className="flex items-center space-x-1">
@@ -83,9 +81,9 @@ export function RecipeCard({ recipe, onSelect, onEdit, onRemove }: RecipeCardPro
         )}
 
         <div className="flex items-center justify-between text-xs text-gray-500">
-          <span>Añadida el {formatDate(recipe.addedAt)}</span>
-          {recipe.lastCooked && (
-            <span>Cocinada el {formatDate(recipe.lastCooked)}</span>
+          <span>Añadida el {formatDate(recipe.created_at)}</span>
+          {recipe.last_cooked && (
+            <span>Cocinada el {formatDate(recipe.last_cooked)}</span>
           )}
         </div>
       </div>

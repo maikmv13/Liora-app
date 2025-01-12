@@ -22,7 +22,7 @@ export function DayCard({
 
   // Calcular calorías totales del día
   const totalCalorias = menuItems.reduce((total, item) => {
-    return total + parseInt(item.recipe.Calorias.replace(/\D/g, ''));
+    return total + parseInt(item.recipe.calories?.replace(/\D/g, '') || '0');
   }, 0);
 
   // Obtener el día actual

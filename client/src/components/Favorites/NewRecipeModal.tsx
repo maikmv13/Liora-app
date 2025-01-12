@@ -9,15 +9,14 @@ interface NewRecipeModalProps {
 
 export function NewRecipeModal({ onClose, onSave }: NewRecipeModalProps) {
   const [recipe, setRecipe] = useState<Partial<Recipe>>({
-    Tipo: 'comida',
-    Comensales: 2,
-    Ingredientes: [],
-    Instrucciones: {}
+    meal_type: 'comida',
+    servings: 2,
+    instructions: {}
   });
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (recipe.Plato && recipe.Categoria) {
+    if (recipe.name && recipe.category) {
       onSave(recipe as Recipe);
     }
   };
@@ -53,8 +52,8 @@ export function NewRecipeModal({ onClose, onSave }: NewRecipeModalProps) {
               </label>
               <input
                 type="text"
-                value={recipe.Plato || ''}
-                onChange={(e) => setRecipe(prev => ({ ...prev, Plato: e.target.value }))}
+                value={recipe.name || ''}
+                onChange={(e) => setRecipe(prev => ({ ...prev, name: e.target.value }))}
                 className="w-full px-4 py-2.5 rounded-xl border border-rose-100 focus:ring-2 focus:ring-rose-500 focus:border-rose-500"
                 placeholder="Ej: Pasta carbonara"
                 required
@@ -66,8 +65,8 @@ export function NewRecipeModal({ onClose, onSave }: NewRecipeModalProps) {
                 Categoría
               </label>
               <select
-                value={recipe.Categoria || ''}
-                onChange={(e) => setRecipe(prev => ({ ...prev, Categoria: e.target.value }))}
+                value={recipe.category || ''}
+                onChange={(e) => setRecipe(prev => ({ ...prev, category: e.target.value as "Aves" | "Carnes" | "Ensaladas" | "Fast Food" | "Legumbres" | "Pastas y Arroces" | "Pescados" | "Sopas y Cremas" | "Vegetariano" | "Desayuno" | "Huevos" | "Snack" | "Otros" | undefined }))}
                 className="w-full px-4 py-2.5 rounded-xl border border-rose-100 focus:ring-2 focus:ring-rose-500 focus:border-rose-500"
                 required
               >
@@ -91,9 +90,9 @@ export function NewRecipeModal({ onClose, onSave }: NewRecipeModalProps) {
               <div className="flex gap-4">
                 <button
                   type="button"
-                  onClick={() => setRecipe(prev => ({ ...prev, Tipo: 'comida' }))}
+                  onClick={() => setRecipe(prev => ({ ...prev, meal_type: 'comida' }))}
                   className={`flex-1 flex items-center justify-center space-x-2 p-3 rounded-xl border transition-colors ${
-                    recipe.Tipo === 'comida'
+                    recipe.meal_type === 'comida'
                       ? 'bg-amber-50 border-amber-200 text-amber-700'
                       : 'border-gray-200 text-gray-600 hover:bg-amber-50/50'
                   }`}
@@ -103,9 +102,9 @@ export function NewRecipeModal({ onClose, onSave }: NewRecipeModalProps) {
                 </button>
                 <button
                   type="button"
-                  onClick={() => setRecipe(prev => ({ ...prev, Tipo: 'cena' }))}
+                  onClick={() => setRecipe(prev => ({ ...prev, meal_type: 'cena' }))}
                   className={`flex-1 flex items-center justify-center space-x-2 p-3 rounded-xl border transition-colors ${
-                    recipe.Tipo === 'cena'
+                    recipe.meal_type === 'cena'
                       ? 'bg-indigo-50 border-indigo-200 text-indigo-700'
                       : 'border-gray-200 text-gray-600 hover:bg-indigo-50/50'
                   }`}
@@ -123,8 +122,8 @@ export function NewRecipeModal({ onClose, onSave }: NewRecipeModalProps) {
               <input
                 type="number"
                 min="1"
-                value={recipe.Comensales || ''}
-                onChange={(e) => setRecipe(prev => ({ ...prev, Comensales: parseInt(e.target.value) }))}
+                value={recipe.servings || ''}
+                onChange={(e) => setRecipe(prev => ({ ...prev, servings: parseInt(e.target.value) }))}
                 className="w-full px-4 py-2.5 rounded-xl border border-rose-100 focus:ring-2 focus:ring-rose-500 focus:border-rose-500"
                 required
               />
@@ -136,8 +135,8 @@ export function NewRecipeModal({ onClose, onSave }: NewRecipeModalProps) {
               </label>
               <input
                 type="text"
-                value={recipe.Calorias || ''}
-                onChange={(e) => setRecipe(prev => ({ ...prev, Calorias: e.target.value }))}
+                value={recipe.calories || ''}
+                onChange={(e) => setRecipe(prev => ({ ...prev, calories: e.target.value }))}
                 className="w-full px-4 py-2.5 rounded-xl border border-rose-100 focus:ring-2 focus:ring-rose-500 focus:border-rose-500"
                 placeholder="Ej: 450 kcal"
               />
@@ -149,8 +148,8 @@ export function NewRecipeModal({ onClose, onSave }: NewRecipeModalProps) {
               </label>
               <input
                 type="text"
-                value={recipe["Tiempo de preparación"] || ''}
-                onChange={(e) => setRecipe(prev => ({ ...prev, "Tiempo de preparación": e.target.value }))}
+                value={recipe.prep_time || ''}
+                onChange={(e) => setRecipe(prev => ({ ...prev, prep_time: e.target.value }))}
                 className="w-full px-4 py-2.5 rounded-xl border border-rose-100 focus:ring-2 focus:ring-rose-500 focus:border-rose-500"
                 placeholder="Ej: 30 min"
               />

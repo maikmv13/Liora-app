@@ -17,9 +17,13 @@ export function useRecipes() {
           .select(`
             *,
             recipe_ingredients (
+              id,
+              ingredient_id,
+              recipe_id,
               quantity,
               unit,
               ingredients (
+                id,
                 name,
                 category
               )
@@ -36,30 +40,15 @@ export function useRecipes() {
 
         // Convertir el formato de Supabase al formato esperado por la aplicación
         const convertedRecipes: Recipe[] = data.map(recipe => ({
-          Plato: recipe.name,
-          Acompañamiento: recipe.side_dish || '',
-          Tipo: recipe.meal_type,
-          Categoria: recipe.category,
-          Comensales: recipe.servings,
-          Ingredientes: recipe.recipe_ingredients?.map((ri: any) => ({
-            Nombre: ri.ingredients.name,
-            Cantidad: ri.quantity,
-            Unidad: ri.unit,
-            Categoria: ri.ingredients.category || 'Otros'
-          })) || [],
-          Calorias: recipe.calories || '0',
-          "Valor energético (kJ)": recipe.energy_kj || '0',
-          Grasas: recipe.fats || '0',
-          Saturadas: recipe.saturated_fats || '0',
-          Carbohidratos: recipe.carbohydrates || '0',
-          Azúcares: recipe.sugars || '0',
-          Fibra: recipe.fiber || '0',
-          Proteínas: recipe.proteins || '0',
-          Sodio: recipe.sodium || '0',
-          "Tiempo de preparación": recipe.prep_time || '30',
-          Instrucciones: recipe.instructions,
-          Url: recipe.url || '',
-          PDF_Url: recipe.pdf_url || ''
+          ...recipe,
+          recipe_ingredients: recipe.recipe_ingredients?.map((ri) => ({
+            ...ri,
+            ingredients: ri.ingredients ? {
+              id: ri.ingredients.id,
+              name: ri.ingredients.name,
+              category: ri.ingredients.category
+            } : undefined
+          })) || []
         }));
 
         setRecipes(convertedRecipes);

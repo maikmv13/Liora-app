@@ -18,20 +18,22 @@ export function RecipeList({ recipes, onRecipeSelect, favorites, onToggleFavorit
   const [searchTerm, setSearchTerm] = useState('');
 
   const filteredRecipes = recipes.filter(recipe => {
-    const matchesCategory = selectedCategory === 'Todas' || recipe.Categoria === selectedCategory;
-    const matchesMealType = selectedMealType === 'all' || recipe.Tipo === selectedMealType;
-    const matchesSearch = recipe.Plato.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         recipe.Categoria.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesCategory = selectedCategory === 'Todas' || recipe.category === selectedCategory;
+    const matchesMealType = selectedMealType === 'all' || recipe.meal_type === selectedMealType;
+    const matchesSearch = recipe.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                         recipe.category.toLowerCase().includes(searchTerm.toLowerCase());
     return matchesCategory && matchesMealType && matchesSearch;
   });
 
   const sortedRecipes = [...filteredRecipes].sort((a, b) => {
     if (sortBy === 'calories') {
-      return parseInt(a.Calorias) - parseInt(b.Calorias);
+      const caloriesA = a.calories ? parseInt(a.calories) : 0;
+      const caloriesB = b.calories ? parseInt(b.calories) : 0;
+      return caloriesA - caloriesB;
     }
     if (sortBy === 'time') {
-      const getMinutes = (time: string) => parseInt(time) || 30;
-      return getMinutes(a["Tiempo de preparación"]) - getMinutes(b["Tiempo de preparación"]);
+      const getMinutes = (time: string | null) => time ? parseInt(time) : 0;
+      return getMinutes(a.prep_time) - getMinutes(b.prep_time);
     }
     return 0;
   });
@@ -53,12 +55,12 @@ export function RecipeList({ recipes, onRecipeSelect, favorites, onToggleFavorit
         {sortedRecipes.map((recipe) => {
           const cardProps = {
             ...mapRecipeToCardProps(recipe),
-            isFavorite: favorites.includes(recipe.Plato)
+            isFavorite: favorites.includes(recipe.name)
           };
           
           return (
             <RecipeCard 
-              key={recipe.Plato}
+              key={recipe.name}
               recipe={cardProps}
               onClick={() => onRecipeSelect(recipe)}
               onToggleFavorite={() => onToggleFavorite(recipe)}

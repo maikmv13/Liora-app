@@ -7,10 +7,19 @@ type DbFavorite = Database['public']['Tables']['favorites']['Row'];
 
 export interface Recipe extends DbRecipe {
   recipe_ingredients?: (DbRecipeIngredient & {
-    ingredient?: DbIngredient;
+    ingredients?: DbIngredient;
   })[];
+  isFavorite?: boolean;
 }
 
-export interface FavoriteRecipe extends DbFavorite {
-  recipe?: Recipe;
-} 
+export interface FavoriteRecipe extends Recipe {
+  created_at: string | null;
+  last_cooked: string | null;
+  notes: string | null;
+  rating: number | null;
+  tags: string[] | null;
+}
+
+export type MealCategory = Database['public']['Enums']['meal_category'];
+export type MealType = Database['public']['Enums']['meal_type'];
+export type UnitType = Database['public']['Enums']['unit_type']; 

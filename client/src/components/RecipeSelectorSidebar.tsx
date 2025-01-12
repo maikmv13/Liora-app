@@ -34,8 +34,8 @@ export function RecipeSelectorSidebar({
   const [showFilters, setShowFilters] = useState(false);
 
   const filteredRecipes = sampleRecipes.filter(recipe => {
-    const matchesSearch = recipe.Plato.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesCategory = selectedCategory === 'Todas' || recipe.Categoria === selectedCategory;
+    const matchesSearch = recipe.name.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesCategory = selectedCategory === 'Todas' || recipe.category === selectedCategory;
     return matchesSearch && matchesCategory;
   });
 
@@ -103,7 +103,7 @@ export function RecipeSelectorSidebar({
           <div className="grid grid-cols-1 gap-2 p-4">
             {filteredRecipes.map((recipe) => (
               <button
-                key={recipe.Plato}
+                key={recipe.id}
                 onClick={() => {
                   onSelectRecipe(recipe);
                   onClose();
@@ -112,14 +112,14 @@ export function RecipeSelectorSidebar({
               >
                 <div className="flex-1 min-w-0">
                   <h3 className="font-medium text-gray-900 group-hover:text-emerald-600 transition-colors line-clamp-2">
-                    {recipe.Plato}
+                    {recipe.name}
                   </h3>
-                  <p className="text-sm text-gray-500 mt-1">{recipe.Acompañamiento}</p>
+                  <p className="text-sm text-gray-500 mt-1">{recipe.side_dish}</p>
                   <div className="flex items-center space-x-2 mt-2">
                     <span className="inline-flex items-center px-2 py-1 rounded-md text-xs font-medium bg-gray-100 text-gray-800">
-                      {recipe.Categoria}
+                      {recipe.category}
                     </span>
-                    <span className="text-sm text-gray-500">{recipe.Calorias}</span>
+                    <span className="text-sm text-gray-500">{recipe.calories}</span>
                   </div>
                 </div>
                 <ChevronRight size={20} className="text-gray-400 group-hover:text-emerald-500 transition-colors" />

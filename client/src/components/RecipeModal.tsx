@@ -11,26 +11,28 @@ interface RecipeModalProps {
 }
 
 const mapToRecipe = (cardRecipe: RecipeCardProps['recipe']): Recipe => ({
-  Plato: cardRecipe.id,
-  Acompañamiento: cardRecipe.side_dish,
-  Tipo: cardRecipe.meal_type,
-  Categoria: cardRecipe.category,
-  Comensales: cardRecipe.servings,
-  Calorias: cardRecipe.calories,
-  "Tiempo de preparación": cardRecipe.prep_time,
-  "Valor energético (kJ)": cardRecipe.energy_kj,
-  Grasas: cardRecipe.fats,
-  Saturadas: cardRecipe.saturated_fats,
-  Carbohidratos: cardRecipe.carbohydrates,
-  Azúcares: cardRecipe.sugars,
-  Fibra: cardRecipe.fiber,
-  Proteínas: cardRecipe.proteins,
-  Sodio: cardRecipe.sodium,
-  Instrucciones: cardRecipe.instructions,
-  Ingredientes: [],
-  Url: cardRecipe.url,
-  PDF_Url: cardRecipe.pdf_url,
-  image_url: cardRecipe.image_url
+  id: cardRecipe.id,
+  side_dish: cardRecipe.side_dish,
+  meal_type: cardRecipe.meal_type,
+  category: cardRecipe.category,
+  servings: cardRecipe.servings,
+  calories: cardRecipe.calories,
+  prep_time: cardRecipe.prep_time,
+  energy_kj: cardRecipe.energy_kj,
+  fats: cardRecipe.fats,
+  saturated_fats: cardRecipe.saturated_fats,
+  carbohydrates: cardRecipe.carbohydrates,
+  sugars: cardRecipe.sugars,
+  fiber: cardRecipe.fiber,
+  proteins: cardRecipe.proteins,
+  sodium: cardRecipe.sodium,
+  instructions: cardRecipe.instructions,
+  url: cardRecipe.url,
+  pdf_url: cardRecipe.pdf_url,
+  image_url: cardRecipe.image_url,
+  created_at: cardRecipe.created_at,
+  name: cardRecipe.name,
+  updated_at: cardRecipe.updated_at
 });
 
 export function RecipeModal({ 
