@@ -26,11 +26,11 @@ export function MenuHistory({ history, onRestore, onDelete }: MenuHistoryProps) 
   const calculateDayCalories = (menu: MenuItem[], day: string) => {
     return menu
       .filter(item => item.day === day)
-      .reduce((total, item) => total + parseInt(item.recipe.Calorias.replace(/\D/g, '')), 0);
+      .reduce((total, item) => total + parseInt(item.recipe.calories?.replace(/\D/g, '') || '0'), 0);
   };
 
   const calculateTotalCalories = (menu: MenuItem[]) => {
-    return menu.reduce((total, item) => total + parseInt(item.recipe.Calorias.replace(/\D/g, '')), 0);
+    return menu.reduce((total, item) => total + parseInt(item.recipe.calories?.replace(/\D/g, '') || '0'), 0);
   };
 
   if (history.length === 0) return null;
@@ -114,13 +114,13 @@ export function MenuHistory({ history, onRestore, onDelete }: MenuHistoryProps) 
                           <div className="flex items-center space-x-2 min-w-0">
                             <Utensils size={16} className="text-rose-400 flex-shrink-0" />
                             <span className="text-sm text-gray-600 truncate">
-                              {comida ? comida.recipe.Plato : '-'}
+                              {comida ? comida.recipe.name : '-'}
                             </span>
                           </div>
                           {comida && (
                             <div className="flex items-center space-x-1 bg-rose-50 px-1.5 py-0.5 rounded-lg border border-rose-200">
                               <Flame size={10} className="text-rose-500" />
-                              <span className="text-[10px] font-medium text-rose-600">{comida.recipe.Calorias}</span>
+                              <span className="text-[10px] font-medium text-rose-600">{comida.recipe.calories} kcal</span>
                             </div>
                           )}
                         </div>
@@ -128,13 +128,13 @@ export function MenuHistory({ history, onRestore, onDelete }: MenuHistoryProps) 
                           <div className="flex items-center space-x-2 min-w-0">
                             <Moon size={16} className="text-rose-400 flex-shrink-0" />
                             <span className="text-sm text-gray-600 truncate">
-                              {cena ? cena.recipe.Plato : '-'}
+                              {cena ? cena.recipe.name : '-'}
                             </span>
                           </div>
                           {cena && (
                             <div className="flex items-center space-x-1 bg-rose-50 px-1.5 py-0.5 rounded-lg border border-rose-200">
                               <Flame size={10} className="text-rose-500" />
-                              <span className="text-[10px] font-medium text-rose-600">{cena.recipe.Calorias}</span>
+                              <span className="text-[10px] font-medium text-rose-600">{cena.recipe.calories} kcal</span>
                             </div>
                           )}
                         </div>

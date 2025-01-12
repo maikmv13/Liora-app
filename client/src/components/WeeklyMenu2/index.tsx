@@ -108,11 +108,11 @@ export function WeeklyMenu2({ weeklyMenu, onRecipeSelect, onAddToMenu }: WeeklyM
         for (const meal of ['comida', 'cena'] as const) {
           const validRecipes = recipes.filter((recipe: Recipe) => {
             const isValidForMeal = meal === 'comida' 
-              ? ['Carnes', 'Pescados', 'Pasta', 'Arroces'].includes(recipe.Categoria)
-              : ['Pescados', 'Vegetariano', 'Pasta', 'Ensaladas', 'Sopas'].includes(recipe.Categoria);
+              ? ['Carnes', 'Pescados', 'Pasta', 'Arroces'].includes(recipe.category)
+              : ['Pescados', 'Vegetariano', 'Pasta', 'Ensaladas', 'Sopas'].includes(recipe.category);
             
             // Evitar repetir recetas que ya están en el menú
-            const isNotRepeated = !weeklyMenu.some(item => item.recipe.Plato === recipe.Plato);
+            const isNotRepeated = !weeklyMenu.some(item => item.recipe.name === recipe.name);
             
             return isValidForMeal && isNotRepeated;
           });
@@ -150,7 +150,7 @@ export function WeeklyMenu2({ weeklyMenu, onRecipeSelect, onAddToMenu }: WeeklyM
         const comida = dayMenu.find(item => item.meal === 'comida');
         const cena = dayMenu.find(item => item.meal === 'cena');
         
-        return `*${day}*\n${comida ? `🍳 Comida: ${comida.recipe.Plato}\n` : ''}${cena ? `🌙 Cena: ${cena.recipe.Plato}\n` : ''}\n`;
+        return `*${day}*\n${comida ? `🍳 Comida: ${comida.recipe.name}\n` : ''}${cena ? `🌙 Cena: ${cena.recipe.name}\n` : ''}\n`;
       }).join('');
 
     const encodedMessage = encodeURIComponent(menuContent);

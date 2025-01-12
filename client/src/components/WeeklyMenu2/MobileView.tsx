@@ -83,13 +83,15 @@ export function MobileView({
             {menuItem ? (
               <div className="p-3">
                 <div className="flex items-center justify-between mb-2">
-                  <p className="font-medium text-gray-900">{menuItem.recipe.Plato}</p>
+                  <p className="font-medium text-gray-900">{menuItem.recipe.name}</p>
                   <div className="flex items-center space-x-1 bg-rose-50 px-2 py-0.5 rounded-lg border border-rose-200">
                     <Flame size={12} className="text-rose-500" />
-                    <span className="text-xs font-medium text-rose-600">{menuItem.recipe.Calorias}</span>
+                    <span className="text-xs font-medium text-rose-600">
+                      {menuItem.recipe.calories || '0'} kcal
+                    </span>
                   </div>
                 </div>
-                <p className="text-sm text-gray-500 mb-3">{menuItem.recipe.Acompañamiento}</p>
+                <p className="text-sm text-gray-500 mb-3">{menuItem.recipe.side_dish && <div>Con {menuItem.recipe.side_dish}</div>}</p>
                 
                 <div className="flex gap-2">
                   <button
