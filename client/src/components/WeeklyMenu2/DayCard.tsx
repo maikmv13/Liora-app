@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { MenuItem, MealType } from '../../types';
 import { MealCell } from './MealCell';
 import { ChefHat, Calendar } from 'lucide-react';
+import { supabase } from '../../lib/supabase';
 
 interface DayCardProps {
   day: string;
@@ -11,14 +12,58 @@ interface DayCardProps {
   onViewRecipe: (recipe: MenuItem) => void;
 }
 
+// Agregar los mapeos necesarios
+const dayMapping: Record<string, string> = {
+  'Lunes': 'monday',
+  'Martes': 'tuesday',
+  'Miércoles': 'wednesday',
+  'Jueves': 'thursday',
+  'Viernes': 'friday',
+  'Sábado': 'saturday',
+  'Domingo': 'sunday'
+};
+
+const mealMapping: Record<string, string> = {
+  'desayuno': 'breakfast',
+  'comida': 'lunch',
+  'snack': 'snack',
+  'cena': 'dinner'
+};
+
 export function DayCard({ 
   day, 
   menuItems, 
   onMealClick, 
-  onRemoveMeal,
+  onRemoveMeal: onRemove,
   onViewRecipe 
 }: DayCardProps) {
   const [hoveredMeal, setHoveredMeal] = useState<MealType | null>(null);
+
+  const handleRemove = async (meal: MealType) => {
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error('Usuario no autenticado');
+
+      const { data: activeMenu } = await supabase
+        .from('weekly_menus')
+        .select('id')
+        .eq('status', 'active')
+        .eq('user_id', user.id)
+        .single();
+
+      if (activeMenu) {
+        const fieldName = `${dayMapping[day]}_${mealMapping[meal]}`;
+        await supabase
+          .from('weekly_menus')
+          .update({ [fieldName]: null })
+          .eq('id', activeMenu.id);
+      }
+
+      onRemove(meal);
+    } catch (error) {
+      console.error('Error al eliminar la comida:', error);
+    }
+  };
 
   // Calcular calorías totales del día
   const totalCalorias = menuItems.reduce((total, item) => {
@@ -76,7 +121,7 @@ export function DayCard({
                 menuItem={menuItem}
                 isHovered={hoveredMeal === meal}
                 onMealClick={() => onMealClick(meal)}
-                onRemove={() => onRemoveMeal(meal)}
+                onRemove={() => onRemove(meal)}
                 onViewRecipe={() => menuItem && onViewRecipe(menuItem)}
                 variant={isMainMeal ? 'prominent' : 'compact'}
               />

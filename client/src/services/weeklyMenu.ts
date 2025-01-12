@@ -19,34 +19,34 @@ export interface WeeklyMenuDB {
   start_date: string;
   created_at: string;
   updated_at: string;
-  lunes_desayuno: string | null;
-  lunes_comida: string | null;
-  lunes_snack: string | null;
-  lunes_cena: string | null;
-  martes_desayuno: string | null;
-  martes_comida: string | null;
-  martes_snack: string | null;
-  martes_cena: string | null;
-  miercoles_desayuno: string | null;
-  miercoles_comida: string | null;
-  miercoles_snack: string | null;
-  miercoles_cena: string | null;
-  jueves_desayuno: string | null;
-  jueves_comida: string | null;
-  jueves_snack: string | null;
-  jueves_cena: string | null;
-  viernes_desayuno: string | null;
-  viernes_comida: string | null;
-  viernes_snack: string | null;
-  viernes_cena: string | null;
-  sabado_desayuno: string | null;
-  sabado_comida: string | null;
-  sabado_snack: string | null;
-  sabado_cena: string | null;
-  domingo_desayuno: string | null;
-  domingo_comida: string | null;
-  domingo_snack: string | null;
-  domingo_cena: string | null;
+  monday_breakfast: string | null;
+  monday_lunch: string | null;
+  monday_snack: string | null;
+  monday_dinner: string | null;
+  tuesday_breakfast: string | null;
+  tuesday_lunch: string | null;
+  tuesday_snack: string | null;
+  tuesday_dinner: string | null;
+  wednesday_breakfast: string | null;
+  wednesday_lunch: string | null;
+  wednesday_snack: string | null;
+  wednesday_dinner: string | null;
+  thursday_breakfast: string | null;
+  thursday_lunch: string | null;
+  thursday_snack: string | null;
+  thursday_dinner: string | null;
+  friday_breakfast: string | null;
+  friday_lunch: string | null;
+  friday_snack: string | null;
+  friday_dinner: string | null;
+  saturday_breakfast: string | null;
+  saturday_lunch: string | null;
+  saturday_snack: string | null;
+  saturday_dinner: string | null;
+  sunday_breakfast: string | null;
+  sunday_lunch: string | null;
+  sunday_snack: string | null;
+  sunday_dinner: string | null;
   [key: string]: string | null | Date;
 }
 
@@ -76,14 +76,30 @@ export async function createWeeklyMenu(menuItems: MenuItem[], forUserId?: string
     created_by: user.id
   };
 
+  // Mapeo de días españoles a inglés
+  const dayMapping: Record<string, string> = {
+    'Lunes': 'monday',
+    'Martes': 'tuesday',
+    'Miércoles': 'wednesday',
+    'Jueves': 'thursday',
+    'Viernes': 'friday',
+    'Sábado': 'saturday',
+    'Domingo': 'sunday'
+  };
+
+  // Mapeo de comidas españolas a inglés
+  const mealMapping: Record<string, string> = {
+    'desayuno': 'breakfast',
+    'comida': 'lunch',
+    'snack': 'snack',
+    'cena': 'dinner'
+  };
+
   // Agregar cada receta al menú
   menuItems.forEach(item => {
-    const normalizedDay = item.day.toLowerCase()
-      .normalize('NFD')
-      .replace(/[\u0300-\u036f]/g, '');
-    const fieldName = `${normalizedDay}_${item.meal}`;
-    
-    // Solo guardar el ID de la receta
+    const day = dayMapping[item.day];
+    const meal = mealMapping[item.meal];
+    const fieldName = `${day}_${meal}`;
     menuData[fieldName] = item.recipe.id;
   });
 
@@ -105,45 +121,27 @@ export async function getActiveMenu(userId?: string) {
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) throw new Error('Usuario no autenticado');
 
+  // Primero, obtener el menú activo más reciente
   const { data, error } = await supabase
     .from('weekly_menus')
-    .select(`
-      *,
-      lunes_desayuno(id, name, calories, meal_type, side_dish),
-      lunes_comida(id, name, calories, meal_type, side_dish),
-      lunes_snack(id, name, calories, meal_type, side_dish),
-      lunes_cena(id, name, calories, meal_type, side_dish),
-      martes_desayuno(id, name, calories, meal_type, side_dish),
-      martes_comida(id, name, calories, meal_type, side_dish),
-      martes_snack(id, name, calories, meal_type, side_dish),
-      martes_cena(id, name, calories, meal_type, side_dish),
-      miercoles_desayuno(id, name, calories, meal_type, side_dish),
-      miercoles_comida(id, name, calories, meal_type, side_dish),
-      miercoles_snack(id, name, calories, meal_type, side_dish),
-      miercoles_cena(id, name, calories, meal_type, side_dish),
-      jueves_desayuno(id, name, calories, meal_type, side_dish),
-      jueves_comida(id, name, calories, meal_type, side_dish),
-      jueves_snack(id, name, calories, meal_type, side_dish),
-      jueves_cena(id, name, calories, meal_type, side_dish),
-      viernes_desayuno(id, name, calories, meal_type, side_dish),
-      viernes_comida(id, name, calories, meal_type, side_dish),
-      viernes_snack(id, name, calories, meal_type, side_dish),
-      viernes_cena(id, name, calories, meal_type, side_dish),
-      sabado_desayuno(id, name, calories, meal_type, side_dish),
-      sabado_comida(id, name, calories, meal_type, side_dish),
-      sabado_snack(id, name, calories, meal_type, side_dish),
-      sabado_cena(id, name, calories, meal_type, side_dish),
-      domingo_desayuno(id, name, calories, meal_type, side_dish),
-      domingo_comida(id, name, calories, meal_type, side_dish),
-      domingo_snack(id, name, calories, meal_type, side_dish),
-      domingo_cena(id, name, calories, meal_type, side_dish)
-    `)
+    .select('*')
     .eq('status', 'active')
     .eq('user_id', userId || user.id)
     .order('created_at', { ascending: false })
+    .limit(1)
     .single();
 
-  if (error) throw error;
+  if (error) {
+    // Si hay un error, archivar todos los menús activos y retornar null
+    await supabase
+      .from('weekly_menus')
+      .update({ status: 'archived' })
+      .eq('user_id', userId || user.id)
+      .eq('status', 'active');
+    
+    return null;
+  }
+
   return data;
 }
 
@@ -164,37 +162,7 @@ export async function getMenuHistory() {
 
   const { data, error } = await supabase
     .from('weekly_menus')
-    .select(`
-      *,
-      lunes_desayuno(id, name, calories, meal_type, side_dish),
-      lunes_comida(id, name, calories, meal_type, side_dish),
-      lunes_snack(id, name, calories, meal_type, side_dish),
-      lunes_cena(id, name, calories, meal_type, side_dish),
-      martes_desayuno(id, name, calories, meal_type, side_dish),
-      martes_comida(id, name, calories, meal_type, side_dish),
-      martes_snack(id, name, calories, meal_type, side_dish),
-      martes_cena(id, name, calories, meal_type, side_dish),
-      miercoles_desayuno(id, name, calories, meal_type, side_dish),
-      miercoles_comida(id, name, calories, meal_type, side_dish),
-      miercoles_snack(id, name, calories, meal_type, side_dish),
-      miercoles_cena(id, name, calories, meal_type, side_dish),
-      jueves_desayuno(id, name, calories, meal_type, side_dish),
-      jueves_comida(id, name, calories, meal_type, side_dish),
-      jueves_snack(id, name, calories, meal_type, side_dish),
-      jueves_cena(id, name, calories, meal_type, side_dish),
-      viernes_desayuno(id, name, calories, meal_type, side_dish),
-      viernes_comida(id, name, calories, meal_type, side_dish),
-      viernes_snack(id, name, calories, meal_type, side_dish),
-      viernes_cena(id, name, calories, meal_type, side_dish),
-      sabado_desayuno(id, name, calories, meal_type, side_dish),
-      sabado_comida(id, name, calories, meal_type, side_dish),
-      sabado_snack(id, name, calories, meal_type, side_dish),
-      sabado_cena(id, name, calories, meal_type, side_dish),
-      domingo_desayuno(id, name, calories, meal_type, side_dish),
-      domingo_comida(id, name, calories, meal_type, side_dish),
-      domingo_snack(id, name, calories, meal_type, side_dish),
-      domingo_cena(id, name, calories, meal_type, side_dish)
-    `)
+    .select('*')
     .eq('user_id', user.id)
     .eq('status', 'archived')
     .order('created_at', { ascending: false });
@@ -213,10 +181,14 @@ export async function deleteMenu(menuId: string) {
 }
 
 export async function restoreMenu(menuId: string) {
-  // Primero, archivamos el menú activo actual
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) throw new Error('Usuario no autenticado');
+
+  // Primero, archivamos todos los menús activos
   await supabase
     .from('weekly_menus')
     .update({ status: 'archived' })
+    .eq('user_id', user.id)
     .eq('status', 'active');
 
   // Luego, activamos el menú seleccionado

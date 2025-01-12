@@ -8,108 +8,129 @@ import { supabase } from '../../lib/supabase';
 
 interface MenuHistoryProps {
   onRestore: (menu: MenuItem[]) => void;
+  history: ExtendedWeeklyMenuDB[];
+  onHistoryChange: (value: ExtendedWeeklyMenuDB[] | ((prev: ExtendedWeeklyMenuDB[]) => ExtendedWeeklyMenuDB[])) => void;
+  onMenuArchived: (menu: ExtendedWeeklyMenuDB) => void;
 }
 
-export function MenuHistory({ onRestore }: MenuHistoryProps) {
-  const [history, setHistory] = useState<ExtendedWeeklyMenuDB[]>([]);
-  const [loading, setLoading] = useState(true);
+export function MenuHistory({ onRestore, history, onHistoryChange, onMenuArchived }: MenuHistoryProps) {
+  const [loading, setLoading] = useState(false);
   const [menuCalories, setMenuCalories] = useState<Record<string, number>>({});
   const [convertedMenus, setConvertedMenus] = useState<Record<string, MenuItem[]>>({});
 
   useEffect(() => {
-    loadHistory();
-  }, []);
+    const loadMenuData = async () => {
+      setLoading(true);
+      try {
+        const batchSize = 3; // Procesar 3 menús a la vez
+        const caloriesData: Record<string, number> = {};
+        const convertedData: Record<string, MenuItem[]> = {};
 
-  useEffect(() => {
-    history.forEach(async (menu) => {
-      const calories = await calculateTotalCalories(menu);
-      setMenuCalories(prev => ({ ...prev, [menu.id]: calories }));
-    });
-  }, [history]);
+        for (let i = 0; i < history.length; i += batchSize) {
+          const batch = history.slice(i, i + batchSize);
+          const batchPromises = batch.map(async (menu) => {
+            const items = await convertDBToMenuItems(menu);
+            convertedData[menu.id] = items;
+            
+            const calories = items.reduce((total, item) => 
+              total + parseInt(item.recipe.calories?.replace(/\D/g, '') || '0'), 0
+            );
+            caloriesData[menu.id] = calories;
+          });
 
-  useEffect(() => {
-    history.forEach(async (menu) => {
-      const items = await convertDBToMenuItems(menu);
-      setConvertedMenus(prev => ({ ...prev, [menu.id]: items }));
-    });
-  }, [history]);
+          await Promise.all(batchPromises);
+        }
 
-  const loadHistory = async () => {
-    try {
-      const data = await getMenuHistory();
-      setHistory(data);
-    } catch (error) {
-      console.error('Error al cargar el historial:', error);
-    } finally {
-      setLoading(false);
+        setConvertedMenus(convertedData);
+        setMenuCalories(caloriesData);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    if (history.length > 0) {
+      loadMenuData();
     }
-  };
+  }, [history]);
 
   const handleRestore = async (menuId: string, menu: ExtendedWeeklyMenuDB) => {
     try {
       await restoreMenu(menuId);
-      // Convertir el menú al formato antiguo para la restauración
       const menuItems = await convertDBToMenuItems(menu);
       onRestore(menuItems);
-      loadHistory();
     } catch (error) {
       console.error('Error al restaurar el menú:', error);
     }
   };
 
-  // Función auxiliar para convertir el menú
+  // Primero, agregar los mapeos necesarios
+  const dayMapping: Record<string, string> = {
+    'monday': 'Lunes',
+    'tuesday': 'Martes',
+    'wednesday': 'Miércoles',
+    'thursday': 'Jueves',
+    'friday': 'Viernes',
+    'saturday': 'Sábado',
+    'sunday': 'Domingo'
+  };
+
+  const mealMapping: Record<string, string> = {
+    'breakfast': 'desayuno',
+    'lunch': 'comida',
+    'snack': 'snack',
+    'dinner': 'cena'
+  };
+
+  // Actualizar la función convertDBToMenuItems para hacer una sola llamada a la base de datos
   const convertDBToMenuItems = async (menu: ExtendedWeeklyMenuDB): Promise<MenuItem[]> => {
     const menuItems: MenuItem[] = [];
-    const days = ['lunes', 'martes', 'miercoles', 'jueves', 'viernes', 'sabado', 'domingo'];
-    const meals: MealType[] = ['desayuno', 'comida', 'snack', 'cena'];
+    const days = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];
+    const meals = ['breakfast', 'lunch', 'snack', 'dinner'];
 
-    // Obtener todas las recetas necesarias de una vez
-    const recipeIds = Object.values(menu).filter(value => 
-      typeof value === 'string' && value.length > 0
-    ) as string[];
+    // Recolectar todos los IDs de recetas primero
+    const recipeIds = Object.entries(menu)
+      .filter(([key, value]) => 
+        days.some(day => key.startsWith(day)) && value !== null
+      )
+      .map(([_, value]) => value) as string[];
 
+    // Obtener todas las recetas en una sola llamada
     const { data: recipes } = await supabase
       .from('recipes')
       .select('*')
       .in('id', recipeIds);
 
-    const recipesMap = new Map(
-      recipes?.map((recipe: Recipe) => [recipe.id, recipe]) || []
-    );
+    if (!recipes) return menuItems;
 
-    days.forEach(day => {
-      meals.forEach(meal => {
+    // Crear un mapa para acceso rápido
+    const recipeMap = new Map(recipes.map(recipe => [recipe.id, recipe]));
+
+    // Construir los menuItems usando el mapa
+    for (const day of days) {
+      for (const meal of meals) {
         const fieldName = `${day}_${meal}` as keyof ExtendedWeeklyMenuDB;
         const recipeId = menu[fieldName];
         
-        if (typeof recipeId === 'string' && recipeId.length > 0) {
-          const recipe = recipesMap.get(recipeId);
+        if (recipeId) {
+          const recipe = recipeMap.get(recipeId);
           if (recipe) {
             menuItems.push({
-              day: day.charAt(0).toUpperCase() + day.slice(1),
-              meal,
+              day: dayMapping[day],
+              meal: mealMapping[meal] as MealType,
               recipe
             });
           }
         }
-      });
-    });
+      }
+    }
 
     return menuItems;
-  };
-
-  // Calcular calorías totales para un menú
-  const calculateTotalCalories = async (menu: ExtendedWeeklyMenuDB) => {
-    const menuItems = await convertDBToMenuItems(menu);
-    return menuItems.reduce((total, item) => 
-      total + parseInt(item.recipe.calories?.replace(/\D/g, '') || '0'), 0
-    );
   };
 
   const handleDelete = async (menuId: string) => {
     try {
       await deleteMenu(menuId);
-      setHistory(prev => prev.filter(menu => menu.id !== menuId));
+      onHistoryChange(prev => prev.filter(menu => menu.id !== menuId));
     } catch (error) {
       console.error('Error al eliminar el menú:', error);
     }
@@ -134,6 +155,20 @@ export function MenuHistory({ onRestore }: MenuHistoryProps) {
     return menuItems.filter(item => item.day === day);
   };
 
+  // Agregar función para calcular el número de semana
+  const getWeekNumber = (menu: ExtendedWeeklyMenuDB) => {
+    // Ordenar los menús por fecha de creación, del más nuevo al más antiguo
+    const sortedMenus = [...history].sort((a, b) => 
+      new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+    );
+    
+    // Encontrar el índice del menú actual en el array ordenado
+    const menuIndex = sortedMenus.findIndex(m => m.id === menu.id);
+    
+    // El número de semana será el índice + 1 (para empezar desde 1 en lugar de 0)
+    return sortedMenus.length - menuIndex;
+  };
+
   if (loading) {
     return <div className="text-center py-4">Cargando historial...</div>;
   }
@@ -150,7 +185,7 @@ export function MenuHistory({ onRestore }: MenuHistoryProps) {
       </div>
 
       <div className="grid gap-4">
-        {history.map((historyMenu, index) => (
+        {history.map((historyMenu) => (
           <div 
             key={historyMenu.id}
             className="bg-white/90 backdrop-blur-sm rounded-xl border-2 border-rose-100 overflow-hidden hover:border-rose-200 transition-all duration-200"
@@ -164,7 +199,7 @@ export function MenuHistory({ onRestore }: MenuHistoryProps) {
                   </div>
                   <div>
                     <h4 className="font-medium text-gray-900">
-                      Menú de la semana {history.length - index}
+                      Menú de la semana {getWeekNumber(historyMenu)}
                     </h4>
                     <div className="flex items-center space-x-2 mt-1">
                       <p className="text-sm text-gray-500">
