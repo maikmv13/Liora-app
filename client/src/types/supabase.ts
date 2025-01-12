@@ -6,35 +6,368 @@ export type Json =
   | { [key: string]: Json | undefined }
   | Json[]
 
-export interface Database {
+export type Database = {
   public: {
     Tables: {
-      recipes: {
+      favorites: {
         Row: {
+          created_at: string | null
+          id: string
+          last_cooked: string | null
+          notes: string | null
+          rating: number | null
+          recipe_id: string
+          tags: string[] | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          last_cooked?: string | null
+          notes?: string | null
+          rating?: number | null
+          recipe_id: string
+          tags?: string[] | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          last_cooked?: string | null
+          notes?: string | null
+          rating?: number | null
+          recipe_id?: string
+          tags?: string[] | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "favorites_recipe_id_fkey"
+            columns: ["recipe_id"]
+            isOneToOne: false
+            referencedRelation: "recipes"
+            referencedColumns: ["name"]
+          },
+        ]
+      }
+      ingredients: {
+        Row: {
+          category: Database["public"]["Enums"]["ingredient_category"]
           id: string
           name: string
-          side_dish: string | null
-          meal_type: 'desayuno' | 'comida' | 'cena' | 'snack'
-          category: 'Carnes' | 'Pescados' | 'Vegetariano' | 'Pasta' | 'Sopas' | 'Ensaladas'
-          servings: number
+        }
+        Insert: {
+          category?: Database["public"]["Enums"]["ingredient_category"]
+          id?: string
+          name: string
+        }
+        Update: {
+          category?: Database["public"]["Enums"]["ingredient_category"]
+          id?: string
+          name?: string
+        }
+        Relationships: []
+      }
+      profiles: {
+        Row: {
+          created_at: string | null
+          full_name: string
+          id: string
+          license_number: string | null
+          specialization: string | null
+          updated_at: string | null
+          user_id: string
+          user_type: string
+        }
+        Insert: {
+          created_at?: string | null
+          full_name: string
+          id?: string
+          license_number?: string | null
+          specialization?: string | null
+          updated_at?: string | null
+          user_id: string
+          user_type: string
+        }
+        Update: {
+          created_at?: string | null
+          full_name?: string
+          id?: string
+          license_number?: string | null
+          specialization?: string | null
+          updated_at?: string | null
+          user_id?: string
+          user_type?: string
+        }
+        Relationships: []
+      }
+      recipe_ingredients: {
+        Row: {
+          id: string
+          ingredient_id: string | null
+          quantity: number
+          recipe_id: string | null
+          unit: Database["public"]["Enums"]["unit_type"]
+        }
+        Insert: {
+          id?: string
+          ingredient_id?: string | null
+          quantity: number
+          recipe_id?: string | null
+          unit: Database["public"]["Enums"]["unit_type"]
+        }
+        Update: {
+          id?: string
+          ingredient_id?: string | null
+          quantity?: number
+          recipe_id?: string | null
+          unit?: Database["public"]["Enums"]["unit_type"]
+        }
+        Relationships: [
+          {
+            foreignKeyName: "recipe_ingredients_ingredient_id_fkey"
+            columns: ["ingredient_id"]
+            isOneToOne: false
+            referencedRelation: "ingredients"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "recipe_ingredients_recipe_id_fkey"
+            columns: ["recipe_id"]
+            isOneToOne: false
+            referencedRelation: "recipes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      recipes: {
+        Row: {
           calories: string | null
+          carbohydrates: string | null
+          category: Database["public"]["Enums"]["meal_category"]
+          created_at: string | null
           energy_kj: string | null
           fats: string | null
-          saturated_fats: string | null
-          carbohydrates: string | null
-          sugars: string | null
           fiber: string | null
-          proteins: string | null
-          sodium: string | null
-          prep_time: string | null
-          instructions: Json
-          url: string | null
-          pdf_url: string | null
+          id: string
           image_url: string | null
-          created_at: string
-          updated_at: string
+          instructions: Json
+          meal_type: Database["public"]["Enums"]["meal_type"]
+          name: string
+          pdf_url: string | null
+          prep_time: string | null
+          proteins: string | null
+          saturated_fats: string | null
+          servings: number
+          side_dish: string | null
+          sodium: string | null
+          sugars: string | null
+          updated_at: string | null
+          url: string | null
         }
+        Insert: {
+          calories?: string | null
+          carbohydrates?: string | null
+          category: Database["public"]["Enums"]["meal_category"]
+          created_at?: string | null
+          energy_kj?: string | null
+          fats?: string | null
+          fiber?: string | null
+          id?: string
+          image_url?: string | null
+          instructions: Json
+          meal_type: Database["public"]["Enums"]["meal_type"]
+          name: string
+          pdf_url?: string | null
+          prep_time?: string | null
+          proteins?: string | null
+          saturated_fats?: string | null
+          servings: number
+          side_dish?: string | null
+          sodium?: string | null
+          sugars?: string | null
+          updated_at?: string | null
+          url?: string | null
+        }
+        Update: {
+          calories?: string | null
+          carbohydrates?: string | null
+          category?: Database["public"]["Enums"]["meal_category"]
+          created_at?: string | null
+          energy_kj?: string | null
+          fats?: string | null
+          fiber?: string | null
+          id?: string
+          image_url?: string | null
+          instructions?: Json
+          meal_type?: Database["public"]["Enums"]["meal_type"]
+          name?: string
+          pdf_url?: string | null
+          prep_time?: string | null
+          proteins?: string | null
+          saturated_fats?: string | null
+          servings?: number
+          side_dish?: string | null
+          sodium?: string | null
+          sugars?: string | null
+          updated_at?: string | null
+          url?: string | null
+        }
+        Relationships: []
       }
+    }
+    Views: {
+      [_ in never]: never
+    }
+    Functions: {
+      [_ in never]: never
+    }
+    Enums: {
+      ingredient_category:
+        | "Carnicería"
+        | "Cereales y Derivados"
+        | "Charcutería"
+        | "Condimentos y Especias"
+        | "Frutas"
+        | "Frutos Secos"
+        | "Ingredientes al gusto"
+        | "Lácteos, Huevos y Derivados"
+        | "Legumbres"
+        | "Líquidos y Caldos"
+        | "Otras Categorías"
+        | "Pescadería"
+        | "Salsas y Aderezos"
+        | "Vegetales y Legumbres"
+        | "Aceites"
+        | "Cafés e infusiones"
+        | "Confituras"
+      meal_category:
+        | "Aves"
+        | "Carnes"
+        | "Ensaladas"
+        | "Fast Food"
+        | "Legumbres"
+        | "Pastas y Arroces"
+        | "Pescados"
+        | "Sopas y Cremas"
+        | "Vegetariano"
+        | "Desayuno"
+        | "Huevos"
+        | "Snack"
+        | "Otros"
+      meal_type: "desayuno" | "comida" | "cena" | "snack"
+      unit_type:
+        | "gramo"
+        | "unidad"
+        | "cucharadita"
+        | "cucharada"
+        | "mililitro"
+        | "sobre"
+        | "rebanada"
+        | "vaso"
+        | "pizca"
+        | "litro"
+        | "hoja"
+    }
+    CompositeTypes: {
+      [_ in never]: never
     }
   }
 }
+
+type PublicSchema = Database[Extract<keyof Database, "public">]
+
+export type Tables<
+  PublicTableNameOrOptions extends
+    | keyof (PublicSchema["Tables"] & PublicSchema["Views"])
+    | { schema: keyof Database },
+  TableName extends PublicTableNameOrOptions extends { schema: keyof Database }
+    ? keyof (Database[PublicTableNameOrOptions["schema"]]["Tables"] &
+        Database[PublicTableNameOrOptions["schema"]]["Views"])
+    : never = never,
+> = PublicTableNameOrOptions extends { schema: keyof Database }
+  ? (Database[PublicTableNameOrOptions["schema"]]["Tables"] &
+      Database[PublicTableNameOrOptions["schema"]]["Views"])[TableName] extends {
+      Row: infer R
+    }
+    ? R
+    : never
+  : PublicTableNameOrOptions extends keyof (PublicSchema["Tables"] &
+        PublicSchema["Views"])
+    ? (PublicSchema["Tables"] &
+        PublicSchema["Views"])[PublicTableNameOrOptions] extends {
+        Row: infer R
+      }
+      ? R
+      : never
+    : never
+
+export type TablesInsert<
+  PublicTableNameOrOptions extends
+    | keyof PublicSchema["Tables"]
+    | { schema: keyof Database },
+  TableName extends PublicTableNameOrOptions extends { schema: keyof Database }
+    ? keyof Database[PublicTableNameOrOptions["schema"]]["Tables"]
+    : never = never,
+> = PublicTableNameOrOptions extends { schema: keyof Database }
+  ? Database[PublicTableNameOrOptions["schema"]]["Tables"][TableName] extends {
+      Insert: infer I
+    }
+    ? I
+    : never
+  : PublicTableNameOrOptions extends keyof PublicSchema["Tables"]
+    ? PublicSchema["Tables"][PublicTableNameOrOptions] extends {
+        Insert: infer I
+      }
+      ? I
+      : never
+    : never
+
+export type TablesUpdate<
+  PublicTableNameOrOptions extends
+    | keyof PublicSchema["Tables"]
+    | { schema: keyof Database },
+  TableName extends PublicTableNameOrOptions extends { schema: keyof Database }
+    ? keyof Database[PublicTableNameOrOptions["schema"]]["Tables"]
+    : never = never,
+> = PublicTableNameOrOptions extends { schema: keyof Database }
+  ? Database[PublicTableNameOrOptions["schema"]]["Tables"][TableName] extends {
+      Update: infer U
+    }
+    ? U
+    : never
+  : PublicTableNameOrOptions extends keyof PublicSchema["Tables"]
+    ? PublicSchema["Tables"][PublicTableNameOrOptions] extends {
+        Update: infer U
+      }
+      ? U
+      : never
+    : never
+
+export type Enums<
+  PublicEnumNameOrOptions extends
+    | keyof PublicSchema["Enums"]
+    | { schema: keyof Database },
+  EnumName extends PublicEnumNameOrOptions extends { schema: keyof Database }
+    ? keyof Database[PublicEnumNameOrOptions["schema"]]["Enums"]
+    : never = never,
+> = PublicEnumNameOrOptions extends { schema: keyof Database }
+  ? Database[PublicEnumNameOrOptions["schema"]]["Enums"][EnumName]
+  : PublicEnumNameOrOptions extends keyof PublicSchema["Enums"]
+    ? PublicSchema["Enums"][PublicEnumNameOrOptions]
+    : never
+
+export type CompositeTypes<
+  PublicCompositeTypeNameOrOptions extends
+    | keyof PublicSchema["CompositeTypes"]
+    | { schema: keyof Database },
+  CompositeTypeName extends PublicCompositeTypeNameOrOptions extends {
+    schema: keyof Database
+  }
+    ? keyof Database[PublicCompositeTypeNameOrOptions["schema"]]["CompositeTypes"]
+    : never = never,
+> = PublicCompositeTypeNameOrOptions extends { schema: keyof Database }
+  ? Database[PublicCompositeTypeNameOrOptions["schema"]]["CompositeTypes"][CompositeTypeName]
+  : PublicCompositeTypeNameOrOptions extends keyof PublicSchema["CompositeTypes"]
+    ? PublicSchema["CompositeTypes"][PublicCompositeTypeNameOrOptions]
+    : never

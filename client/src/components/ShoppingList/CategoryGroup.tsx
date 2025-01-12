@@ -1,6 +1,29 @@
 import React from 'react';
 import { ChevronDown, ChevronUp } from 'lucide-react';
 import { ShoppingItem } from '../../types';
+import { Database } from '../../types/supabase';
+
+// Tipo para las categorías de ingredientes desde la base de datos
+type IngredientCategory = Database['public']['Enums']['ingredient_category'];
+
+// Orden definido para las categorías
+export const categoryOrder: IngredientCategory[] = [
+  'Carnicería',
+  'Pescadería',
+  'Charcutería',
+  'Vegetales y Legumbres',
+  'Frutas',
+  'Frutos Secos',
+  'Cereales y Derivados',
+  'Lácteos, Huevos y Derivados',
+  'Líquidos y Caldos',
+  'Condimentos y Especias',
+  'Salsas y Aderezos',
+  'Aceites',
+  'Cafés e infusiones',
+  'Confituras',
+  'Otras Categorías'
+];
 
 interface CategoryGroupProps {
   categoria: string;

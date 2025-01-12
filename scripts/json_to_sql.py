@@ -34,7 +34,7 @@ INSERT INTO recipes (
     name, side_dish, meal_type, category, servings,
     calories, energy_kj, fats, saturated_fats, carbohydrates,
     sugars, fiber, proteins, sodium, prep_time, instructions,
-    url, pdf_url
+    url, pdf_url, image_url
 ) VALUES\n"""
 
     for recipe in recipes:
@@ -56,7 +56,8 @@ INSERT INTO recipes (
     '{recipe['Tiempo de preparación'] or '45'}',
     '{json.dumps(recipe['Instrucciones'])}'::jsonb,
     '{recipe['Url']}',
-    '{recipe['PDF_Url']}'
+    '{recipe['PDF_Url']}',
+    '{recipe.get('image_url', '')}'
 ),\n"""
     sql = sql.rstrip(',\n') + ';\n\n'
 
