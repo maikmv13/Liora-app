@@ -6,24 +6,31 @@ export async function getRecipes(): Promise<Recipe[]> {
     .from('recipes')
     .select(`
       *,
-      recipe_ingredients!inner (
+      recipe_ingredients (
+        id,
+        ingredient_id,
+        recipe_id,
         quantity,
         unit,
-        ingredients!inner (
-          name
+        ingredients (
+          id,
+          name,
+          category
         )
       )
     `);
 
   if (recipesError) throw recipesError;
 
-  // Transformar los datos al formato esperado
   return recipes.map(recipe => ({
     ...recipe,
-    ingredients: recipe.recipe_ingredients.map((ri: any) => ({
-      name: ri.ingredients.name,
+    recipe_ingredients: recipe.recipe_ingredients?.map((ri) => ({
+      id: ri.id,
+      ingredient_id: ri.ingredient_id,
+      recipe_id: ri.recipe_id,
       quantity: ri.quantity,
-      unit: ri.unit
-    }))
+      unit: ri.unit,
+      ingredients: ri.ingredients || undefined
+    })) || []
   }));
 }

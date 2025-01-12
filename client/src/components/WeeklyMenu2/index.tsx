@@ -80,7 +80,7 @@ export function WeeklyMenu2({ weeklyMenu, onRecipeSelect, onAddToMenu }: WeeklyM
   const handleGenerateMenu = async () => {
     if (isGenerating || loading) return;
     
-    // Guardar el menú actual en el historial si tiene elementos
+    // Guardar el menú actual en el historial
     if (weeklyMenu.length > 0) {
       const newHistoryEntry: MenuHistory = {
         id: Date.now().toString(),
@@ -92,47 +92,47 @@ export function WeeklyMenu2({ weeklyMenu, onRecipeSelect, onAddToMenu }: WeeklyM
     
     setIsGenerating(true);
     try {
-      // Limpiar el menú actual
-      for (const day of weekDays) {
-        for (const meal of ['comida', 'cena'] as const) {
-          onAddToMenu(null, day, meal);
-          await new Promise(resolve => setTimeout(resolve, 50));
-        }
-      }
-      
-      // Pequeña pausa antes de generar el nuevo menú
+      // Limpiar el menú actual completamente
+      weekDays.forEach(day => {
+        ['comida', 'cena'].forEach(meal => {
+          onAddToMenu(null, day, meal as 'comida' | 'cena');
+        });
+      });
+
+      // Esperar un momento para que se limpie
       await new Promise(resolve => setTimeout(resolve, 100));
+      
+      // Mantener un registro de las recetas ya seleccionadas
+      const selectedRecipeIds = new Set<string>();
       
       // Generar nuevo menú
       for (const day of weekDays) {
         for (const meal of ['comida', 'cena'] as const) {
           const validRecipes = recipes.filter((recipe: Recipe) => {
             const isValidForMeal = meal === 'comida' 
-              ? ['Carnes', 'Pescados', 'Pasta', 'Arroces'].includes(recipe.category)
-              : ['Pescados', 'Vegetariano', 'Pasta', 'Ensaladas', 'Sopas'].includes(recipe.category);
+              ? ['Aves', 'Carnes', 'Pastas y Arroces', 'Pescados', 'Legumbres'].includes(recipe.category)
+              : ['Ensaladas', 'Sopas y Cremas', 'Vegetariano', 'Pastas y Arroces'].includes(recipe.category);
             
-            // Evitar repetir recetas que ya están en el menú
-            const isNotRepeated = !weeklyMenu.some(item => item.recipe.name === recipe.name);
+            // Evitar repetir recetas usando el Set
+            const isNotRepeated = !selectedRecipeIds.has(recipe.id);
             
             return isValidForMeal && isNotRepeated;
           });
-
+          
           if (validRecipes.length > 0) {
-            const randomRecipe = validRecipes[Math.floor(Math.random() * validRecipes.length)];
-            onAddToMenu(randomRecipe, day, meal);
+            const randomIndex = Math.floor(Math.random() * validRecipes.length);
+            const selectedRecipe = validRecipes[randomIndex];
+            // Añadir el ID al Set de recetas seleccionadas
+            selectedRecipeIds.add(selectedRecipe.id);
             await new Promise(resolve => setTimeout(resolve, 50));
+            onAddToMenu(selectedRecipe, day, meal);
           }
         }
       }
-
-      // Guardar la fecha de generación
-      const now = new Date().toISOString();
-      localStorage.setItem('lastMenuGenerated', now);
-      setLastGenerated(now);
-    } catch (error) {
-      console.error('Error generating menu:', error);
     } finally {
       setIsGenerating(false);
+      localStorage.setItem('lastMenuGenerated', new Date().toISOString());
+      setLastGenerated(new Date().toISOString());
     }
   };
 
