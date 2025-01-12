@@ -1,33 +1,13 @@
-export type MealType = 'desayuno' | 'comida' | 'cena' | 'snack';
+import type { Database } from './supabase';
+import type { Recipe } from './recipe';
 
-export interface Recipe {
-  Plato: string;
-  Acompañamiento: string | null;
-  Tipo: MealType;
-  Categoria: string;
-  Comensales: number;
-  Calorias: string;
-  "Tiempo de preparación": string;
-  "Valor energético (kJ)": string;
-  Grasas: string;
-  Saturadas: string;
-  Carbohidratos: string;
-  Azúcares: string;
-  Fibra: string;
-  Proteínas: string;
-  Sodio: string;
-  Instrucciones: Record<string, string>;
-  Ingredientes: Array<{
-    Nombre: string;
-    Cantidad: number;
-    Unidad: string;
-    Categoria?: string;
-  }>;
-  Url?: string;
-  PDF_Url?: string;
-  image_url?: string;
-}
+// Tipos de la base de datos
+export type MealType = Database['public']['Enums']['meal_type'];
+export type MealCategory = Database['public']['Enums']['meal_category'];
+export type UnitType = Database['public']['Enums']['unit_type'];
+export type IngredientCategory = Database['public']['Enums']['ingredient_category'];
 
+// Interfaces específicas de la aplicación
 export interface MenuItem {
   recipe: Recipe;
   day: string;
@@ -37,44 +17,14 @@ export interface MenuItem {
 export interface ShoppingItem {
   nombre: string;
   cantidad: number;
-  unidad: string;
-  categoria: string;
+  unidad: UnitType;
+  categoria: IngredientCategory;
   comprado: boolean;
   dias: string[];
 }
 
-export interface FavoriteRecipe extends Recipe {
-  addedAt: string;
-  notes?: string;
-  rating: number;
-  lastCooked?: string;
-  tags?: string[];
-}
-
 export interface RecipeCardProps {
-  recipe: {
-    id: string;
-    name: string;
-    side_dish: string | null;
-    meal_type: MealType;
-    category: "Carnes" | "Pescados" | "Pasta" | "Vegetariano" | "Ensaladas" | "Sopas";
-    servings: number;
-    calories: string;
-    prep_time: string;
-    energy_kj: string;
-    fats: string;
-    saturated_fats: string;
-    carbohydrates: string;
-    sugars: string;
-    fiber: string;
-    proteins: string;
-    sodium: string;
-    instructions: Record<string, string>;
-    url?: string;
-    pdf_url?: string;
-    image_url?: string;
-    created_at: string;
-    updated_at: string;
+  recipe: Recipe & {
     isFavorite?: boolean;
   };
   onClick: () => void;

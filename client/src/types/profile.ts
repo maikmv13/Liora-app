@@ -1,11 +1,7 @@
-export interface ProfileData {
-  email: string;
-  created_at: string | null;
-  full_name: string;
-  id: string;
-  license_number: string | null;
-  specialization: string | null;
-  updated_at: string | null;
-  user_id: string;
-  user_type: 'user' | 'nutritionist';
+import type { Database } from './supabase';
+
+type DbProfile = Database['public']['Tables']['profiles']['Row'];
+
+export interface Profile extends DbProfile {
+  // Si necesitamos extender con propiedades adicionales
 } 
