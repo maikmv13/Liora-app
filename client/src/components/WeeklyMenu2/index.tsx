@@ -10,7 +10,8 @@ import { Calendar, Wand2, Share2, Loader2 } from 'lucide-react';
 import { useRecipes } from '../../hooks/useRecipes';
 import { mapRecipeToCardProps } from '../RecipeCard';
 import { generateCompleteMenu } from '../../services/menuGenerator';
-import { archiveMenu, createWeeklyMenu, getActiveMenu } from '../../services/weeklyMenu';
+import { archiveMenu, createWeeklyMenu, getActiveMenu, type WeeklyMenuDB, type RecipeDB } from '../../services/weeklyMenu';
+import { supabase } from '../../lib/supabase';
 
 interface WeeklyMenu2Props {
   readonly weeklyMenu: MenuItem[];
@@ -21,6 +22,83 @@ interface WeeklyMenu2Props {
 
 const DAYS = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domingo'] as const;
 type WeekDay = typeof DAYS[number];
+
+export interface RecipeData extends Recipe {
+  id: string;
+  name: string;
+  calories: string;
+  meal_type: MealType;
+  side_dish: string | null;
+}
+
+export interface ExtendedWeeklyMenuDB extends WeeklyMenuDB {
+  lunes_desayuno: string | null;
+  lunes_comida: string | null;
+  lunes_snack: string | null;
+  lunes_cena: string | null;
+  martes_desayuno: string | null;
+  martes_comida: string | null;
+  martes_snack: string | null;
+  martes_cena: string | null;
+  miercoles_desayuno: string | null;
+  miercoles_comida: string | null;
+  miercoles_snack: string | null;
+  miercoles_cena: string | null;
+  jueves_desayuno: string | null;
+  jueves_comida: string | null;
+  jueves_snack: string | null;
+  jueves_cena: string | null;
+  viernes_desayuno: string | null;
+  viernes_comida: string | null;
+  viernes_snack: string | null;
+  viernes_cena: string | null;
+  sabado_desayuno: string | null;
+  sabado_comida: string | null;
+  sabado_snack: string | null;
+  sabado_cena: string | null;
+  domingo_desayuno: string | null;
+  domingo_comida: string | null;
+  domingo_snack: string | null;
+  domingo_cena: string | null;
+}
+
+async function convertDBToMenuItems(menu: ExtendedWeeklyMenuDB): Promise<MenuItem[]> {
+  const menuItems: MenuItem[] = [];
+  const days = ['lunes', 'martes', 'miercoles', 'jueves', 'viernes', 'sabado', 'domingo'];
+  const meals: MealType[] = ['desayuno', 'comida', 'snack', 'cena'];
+
+  // Obtener todas las recetas necesarias de una vez
+  const recipeIds = Object.values(menu).filter(value => 
+    typeof value === 'string' && value.length > 0
+  ) as string[];
+
+  const { data: recipes } = await supabase
+    .from('recipes')
+    .select('*')
+    .in('id', recipeIds);
+
+  const recipesMap = new Map(recipes?.map(recipe => [recipe.id, recipe]));
+
+  days.forEach(day => {
+    meals.forEach(meal => {
+      const fieldName = `${day}_${meal}` as keyof ExtendedWeeklyMenuDB;
+      const recipeId = menu[fieldName];
+      
+      if (typeof recipeId === 'string' && recipeId.length > 0) {
+        const recipe = recipesMap.get(recipeId);
+        if (recipe) {
+          menuItems.push({
+            day: day.charAt(0).toUpperCase() + day.slice(1),
+            meal,
+            recipe
+          });
+        }
+      }
+    });
+  });
+
+  return menuItems;
+}
 
 export function WeeklyMenu2({ weeklyMenu, onRecipeSelect, onAddToMenu, forUserId }: WeeklyMenu2Props) {
   const { recipes, loading } = useRecipes();
@@ -44,8 +122,9 @@ export function WeeklyMenu2({ weeklyMenu, onRecipeSelect, onAddToMenu, forUserId
         const activeMenu = await getActiveMenu(forUserId);
         if (activeMenu) {
           setCurrentMenuId(activeMenu.id);
-          // Restaurar el menú activo
-          activeMenu.menu_items.forEach(item => {
+          // Convertir y restaurar el menú activo
+          const menuItems = await convertDBToMenuItems(activeMenu as ExtendedWeeklyMenuDB);
+          menuItems.forEach(item => {
             onAddToMenu(item.recipe, item.day, item.meal);
           });
         }
@@ -85,9 +164,12 @@ export function WeeklyMenu2({ weeklyMenu, onRecipeSelect, onAddToMenu, forUserId
   };
 
   const clearMenu = () => {
-    weekDays.forEach(day => {
-      ['desayuno', 'comida', 'snack', 'cena'].forEach(meal => {
-        onAddToMenu(null, day, meal as MealType);
+    const days = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domingo'];
+    const meals: MealType[] = ['desayuno', 'comida', 'snack', 'cena'];
+    
+    days.forEach(day => {
+      meals.forEach(meal => {
+        onAddToMenu(null, day, meal);
       });
     });
   };
@@ -104,19 +186,42 @@ export function WeeklyMenu2({ weeklyMenu, onRecipeSelect, onAddToMenu, forUserId
         await archiveMenu(currentMenuId);
       }
 
-      // Generar y guardar nuevo menú
+      // Verificar que tenemos recetas
+      if (!recipes || recipes.length === 0) {
+        throw new Error('No hay recetas disponibles');
+      }
+
+      console.log('Generando menú con', recipes.length, 'recetas');
+
+      // Generar nuevo menú
       const newMenu = await generateCompleteMenu(recipes);
+      
+      if (!newMenu || newMenu.length === 0) {
+        throw new Error('No se pudo generar el menú');
+      }
+
+      console.log('Menú generado:', newMenu);
+
+      // Guardar el nuevo menú en la base de datos
       const savedMenu = await createWeeklyMenu(newMenu, forUserId);
       setCurrentMenuId(savedMenu.id);
       
-      // Actualizar UI
+      // Actualizar UI con animación
       for (const menuItem of newMenu) {
         await new Promise(resolve => setTimeout(resolve, 50));
         onAddToMenu(menuItem.recipe, menuItem.day, menuItem.meal);
       }
+
+      // Actualizar timestamp
+      const timestamp = new Date().toISOString();
+      setLastGenerated(timestamp);
+      localStorage.setItem('lastMenuGenerated', timestamp);
+
+    } catch (error) {
+      console.error('Error al generar el menú:', error);
+      // Aquí podrías mostrar un mensaje de error al usuario
     } finally {
       setIsGenerating(false);
-      setLastGenerated(new Date().toISOString());
     }
   };
 

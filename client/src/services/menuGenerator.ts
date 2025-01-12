@@ -60,10 +60,15 @@ function isValidSelection(
   lastCategory: string | null
 ): boolean {
   const rules = mealRules[mealType];
-
-  // Verificar si la receta está marcada para el tipo de comida correcto
-  if (recipe.meal_type !== mealType) {
+  
+  // Verificación básica del tipo de comida
+  if (!recipe.meal_type || recipe.meal_type !== mealType) {
     return false;
+  }
+
+  // Si no hay reglas para este tipo de comida, permitir cualquier receta
+  if (!rules) {
+    return true;
   }
 
   // Verificar si la categoría está permitida para este tipo de comida
@@ -105,8 +110,16 @@ export function generateMenuForDay(
   mealType: MealType,
   existingMenu: MenuItem[]
 ): Recipe | null {
-  const validRecipes = recipes.filter(recipe => {
-    const dayIndex = existingMenu.length / 2; // Asumiendo 2 comidas por día
+  // Filtrar primero por tipo de comida
+  const mealTypeRecipes = recipes.filter(recipe => recipe.meal_type === mealType);
+  
+  if (mealTypeRecipes.length === 0) {
+    console.warn(`No hay recetas para el tipo de comida: ${mealType}`);
+    return null;
+  }
+
+  const validRecipes = mealTypeRecipes.filter(recipe => {
+    const dayIndex = Math.floor(existingMenu.length / 4); // 4 comidas por día
     const lastMenuItem = existingMenu[existingMenu.length - 1];
     const lastCategory = lastMenuItem ? lastMenuItem.recipe.category : null;
     
@@ -129,31 +142,57 @@ export function generateMenuForDay(
     );
   });
 
-  if (validRecipes.length === 0) return null;
+  if (validRecipes.length === 0) {
+    // Si no hay recetas válidas, retornar cualquier receta del tipo correcto
+    return mealTypeRecipes[Math.floor(Math.random() * mealTypeRecipes.length)];
+  }
   
-  const randomIndex = Math.floor(Math.random() * validRecipes.length);
-  return validRecipes[randomIndex];
+  return validRecipes[Math.floor(Math.random() * validRecipes.length)];
 }
 
 export async function generateCompleteMenu(recipes: Recipe[]): Promise<MenuItem[]> {
   const weekDays = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domingo'];
+  const mealTypes: MealType[] = ['desayuno', 'comida', 'snack', 'cena'];
   const newMenu: MenuItem[] = [];
   const selectedRecipeIds = new Set<string>();
 
+  // Agrupar recetas por tipo de comida
+  const recipesByMealType = recipes.reduce((acc, recipe) => {
+    if (!acc[recipe.meal_type]) {
+      acc[recipe.meal_type] = [];
+    }
+    acc[recipe.meal_type].push(recipe);
+    return acc;
+  }, {} as Record<MealType, Recipe[]>);
+
+  // Generar menú para cada día y tipo de comida
   for (const day of weekDays) {
-    for (const meal of ['comida', 'cena', 'desayuno', 'snack'] as MealType[]) {
-      const recipe = generateMenuForDay(
-        recipes.filter(r => !selectedRecipeIds.has(r.id)),
-        meal,
-        newMenu
-      );
+    for (const meal of mealTypes) {
+      let recipe: Recipe | null = null;
+      
+      // Si no hay recetas para este tipo de comida, usar una receta de comida
+      const availableRecipes = recipesByMealType[meal] || recipesByMealType['comida'];
+      
+      if (availableRecipes && availableRecipes.length > 0) {
+        // Intentar encontrar una receta no usada
+        const unusedRecipes = availableRecipes.filter(r => !selectedRecipeIds.has(r.id));
+        if (unusedRecipes.length > 0) {
+          recipe = unusedRecipes[Math.floor(Math.random() * unusedRecipes.length)];
+        } else {
+          // Si todas están usadas, usar cualquiera
+          recipe = availableRecipes[Math.floor(Math.random() * availableRecipes.length)];
+        }
+      }
 
       if (recipe) {
         selectedRecipeIds.add(recipe.id);
         newMenu.push({
           day,
           meal,
-          recipe
+          recipe: {
+            ...recipe,
+            meal_type: meal // Forzar el tipo de comida correcto
+          }
         });
       }
     }
