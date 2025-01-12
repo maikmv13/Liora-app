@@ -11,9 +11,12 @@ interface ProfileData {
   full_name: string;
   user_type: 'user' | 'nutritionist';
   email: string;
-  specialization?: string;
-  license_number?: string;
-  created_at: string;
+  specialization: string | null;
+  license_number: string | null;
+  created_at: string | null;
+  updated_at: string | null;
+  id: string;
+  user_id: string;
 }
 
 export function Profile() {
@@ -52,7 +55,8 @@ export function Profile() {
 
         setProfile({
           ...profileData,
-          email: user.email || ''
+          email: user.email || '',
+          user_type: profileData.user_type as 'user' | 'nutritionist'
         });
       }
     } catch (error) {
@@ -103,7 +107,7 @@ export function Profile() {
             fullName={profile.full_name}
             userType={profile.user_type}
             email={profile.email}
-            createdAt={profile.created_at}
+            createdAt={profile.created_at || ''}
             onLogout={handleLogout}
             onEditProfile={() => {/* TODO: Implementar edición */}}
           />

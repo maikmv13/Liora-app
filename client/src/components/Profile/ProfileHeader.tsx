@@ -5,7 +5,7 @@ interface ProfileHeaderProps {
   fullName: string;
   userType: 'user' | 'nutritionist';
   email: string;
-  createdAt: string;
+  createdAt: string | null;
   onLogout: () => void;
   onEditProfile: () => void;
 }
@@ -58,7 +58,7 @@ export function ProfileHeader({
               <div className="bg-rose-50 p-2 rounded-lg">
                 <Settings size={18} className="text-rose-500" />
               </div>
-              <span>Miembro desde {new Date(createdAt).toLocaleDateString()}</span>
+              <span>Miembro desde {new Date(createdAt || Date.now()).toLocaleDateString()}</span>
             </div>
           </div>
 
