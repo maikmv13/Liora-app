@@ -1,3 +1,5 @@
+import type { MenuItem } from './index';
+
 export type Json =
   | string
   | number
@@ -214,6 +216,33 @@ export type Database = {
           url?: string | null
         }
         Relationships: []
+      }
+      weekly_menus: {
+        Row: {
+          id: string;
+          user_id: string;
+          created_by: string;
+          status: 'active' | 'archived';
+          start_date: string;
+          menu_items: {
+            recipe: {
+              id: string;
+              name: string;
+              category: string;
+              meal_type: Database["public"]["Enums"]["meal_type"];
+            };
+            day: string;
+            meal: Database["public"]["Enums"]["meal_type"];
+          }[];
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          // campos para inserción
+        };
+        Update: {
+          // campos para actualización
+        };
       }
     }
     Views: {

@@ -9,11 +9,14 @@ import { weekDays } from './utils';
 import { Calendar, Wand2, Share2, Loader2 } from 'lucide-react';
 import { useRecipes } from '../../hooks/useRecipes';
 import { mapRecipeToCardProps } from '../RecipeCard';
+import { generateCompleteMenu } from '../../services/menuGenerator';
+import { archiveMenu, createWeeklyMenu } from '../../services/weeklyMenu';
 
 interface WeeklyMenu2Props {
   readonly weeklyMenu: MenuItem[];
   readonly onRecipeSelect: (recipe: Recipe) => void;
-  readonly onAddToMenu: (recipe: Recipe | null, day: string, meal: 'comida' | 'cena') => void;
+  readonly onAddToMenu: (recipe: Recipe | null, day: string, meal: MealType) => void;
+  readonly forUserId?: string;
 }
 
 interface MenuHistory {
@@ -25,7 +28,7 @@ interface MenuHistory {
 const DAYS = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domingo'] as const;
 type WeekDay = typeof DAYS[number];
 
-export function WeeklyMenu2({ weeklyMenu, onRecipeSelect, onAddToMenu }: WeeklyMenu2Props) {
+export function WeeklyMenu2({ weeklyMenu, onRecipeSelect, onAddToMenu, forUserId }: WeeklyMenu2Props) {
   const { recipes, loading } = useRecipes();
   const [selectedDay, setSelectedDay] = useState<WeekDay>('Lunes');
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -42,6 +45,7 @@ export function WeeklyMenu2({ weeklyMenu, onRecipeSelect, onAddToMenu }: WeeklyM
     const saved = localStorage.getItem('menuHistory');
     return saved ? JSON.parse(saved) : [];
   });
+  const [currentMenuId, setCurrentMenuId] = useState<string | null>(null);
 
   useEffect(() => {
     localStorage.setItem('menuHistory', JSON.stringify(menuHistory));
@@ -80,54 +84,24 @@ export function WeeklyMenu2({ weeklyMenu, onRecipeSelect, onAddToMenu }: WeeklyM
   const handleGenerateMenu = async () => {
     if (isGenerating || loading) return;
     
-    // Guardar el menú actual en el historial
-    if (weeklyMenu.length > 0) {
-      const newHistoryEntry: MenuHistory = {
-        id: Date.now().toString(),
-        date: new Date().toISOString(),
-        menu: [...weeklyMenu]
-      };
-      setMenuHistory(prev => [newHistoryEntry, ...prev]);
-    }
-    
     setIsGenerating(true);
     try {
-      // Limpiar el menú actual completamente
-      weekDays.forEach(day => {
-        ['comida', 'cena'].forEach(meal => {
-          onAddToMenu(null, day, meal as 'comida' | 'cena');
-        });
-      });
+      // Archivar el menú actual si existe
+      if (weeklyMenu.length > 0) {
+        await archiveMenu(currentMenuId);
+      }
 
-      // Esperar un momento para que se limpie
-      await new Promise(resolve => setTimeout(resolve, 100));
-      
-      // Mantener un registro de las recetas ya seleccionadas
-      const selectedRecipeIds = new Set<string>();
-      
       // Generar nuevo menú
-      for (const day of weekDays) {
-        for (const meal of ['comida', 'cena'] as const) {
-          const validRecipes = recipes.filter((recipe: Recipe) => {
-            const isValidForMeal = meal === 'comida' 
-              ? ['Aves', 'Carnes', 'Pastas y Arroces', 'Pescados', 'Legumbres'].includes(recipe.category)
-              : ['Ensaladas', 'Sopas y Cremas', 'Vegetariano', 'Pastas y Arroces'].includes(recipe.category);
-            
-            // Evitar repetir recetas usando el Set
-            const isNotRepeated = !selectedRecipeIds.has(recipe.id);
-            
-            return isValidForMeal && isNotRepeated;
-          });
-          
-          if (validRecipes.length > 0) {
-            const randomIndex = Math.floor(Math.random() * validRecipes.length);
-            const selectedRecipe = validRecipes[randomIndex];
-            // Añadir el ID al Set de recetas seleccionadas
-            selectedRecipeIds.add(selectedRecipe.id);
-            await new Promise(resolve => setTimeout(resolve, 50));
-            onAddToMenu(selectedRecipe, day, meal);
-          }
-        }
+      const newMenu = await generateCompleteMenu(recipes);
+      
+      // Guardar en Supabase
+      const savedMenu = await createWeeklyMenu(newMenu, forUserId);
+      setCurrentMenuId(savedMenu.id);
+      
+      // Actualizar la UI
+      for (const menuItem of newMenu) {
+        await new Promise(resolve => setTimeout(resolve, 50));
+        onAddToMenu(menuItem.recipe, menuItem.day, menuItem.meal);
       }
     } finally {
       setIsGenerating(false);

@@ -1,7 +1,7 @@
 import type { Database } from './supabase';
 import type { Recipe } from './recipe';
 
-export type MealType = Database['public']['Enums']['meal_type'];
+export type MealType = 'comida' | 'cena' | 'desayuno' | 'snack';
 export type UnitType = Database['public']['Enums']['unit_type'];
 export type IngredientCategory = Database['public']['Enums']['ingredient_category'];
 

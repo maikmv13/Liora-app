@@ -1,10 +1,8 @@
-import { Recipe, MenuItem } from '../types';
-
-type DinnerMealType = 'comida' | 'cena';
+import { Recipe, MenuItem, MealType } from '../types';
 
 interface MenuRules {
   allowedCategories: string[];
-  restrictedCategories: {
+  restrictedCategories?: {
     'Fast Food': { startDay: number; };
   };
   weeklyLimits?: {
@@ -21,7 +19,7 @@ interface MenuStats {
   proteinMealsToday: number;
 }
 
-const mealRules: Record<DinnerMealType, MenuRules> = {
+const mealRules: Record<MealType, MenuRules> = {
   comida: {
     allowedCategories: ['Aves', 'Carnes', 'Pastas y Arroces', 'Pescados', 'Legumbres'],
     restrictedCategories: {
@@ -37,12 +35,24 @@ const mealRules: Record<DinnerMealType, MenuRules> = {
     restrictedCategories: {
       'Fast Food': { startDay: 4 }
     }
+  },
+  desayuno: {
+    allowedCategories: ['Cereales', 'Frutas', 'Lácteos'],
+    restrictedCategories: {
+      'Fast Food': { startDay: 7 }
+    }
+  },
+  snack: {
+    allowedCategories: ['Frutas', 'Nueces', 'Yogur'],
+    restrictedCategories: {
+      'Fast Food': { startDay: 7 }
+    }
   }
 };
 
 function isValidSelection(
   recipe: Recipe,
-  mealType: DinnerMealType,
+  mealType: MealType,
   day: string,
   dayIndex: number,
   stats: MenuStats,
@@ -58,12 +68,14 @@ function isValidSelection(
 
   // Verificar si la categoría está permitida para este tipo de comida
   if (!rules.allowedCategories.includes(recipe.category) &&
-      !Object.keys(rules.restrictedCategories).includes(recipe.category)) {
+      !(rules.restrictedCategories && Object.keys(rules.restrictedCategories).includes(recipe.category))) {
     return false;
   }
 
   // Verificar restricciones de Fast Food
-  if (recipe.category === 'Fast Food' && dayIndex < rules.restrictedCategories['Fast Food'].startDay) {
+  if (recipe.category === 'Fast Food' && 
+      rules.restrictedCategories && 
+      dayIndex < rules.restrictedCategories['Fast Food'].startDay) {
     return false;
   }
 
@@ -90,7 +102,7 @@ function isValidSelection(
 
 export function generateMenuForDay(
   recipes: Recipe[],
-  mealType: DinnerMealType,
+  mealType: MealType,
   existingMenu: MenuItem[]
 ): Recipe | null {
   const validRecipes = recipes.filter(recipe => {
@@ -121,4 +133,31 @@ export function generateMenuForDay(
   
   const randomIndex = Math.floor(Math.random() * validRecipes.length);
   return validRecipes[randomIndex];
+}
+
+export async function generateCompleteMenu(recipes: Recipe[]): Promise<MenuItem[]> {
+  const weekDays = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domingo'];
+  const newMenu: MenuItem[] = [];
+  const selectedRecipeIds = new Set<string>();
+
+  for (const day of weekDays) {
+    for (const meal of ['comida', 'cena', 'desayuno', 'snack'] as MealType[]) {
+      const recipe = generateMenuForDay(
+        recipes.filter(r => !selectedRecipeIds.has(r.id)),
+        meal,
+        newMenu
+      );
+
+      if (recipe) {
+        selectedRecipeIds.add(recipe.id);
+        newMenu.push({
+          day,
+          meal,
+          recipe
+        });
+      }
+    }
+  }
+
+  return newMenu;
 } 
