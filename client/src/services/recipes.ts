@@ -1,5 +1,5 @@
 import { supabase } from '../lib/supabaseClient.ts';
-import type { Recipe } from '../types';
+import type { Recipe, RecipeIngredient } from '../types';
 
 export async function getRecipes(): Promise<Recipe[]> {
   const { data: recipes, error: recipesError } = await supabase
@@ -24,13 +24,9 @@ export async function getRecipes(): Promise<Recipe[]> {
 
   return recipes.map(recipe => ({
     ...recipe,
-    recipe_ingredients: recipe.recipe_ingredients?.map((ri) => ({
-      id: ri.id,
-      ingredient_id: ri.ingredient_id,
-      recipe_id: ri.recipe_id,
-      quantity: ri.quantity,
-      unit: ri.unit,
-      ingredients: ri.ingredients || undefined
+    recipe_ingredients: recipe.recipe_ingredients?.map((ri: RecipeIngredient) => ({
+      ...ri,
+      ingredients: ri.ingredients
     })) || []
   }));
 }

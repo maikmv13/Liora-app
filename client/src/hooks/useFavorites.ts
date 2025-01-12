@@ -17,33 +17,23 @@ export function useFavorites() {
           return;
         }
 
-        const { data, error } = await supabase
+        const { data } = await supabase
           .from('favorites')
-          .select(`
-            id,
-            user_id,
-            recipe_id,
-            created_at,
-            notes,
-            rating,
-            last_cooked,
-            tags,
-            recipes (*)
-          `)
+          .select('*, recipes(*)')
           .eq('user_id', session.user.id);
 
-        if (error) throw error;
-
-        const convertedFavorites: FavoriteRecipe[] = (data || []).map(fav => ({
-          ...fav.recipes,
-          created_at: fav.created_at ?? new Date().toISOString(),
-          last_cooked: fav.last_cooked,
-          notes: fav.notes ?? '',
-          rating: fav.rating ?? 0,
-          tags: fav.tags ?? []
-        }));
-
-        setFavorites(convertedFavorites);
+        if (data) {
+          setFavorites(data.map(fav => ({
+            ...fav.recipes,
+            created_at: fav.created_at,
+            last_cooked: fav.last_cooked,
+            notes: fav.notes,
+            rating: fav.rating,
+            tags: fav.tags
+          })) as FavoriteRecipe[] || []);
+        } else {
+          setFavorites([]);
+        }
       } catch (e) {
         setError(e as Error);
         console.error('Error fetching favorites:', e);

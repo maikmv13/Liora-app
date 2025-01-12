@@ -29,5 +29,18 @@ export interface RecipeCardProps {
   onToggleFavorite: () => void;
 }
 
+export interface RecipeIngredient {
+  id: string;
+  ingredient_id: string;
+  recipe_id: string;
+  quantity: number;
+  unit: string;
+  ingredients?: {
+    id: string;
+    name: string;
+    category: string;
+  };
+}
+
 export * from './recipe';
 export * from './profile';

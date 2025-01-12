@@ -62,7 +62,7 @@ function App() {
     }
   };
 
-  const handleAddToMenu = (recipe: Recipe | null, day: string, meal: "comida" | "cena") => {
+  const handleAddToMenu = (recipe: Recipe | null, day: string, meal: MealType) => {
     if (recipe) {
       setWeeklyMenu(prev => [...prev, { recipe, day, meal }]);
     }

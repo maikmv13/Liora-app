@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { supabase } from '../lib/supabase';
-import type { Recipe } from '../types';
+import type { Recipe, RecipeIngredient } from '../types';
 
 export function useRecipes() {
   const [recipes, setRecipes] = useState<Recipe[]>([]);
@@ -41,13 +41,9 @@ export function useRecipes() {
         // Convertir el formato de Supabase al formato esperado por la aplicación
         const convertedRecipes: Recipe[] = data.map(recipe => ({
           ...recipe,
-          recipe_ingredients: recipe.recipe_ingredients?.map((ri) => ({
+          recipe_ingredients: recipe.recipe_ingredients?.map((ri: RecipeIngredient) => ({
             ...ri,
-            ingredients: ri.ingredients ? {
-              id: ri.ingredients.id,
-              name: ri.ingredients.name,
-              category: ri.ingredients.category
-            } : undefined
+            ingredients: ri.ingredients
           })) || []
         }));
 
