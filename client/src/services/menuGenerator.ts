@@ -90,15 +90,31 @@ function isValidSelection(
 
 export function generateMenuForDay(
   recipes: Recipe[],
-  meal: 'comida' | 'cena',
+  mealType: DinnerMealType,
   existingMenu: MenuItem[]
 ): Recipe | null {
   const validRecipes = recipes.filter(recipe => {
-    // Implementar reglas de selección:
-    // 1. Categorías apropiadas para comida/cena
-    // 2. No repetir recetas
-    // 3. Balancear tipos de comida
-    return true;
+    const dayIndex = existingMenu.length / 2; // Asumiendo 2 comidas por día
+    const lastMenuItem = existingMenu[existingMenu.length - 1];
+    const lastCategory = lastMenuItem ? lastMenuItem.recipe.category : null;
+    
+    const stats: MenuStats = {
+      weeklyLimitCount: {},
+      categoryCount: {},
+      consecutiveCategories: {},
+      healthyCategoriesUsed: new Set(),
+      proteinMealsToday: 0
+    };
+
+    return isValidSelection(
+      recipe,
+      mealType,
+      new Date().toISOString(),
+      dayIndex,
+      stats,
+      existingMenu,
+      lastCategory
+    );
   });
 
   if (validRecipes.length === 0) return null;
