@@ -210,6 +210,27 @@ export function WeightGoalModal({
     </div>
   );
 
+  const renderTargetSelection = () => (
+    <div className="space-y-4">
+      <h4 className="font-medium text-gray-900 mb-3">Define tu objetivo de peso</h4>
+      <div className="space-y-4">
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-2">
+            Peso objetivo (kg)
+          </label>
+          <input
+            type="number"
+            value={newTarget}
+            onChange={(e) => setNewTarget(e.target.value)}
+            className="w-full px-4 py-2.5 rounded-xl border border-gray-200 focus:ring-2 focus:ring-rose-500 focus:border-rose-500"
+            step="0.1"
+            required
+          />
+        </div>
+      </div>
+    </div>
+  );
+
   const renderPlanConfirmation = () => (
     <div className="space-y-6">
       <div className="bg-gradient-to-br from-rose-50 to-orange-50 p-4 rounded-xl border border-rose-100">

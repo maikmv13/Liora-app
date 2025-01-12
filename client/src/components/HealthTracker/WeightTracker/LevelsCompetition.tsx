@@ -1,6 +1,4 @@
-import React from 'react';
 import { X, Trophy, Crown, Star, Award, Zap, Shield, Target, Flame, Gift, Medal } from 'lucide-react';
-import confetti from 'canvas-confetti';
 
 interface LevelsCompetitionProps {
   isOpen: boolean;

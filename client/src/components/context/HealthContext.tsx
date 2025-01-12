@@ -1,5 +1,4 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import { WeightEntry } from '../HealthTracker/WeightTracker/types';
 
 interface HealthContextType {
   totalXP: number;
