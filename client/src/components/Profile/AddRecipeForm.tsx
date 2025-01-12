@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import { X, Plus, ChefHat, Clock, Users, Image } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
+import { Database } from '../../types/supabase';
+type UnitType = Database['public']['Enums']['unit_type'];
 
 interface AddRecipeFormProps {
   onClose: () => void;
@@ -9,7 +11,7 @@ interface AddRecipeFormProps {
 interface Ingredient {
   name: string;
   quantity: number;
-  unit: string;
+  unit: UnitType;
 }
 
 interface Instruction {
@@ -31,7 +33,7 @@ export function AddRecipeForm({ onClose }: AddRecipeFormProps) {
     image_url: ''
   });
 
-  const [currentIngredient, setCurrentIngredient] = useState({
+  const [currentIngredient, setCurrentIngredient] = useState<Ingredient>({
     name: '',
     quantity: 0,
     unit: 'gramo'
@@ -293,7 +295,10 @@ export function AddRecipeForm({ onClose }: AddRecipeFormProps) {
                   />
                   <select
                     value={currentIngredient.unit}
-                    onChange={(e) => setCurrentIngredient(prev => ({ ...prev, unit: e.target.value }))}
+                    onChange={(e) => setCurrentIngredient(prev => ({ 
+                      ...prev, 
+                      unit: e.target.value as UnitType 
+                    }))}
                     className="w-32 px-4 py-2.5 rounded-xl border border-rose-100 focus:ring-2 focus:ring-rose-500"
                   >
                     <option value="gramo">gramos</option>

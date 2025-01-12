@@ -189,6 +189,12 @@ export function ShoppingList({ items, onToggleItem }: ShoppingListProps) {
 
           if (visibleItems.length === 0) return null;
 
+          console.log('Rendering CategoryGroup:', {
+            categoria,
+            items: visibleItems,
+            isExpanded: expandedCategories.includes(categoria)
+          });
+
           return (
             <CategoryGroup
               key={categoria}
