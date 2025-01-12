@@ -41,7 +41,7 @@ export function Header({
 
           {/* Botones de acción */}
           <div className="flex items-center space-x-2 md:space-x-3">
-            {activeTab !== 'peso' && (
+            {activeTab !== 'salud' && (
               <button
                 onClick={() => setShowSearch(!showSearch)}
                 className="p-2 hover:bg-white/10 rounded-lg transition-colors text-white"

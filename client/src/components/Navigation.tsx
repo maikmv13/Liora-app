@@ -1,5 +1,6 @@
 import React from 'react';
-import { ChefHat, Calendar, ShoppingCart, Heart, Scale } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import { ChefHat, Calendar, ShoppingCart, Heart, Activity } from 'lucide-react';
 
 interface NavigationProps {
   activeTab: string;
@@ -8,6 +9,14 @@ interface NavigationProps {
 }
 
 export function Navigation({ activeTab, onTabChange, orientation = 'horizontal' }: NavigationProps) {
+  const navigate = useNavigate();
+
+  const handleTabChange = (id: string) => {
+    console.log('Navigation: changing to', id);
+    onTabChange(id);
+    navigate(`/${id}`);
+  };
+
   const navItems = [
     { 
       id: 'recetas', 
@@ -34,10 +43,10 @@ export function Navigation({ activeTab, onTabChange, orientation = 'horizontal' 
       description: 'Guardados'
     },
     {
-      id: 'peso',
-      icon: Scale,
-      label: 'Peso',
-      description: 'Control'
+      id: 'salud',
+      icon: Activity,
+      label: 'Salud',
+      description: 'Bienestar'
     }
   ];
 
@@ -47,7 +56,7 @@ export function Navigation({ activeTab, onTabChange, orientation = 'horizontal' 
         {navItems.map(({ id, icon: Icon, label }) => (
           <button
             key={id}
-            onClick={() => onTabChange(id)}
+            onClick={() => handleTabChange(id)}
             className={`w-full flex items-center space-x-3 px-4 py-2.5 rounded-lg transition-colors ${
               activeTab === id
                 ? 'bg-white/10 text-white'
@@ -73,7 +82,7 @@ export function Navigation({ activeTab, onTabChange, orientation = 'horizontal' 
           {navItems.map(({ id, icon: Icon, label, description }) => (
             <button
               key={id}
-              onClick={() => onTabChange(id)}
+              onClick={() => handleTabChange(id)}
               className={`group flex-1 py-3 md:py-4 transition-all duration-200 relative ${
                 activeTab === id
                   ? 'text-rose-500'

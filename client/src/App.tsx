@@ -7,7 +7,6 @@ import { RecipeModal } from './components/RecipeModal';
 import { WeeklyMenu2 as WeeklyMenu } from './components/WeeklyMenu2';
 import { ShoppingList } from './components/ShoppingList';
 import { Favorites } from './components/Favorites';
-import { WeightTracker } from './components/WeightTracker';
 import { HealthyPlateGuide } from './components/HealthyPlateGuide';
 import { Login } from './components/Login';
 import { Profile } from './components/Profile';
@@ -15,6 +14,8 @@ import { supabase } from './lib/supabase';
 import { useRecipes } from './hooks/useRecipes';
 import { RecipeContent } from './components/RecipeList/RecipeContent';
 import { mapRecipeToCardProps } from './components/RecipeCard';
+import { HealthProvider } from './components/context/HealthContext';
+import { HealthTracker } from './components/HealthTracker';
 
 function App() {
   const navigate = useNavigate();
@@ -273,10 +274,6 @@ function App() {
             }
           />
           <Route 
-            path="/peso" 
-            element={<WeightTracker />}
-          />
-          <Route 
             path="/plato" 
             element={<HealthyPlateGuide />}
           />
@@ -284,6 +281,18 @@ function App() {
             path="/perfil" 
             element={
               user ? <Profile /> : <Navigate to="/recetas" replace />
+            }
+          />
+          <Route 
+            path="/salud" 
+            element={
+              <HealthProvider>
+                <div className="p-4 md:p-6">
+                  <div className="max-w-6xl mx-auto">
+                    <HealthTracker />
+                  </div>
+                </div>
+              </HealthProvider>
             }
           />
         </Routes>
