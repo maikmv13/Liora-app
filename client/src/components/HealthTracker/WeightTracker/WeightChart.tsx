@@ -116,7 +116,7 @@ export function WeightChart({
           padding: 20,
           font: {
             size: 12,
-            weight: '500'
+            weight: 'normal' as const
           },
           boxWidth: 6,
           boxHeight: 6
