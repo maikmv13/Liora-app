@@ -1,5 +1,5 @@
 import { MenuItem, ShoppingItem } from '../types';
-import { categoryOrder } from '../data/categories';
+import { categoryOrder } from '../types/categories';
 
 export function generateShoppingList(menuItems: MenuItem[]): ShoppingItem[] {
   console.log('Generating shopping list for:', menuItems);
@@ -51,8 +51,8 @@ export function generateShoppingList(menuItems: MenuItem[]): ShoppingItem[] {
   
   // Sort by category and then by name
   const sortedList = shoppingList.sort((a, b) => {
-    const categoryIndexA = categoryOrder.indexOf(a.category);
-    const categoryIndexB = categoryOrder.indexOf(b.category);
+    const categoryIndexA = categoryOrder.indexOf(a.category as any);
+    const categoryIndexB = categoryOrder.indexOf(b.category as any);
     
     if (categoryIndexA !== categoryIndexB) {
       return categoryIndexA - categoryIndexB;

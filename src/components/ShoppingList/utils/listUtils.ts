@@ -1,5 +1,5 @@
 import { ShoppingItem } from '../../../types';
-import { categoryOrder } from '../../../data/categories';
+import { categoryOrder } from '../../../types/categories';
 
 export function filterAndSortItems(
   items: ShoppingItem[],

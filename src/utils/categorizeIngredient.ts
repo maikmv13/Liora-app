@@ -1,4 +1,4 @@
-import { foodCategories } from '../data/categories';
+import { foodCategories } from '../types/categories';
 import { Database } from '../types/supabase';
 
 type IngredientCategory = Database['public']['Enums']['ingredient_category'];

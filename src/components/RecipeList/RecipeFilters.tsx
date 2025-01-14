@@ -1,7 +1,7 @@
 import React, { useRef, useState, useEffect } from 'react';
 import { Search, ChevronLeft, ChevronRight } from 'lucide-react';
 import { MealType } from '../../types';
-import { categories, mealTypes } from './categories';
+import { categories, mealTypes } from '../../types/categories';
 
 interface RecipeFiltersProps {
   selectedCategory: string;

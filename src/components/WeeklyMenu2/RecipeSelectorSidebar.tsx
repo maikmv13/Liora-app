@@ -3,7 +3,7 @@ import { X, Search, ChevronRight, Filter, Flame, Clock, ChefHat, Command } from 
 import { Recipe, MealType } from '../../types';
 import { useRecipes } from '../../hooks/useRecipes';
 import { useVirtualizer } from '@tanstack/react-virtual';
-import { categories } from '../RecipeList/categories';
+import { categories } from '../../types/categories';
 
 interface RecipeSelectorSidebarProps {
   isOpen: boolean;
