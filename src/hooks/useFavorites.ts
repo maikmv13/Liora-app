@@ -2,6 +2,12 @@ import { useState, useEffect } from 'react';
 import { supabase } from '../lib/supabase';
 import type { FavoriteRecipe, Recipe } from '../types/recipe';
 
+// Función auxiliar para validar UUID
+const isValidUUID = (uuid: string) => {
+  const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+  return uuidRegex.test(uuid);
+};
+
 export function useFavorites() {
   const [favorites, setFavorites] = useState<FavoriteRecipe[]>([]);
   const [loading, setLoading] = useState(true);
@@ -26,12 +32,18 @@ export function useFavorites() {
           return;
         }
 
-        console.log('Fetching favorites for user:', session.user.id);
+        const userId = session.user.id;
+        if (!isValidUUID(userId)) {
+          console.error('Invalid user ID:', userId);
+          throw new Error('Invalid user ID');
+        }
+
+        console.log('Fetching favorites for user:', userId);
 
         const { count, error: countError } = await supabase
           .from('favorites')
           .select('*', { count: 'exact' })
-          .eq('user_id', session.user.id);
+          .eq('user_id', userId);
 
         if (countError) {
           console.error('Error checking favorites count:', countError);
@@ -52,7 +64,7 @@ export function useFavorites() {
             recipe_id,
             recipes:recipe_id (*)
           `)
-          .eq('user_id', session.user.id);
+          .eq('user_id', userId);
 
         if (error) {
           console.error('Error fetching favorites:', error);
@@ -61,15 +73,21 @@ export function useFavorites() {
 
         if (!ignore) {
           console.log('Raw favorites data:', data);
-          const transformedFavorites = data?.map(fav => ({
-            ...fav.recipes,
-            favorite_id: fav.id,
-            created_at: fav.created_at,
-            last_cooked: fav.last_cooked,
-            notes: fav.notes,
-            rating: fav.rating,
-            tags: fav.tags
-          })) as FavoriteRecipe[];
+          const transformedFavorites = data?.map(fav => {
+            if (!fav.recipes) {
+              console.warn('Missing recipe data for favorite:', fav.id);
+              return null;
+            }
+            return {
+              ...fav.recipes,
+              favorite_id: fav.id,
+              created_at: fav.created_at,
+              last_cooked: fav.last_cooked,
+              notes: fav.notes,
+              rating: fav.rating,
+              tags: fav.tags
+            };
+          }).filter(Boolean) as FavoriteRecipe[];
 
           console.log('Transformed favorites:', transformedFavorites);
           setFavorites(transformedFavorites || []);
@@ -90,38 +108,23 @@ export function useFavorites() {
 
     const authSubscription = supabase.auth.onAuthStateChange((event, session) => {
       console.log('Auth state changed:', event, session?.user?.id);
-      if (!ignore) {
+      if (!ignore && session?.user?.id) {
         fetchFavorites();
       }
     });
 
-    const channel = supabase.channel('favorites_changes');
-    const subscription = channel
-      .on(
-        'postgres_changes',
-        {
-          event: '*',
-          schema: 'public',
-          table: 'favorites'
-        },
-        (payload) => {
-          console.log('Favorites changed:', payload);
-          if (!ignore) {
-            fetchFavorites();
-          }
-        }
-      )
-      .subscribe();
-
     return () => {
       ignore = true;
       authSubscription.data.subscription.unsubscribe();
-      subscription.unsubscribe();
     };
   }, []);
 
   const addFavorite = async (recipe: Recipe) => {
     try {
+      if (!recipe?.id || !isValidUUID(recipe.id)) {
+        throw new Error('Invalid recipe ID');
+      }
+
       const { data: { session }, error: sessionError } = await supabase.auth.getSession();
       
       if (sessionError) {
@@ -129,33 +132,11 @@ export function useFavorites() {
         throw sessionError;
       }
 
-      if (!session?.user) {
-        throw new Error('User must be authenticated to add favorites');
+      if (!session?.user?.id || !isValidUUID(session.user.id)) {
+        throw new Error('Invalid user session');
       }
 
-      if (!session.access_token) {
-        throw new Error('No access token available');
-      }
-
-      console.log('Current user:', session.user.id);
-      console.log('Access token:', session.access_token.substring(0, 20) + '...');
-
-      const { data: existing, error: checkError } = await supabase
-        .from('favorites')
-        .select('id')
-        .eq('user_id', session.user.id)
-        .eq('recipe_id', recipe.id)
-        .maybeSingle();
-
-      if (checkError) {
-        console.error('Error checking existing favorite:', checkError);
-        throw checkError;
-      }
-
-      if (existing) {
-        console.log('Favorite already exists:', existing);
-        return;
-      }
+      console.log('Adding favorite - User:', session.user.id, 'Recipe:', recipe.id);
 
       const { data, error: insertError } = await supabase
         .from('favorites')
@@ -188,6 +169,44 @@ export function useFavorites() {
 
   const removeFavorite = async (recipe: FavoriteRecipe) => {
     try {
+      console.log('Attempting to remove favorite:', recipe);
+      
+      if (!recipe) {
+        throw new Error('Recipe object is required');
+      }
+
+      // Verificar si tenemos el ID del favorito
+      const favoriteId = recipe.favorite_id;
+      console.log('Favorite ID to remove:', favoriteId);
+
+      if (!favoriteId) {
+        // Intentar encontrar el favorito por recipe_id si no tenemos favorite_id
+        const { data: { session } } = await supabase.auth.getSession();
+        if (!session?.user?.id) {
+          throw new Error('User must be authenticated');
+        }
+
+        console.log('Looking up favorite by recipe_id:', recipe.id);
+        const { data: existingFavorite, error: lookupError } = await supabase
+          .from('favorites')
+          .select('id')
+          .eq('user_id', session.user.id)
+          .eq('recipe_id', recipe.id)
+          .single();
+
+        if (lookupError || !existingFavorite) {
+          console.error('Error looking up favorite:', lookupError);
+          throw new Error('Could not find favorite to remove');
+        }
+
+        console.log('Found favorite by recipe_id:', existingFavorite);
+        recipe.favorite_id = existingFavorite.id;
+      }
+
+      if (!isValidUUID(recipe.favorite_id)) {
+        throw new Error(`Invalid favorite ID: ${recipe.favorite_id}`);
+      }
+
       const { data: { session }, error: sessionError } = await supabase.auth.getSession();
       
       if (sessionError) {
@@ -195,16 +214,10 @@ export function useFavorites() {
         throw sessionError;
       }
 
-      if (!session?.user) {
-        throw new Error('User must be authenticated to remove favorites');
+      if (!session?.user?.id || !isValidUUID(session.user.id)) {
+        throw new Error('Invalid user session');
       }
 
-      if (!session.access_token) {
-        throw new Error('No access token available');
-      }
-
-      console.log('Current user:', session.user.id);
-      console.log('Access token:', session.access_token.substring(0, 20) + '...');
       console.log('Removing favorite:', recipe.favorite_id, 'for user:', session.user.id);
 
       const { error } = await supabase
