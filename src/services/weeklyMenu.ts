@@ -1,64 +1,40 @@
 import { supabase } from '../lib/supabase';
-import { MenuItem, MealType, Recipe } from '../types';
-import { DAYS, WeekDay, DAY_MAPPING, MEAL_TYPES, MEAL_MAPPING } from '../components/WeeklyMenu2/constants';
-import { generateShoppingList } from './shoppingList';
+import type { MenuItem, MealType } from '../types';
+import { DAY_MAPPING, MEAL_TYPES, MEAL_MAPPING } from '../components/WeeklyMenu2/constants';
+import type { Database } from '../types/supabase';
 
-// Type definitions
-export interface RecipeDB {
-  id: string;
-  name: string;
-  calories: string;
-  meal_type: MealType;
-  side_dish: string | null;
-  category: string;
-  servings: number;
-  prep_time?: string;
+// Definir tipos base de la base de datos
+type WeeklyMenu = Database['public']['Tables']['weekly_menus']['Row'];
+type WeeklyMenuUpdate = Database['public']['Tables']['weekly_menus']['Update'];
+type WeeklyMenuInsert = Database['public']['Tables']['weekly_menus']['Insert'];
+type Recipe = Database['public']['Tables']['recipes']['Row'];
+
+// Tipos específicos de la aplicación
+export interface RecipeDB extends Omit<Recipe, 'instructions'> {
   instructions?: Record<string, string>;
-  image_url?: string;
 }
 
-export interface WeeklyMenuBase {
-  id: string;
-  user_id: string;
-  created_by: string;
-  status: 'active' | 'archived';
-  start_date: string;
-  created_at: string;
-  updated_at: string;
-  [key: string]: string | null;
-}
-
-export interface ExtendedWeeklyMenuDB extends WeeklyMenuBase {
-  recipes?: RecipeDB[];
-  monday_breakfast: string | null;
-  monday_lunch: string | null;
-  monday_snack: string | null;
-  monday_dinner: string | null;
-  tuesday_breakfast: string | null;
-  tuesday_lunch: string | null;
-  tuesday_snack: string | null;
-  tuesday_dinner: string | null;
-  wednesday_breakfast: string | null;
-  wednesday_lunch: string | null;
-  wednesday_snack: string | null;
-  wednesday_dinner: string | null;
-  thursday_breakfast: string | null;
-  thursday_lunch: string | null;
-  thursday_snack: string | null;
-  thursday_dinner: string | null;
-  friday_breakfast: string | null;
-  friday_lunch: string | null;
-  friday_snack: string | null;
-  friday_dinner: string | null;
-  saturday_breakfast: string | null;
-  saturday_lunch: string | null;
-  saturday_snack: string | null;
-  saturday_dinner: string | null;
-  sunday_breakfast: string | null;
-  sunday_lunch: string | null;
-  sunday_snack: string | null;
-  sunday_dinner: string | null;
-  [key: string]: string | null | RecipeDB[] | undefined;
+export interface ExtendedWeeklyMenuDB extends WeeklyMenu {
+  monday_breakfast_recipe?: RecipeDB;
+  monday_lunch_recipe?: RecipeDB;
+  monday_snack_recipe?: RecipeDB;
+  monday_dinner_recipe?: RecipeDB;
+  tuesday_breakfast_recipe?: RecipeDB;
+  tuesday_lunch_recipe?: RecipeDB;
+  tuesday_snack_recipe?: RecipeDB;
+  tuesday_dinner_recipe?: RecipeDB;
+  wednesday_breakfast_recipe?: RecipeDB;
+  wednesday_lunch_recipe?: RecipeDB;
+  wednesday_snack_recipe?: RecipeDB;
+  wednesday_dinner_recipe?: RecipeDB;
+  thursday_breakfast_recipe?: RecipeDB;
+  thursday_lunch_recipe?: RecipeDB;
+  thursday_snack_recipe?: RecipeDB;
+  thursday_dinner_recipe?: RecipeDB;
+  friday_breakfast_recipe?: RecipeDB;
+  friday_lunch_recipe?: RecipeDB;
+  friday_snack_recipe?: RecipeDB;
+  friday_dinner_recipe?: RecipeDB;
 }
 
 /**
@@ -74,15 +50,37 @@ export async function getActiveMenu(userId?: string): Promise<ExtendedWeeklyMenu
 
     const { data, error } = await supabase
       .from('weekly_menus')
-      .select()
-      .eq('status', 'active')
+      .select(`
+        *,
+        monday_breakfast_recipe:recipes(id, name, category, meal_type),
+        monday_lunch_recipe:recipes(id, name, category, meal_type),
+        monday_snack_recipe:recipes(id, name, category, meal_type),
+        monday_dinner_recipe:recipes(id, name, category, meal_type),
+        tuesday_breakfast_recipe:recipes(id, name, category, meal_type),
+        tuesday_lunch_recipe:recipes(id, name, category, meal_type),
+        tuesday_snack_recipe:recipes(id, name, category, meal_type),
+        tuesday_dinner_recipe:recipes(id, name, category, meal_type),
+        wednesday_breakfast_recipe:recipes(id, name, category, meal_type),
+        wednesday_lunch_recipe:recipes(id, name, category, meal_type),
+        wednesday_snack_recipe:recipes(id, name, category, meal_type),
+        wednesday_dinner_recipe:recipes(id, name, category, meal_type),
+        thursday_breakfast_recipe:recipes(id, name, category, meal_type),
+        thursday_lunch_recipe:recipes(id, name, category, meal_type),
+        thursday_snack_recipe:recipes(id, name, category, meal_type),
+        thursday_dinner_recipe:recipes(id, name, category, meal_type),
+        friday_breakfast_recipe:recipes(id, name, category, meal_type),
+        friday_lunch_recipe:recipes(id, name, category, meal_type),
+        friday_snack_recipe:recipes(id, name, category, meal_type),
+        friday_dinner_recipe:recipes(id, name, category, meal_type)
+      `)
+      .eq('status', 'active' as const)
       .eq('user_id', userId)
       .order('created_at', { ascending: false })
       .limit(1)
       .maybeSingle();
 
     if (error) throw error;
-    return data;
+    return data as ExtendedWeeklyMenuDB | null;
   } catch (error) {
     console.error('Error getting active menu:', error);
     return null;
@@ -106,11 +104,11 @@ export async function updateMenuRecipe(
       throw new Error('Invalid day or meal type');
     }
 
-    const fieldName = `${dayKey}_${mealKey}`;
+    const fieldName = `${dayKey}_${mealKey}` as keyof WeeklyMenuUpdate;
     const { error } = await supabase
       .from('weekly_menus')
       .update({ [fieldName]: recipeId })
-      .eq('id', menuId);
+      .eq('id',  );
 
     if (error) throw error;
   } catch (error) {
@@ -160,56 +158,33 @@ export async function createWeeklyMenu(menuItems: MenuItem[], userId?: string): 
     }
 
     // Prepare menu data
-    const menuData: Record<string, any> = {};
+    const menuData: Partial<WeeklyMenuInsert> = {
+      user_id: userId,
+      created_by: userId,
+      status: 'active',
+      start_date: new Date().toISOString(),
+    };
+
     menuItems.forEach(item => {
       const dayKey = Object.entries(DAY_MAPPING).find(([_, value]) => value === item.day)?.[0];
       const mealKey = MEAL_MAPPING[item.meal];
       
       if (dayKey && mealKey) {
-        const fieldName = `${dayKey}_${mealKey}`;
+        const fieldName = `${dayKey}_${mealKey}` as keyof WeeklyMenuInsert;
         menuData[fieldName] = item.recipe.id;
       }
     });
 
-    // Create menu using stored procedure
     const { data: newMenu, error } = await supabase
-      .rpc('create_weekly_menu', {
-        p_user_id: userId,
-        p_menu_data: menuData
-      });
+      .from('weekly_menus')
+      .insert(menuData)
+      .select()
+      .single();
 
     if (error) throw error;
     if (!newMenu) throw new Error('Failed to create menu');
 
-    // Generate shopping list
-    const shoppingList = generateShoppingList(menuItems);
-
-    // Insert shopping list items
-    if (shoppingList.length > 0) {
-      const shoppingListItems = shoppingList.map(item => ({
-        user_id: userId,
-        menu_id: newMenu.id,
-        item_name: item.name,
-        category: item.category || 'Otras Categorías',
-        quantity: item.quantity,
-        unit: item.unit,
-        checked: false,
-        days: item.days
-      }));
-
-      const { error: insertError } = await supabase
-        .from('shopping_list_items')
-        .upsert(shoppingListItems, {
-          onConflict: 'user_id,menu_id,item_name',
-          ignoreDuplicates: false
-        });
-
-      if (insertError) {
-        console.error('Error inserting shopping list items:', insertError);
-      }
-    }
-
-    return newMenu;
+    return newMenu as ExtendedWeeklyMenuDB;
   } catch (error) {
     console.error('Error creating weekly menu:', error);
     throw error;
@@ -223,7 +198,9 @@ export async function archiveMenu(menuId: string): Promise<void> {
   try {
     const { error } = await supabase
       .from('weekly_menus')
-      .update({ status: 'archived' })
+      .update({ 
+        status: 'archived' as WeeklyMenu['status'] 
+      })
       .eq('id', menuId);
 
     if (error) throw error;

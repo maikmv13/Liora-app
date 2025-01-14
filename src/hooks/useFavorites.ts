@@ -12,38 +12,58 @@ export function useFavorites() {
 
     async function fetchFavorites() {
       try {
-        const { data: { session } } = await supabase.auth.getSession();
+        const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+        
+        if (sessionError) {
+          console.error('Error getting session:', sessionError);
+          throw sessionError;
+        }
+
         if (!session?.user) {
+          console.log('No active session found');
           setFavorites([]);
+          setLoading(false);
           return;
         }
+
+        console.log('Fetching favorites for user:', session.user.id);
+
+        const { count, error: countError } = await supabase
+          .from('favorites')
+          .select('*', { count: 'exact' })
+          .eq('user_id', session.user.id);
+
+        if (countError) {
+          console.error('Error checking favorites count:', countError);
+          throw countError;
+        }
+
+        console.log('Found favorites count:', count);
 
         const { data, error } = await supabase
           .from('favorites')
           .select(`
-            *,
-            recipe:recipes!favorites_recipe_id_fkey (
-              id,
-              name,
-              category,
-              meal_type,
-              servings,
-              calories,
-              prep_time,
-              side_dish,
-              instructions,
-              image_url,
-              created_at,
-              updated_at
-            )
+            id,
+            created_at,
+            last_cooked,
+            notes,
+            rating,
+            tags,
+            recipe_id,
+            recipes:recipe_id (*)
           `)
           .eq('user_id', session.user.id);
 
-        if (error) throw error;
+        if (error) {
+          console.error('Error fetching favorites:', error);
+          throw error;
+        }
 
         if (!ignore) {
+          console.log('Raw favorites data:', data);
           const transformedFavorites = data?.map(fav => ({
-            ...fav.recipe,
+            ...fav.recipes,
+            favorite_id: fav.id,
             created_at: fav.created_at,
             last_cooked: fav.last_cooked,
             notes: fav.notes,
@@ -51,10 +71,11 @@ export function useFavorites() {
             tags: fav.tags
           })) as FavoriteRecipe[];
 
+          console.log('Transformed favorites:', transformedFavorites);
           setFavorites(transformedFavorites || []);
         }
       } catch (e) {
-        console.error('Error fetching favorites:', e);
+        console.error('Error in fetchFavorites:', e);
         if (!ignore) {
           setError(e as Error);
         }
@@ -67,96 +88,144 @@ export function useFavorites() {
 
     fetchFavorites();
 
-    const subscription = supabase.auth.onAuthStateChange(() => {
-      fetchFavorites();
+    const authSubscription = supabase.auth.onAuthStateChange((event, session) => {
+      console.log('Auth state changed:', event, session?.user?.id);
+      if (!ignore) {
+        fetchFavorites();
+      }
     });
+
+    const channel = supabase.channel('favorites_changes');
+    const subscription = channel
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'favorites'
+        },
+        (payload) => {
+          console.log('Favorites changed:', payload);
+          if (!ignore) {
+            fetchFavorites();
+          }
+        }
+      )
+      .subscribe();
 
     return () => {
       ignore = true;
-      subscription.data.subscription.unsubscribe();
+      authSubscription.data.subscription.unsubscribe();
+      subscription.unsubscribe();
     };
   }, []);
 
   const addFavorite = async (recipe: Recipe) => {
     try {
-      const { data: { session } } = await supabase.auth.getSession();
+      const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+      
+      if (sessionError) {
+        console.error('Session error:', sessionError);
+        throw sessionError;
+      }
+
       if (!session?.user) {
         throw new Error('User must be authenticated to add favorites');
       }
 
-      const { error } = await supabase
+      if (!session.access_token) {
+        throw new Error('No access token available');
+      }
+
+      console.log('Current user:', session.user.id);
+      console.log('Access token:', session.access_token.substring(0, 20) + '...');
+
+      const { data: existing, error: checkError } = await supabase
+        .from('favorites')
+        .select('id')
+        .eq('user_id', session.user.id)
+        .eq('recipe_id', recipe.id)
+        .maybeSingle();
+
+      if (checkError) {
+        console.error('Error checking existing favorite:', checkError);
+        throw checkError;
+      }
+
+      if (existing) {
+        console.log('Favorite already exists:', existing);
+        return;
+      }
+
+      const { data, error: insertError } = await supabase
         .from('favorites')
         .insert({
           user_id: session.user.id,
           recipe_id: recipe.id,
           created_at: new Date().toISOString()
-        });
+        })
+        .select()
+        .single();
 
-      if (error) throw error;
+      if (insertError) {
+        console.error('Insert error:', insertError);
+        throw insertError;
+      }
 
-      const newFavorite: FavoriteRecipe = {
+      console.log('Successfully added favorite:', data);
+
+      setFavorites(prev => [...prev, { 
         ...recipe,
-        created_at: new Date().toISOString(),
-        last_cooked: null,
-        notes: '',
-        rating: 0,
-        tags: []
-      };
+        favorite_id: data.id,
+        created_at: data.created_at
+      }]);
 
-      setFavorites(prev => [...prev, newFavorite]);
     } catch (e) {
       console.error('Error adding favorite:', e);
       throw e;
     }
   };
 
-  const removeFavorite = async (recipe: Recipe) => {
+  const removeFavorite = async (recipe: FavoriteRecipe) => {
     try {
-      const { data: { session } } = await supabase.auth.getSession();
+      const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+      
+      if (sessionError) {
+        console.error('Session error:', sessionError);
+        throw sessionError;
+      }
+
       if (!session?.user) {
         throw new Error('User must be authenticated to remove favorites');
       }
 
+      console.log('Removing favorite:', recipe.favorite_id, 'for user:', session.user.id);
+
       const { error } = await supabase
         .from('favorites')
         .delete()
-        .eq('user_id', session.user.id)
-        .eq('recipe_id', recipe.id);
+        .eq('id', recipe.favorite_id)
+        .eq('user_id', session.user.id);
 
-      if (error) throw error;
-      setFavorites(prev => prev.filter(f => f.id !== recipe.id));
+      if (error) {
+        console.error('Delete error:', error);
+        throw error;
+      }
+
+      console.log('Successfully removed favorite');
+
+      setFavorites(prev => prev.filter(f => f.favorite_id !== recipe.favorite_id));
     } catch (e) {
       console.error('Error removing favorite:', e);
       throw e;
     }
   };
 
-  const updateFavorite = async (recipe: FavoriteRecipe) => {
-    try {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (!session?.user) {
-        throw new Error('User must be authenticated to update favorites');
-      }
-
-      const { error } = await supabase
-        .from('favorites')
-        .update({
-          notes: recipe.notes,
-          rating: recipe.rating,
-          tags: recipe.tags,
-          last_cooked: recipe.last_cooked,
-          updated_at: new Date().toISOString()
-        })
-        .eq('user_id', session.user.id)
-        .eq('recipe_id', recipe.id);
-
-      if (error) throw error;
-      setFavorites(prev => prev.map(f => f.id === recipe.id ? recipe : f));
-    } catch (e) {
-      console.error('Error updating favorite:', e);
-      throw e;
-    }
+  return { 
+    favorites, 
+    loading, 
+    error, 
+    addFavorite, 
+    removeFavorite 
   };
-
-  return { favorites, loading, error, addFavorite, removeFavorite, updateFavorite };
 }

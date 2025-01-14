@@ -1,70 +1,95 @@
 import { useState, useEffect } from 'react';
-import { MenuItem } from '../types';
-import { getActiveMenu, convertDBToMenuItems } from '../services/weeklyMenu';
-import { supabase, checkSupabaseConnection } from '../lib/supabase';
+import { supabase } from '../lib/supabase';
+import type { MenuItem } from '../types';
 
-const MAX_RETRIES = 3;
-const RETRY_DELAY = 1000;
-
-export function useActiveMenu(userId?: string) {
+export function useActiveMenu(userId: string | undefined) {
   const [menuItems, setMenuItems] = useState<MenuItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
-  const [isConnected, setIsConnected] = useState(true);
 
   useEffect(() => {
     let ignore = false;
-    let subscription: any;
-    let retryCount = 0;
-
-    const checkConnection = async () => {
-      const connected = await checkSupabaseConnection();
-      if (!ignore) {
-        setIsConnected(connected);
-      }
-      return connected;
-    };
 
     async function fetchActiveMenu() {
+      if (!userId) {
+        setMenuItems([]);
+        setLoading(false);
+        return;
+      }
+
       try {
-        // Check connection first
-        const connected = await checkConnection();
-        if (!connected) {
-          throw new Error('No connection to database');
-        }
+        // 1. Obtenemos el menú más reciente con una consulta más simple
+        const { data: menuData, error: menuError } = await supabase
+          .from('weekly_menus')
+          .select('*')
+          .eq('user_id', userId)
+          .order('created_at', { ascending: false })
+          .limit(1)
+          .maybeSingle();
 
-        let effectiveUserId = userId;
-        if (!effectiveUserId) {
-          const { data: { user } } = await supabase.auth.getUser();
-          effectiveUserId = user?.id;
-        }
-
-        if (!effectiveUserId) {
+        if (menuError) throw menuError;
+        if (!menuData) {
           setMenuItems([]);
-          setLoading(false);
           return;
         }
 
-        const activeMenu = await getActiveMenu(effectiveUserId);
-        
-        if (!ignore) {
-          if (activeMenu) {
-            const items = await convertDBToMenuItems(activeMenu);
-            setMenuItems(items);
-          } else {
-            setMenuItems([]);
-          }
-          setError(null);
+        // 2. Creamos un array con los IDs de las recetas no nulas
+        const mealFields = [
+          'monday_breakfast_id', 'monday_lunch_id', 'monday_dinner_id',
+          'tuesday_breakfast_id', 'tuesday_lunch_id', 'tuesday_dinner_id',
+          'wednesday_breakfast_id', 'wednesday_lunch_id', 'wednesday_dinner_id',
+          'thursday_breakfast_id', 'thursday_lunch_id', 'thursday_dinner_id',
+          'friday_breakfast_id', 'friday_lunch_id', 'friday_dinner_id',
+          'saturday_breakfast_id', 'saturday_lunch_id', 'saturday_dinner_id',
+          'sunday_breakfast_id', 'sunday_lunch_id', 'sunday_dinner_id'
+        ];
+
+        const recipeIds = mealFields
+          .map(field => menuData[field])
+          .filter((id): id is number => id !== null);
+
+        if (recipeIds.length === 0) {
+          setMenuItems([]);
+          return;
         }
-      } catch (err) {
-        console.error('Error al obtener el menú activo:', err);
-        if (!ignore) {
-          setError(err as Error);
-          if (retryCount < MAX_RETRIES) {
-            retryCount++;
-            console.log(`Retrying fetch (${retryCount}/${MAX_RETRIES}) after ${RETRY_DELAY * retryCount}ms...`);
-            setTimeout(fetchActiveMenu, RETRY_DELAY * retryCount);
+
+        // 3. Obtenemos las recetas en una sola consulta
+        const { data: recipesData, error: recipesError } = await supabase
+          .from('recipes')
+          .select()
+          .in('id', recipeIds);
+
+        if (recipesError) throw recipesError;
+        if (!recipesData) return;
+
+        // 4. Construimos el array de MenuItems
+        const items: MenuItem[] = [];
+        const days = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];
+        const meals = ['breakfast', 'lunch', 'dinner'];
+
+        for (const day of days) {
+          for (const meal of meals) {
+            const recipeId = menuData[`${day}_${meal}_id`];
+            if (recipeId) {
+              const recipe = recipesData.find(r => r.id === recipeId);
+              if (recipe) {
+                items.push({
+                  day,
+                  meal,
+                  recipe
+                });
+              }
+            }
           }
+        }
+
+        if (!ignore) {
+          setMenuItems(items);
+        }
+      } catch (e) {
+        console.error('Error fetching active menu:', e);
+        if (!ignore) {
+          setError(e as Error);
         }
       } finally {
         if (!ignore) {
@@ -73,37 +98,12 @@ export function useActiveMenu(userId?: string) {
       }
     }
 
-    setLoading(true);
     fetchActiveMenu();
-
-    // Set up real-time subscription only if we have a connection
-    if (userId && isConnected) {
-      subscription = supabase
-        .channel('menu_changes')
-        .on(
-          'postgres_changes',
-          {
-            event: '*',
-            schema: 'public',
-            table: 'weekly_menus',
-            filter: `user_id=eq.${userId} AND status=eq.active`
-          },
-          async () => {
-            if (!ignore) {
-              await fetchActiveMenu();
-            }
-          }
-        )
-        .subscribe();
-    }
 
     return () => {
       ignore = true;
-      if (subscription) {
-        subscription.unsubscribe();
-      }
     };
-  }, [userId, isConnected]);
+  }, [userId]);
 
-  return { menuItems, loading, error, isConnected };
+  return { menuItems, loading, error };
 }

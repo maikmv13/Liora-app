@@ -26,7 +26,14 @@ function App() {
   const { menuItems: activeMenuItems, loading: menuLoading } = useActiveMenu(user?.id);
   const { shoppingList, toggleItem } = useShoppingList(user?.id);
   const { recipes, loading: recipesLoading } = useRecipes();
-  const { favorites, addFavorite, removeFavorite, updateFavorite } = useFavorites();
+  const { 
+    favorites, 
+    addFavorite, 
+    removeFavorite, 
+    updateFavorite,
+    loading: favoritesLoading,
+    error: favoritesError 
+  } = useFavorites();
 
   useEffect(() => {
     if (!menuLoading && activeMenuItems.length > 0) {
@@ -61,13 +68,16 @@ function App() {
     }
     
     try {
-      if (favorites.some(fav => fav.id === recipe.id)) {
+      const isFavorite = favorites.some(fav => fav.id === recipe.id);
+      
+      if (isFavorite) {
         await removeFavorite(recipe);
       } else {
         await addFavorite(recipe);
       }
     } catch (error) {
       console.error('Error toggling favorite:', error);
+      // Aquí podrías mostrar una notificación de error
     }
   };
 
@@ -115,7 +125,7 @@ function App() {
                   error={null}
                   recipes={recipes}
                   onRecipeSelect={() => {}}
-                  favorites={favorites.map(f => f.name)}
+                  favorites={favorites.map(f => f.id)}
                   onToggleFavorite={handleToggleFavorite}
                 />
               } 
@@ -148,6 +158,8 @@ function App() {
                     favorites={favorites}
                     onRemoveFavorite={removeFavorite}
                     onUpdateFavorite={updateFavorite}
+                    loading={favoritesLoading}
+                    error={favoritesError}
                   />
                 ) : (
                   <Navigate to="/menu" replace />
