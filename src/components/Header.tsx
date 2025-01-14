@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import { ChefHat, Search, Menu, X, Download, Share2, LogIn, Apple, User } from 'lucide-react';
-import { Navigation } from './Navigation';
 import { useNavigate } from 'react-router-dom';
 import { AccountMenu } from './AccountMenu';
 

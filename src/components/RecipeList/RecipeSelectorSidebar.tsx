@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { X, Search, ChevronRight, Filter } from 'lucide-react';
-import { Recipe } from '../types';
-import { sampleRecipes } from '../data/recipes';
+import { Recipe } from '../../types';
+import { sampleRecipes } from '../../data/recipes';
 
 interface RecipeSelectorSidebarProps {
   isOpen: boolean;

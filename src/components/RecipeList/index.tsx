@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Recipe, MealType } from '../../types';
-import { RecipeCard, mapRecipeToCardProps } from '../RecipeCard';
+import { RecipeCard, mapRecipeToCardProps } from './RecipeCard';
 import { ChefHat } from 'lucide-react';
 import { RecipeFilters } from './RecipeFilters';
 

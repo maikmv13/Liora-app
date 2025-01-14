@@ -1,12 +1,12 @@
 import React, { useState } from 'react';
 import { Heart, Plus, ChevronDown, ChefHat } from 'lucide-react';
 import { FavoriteRecipe } from '../../types';
-import { RecipeCard } from '../RecipeCard';
-import { RecipeModal } from '../RecipeModal';
+import { RecipeCard } from '../RecipeList/RecipeCard';
+import { RecipeModal } from '../RecipeList/RecipeModal';
 import { EditRecipeModal } from './EditRecipeModal';
 import { RecipeFilters } from '../RecipeList/RecipeFilters';
 import { NewRecipeModal } from './NewRecipeModal';
-import { mapRecipeToCardProps } from '../RecipeCard';
+import { mapRecipeToCardProps } from '../RecipeList/RecipeCard';
 
 interface FavoritesProps {
   favorites: FavoriteRecipe[];

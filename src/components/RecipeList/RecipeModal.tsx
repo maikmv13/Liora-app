@@ -4,7 +4,7 @@ import {
   Flame, Leaf, Cookie, Beef, Scale, Soup, UtensilsCrossed,
   Dumbbell, Apple, Wheat, CircleDot
 } from 'lucide-react';
-import { Recipe } from '../types';
+import { Recipe } from '../../types';
 
 interface RecipeModalProps {
   recipe: Recipe;

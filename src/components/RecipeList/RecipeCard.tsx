@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Clock, Users, ChefHat, Flame, Heart, Sun, Moon } from 'lucide-react';
-import { Recipe, RecipeCardProps } from '../types';
-import { categoryColors } from '../utils/categoryColors';
+import { Recipe, RecipeCardProps } from '../../types';
+import { categoryColors } from '../../utils/categoryColors';
 import { RecipeModal } from './RecipeModal';
 
 export function RecipeCard({ recipe, onClick, onToggleFavorite }: RecipeCardProps) {
