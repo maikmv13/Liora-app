@@ -199,6 +199,12 @@ export function useFavorites() {
         throw new Error('User must be authenticated to remove favorites');
       }
 
+      if (!session.access_token) {
+        throw new Error('No access token available');
+      }
+
+      console.log('Current user:', session.user.id);
+      console.log('Access token:', session.access_token.substring(0, 20) + '...');
       console.log('Removing favorite:', recipe.favorite_id, 'for user:', session.user.id);
 
       const { error } = await supabase
