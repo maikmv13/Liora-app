@@ -11,22 +11,15 @@ export function usePWA() {
 
   useEffect(() => {
     const handleBeforeInstallPrompt = (e: Event) => {
-      // Prevenir que Chrome muestre el prompt automáticamente
       e.preventDefault();
-      // Guardar el evento para usarlo después
       setDeferredPrompt(e as BeforeInstallPromptEvent);
       setIsInstallable(true);
+      console.log('PWA es instalable');
     };
 
-    // Escuchar el evento beforeinstallprompt
     window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
-
-    // Comprobar si la app ya está instalada
-    window.addEventListener('appinstalled', () => {
-      setIsInstallable(false);
-      setDeferredPrompt(null);
-      console.log('PWA instalada con éxito');
-    });
+    
+    console.log('Listener de PWA registrado');
 
     return () => {
       window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
