@@ -23,3 +23,4 @@ export interface FavoriteRecipe extends Recipe {
 export type MealCategory = Database['public']['Enums']['meal_category'];
 export type MealType = Database['public']['Enums']['meal_type'];
 export type UnitType = Database['public']['Enums']['unit_type']; 
+

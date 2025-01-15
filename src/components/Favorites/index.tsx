@@ -10,7 +10,7 @@ import { mapRecipeToCardProps } from '../RecipeList/RecipeCard';
 
 interface FavoritesProps {
   favorites: FavoriteRecipe[];
-  onRemoveFavorite: (recipe: Recipe) => Promise<void>;
+  onRemoveFavorite: (recipe: FavoriteRecipe) => Promise<void>;
   onUpdateFavorite: (recipe: FavoriteRecipe) => Promise<void>;
   loading?: boolean;
   error?: Error | null;
