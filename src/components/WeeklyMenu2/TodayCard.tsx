@@ -194,7 +194,16 @@ export function TodayCard({ menuItems, onViewRecipe, activeMenu }: TodayCardProp
       {/* Meals Grid */}
       <div className="grid grid-cols-1 divide-y divide-rose-100/10">
         {mealTypes.map((mealType) => {
-          const menuItem = menuItems.find(item => item.meal === mealType);
+          const menuItem = menuItems.find(item => {
+            if (mealType === 'desayuno') {
+              return item.meal === 'desayuno';
+            }
+            if (mealType === 'snack') {
+              return item.meal === 'snack';
+            }
+            return item.meal === mealType;
+          });
+          
           const isCompleted = menuItem && completions[menuItem.recipe.id]?.completed_at;
           const isSkipped = menuItem && completions[menuItem.recipe.id]?.skipped;
           
