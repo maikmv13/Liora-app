@@ -77,7 +77,6 @@ function App() {
       }
     } catch (error) {
       console.error('Error toggling favorite:', error);
-      // Aquí podrías mostrar una notificación de error
     }
   };
 
@@ -113,9 +112,10 @@ function App() {
         <Navigation
           activeTab={activeTab}
           onTabChange={setActiveTab}
+          user={user}
         />
 
-        <main className="container mx-auto px-4 pt-32 md:pt-40 pb-24 md:pb-8">
+        <main className="container mx-auto px-4 pt-20 pb-24 md:pb-8">
           <Routes>
             <Route 
               path="/recetas" 

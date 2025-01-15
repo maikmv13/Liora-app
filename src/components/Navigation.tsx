@@ -1,14 +1,15 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ChefHat, Calendar, ShoppingCart, Heart, Activity } from 'lucide-react';
+import { ChefHat, Calendar, ShoppingCart, Activity } from 'lucide-react';
 
 interface NavigationProps {
   activeTab: string;
   onTabChange: (tab: string) => void;
   orientation?: 'horizontal' | 'vertical';
+  user?: any;
 }
 
-export function Navigation({ activeTab, onTabChange, orientation = 'horizontal' }: NavigationProps) {
+export function Navigation({ activeTab, onTabChange, orientation = 'horizontal', user }: NavigationProps) {
   const navigate = useNavigate();
 
   const handleTabChange = (id: string) => {
@@ -34,12 +35,6 @@ export function Navigation({ activeTab, onTabChange, orientation = 'horizontal' 
       icon: ShoppingCart, 
       label: 'Compra',
       description: 'Lista'
-    },
-    {
-      id: 'favoritos', 
-      icon: Heart, 
-      label: 'Favoritos',
-      description: 'Guardados'
     },
     {
       id: 'salud',
@@ -71,13 +66,9 @@ export function Navigation({ activeTab, onTabChange, orientation = 'horizontal' 
   }
 
   return (
-    <nav className={`
-      fixed z-40 w-full bg-white border-t border-rose-100
-      md:sticky md:top-14 md:border-t-0 md:border-b md:border-rose-100
-      ${orientation === 'horizontal' ? 'bottom-0' : ''}
-    `}>
+    <nav className="fixed z-40 w-full bg-white/95 backdrop-blur-md border-t border-rose-100 shadow-lg md:sticky md:top-16 md:border-t-0 md:border-b md:shadow-sm bottom-0">
       <div className="container mx-auto px-4">
-        <div className="flex">
+        <div className="flex items-stretch">
           {navItems.map(({ id, icon: Icon, label, description }) => (
             <button
               key={id}
@@ -85,7 +76,7 @@ export function Navigation({ activeTab, onTabChange, orientation = 'horizontal' 
               className={`group flex-1 py-3 md:py-4 transition-all duration-200 relative ${
                 activeTab === id
                   ? 'text-rose-500'
-                  : 'text-gray-400 hover:text-rose-400'
+                  : 'text-gray-600 hover:text-rose-400'
               }`}
             >
               <div className="flex flex-col md:flex-row items-center md:justify-start md:px-4 md:space-x-2">

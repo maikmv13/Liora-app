@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
 import { Recipe, MealType } from '../../types';
 import { RecipeCard, mapRecipeToCardProps } from './RecipeCard';
-import { ChefHat } from 'lucide-react';
+import { ChefHat, Heart, Sparkles, ArrowRight } from 'lucide-react';
 import { RecipeFilters } from './RecipeFilters';
+import { useNavigate } from 'react-router-dom';
 
 interface RecipeListProps {
   recipes: Recipe[];
@@ -16,6 +17,7 @@ export function RecipeList({ recipes, onRecipeSelect, favorites, onToggleFavorit
   const [selectedMealType, setSelectedMealType] = useState<'all' | MealType>('all');
   const [sortBy, setSortBy] = useState<'popular' | 'calories' | 'time' | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
+  const navigate = useNavigate();
 
   const filteredRecipes = recipes.filter(recipe => {
     const matchesCategory = selectedCategory === 'Todas' || recipe.category === selectedCategory;
@@ -40,6 +42,45 @@ export function RecipeList({ recipes, onRecipeSelect, favorites, onToggleFavorit
 
   return (
     <div className="space-y-6">
+      {/* Favorites Banner */}
+      <div className="relative -mb-4">
+        {/* Decorative circles - now with lower z-index */}
+        <div className="absolute inset-0 overflow-hidden rounded-2xl">
+          <div className="absolute top-0 right-0 w-64 h-64 bg-white/5 rounded-full -translate-y-1/2 translate-x-1/2 backdrop-blur-3xl -z-10" />
+          <div className="absolute bottom-0 left-0 w-48 h-48 bg-white/5 rounded-full translate-y-1/2 -translate-x-1/2 backdrop-blur-3xl -z-10" />
+        </div>
+
+        {/* Banner content */}
+        <button
+          onClick={() => navigate('/favoritos')}
+          className="relative w-full overflow-hidden group rounded-2xl"
+        >
+          <div className="absolute inset-0 bg-gradient-to-r from-rose-400 via-pink-500 to-purple-500 opacity-90 group-hover:opacity-100 transition-opacity" />
+          
+          <div className="relative flex items-center justify-between p-6 md:p-8">
+            <div className="flex items-center space-x-4">
+              <div className="bg-white/20 p-3 rounded-xl backdrop-blur-sm border border-white/30 group-hover:scale-110 transition-transform duration-300">
+                <Heart size={24} className="text-white" />
+              </div>
+              <div className="text-left">
+                <h3 className="text-white text-lg md:text-xl font-bold flex items-center space-x-2">
+                  <span>Tus Recetas Favoritas</span>
+                  <Sparkles size={20} className="text-amber-300 animate-pulse" />
+                </h3>
+                <p className="text-white/90 text-sm md:text-base mt-1">
+                  Accede rápidamente a tus recetas guardadas
+                </p>
+              </div>
+            </div>
+            
+            <div className="flex items-center space-x-2 bg-white/10 px-4 py-2 rounded-xl backdrop-blur-sm border border-white/30 group-hover:bg-white/20 transition-colors">
+              <span className="text-white font-medium hidden md:block">Ver Favoritos</span>
+              <ArrowRight size={20} className="text-white transform group-hover:translate-x-1 transition-transform" />
+            </div>
+          </div>
+        </button>
+      </div>
+
       {/* Header */}
       <div className="flex flex-col md:flex-row md:justify-between md:items-start gap-4">
         <div className="flex items-center space-x-3">
@@ -73,7 +114,7 @@ export function RecipeList({ recipes, onRecipeSelect, favorites, onToggleFavorit
           <RecipeCard 
             key={recipe.id}
             recipe={recipe}
-            favorites={favorites.map(fav => fav.recipe_id)}
+            favorites={favorites}
             onClick={() => onRecipeSelect(recipe)}
             onToggleFavorite={() => onToggleFavorite(recipe)}
           />

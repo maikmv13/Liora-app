@@ -2,6 +2,7 @@ import React, { useRef, useState, useEffect } from 'react';
 import { Search, ChevronLeft, ChevronRight } from 'lucide-react';
 import { MealType } from '../../types';
 import { categories, mealTypes } from '../../types/categories';
+import { motion } from 'framer-motion';
 
 interface RecipeFiltersProps {
   selectedCategory: string;
@@ -28,23 +29,20 @@ export function RecipeFilters({
   const categoriesRef = useRef<HTMLDivElement>(null);
   const sortByRef = useRef<HTMLDivElement>(null);
 
-  // State to track if scrolling is possible
   const [canScrollMealTypes, setCanScrollMealTypes] = useState({ left: false, right: false });
   const [canScrollCategories, setCanScrollCategories] = useState({ left: false, right: false });
   const [canScrollSortBy, setCanScrollSortBy] = useState({ left: false, right: false });
 
-  // Check if scrolling is possible
   const checkScroll = (ref: React.RefObject<HTMLDivElement>, setCanScroll: React.Dispatch<React.SetStateAction<{ left: boolean; right: boolean }>>) => {
     if (ref.current) {
       const { scrollLeft, scrollWidth, clientWidth } = ref.current;
       setCanScroll({
         left: scrollLeft > 0,
-        right: scrollLeft < scrollWidth - clientWidth - 1 // -1 for rounding errors
+        right: scrollLeft < scrollWidth - clientWidth - 1
       });
     }
   };
 
-  // Add scroll event listeners
   useEffect(() => {
     const mealTypesElement = mealTypesRef.current;
     const categoriesElement = categoriesRef.current;
@@ -54,12 +52,10 @@ export function RecipeFilters({
       checkScroll(ref, setCanScroll);
     };
 
-    // Initial check
     checkScroll(mealTypesRef, setCanScrollMealTypes);
     checkScroll(categoriesRef, setCanScrollCategories);
     checkScroll(sortByRef, setCanScrollSortBy);
 
-    // Add listeners
     if (mealTypesElement) {
       mealTypesElement.addEventListener('scroll', () => handleScroll(mealTypesRef, setCanScrollMealTypes));
     }
@@ -70,7 +66,6 @@ export function RecipeFilters({
       sortByElement.addEventListener('scroll', () => handleScroll(sortByRef, setCanScrollSortBy));
     }
 
-    // Cleanup
     return () => {
       if (mealTypesElement) {
         mealTypesElement.removeEventListener('scroll', () => handleScroll(mealTypesRef, setCanScrollMealTypes));
@@ -106,28 +101,32 @@ export function RecipeFilters({
   }) => (
     <>
       {canScroll.left && (
-        <button
+        <motion.button
+          initial={{ opacity: 0, x: 10 }}
+          animate={{ opacity: 1, x: 0 }}
           onClick={(e) => {
             e.preventDefault();
             scroll(scrollRef, 'left');
           }}
-          className="absolute left-0 top-1/2 -translate-y-1/2 z-10 p-1 bg-white/80 hover:bg-white/90 rounded-full shadow-lg border border-rose-100 text-rose-500 transition-all duration-200"
+          className="absolute left-1 top-1/2 -translate-y-1/2 z-10 p-1.5 bg-white shadow-lg rounded-full border border-rose-100/50 text-rose-500 transition-all duration-200 hover:bg-rose-50 hover:scale-110"
           aria-label="Scroll left"
         >
-          <ChevronLeft size={20} />
-        </button>
+          <ChevronLeft size={16} />
+        </motion.button>
       )}
       {canScroll.right && (
-        <button
+        <motion.button
+          initial={{ opacity: 0, x: -10 }}
+          animate={{ opacity: 1, x: 0 }}
           onClick={(e) => {
             e.preventDefault();
             scroll(scrollRef, 'right');
           }}
-          className="absolute right-0 top-1/2 -translate-y-1/2 z-10 p-1 bg-white/80 hover:bg-white/90 rounded-full shadow-lg border border-rose-100 text-rose-500 transition-all duration-200"
+          className="absolute -right-1 top-1/2 -translate-y-1/2 z-10 p-1.5 bg-white shadow-lg rounded-full border border-rose-100/50 text-rose-500 transition-all duration-200 hover:bg-rose-50 hover:scale-110"
           aria-label="Scroll right"
         >
-          <ChevronRight size={20} />
-        </button>
+          <ChevronRight size={16} />
+        </motion.button>
       )}
     </>
   );
@@ -147,79 +146,85 @@ export function RecipeFilters({
       </div>
 
       {/* Scrollable Filters */}
-      <div className="space-y-3">
-        {/* Meal Types - First row */}
-        <div className="relative">
+      <div className="space-y-2">
+        {/* Meal Types */}
+        <div className="relative bg-white/50 backdrop-blur-sm rounded-xl p-1">
           <div
             ref={mealTypesRef}
-            className="flex gap-2 overflow-x-auto scrollbar-hide px-8"
+            className="flex gap-1.5 overflow-x-auto scrollbar-hide pl-1 pr-4"
             style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
           >
-            <button
+            <motion.button
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
               onClick={() => onMealTypeChange('all')}
-              className={`flex-none px-3 py-1.5 rounded-xl text-sm font-medium transition-all duration-200 whitespace-nowrap ${
+              className={`flex-none px-3 py-2 rounded-lg text-sm font-medium transition-all duration-200 whitespace-nowrap ${
                 selectedMealType === 'all'
-                  ? 'bg-rose-100 text-rose-700 border-2 border-rose-200 shadow-sm transform scale-105'
-                  : 'bg-white/80 text-gray-600 hover:bg-rose-50 border border-gray-200 hover:border-rose-200'
+                  ? 'bg-gradient-to-r from-rose-500 to-pink-500 text-white shadow-md'
+                  : 'bg-white/80 text-gray-600 hover:bg-rose-50 border border-rose-100/50'
               }`}
             >
               <span className="flex items-center space-x-1.5">
                 <span>🍽️</span>
                 <span>Todas</span>
               </span>
-            </button>
+            </motion.button>
             {mealTypes.map(({ id, label, emoji }) => (
-              <button
+              <motion.button
                 key={id}
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
                 onClick={() => onMealTypeChange(id)}
-                className={`flex-none px-3 py-1.5 rounded-xl text-sm font-medium transition-all duration-200 whitespace-nowrap ${
+                className={`flex-none px-3 py-2 rounded-lg text-sm font-medium transition-all duration-200 whitespace-nowrap ${
                   selectedMealType === id
-                    ? 'bg-rose-100 text-rose-700 border-2 border-rose-200 shadow-sm transform scale-105'
-                    : 'bg-white/80 text-gray-600 hover:bg-rose-50 border border-gray-200 hover:border-rose-200'
+                    ? 'bg-gradient-to-r from-rose-500 to-pink-500 text-white shadow-md'
+                    : 'bg-white/80 text-gray-600 hover:bg-rose-50 border border-rose-100/50'
                 }`}
               >
                 <span className="flex items-center space-x-1.5">
                   <span>{emoji}</span>
                   <span>{label}</span>
                 </span>
-              </button>
+              </motion.button>
             ))}
           </div>
           <ScrollButtons scrollRef={mealTypesRef} canScroll={canScrollMealTypes} />
         </div>
 
-        {/* Categories - Second row */}
-        <div className="relative">
+        {/* Categories */}
+        <div className="relative bg-white/50 backdrop-blur-sm rounded-xl p-1">
           <div
             ref={categoriesRef}
-            className="flex gap-2 overflow-x-auto scrollbar-hide px-8"
+            className="flex gap-1.5 overflow-x-auto scrollbar-hide pl-1 pr-4"
             style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
           >
             {categories.map(({ id, label, emoji }) => (
-              <button
+              <motion.button
                 key={id}
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
                 onClick={() => onCategoryChange(id)}
-                className={`flex-none px-3 py-1.5 rounded-xl text-sm font-medium transition-all duration-200 whitespace-nowrap ${
+                className={`flex-none px-3 py-2 rounded-lg text-sm font-medium transition-all duration-200 whitespace-nowrap ${
                   selectedCategory === id
-                    ? 'bg-rose-100 text-rose-700 border-2 border-rose-200 shadow-sm transform scale-105'
-                    : 'bg-white/80 text-gray-600 hover:bg-rose-50 border border-gray-200 hover:border-rose-200'
+                    ? 'bg-gradient-to-r from-rose-500 to-pink-500 text-white shadow-md'
+                    : 'bg-white/80 text-gray-600 hover:bg-rose-50 border border-rose-100/50'
                 }`}
               >
                 <span className="flex items-center space-x-1.5">
                   <span>{emoji}</span>
                   <span>{label}</span>
                 </span>
-              </button>
+              </motion.button>
             ))}
           </div>
           <ScrollButtons scrollRef={categoriesRef} canScroll={canScrollCategories} />
         </div>
 
-        {/* Sort Options - Third row */}
-        <div className="relative">
+        {/* Sort Options */}
+        <div className="relative bg-white/50 backdrop-blur-sm rounded-xl p-1">
           <div
             ref={sortByRef}
-            className="flex gap-2 overflow-x-auto scrollbar-hide px-8"
+            className="flex gap-1.5 overflow-x-auto scrollbar-hide pl-1 pr-4"
             style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
           >
             {[
@@ -228,20 +233,22 @@ export function RecipeFilters({
               { id: 'calories', label: 'Calorías', emoji: '🔥' },
               { id: 'time', label: 'Tiempo', emoji: '⏱️' }
             ].map(({ id, label, emoji }) => (
-              <button
+              <motion.button
                 key={label}
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
                 onClick={() => onSortChange(id as 'popular' | 'calories' | 'time' | null)}
-                className={`flex-none px-3 py-1.5 rounded-xl text-sm font-medium transition-all duration-200 whitespace-nowrap ${
+                className={`flex-none px-3 py-2 rounded-lg text-sm font-medium transition-all duration-200 whitespace-nowrap ${
                   sortBy === id
-                    ? 'bg-rose-100 text-rose-700 border-2 border-rose-200 shadow-sm transform scale-105'
-                    : 'bg-white/80 text-gray-600 hover:bg-rose-50 border border-gray-200 hover:border-rose-200'
+                    ? 'bg-gradient-to-r from-rose-500 to-pink-500 text-white shadow-md'
+                    : 'bg-white/80 text-gray-600 hover:bg-rose-50 border border-rose-100/50'
                 }`}
               >
                 <span className="flex items-center space-x-1.5">
                   <span>{emoji}</span>
                   <span>{label}</span>
                 </span>
-              </button>
+              </motion.button>
             ))}
           </div>
           <ScrollButtons scrollRef={sortByRef} canScroll={canScrollSortBy} />

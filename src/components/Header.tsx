@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
-import { ChefHat, Search, Menu, X, Download, Share2, LogIn, Apple, User } from 'lucide-react';
+import { ChefHat, Search, Menu as MenuIcon, X } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-import { AccountMenu } from './AccountMenu';
+import { MobileMenu } from './MobileMenu';
 
 interface HeaderProps {
   searchTerm: string;
@@ -24,84 +24,105 @@ export function Header({
 }: HeaderProps) {
   const [showSearch, setShowSearch] = useState(false);
   const [showMobileMenu, setShowMobileMenu] = useState(false);
-  const [showAccountMenu, setShowAccountMenu] = useState(false);
   const navigate = useNavigate();
 
+  // Función para obtener el título de la pestaña actual
+  const getActiveTabTitle = () => {
+    switch (activeTab) {
+      case 'recetas':
+        return 'Recetas';
+      case 'menu':
+        return 'Menú';
+      case 'compra':
+        return 'Lista de Compra';
+      case 'salud':
+        return 'Vida Sana';
+      case 'profile':
+        return 'Mi Perfil';
+      default:
+        return '';
+    }
+  };
+
   return (
-    <header className="fixed top-0 inset-x-0 z-50 bg-gradient-to-r from-orange-400 via-pink-500 to-rose-500">
-      <div className="container mx-auto px-4">
-        <div className="flex items-center justify-between h-14 md:h-16">
-          {/* Logo y título */}
-          <div className="flex items-center space-x-3">
-            <div className="bg-white/10 p-2 rounded-lg border border-white/20 group hover:bg-white/20 transition-all duration-300">
-              <ChefHat size={20} className="text-white transform group-hover:rotate-12 transition-transform" />
-            </div>
-            <h1 className="text-lg md:text-xl tracking-tight text-white">
-              <span className="font-light">Mi</span>
-              <span className="font-bold">Cocina</span>
-            </h1>
-          </div>
-
-          {/* Botones de acción */}
-          <div className="flex items-center space-x-2 md:space-x-3">
-            {activeTab !== 'salud' && (
-              <button
-                onClick={() => setShowSearch(!showSearch)}
-                className="p-2 hover:bg-white/10 rounded-lg transition-colors text-white"
-              >
-                <Search size={20} />
-              </button>
-            )}
-
-            {/* Botón de Vida Sana - Solo en desktop */}
-            <button
-              onClick={() => onTabChange('plato')}
-              className="hidden md:flex items-center space-x-2 px-4 py-2 bg-white/10 text-white rounded-lg hover:bg-white/20 transition-colors border border-white/20"
-            >
-              <Apple size={18} />
-              <span className="text-sm font-medium">Vida Sana</span>
-            </button>
-
-            {/* Botón de perfil/login */}
-            {user ? (
-              <div className="relative">
-                <button
-                  onClick={() => setShowAccountMenu(!showAccountMenu)}
-                  className="flex items-center space-x-2 px-4 py-2 bg-white/10 text-white rounded-lg hover:bg-white/20 transition-colors border border-white/20"
-                >
-                  <User size={18} />
-                  <span className="text-sm font-medium hidden md:block">Mi Cuenta</span>
-                </button>
-
-                <AccountMenu
-                  isOpen={showAccountMenu}
-                  onClose={() => setShowAccountMenu(false)}
-                  userType={user.user_metadata?.user_type || 'user'}
-                  userName={user.user_metadata?.full_name || 'Usuario'}
-                />
+    <>
+      {/* Desktop Header */}
+      <header className="fixed top-0 inset-x-0 z-50 bg-gradient-to-r from-orange-400 via-pink-500 to-rose-500 hidden md:block">
+        <div className="container mx-auto px-4">
+          <div className="flex items-center justify-between h-16">
+            <div className="flex items-center space-x-3">
+              <div className="bg-white/10 p-2 rounded-lg border border-white/20 group hover:bg-white/20 transition-all duration-300">
+                <ChefHat size={20} className="text-white transform group-hover:rotate-12 transition-transform" />
               </div>
-            ) : (
-              <button
-                onClick={onLogin}
-                className="flex items-center space-x-2 px-4 py-2 bg-white/10 text-white rounded-lg hover:bg-white/20 transition-colors border border-white/20"
-              >
-                <LogIn size={18} />
-                <span className="text-sm font-medium hidden md:block">Iniciar sesión</span>
-              </button>
-            )}
+              <h1 className="text-xl tracking-tight text-white">
+                <span className="font-light">Mi</span>
+                <span className="font-bold">Cocina</span>
+              </h1>
+            </div>
 
-            {/* Botón de menú móvil */}
+            <div className="flex items-center space-x-3">
+              {activeTab !== 'salud' && (
+                <button
+                  onClick={() => setShowSearch(!showSearch)}
+                  className="p-2 hover:bg-white/10 rounded-lg transition-colors text-white"
+                >
+                  <Search size={20} />
+                </button>
+              )}
+            </div>
+          </div>
+        </div>
+      </header>
+
+      {/* Mobile Header */}
+      <header className="fixed top-0 inset-x-0 z-50 bg-gradient-to-r from-orange-400 via-pink-500 to-rose-500 md:hidden">
+        <div className="container mx-auto px-4">
+          <div className="flex items-center justify-between h-14">
+            <div className="flex items-center space-x-3">
+              <div className="bg-white/10 p-2 rounded-lg border border-white/20">
+                <ChefHat size={20} className="text-white" />
+              </div>
+              <div className="flex items-center space-x-2">
+                <h1 className="text-lg tracking-tight text-white">
+                  <span className="font-light">Mi</span>
+                  <span className="font-bold">Cocina</span>
+                </h1>
+                {getActiveTabTitle() && (
+                  <>
+                    <span className="text-white/50">•</span>
+                    <span className="text-white/90 text-sm font-medium">
+                      {getActiveTabTitle()}
+                    </span>
+                  </>
+                )}
+              </div>
+            </div>
+
             <button
-              onClick={() => setShowMobileMenu(!showMobileMenu)}
-              className="md:hidden p-2 hover:bg-white/10 rounded-lg transition-colors text-white"
+              onClick={() => setShowMobileMenu(true)}
+              className="relative group"
             >
-              {showMobileMenu ? <X size={20} /> : <Menu size={20} />}
+              <div className="p-2 bg-white/10 hover:bg-white/20 rounded-xl border border-white/20 transition-all duration-300">
+                <div className="w-5 space-y-1">
+                  <span className="block h-0.5 w-full bg-white transform transition-all duration-300 group-hover:rotate-45 group-hover:translate-y-1.5"></span>
+                  <span className="block h-0.5 w-full bg-white transition-all duration-300 group-hover:opacity-0"></span>
+                  <span className="block h-0.5 w-full bg-white transform transition-all duration-300 group-hover:-rotate-45 group-hover:-translate-y-1.5"></span>
+                </div>
+              </div>
             </button>
           </div>
         </div>
-      </div>
+      </header>
 
-      {/* Rest of the header components... */}
-    </header>
+      {/* Mobile Menu Sidebar */}
+      <MobileMenu
+        isOpen={showMobileMenu}
+        onClose={() => setShowMobileMenu(false)}
+        user={user}
+        onLogin={onLogin}
+        onProfile={onProfile}
+        activeTab={activeTab}
+      />
+    </>
   );
 }
