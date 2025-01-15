@@ -16,6 +16,7 @@ import { useShoppingList } from './hooks/useShoppingList';
 import { useRecipes } from './hooks/useRecipes';
 import { useFavorites } from './hooks/useFavorites';
 import { HealthyPlateGuide } from './components/HealthyPlateGuide';
+import { MobileInstallButton } from './components/MobileInstallButton';
 
 function App() {
   const [searchTerm, setSearchTerm] = useState('');
@@ -191,6 +192,8 @@ function App() {
             onLoginSuccess={handleLoginSuccess}
           />
         )}
+
+        <MobileInstallButton />
       </div>
     </Router>
   );

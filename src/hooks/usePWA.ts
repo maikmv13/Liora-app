@@ -11,15 +11,19 @@ export function usePWA() {
 
   useEffect(() => {
     const handleBeforeInstallPrompt = (e: Event) => {
+      // Prevenir comportamiento por defecto
       e.preventDefault();
+      console.log('🚀 PWA instalable detectada'); // Debug log
+      
+      // Guardar el evento
       setDeferredPrompt(e as BeforeInstallPromptEvent);
       setIsInstallable(true);
-      console.log('PWA es instalable');
     };
 
     window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
-    
-    console.log('Listener de PWA registrado');
+
+    // Debug: verificar si el evento está registrado
+    console.log('🎯 Listener de PWA registrado');
 
     return () => {
       window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
@@ -28,27 +32,21 @@ export function usePWA() {
 
   const installPWA = async () => {
     if (!deferredPrompt) {
-      console.log('No se puede instalar la PWA');
+      console.log('❌ No se puede instalar la PWA (no hay prompt)');
       return;
     }
 
     try {
-      // Mostrar el prompt de instalación
+      console.log('📱 Intentando mostrar el prompt de instalación');
       await deferredPrompt.prompt();
-      // Esperar la respuesta del usuario
+      
       const choiceResult = await deferredPrompt.userChoice;
+      console.log('✅ Resultado de instalación:', choiceResult.outcome);
       
-      if (choiceResult.outcome === 'accepted') {
-        console.log('Usuario aceptó instalar la PWA');
-      } else {
-        console.log('Usuario rechazó instalar la PWA');
-      }
-      
-      // Limpiar el prompt guardado
       setDeferredPrompt(null);
       setIsInstallable(false);
     } catch (error) {
-      console.error('Error al instalar la PWA:', error);
+      console.error('❌ Error al instalar la PWA:', error);
     }
   };
 
