@@ -35,7 +35,7 @@ export function Header({
         return 'Menú';
       case 'compra':
         return 'Lista de Compra';
-      case 'salud':
+      case 'vida-sana':
         return 'Vida Sana';
       case 'profile':
         return 'Mi Perfil';

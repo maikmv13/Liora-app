@@ -52,10 +52,10 @@ export function MobileMenu({ isOpen, onClose, user, onLogin, onProfile, activeTa
 
   const additionalItems = [
     {
-      id: 'salud',
+      id: 'vida-sana',
       icon: Apple,
       label: 'Vida Sana',
-      onClick: () => navigate('/salud'),
+      onClick: () => navigate('/vida-sana'),
       description: 'Consejos y bienestar'
     },
     {

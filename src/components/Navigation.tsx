@@ -37,9 +37,9 @@ export function Navigation({ activeTab, onTabChange, orientation = 'horizontal',
       description: 'Lista'
     },
     {
-      id: 'salud',
+      id: 'vida-sana',
       icon: Activity,
-      label: 'Salud',
+      label: 'Vida Sana',
       description: 'Bienestar'
     }
   ];

@@ -15,6 +15,7 @@ import { useActiveMenu } from './hooks/useActiveMenu';
 import { useShoppingList } from './hooks/useShoppingList';
 import { useRecipes } from './hooks/useRecipes';
 import { useFavorites } from './hooks/useFavorites';
+import { HealthyPlateGuide } from './components/HealthyPlateGuide';
 
 function App() {
   const [searchTerm, setSearchTerm] = useState('');
@@ -175,6 +176,10 @@ function App() {
                   <Navigate to="/menu" replace />
                 )
               } 
+            />
+            <Route 
+              path="/vida-sana" 
+              element={<HealthyPlateGuide />} 
             />
             <Route path="/" element={<Navigate to="/menu" replace />} />
           </Routes>
