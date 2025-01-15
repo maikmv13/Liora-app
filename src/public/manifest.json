@@ -6,6 +6,7 @@
   "display": "standalone",
   "background_color": "#ffffff",
   "theme_color": "#F43F5E",
+  "orientation": "portrait",
   "icons": [
     {
       "src": "/icon-192.png",
@@ -19,5 +20,15 @@
       "type": "image/png",
       "purpose": "any maskable"
     }
-  ]
+  ],
+  "shortcuts": [
+    {
+      "name": "Menú de Hoy",
+      "short_name": "Hoy",
+      "description": "Ver el menú de hoy",
+      "url": "/?source=pwa",
+      "icons": [{ "src": "/icon-192.png", "sizes": "192x192" }]
+    }
+  ],
+  "categories": ["food", "lifestyle", "productivity"]
 }

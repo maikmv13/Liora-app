@@ -10,36 +10,39 @@ export default defineConfig({
       registerType: 'autoUpdate',
       includeAssets: ['favicon.ico', 'apple-touch-icon.png', 'masked-icon.svg'],
       manifest: {
-        name: 'Recetas App',
-        short_name: 'Recetas',
-        description: 'Aplicación de recetas',
-        theme_color: '#ffffff',
-        background_color: '#ffffff',
-        display: 'standalone', // Esto oculta la barra del navegador
-        orientation: 'portrait',
-        scope: '/',
-        start_url: '/',
+        name: "MiCocina",
+        short_name: "MiCocina",
+        description: "Tu asistente culinario personal",
+        theme_color: "#F43F5E",
+        background_color: "#ffffff",
+        display: "standalone",
+        orientation: "portrait",
+        scope: "/",
+        start_url: "/",
         icons: [
           {
-            src: 'pwa-192x192.png',
-            sizes: '192x192',
-            type: 'image/png'
+            src: "/icon-192.png",
+            sizes: "192x192",
+            type: "image/png",
+            purpose: "any maskable"
           },
           {
-            src: 'pwa-512x512.png',
-            sizes: '512x512',
-            type: 'image/png'
-          },
+            src: "/icon-512.png",
+            sizes: "512x512",
+            type: "image/png",
+            purpose: "any maskable"
+          }
+        ],
+        screenshots: [
           {
-            src: 'pwa-512x512.png',
-            sizes: '512x512',
-            type: 'image/png',
-            purpose: 'any maskable'
+            src: "/screenshot1.png",
+            sizes: "1170x2532",
+            type: "image/png"
           }
         ]
       },
       workbox: {
-        navigateFallback: '/index.html',
+        globPatterns: ['**/*.{js,css,html,ico,png,svg,json}'],
         runtimeCaching: [
           {
             urlPattern: /^https:\/\/api\.*/i,
@@ -53,6 +56,10 @@ export default defineConfig({
             }
           }
         ]
+      },
+      devOptions: {
+        enabled: true,
+        type: 'module'
       }
     })
   ],
