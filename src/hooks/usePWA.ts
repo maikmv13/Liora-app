@@ -8,27 +8,25 @@ interface BeforeInstallPromptEvent extends Event {
 export function usePWA() {
   const [deferredPrompt, setDeferredPrompt] = useState<BeforeInstallPromptEvent | null>(null);
   const [isInstallable, setIsInstallable] = useState(false);
-  const [isIOS, setIsIOS] = useState(false);
 
   useEffect(() => {
-    // Detect iOS device
-    const isIOSDevice = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
-    setIsIOS(isIOSDevice);
-
-    // Handle beforeinstallprompt event
     const handleBeforeInstallPrompt = (e: Event) => {
+      // Prevenir que Chrome muestre el prompt automáticamente
       e.preventDefault();
+      // Guardar el evento para usarlo después
       setDeferredPrompt(e as BeforeInstallPromptEvent);
       setIsInstallable(true);
     };
 
+    // Escuchar el evento beforeinstallprompt
     window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
 
-    // Check if already installed
-    const isStandalone = window.matchMedia('(display-mode: standalone)').matches;
-    if (isStandalone) {
+    // Comprobar si la app ya está instalada
+    window.addEventListener('appinstalled', () => {
       setIsInstallable(false);
-    }
+      setDeferredPrompt(null);
+      console.log('PWA instalada con éxito');
+    });
 
     return () => {
       window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
@@ -36,25 +34,33 @@ export function usePWA() {
   }, []);
 
   const installPWA = async () => {
-    if (!deferredPrompt) return;
+    if (!deferredPrompt) {
+      console.log('No se puede instalar la PWA');
+      return;
+    }
 
     try {
+      // Mostrar el prompt de instalación
       await deferredPrompt.prompt();
-      const { outcome } = await deferredPrompt.userChoice;
+      // Esperar la respuesta del usuario
+      const choiceResult = await deferredPrompt.userChoice;
       
-      if (outcome === 'accepted') {
-        setIsInstallable(false);
+      if (choiceResult.outcome === 'accepted') {
+        console.log('Usuario aceptó instalar la PWA');
+      } else {
+        console.log('Usuario rechazó instalar la PWA');
       }
-    } catch (error) {
-      console.error('Error installing PWA:', error);
-    } finally {
+      
+      // Limpiar el prompt guardado
       setDeferredPrompt(null);
+      setIsInstallable(false);
+    } catch (error) {
+      console.error('Error al instalar la PWA:', error);
     }
   };
 
   return {
     isInstallable,
-    isIOS,
     installPWA
   };
 }
