@@ -2,12 +2,20 @@ import { useState } from 'react';
 import { MenuItem, Recipe, MealType } from '../../../types';
 import { ExtendedWeeklyMenuDB } from '../../../services/weeklyMenu';
 import { handleUpdateMenuRecipe, handleRemoveMeal } from '../handlers';
+import React from 'react';
 
 export function useMenuState(
   forUserId: string | undefined,
   onAddToMenu: (recipe: Recipe | null, day: string, meal: MealType) => void
 ) {
-  const [selectedDay, setSelectedDay] = useState<string>('Lunes');
+  const getTomorrowDay = React.useCallback(() => {
+    const today = new Date();
+    const tomorrow = new Date(today);
+    tomorrow.setDate(today.getDate() + 1);
+    return new Intl.DateTimeFormat('es-ES', { weekday: 'long' }).format(tomorrow);
+  }, []);
+
+  const [selectedDay, setSelectedDay] = useState(getTomorrowDay());
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [selectedMealInfo, setSelectedMealInfo] = useState<{
     day: string;

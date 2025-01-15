@@ -22,7 +22,7 @@ export function MobileMenu({ isOpen, onClose, user, onLogin, onProfile, activeTa
   const handleLogout = async () => {
     try {
       await supabase.auth.signOut();
-      navigate('/recetas');
+      navigate('/menu');
       onClose();
     } catch (error) {
       console.error('Error signing out:', error);

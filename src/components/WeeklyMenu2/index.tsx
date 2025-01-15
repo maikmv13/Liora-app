@@ -153,6 +153,7 @@ export function WeeklyMenu2({ weeklyMenu, onRecipeSelect, onAddToMenu, forUserId
           weekDays={weekDays}
           weeklyMenu={weeklyMenu}
           onDayChange={setSelectedDay}
+          initialDay={selectedDay}
           onMealClick={handleMealClick}
           onRemoveMeal={handleRemoveMealClick}
           onViewRecipe={setViewingRecipe}

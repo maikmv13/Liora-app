@@ -15,6 +15,7 @@ interface MobileViewProps {
   onViewRecipe: (menuItem: MenuItem) => void;
   onAddToMenu: (recipe: Recipe | null, day: WeekDay, meal: MealType) => void;
   activeMenu: ExtendedWeeklyMenuDB | null;
+  initialDay?: string;
 }
 
 export function MobileView({ 
@@ -26,7 +27,8 @@ export function MobileView({
   onRemoveMeal,
   onViewRecipe,
   onAddToMenu,
-  activeMenu
+  activeMenu,
+  initialDay
 }: MobileViewProps) {
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const [canScrollLeft, setCanScrollLeft] = React.useState(false);
@@ -79,6 +81,18 @@ export function MobileView({
       });
     }
   };
+
+  React.useEffect(() => {
+    if (scrollContainerRef.current && initialDay) {
+      const index = weekDays.findIndex(day => 
+        day.toLowerCase() === initialDay.toLowerCase()
+      );
+      if (index !== -1) {
+        const cardWidth = scrollContainerRef.current.offsetWidth;
+        scrollContainerRef.current.scrollLeft = index * cardWidth;
+      }
+    }
+  }, [initialDay, weekDays]);
 
   return (
     <div className="relative">
