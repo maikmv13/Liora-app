@@ -1,13 +1,23 @@
 import React, { useState } from 'react';
 import { Clock, Users, ChefHat, Flame, Heart, Sun, Moon } from 'lucide-react';
-import { Recipe, RecipeCardProps } from '../../types';
+import type { Recipe } from '../../types';
 import { categoryColors } from '../../utils/categoryColors';
 import { RecipeModal } from './RecipeModal';
 
-export function RecipeCard({ recipe, onClick, onToggleFavorite }: RecipeCardProps) {
+interface RecipeCardProps {
+  recipe: Recipe;
+  favorites: string[];
+  onClick: () => void;
+  onToggleFavorite: () => void;
+}
+
+export function RecipeCard({ recipe, favorites, onClick, onToggleFavorite }: RecipeCardProps) {
   const [imageLoaded, setImageLoaded] = useState(false);
   const [imageError, setImageError] = useState(false);
   const [showModal, setShowModal] = useState(false);
+
+  // Modificar la verificación de isFavorite
+  const isFavorite = favorites?.includes(recipe.id);
 
   const colors = categoryColors[recipe.category as keyof typeof categoryColors] || {
     bg: 'bg-gray-50',
@@ -72,15 +82,19 @@ export function RecipeCard({ recipe, onClick, onToggleFavorite }: RecipeCardProp
           <button
             onClick={(e) => {
               e.stopPropagation();
+              console.log('Toggle favorite:', { recipe, isFavorite, favorites });
               onToggleFavorite();
             }}
             className={`absolute top-2 right-2 p-2 rounded-xl transition-colors ${
-              recipe.isFavorite
+              isFavorite
                 ? 'text-rose-500 bg-white/90 backdrop-blur-sm hover:bg-white'
                 : 'text-white/90 hover:text-white bg-black/20 hover:bg-black/30'
             }`}
           >
-            <Heart size={20} className={recipe.isFavorite ? 'fill-current' : ''} />
+            <Heart 
+              size={20} 
+              className={`transition-colors ${isFavorite ? 'fill-current text-rose-500' : ''}`} 
+            />
           </button>
         </div>
 
@@ -136,8 +150,8 @@ export function RecipeCard({ recipe, onClick, onToggleFavorite }: RecipeCardProp
           recipe={recipe}
           onClose={() => setShowModal(false)}
           onAddToMenu={() => {}}
-          isFavorite={recipe.isFavorite}
-          onToggleFavorite={onToggleFavorite}
+          isFavorite={isFavorite}
+          onToggleFavorite={() => onToggleFavorite()}
         />
       )}
     </>

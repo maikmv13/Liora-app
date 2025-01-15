@@ -7,7 +7,7 @@ import { RecipeFilters } from './RecipeFilters';
 interface RecipeListProps {
   recipes: Recipe[];
   onRecipeSelect: (recipe: Recipe) => void;
-  favorites: string[];
+  favorites: { recipe_id: string }[];
   onToggleFavorite: (recipe: Recipe) => void;
 }
 
@@ -69,21 +69,15 @@ export function RecipeList({ recipes, onRecipeSelect, favorites, onToggleFavorit
 
       {/* Recipe Grid */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
-        {sortedRecipes.map((recipe) => {
-          const cardProps = {
-            ...mapRecipeToCardProps(recipe),
-            isFavorite: favorites.includes(recipe.name)
-          };
-          
-          return (
-            <RecipeCard 
-              key={recipe.name}
-              recipe={cardProps}
-              onClick={() => onRecipeSelect(recipe)}
-              onToggleFavorite={() => onToggleFavorite(recipe)}
-            />
-          );
-        })}
+        {sortedRecipes.map((recipe) => (
+          <RecipeCard 
+            key={recipe.id}
+            recipe={recipe}
+            favorites={favorites.map(fav => fav.recipe_id)}
+            onClick={() => onRecipeSelect(recipe)}
+            onToggleFavorite={() => onToggleFavorite(recipe)}
+          />
+        ))}
       </div>
 
       {/* Empty State */}
