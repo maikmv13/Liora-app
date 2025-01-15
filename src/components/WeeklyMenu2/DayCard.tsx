@@ -65,6 +65,7 @@ export function DayCard({
       className={`
         bg-white/95 backdrop-blur-md rounded-2xl overflow-hidden h-full
         transition-all duration-300 transform hover:translate-y-[-2px]
+        my-2 md:my-0
         ${isToday 
           ? 'ring-2 ring-rose-200 shadow-lg shadow-rose-100/50 border-2 border-rose-200' 
           : isTomorrow
@@ -117,8 +118,8 @@ export function DayCard({
         </div>
       </div>
 
-      {/* Meals Grid - Fixed height rows */}
-      <div className="grid grid-rows-4 h-[calc(100%-4rem)]">
+      {/* Meals Grid - Fixed height rows - Actualizado con padding */}
+      <div className="grid grid-rows-4 h-[calc(100%-4rem)] py-1 md:py-0">
         {mealTypes.map((meal) => {
           const menuItem = menuItems.find(item => item.meal === meal);
           const isMainMeal = meal === 'comida' || meal === 'cena';
