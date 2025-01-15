@@ -19,7 +19,7 @@ import { HealthyPlateGuide } from './components/HealthyPlateGuide';
 
 function App() {
   const [searchTerm, setSearchTerm] = useState('');
-  const [activeTab, setActiveTab] = useState('menu');
+  const [activeTab, setActiveTab] = useState('recetas');
   const [weeklyMenu, setWeeklyMenu] = useState<MenuItem[]>([]);
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
@@ -181,7 +181,7 @@ function App() {
               path="/vida-sana" 
               element={<HealthyPlateGuide />} 
             />
-            <Route path="/" element={<Navigate to="/menu" replace />} />
+            <Route path="/" element={<Navigate to="/recetas" replace />} />
           </Routes>
         </main>
 

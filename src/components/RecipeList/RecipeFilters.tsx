@@ -137,7 +137,7 @@ export function RecipeFilters({
       <div className="relative">
         <input
           type="text"
-          placeholder="Buscar por nombre, categoría..."
+          placeholder="Buscar por nombre, ingrediente o categoría..."
           value={searchTerm}
           onChange={(e) => onSearchChange(e.target.value)}
           className="w-full pl-10 pr-4 py-2.5 bg-white/90 backdrop-blur-sm rounded-xl border border-rose-100 focus:ring-2 focus:ring-rose-500 focus:border-rose-500"
@@ -160,7 +160,7 @@ export function RecipeFilters({
               onClick={() => onMealTypeChange('all')}
               className={`flex-none px-3 py-2 rounded-lg text-sm font-medium transition-all duration-200 whitespace-nowrap ${
                 selectedMealType === 'all'
-                  ? 'bg-gradient-to-r from-rose-500 to-pink-500 text-white shadow-md'
+                  ? 'bg-rose-100/80 text-rose-600 shadow-sm border border-rose-200/50'
                   : 'bg-white/80 text-gray-600 hover:bg-rose-50 border border-rose-100/50'
               }`}
             >
@@ -177,7 +177,7 @@ export function RecipeFilters({
                 onClick={() => onMealTypeChange(id)}
                 className={`flex-none px-3 py-2 rounded-lg text-sm font-medium transition-all duration-200 whitespace-nowrap ${
                   selectedMealType === id
-                    ? 'bg-gradient-to-r from-rose-500 to-pink-500 text-white shadow-md'
+                    ? 'bg-rose-100/80 text-rose-600 shadow-sm border border-rose-200/50'
                     : 'bg-white/80 text-gray-600 hover:bg-rose-50 border border-rose-100/50'
                 }`}
               >
@@ -206,7 +206,7 @@ export function RecipeFilters({
                 onClick={() => onCategoryChange(id)}
                 className={`flex-none px-3 py-2 rounded-lg text-sm font-medium transition-all duration-200 whitespace-nowrap ${
                   selectedCategory === id
-                    ? 'bg-gradient-to-r from-rose-500 to-pink-500 text-white shadow-md'
+                    ? 'bg-rose-100/80 text-rose-600 shadow-sm border border-rose-200/50'
                     : 'bg-white/80 text-gray-600 hover:bg-rose-50 border border-rose-100/50'
                 }`}
               >
@@ -240,7 +240,7 @@ export function RecipeFilters({
                 onClick={() => onSortChange(id as 'popular' | 'calories' | 'time' | null)}
                 className={`flex-none px-3 py-2 rounded-lg text-sm font-medium transition-all duration-200 whitespace-nowrap ${
                   sortBy === id
-                    ? 'bg-gradient-to-r from-rose-500 to-pink-500 text-white shadow-md'
+                    ? 'bg-rose-100/80 text-rose-600 shadow-sm border border-rose-200/50'
                     : 'bg-white/80 text-gray-600 hover:bg-rose-50 border border-rose-100/50'
                 }`}
               >

@@ -43,8 +43,8 @@ export function RecipeList({ recipes, onRecipeSelect, favorites, onToggleFavorit
   return (
     <div className="space-y-6">
       {/* Favorites Banner */}
-      <div className="relative -mb-4">
-        {/* Decorative circles - now with lower z-index */}
+      <div className="relative">
+        {/* Decorative circles */}
         <div className="absolute inset-0 overflow-hidden rounded-2xl">
           <div className="absolute top-0 right-0 w-64 h-64 bg-white/5 rounded-full -translate-y-1/2 translate-x-1/2 backdrop-blur-3xl -z-10" />
           <div className="absolute bottom-0 left-0 w-48 h-48 bg-white/5 rounded-full translate-y-1/2 -translate-x-1/2 backdrop-blur-3xl -z-10" />
@@ -68,7 +68,7 @@ export function RecipeList({ recipes, onRecipeSelect, favorites, onToggleFavorit
                   <Sparkles size={20} className="text-amber-300 animate-pulse" />
                 </h3>
                 <p className="text-white/90 text-sm md:text-base mt-1">
-                  Accede rápidamente a tus recetas guardadas
+                  👩‍🍳 {favorites.length} favoritas de {recipes.length} recetas disponibles
                 </p>
               </div>
             </div>
@@ -79,21 +79,6 @@ export function RecipeList({ recipes, onRecipeSelect, favorites, onToggleFavorit
             </div>
           </div>
         </button>
-      </div>
-
-      {/* Header */}
-      <div className="flex flex-col md:flex-row md:justify-between md:items-start gap-4">
-        <div className="flex items-center space-x-3">
-          <div className="bg-rose-50 w-12 h-12 md:w-14 md:h-14 rounded-2xl flex items-center justify-center">
-            <ChefHat size={24} className="text-rose-500 md:w-7 md:h-7" />
-          </div>
-          <div>
-            <h2 className="text-2xl md:text-3xl font-bold text-gray-900">Descubre nuevas recetas!!</h2>
-            <p className="text-sm md:text-base text-gray-600 mt-1">
-              👩‍🍳 {recipes.length} recetas disponibles
-            </p>
-          </div>
-        </div>
       </div>
 
       {/* Filters */}
