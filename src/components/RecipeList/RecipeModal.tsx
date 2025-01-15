@@ -14,6 +14,18 @@ interface RecipeModalProps {
   onToggleFavorite?: () => void;
 }
 
+interface RecipeIngredient {
+  ingredients: {
+    name: string;
+  };
+  quantity: number | string;
+  unit: string;
+}
+
+interface Recipe {
+  recipe_ingredients?: RecipeIngredient[];
+}
+
 export function RecipeModal({ 
   recipe, 
   onClose, 
@@ -69,7 +81,7 @@ export function RecipeModal({
       onClick={onClose}
     >
       <div 
-        className="bg-white/95 backdrop-blur-md rounded-2xl w-full max-w-4xl my-4 shadow-lg flex flex-col"
+        className="bg-white/95 backdrop-blur-md rounded-2xl w-full max-w-4xl my-4 shadow-lg flex flex-col overflow-hidden"
         style={{ maxHeight: 'calc(100vh - 2rem)' }}
         onClick={e => e.stopPropagation()}
       >
@@ -162,22 +174,28 @@ export function RecipeModal({
                   Ingredientes
                 </h3>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  {recipe.recipe_ingredients.map((ri, index) => (
-                    <div 
-                      key={index}
-                      className="flex items-center space-x-3 p-3 bg-gray-50 rounded-xl border border-gray-100"
-                    >
-                      <div className="p-2 bg-white rounded-lg">
-                        <ChefHat size={16} className="text-gray-500" />
+                  {recipe.recipe_ingredients.map((ri, index) => {
+                    console.log('Ingredient:', ri);
+                    
+                    return (
+                      <div 
+                        key={index}
+                        className="flex items-center space-x-3 p-3 bg-gray-50 rounded-xl border border-gray-100"
+                      >
+                        <div className="p-2 bg-white rounded-lg">
+                          <ChefHat size={16} className="text-gray-500" />
+                        </div>
+                        <div>
+                          <p className="text-gray-900 font-medium">
+                            {ri?.ingredients?.name || 'Ingrediente sin nombre'}
+                          </p>
+                          <p className="text-sm text-gray-500">
+                            {ri?.quantity || ''} {ri?.unit || ''}
+                          </p>
+                        </div>
                       </div>
-                      <div>
-                        <p className="text-gray-900 font-medium">{ri.ingredients?.name}</p>
-                        <p className="text-sm text-gray-500">
-                          {ri.quantity} {ri.unit}
-                        </p>
-                      </div>
-                    </div>
-                  ))}
+                    );
+                  })}
                 </div>
               </div>
             )}
@@ -206,12 +224,12 @@ export function RecipeModal({
           </div>
         </div>
 
-        {/* Footer Actions - Now sticky */}
-        <div className="sticky bottom-0 flex flex-col sm:flex-row gap-3 p-4 border-t border-gray-100 bg-white/95 backdrop-blur-sm">
+        {/* Footer Actions - Actualizado con esquinas redondeadas */}
+        <div className="sticky bottom-0 flex flex-col sm:flex-row gap-3 p-4 border-t border-gray-100 bg-white/95 backdrop-blur-sm rounded-b-2xl">
           {onAddToMenu && (
             <button 
               onClick={() => onAddToMenu(recipe)}
-              className="flex-1 bg-gradient-to-r from-orange-400 via-pink-500 to-rose-500 text-white py-3 px-6 rounded-xl font-medium hover:from-orange-500 hover:via-pink-600 hover:to-rose-600 transition-colors flex items-center justify-center space-x-2"
+              className="flex-1 bg-gradient-to-r from-orange-400 via-pink-500 to-rose-500 text-white py-3 px-6 rounded-xl font-medium hover:from-orange-500 hover:via-pink-600 hover:to-rose-600 transition-colors flex items-center justify-center space-x-2 shadow-sm"
             >
               <Calendar size={20} />
               <span>Añadir al Menú</span>
@@ -220,7 +238,7 @@ export function RecipeModal({
           {onToggleFavorite && (
             <button 
               onClick={onToggleFavorite}
-              className={`w-full sm:w-auto py-3 px-6 rounded-xl font-medium transition-colors flex items-center justify-center space-x-2 border ${
+              className={`w-full sm:w-auto py-3 px-6 rounded-xl font-medium transition-colors flex items-center justify-center space-x-2 border shadow-sm ${
                 isFavorite
                   ? 'bg-rose-50 text-rose-600 border-rose-200 hover:bg-rose-100'
                   : 'bg-white text-gray-700 border-gray-200 hover:bg-gray-50'
