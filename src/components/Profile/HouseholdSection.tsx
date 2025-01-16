@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Home, Users, Copy, Check, Plus, X, Mail } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
+import { JoinHouseholdModal } from './JoinHouseholdModal';
 
 interface HouseholdSectionProps {
   userId: string;
@@ -10,6 +11,7 @@ interface HouseholdSectionProps {
 
 export function HouseholdSection({ userId, householdId, onUpdate }: HouseholdSectionProps) {
   const [showInvite, setShowInvite] = useState(false);
+  const [showJoin, setShowJoin] = useState(false);
   const [inviteEmail, setInviteEmail] = useState('');
   const [copied, setCopied] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -97,7 +99,7 @@ export function HouseholdSection({ userId, householdId, onUpdate }: HouseholdSec
       // Verificar si el usuario existe
       const { data: existingUser, error: userError } = await supabase
         .from('profiles')
-        .select('id, household_id')
+        .select('id, household_id, email')
         .eq('email', inviteEmail)
         .single();
 
@@ -109,17 +111,20 @@ export function HouseholdSection({ userId, householdId, onUpdate }: HouseholdSec
         throw new Error('El usuario ya pertenece a otro hogar');
       }
 
-      // Actualizar el perfil del usuario invitado
-      const { error: updateError } = await supabase
-        .from('profiles')
-        .update({ household_id: householdId })
-        .eq('id', existingUser.id);
+      // Enviar email de invitación
+      const { error: emailError } = await supabase.functions.invoke('send-household-invite', {
+        body: {
+          email: inviteEmail,
+          householdId,
+          invitedBy: userId
+        }
+      });
 
-      if (updateError) throw updateError;
+      if (emailError) throw emailError;
 
       setInviteEmail('');
       setShowInvite(false);
-      loadHouseholdMembers();
+      alert('Invitación enviada correctamente');
     } catch (error) {
       console.error('Error inviting member:', error);
       setError(error instanceof Error ? error.message : 'Error al invitar miembro');
@@ -154,16 +159,25 @@ export function HouseholdSection({ userId, householdId, onUpdate }: HouseholdSec
               <Users className="w-6 h-6 text-rose-500" />
             </div>
             <p className="text-gray-600 mb-4">
-              No perteneces a ningún hogar. Crea uno nuevo para compartir tu menú con tu familia.
+              No perteneces a ningún hogar. Crea uno nuevo o únete a uno existente.
             </p>
-            <button
-              onClick={createHousehold}
-              disabled={loading}
-              className="inline-flex items-center space-x-2 px-4 py-2 bg-rose-500 text-white rounded-xl hover:bg-rose-600 transition-colors"
-            >
-              <Plus size={18} />
-              <span>Crear Hogar</span>
-            </button>
+            <div className="flex flex-col space-y-2">
+              <button
+                onClick={createHousehold}
+                disabled={loading}
+                className="inline-flex items-center justify-center space-x-2 px-4 py-2 bg-rose-500 text-white rounded-xl hover:bg-rose-600 transition-colors"
+              >
+                <Plus size={18} />
+                <span>Crear Hogar</span>
+              </button>
+              <button
+                onClick={() => setShowJoin(true)}
+                className="inline-flex items-center justify-center space-x-2 px-4 py-2 bg-rose-100 text-rose-600 rounded-xl hover:bg-rose-200 transition-colors"
+              >
+                <Home size={18} />
+                <span>Unirse a un Hogar</span>
+              </button>
+            </div>
           </div>
         ) : (
           <div className="space-y-4">
@@ -262,6 +276,14 @@ export function HouseholdSection({ userId, householdId, onUpdate }: HouseholdSec
           </div>
         )}
       </div>
+
+      {/* Modal para unirse a un hogar */}
+      {showJoin && (
+        <JoinHouseholdModal
+          onClose={() => setShowJoin(false)}
+          onJoin={onUpdate}
+        />
+      )}
     </div>
   );
 }
