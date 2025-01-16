@@ -5,6 +5,9 @@ export function generateShoppingList(menuItems: MenuItem[]): ShoppingItem[] {
   console.log('Generating shopping list for:', menuItems);
   const ingredientMap = new Map<string, ShoppingItem>();
 
+  // Primero agrupamos los ingredientes por día
+  const ingredientsByDay = new Map<string, Map<string, number>>();
+
   menuItems.forEach(({ recipe, day }) => {
     if (!recipe.recipe_ingredients || recipe.recipe_ingredients.length === 0) {
       console.warn(`No ingredients found for recipe: ${recipe.name}`);
@@ -25,14 +28,27 @@ export function generateShoppingList(menuItems: MenuItem[]): ShoppingItem[] {
       const unit = ri.unit;
       const category = ri.ingredients.category;
 
-      const key = `${name}-${unit}`; // Use name and unit as key to prevent duplicates with different units
+      // Crear clave única para el ingrediente
+      const key = `${name}-${unit}`;
 
+      // Agregar cantidad al día correspondiente
+      if (!ingredientsByDay.has(day)) {
+        ingredientsByDay.set(day, new Map());
+      }
+      const dayMap = ingredientsByDay.get(day)!;
+      dayMap.set(key, (dayMap.get(key) || 0) + scaledQuantity);
+
+      // Actualizar o crear el ingrediente en el mapa principal
       if (ingredientMap.has(key)) {
         const existing = ingredientMap.get(key)!;
         existing.quantity += scaledQuantity;
         if (!existing.days.includes(day)) {
           existing.days.push(day);
         }
+        if (!existing.dailyQuantities) {
+          existing.dailyQuantities = {};
+        }
+        existing.dailyQuantities[day] = dayMap.get(key)!;
       } else {
         ingredientMap.set(key, {
           id: ri.id,
@@ -41,12 +57,16 @@ export function generateShoppingList(menuItems: MenuItem[]): ShoppingItem[] {
           unit,
           category,
           checked: false,
-          days: [day]
+          days: [day],
+          dailyQuantities: {
+            [day]: scaledQuantity
+          }
         });
       }
     });
   });
 
+  // Convertir el mapa a array y ordenar
   const shoppingList = Array.from(ingredientMap.values());
   
   // Sort by category and then by name

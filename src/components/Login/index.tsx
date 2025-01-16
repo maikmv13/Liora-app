@@ -23,6 +23,11 @@ export function Login({ onClose, onLoginSuccess }: LoginProps) {
     setLoading(true);
 
     try {
+      if (!userType) {
+        throw new Error('Por favor, selecciona un tipo de usuario');
+      }
+
+      // 1. Iniciar sesión
       const { data: { user }, error: signInError } = await supabase.auth.signInWithPassword({
         email,
         password
@@ -38,13 +43,24 @@ export function Login({ onClose, onLoginSuccess }: LoginProps) {
       }
 
       if (user) {
+        // 2. Verificar y actualizar el perfil
         const { data: profile, error: profileError } = await supabase
           .from('profiles')
-          .select('user_type')
+          .select('*')
           .eq('user_id', user.id)
           .single();
 
         if (profileError) throw profileError;
+
+        // 3. Actualizar el email en el perfil si es necesario
+        if (!profile.email || profile.email !== email) {
+          const { error: updateError } = await supabase
+            .from('profiles')
+            .update({ email })
+            .eq('user_id', user.id);
+
+          if (updateError) throw updateError;
+        }
         
         if (userType && profile.user_type !== userType) {
           throw new Error(`Esta cuenta no está registrada como ${userType === 'user' ? 'usuario' : 'nutricionista'}`);

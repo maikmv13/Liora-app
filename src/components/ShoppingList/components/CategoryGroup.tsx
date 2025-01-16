@@ -10,56 +10,26 @@ interface CategoryGroupProps {
   isExpanded: boolean;
   onToggleExpand: () => void;
   onToggleItem: (nombre: string) => void;
+  viewMode: 'weekly' | 'daily';
+  selectedDay?: string;
 }
-
-// Define weekday order for sorting
-const weekDayOrder = {
-  'Lunes': 1,
-  'Martes': 2,
-  'Miércoles': 3,
-  'Jueves': 4,
-  'Viernes': 5,
-  'Sábado': 6,
-  'Domingo': 7
-};
 
 export function CategoryGroup({ 
   categoria, 
   items, 
   isExpanded, 
   onToggleExpand,
-  onToggleItem 
+  onToggleItem,
+  viewMode,
+  selectedDay
 }: CategoryGroupProps) {
   const completedCount = items.filter(item => item.checked).length;
   const isAllCompleted = completedCount === items.length;
   const CategoryIcon = getCategoryIcon(categoria);
 
-  // Sort items chronologically by days
-  const sortedItems = [...items].sort((a, b) => {
-    // Get the earliest day for each item
-    const earliestDayA = a.days.reduce((earliest, day) => {
-      const dayOrder = weekDayOrder[day as keyof typeof weekDayOrder] || 999;
-      return dayOrder < earliest ? dayOrder : earliest;
-    }, 999);
-
-    const earliestDayB = b.days.reduce((earliest, day) => {
-      const dayOrder = weekDayOrder[day as keyof typeof weekDayOrder] || 999;
-      return dayOrder < earliest ? dayOrder : earliest;
-    }, 999);
-
-    // Sort by earliest day first
-    if (earliestDayA !== earliestDayB) {
-      return earliestDayA - earliestDayB;
-    }
-
-    // If days are the same, sort by name
-    return a.name.localeCompare(b.name);
-  });
-
   const handleToggleAll = (e: React.MouseEvent) => {
     e.stopPropagation();
-    // If all items are checked, uncheck all. Otherwise, check all
-    sortedItems.forEach(item => {
+    items.forEach(item => {
       if (isAllCompleted || !item.checked) {
         onToggleItem(item.name);
       }
@@ -143,12 +113,14 @@ export function CategoryGroup({
       {/* Items List */}
       {isExpanded && (
         <div className="divide-y divide-rose-100/20">
-          {sortedItems.map((item) => (
+          {items.map((item) => (
             <ShoppingItemRow
               key={`${item.name}-${item.days.join('-')}`}
               item={item}
               onToggle={() => onToggleItem(item.name)}
               isGroupCompleted={isAllCompleted}
+              viewMode={viewMode}
+              selectedDay={selectedDay}
             />
           ))}
         </div>

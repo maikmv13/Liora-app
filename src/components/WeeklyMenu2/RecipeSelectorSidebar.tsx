@@ -1,5 +1,8 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { X, Search, ChevronRight, Filter, Flame, Clock, ChefHat, Command } from 'lucide-react';
+import { 
+  X, Search, ChevronRight, Filter, Flame, Clock, ChefHat, Command,
+  Users, Sun, Moon, Cookie, Star, Heart
+} from 'lucide-react';
 import { Recipe, MealType } from '../../types';
 import { useRecipes } from '../../hooks/useRecipes';
 import { useVirtualizer } from '@tanstack/react-virtual';
@@ -93,6 +96,36 @@ export function RecipeSelectorSidebar({
     return `${url}?quality=${quality}&width=${width}&format=${format}`;
   };
 
+  const getMealIcon = () => {
+    switch (selectedMeal) {
+      case 'desayuno':
+        return <Cookie className="w-5 h-5 text-amber-500" />;
+      case 'comida':
+        return <Sun className="w-5 h-5 text-orange-500" />;
+      case 'snack':
+        return <Cookie className="w-5 h-5 text-emerald-500" />;
+      case 'cena':
+        return <Moon className="w-5 h-5 text-indigo-500" />;
+      default:
+        return null;
+    }
+  };
+
+  const getMealColor = () => {
+    switch (selectedMeal) {
+      case 'desayuno':
+        return 'bg-amber-50 text-amber-700 border-amber-200';
+      case 'comida':
+        return 'bg-orange-50 text-orange-700 border-orange-200';
+      case 'snack':
+        return 'bg-emerald-50 text-emerald-700 border-emerald-200';
+      case 'cena':
+        return 'bg-indigo-50 text-indigo-700 border-indigo-200';
+      default:
+        return 'bg-gray-50 text-gray-700 border-gray-200';
+    }
+  };
+
   return (
     <>
       {/* Overlay */}
@@ -114,8 +147,17 @@ export function RecipeSelectorSidebar({
           <div className="p-4">
             <div className="flex items-center justify-between mb-4">
               <div>
-                <h2 className="text-lg font-semibold text-gray-900">Seleccionar {selectedMeal}</h2>
-                <p className="text-sm text-gray-500">{selectedDay}</p>
+                <div className="flex items-center space-x-2">
+                  <div className={`p-2 rounded-lg ${getMealColor()}`}>
+                    {getMealIcon()}
+                  </div>
+                  <div>
+                    <h2 className="text-lg font-semibold text-gray-900 capitalize">
+                      {selectedMeal}
+                    </h2>
+                    <p className="text-sm text-gray-500">{selectedDay}</p>
+                  </div>
+                </div>
               </div>
               <button 
                 onClick={onClose}
@@ -248,18 +290,29 @@ export function RecipeSelectorSidebar({
                           {recipe.name}
                         </h3>
                         
-                        <div className="mt-1 flex flex-wrap gap-2">
+                        <div className="mt-2 flex flex-wrap gap-2">
+                          {/* Category */}
                           <span className="inline-flex items-center px-2 py-1 rounded-lg text-xs font-medium bg-gray-100 text-gray-800">
                             {recipe.category}
                           </span>
+
+                          {/* Servings */}
+                          <span className="inline-flex items-center space-x-1 px-2 py-1 rounded-lg text-xs font-medium bg-blue-50 text-blue-700 border border-blue-100">
+                            <Users size={12} />
+                            <span>{recipe.servings}</span>
+                          </span>
+
+                          {/* Calories */}
                           {recipe.calories && (
                             <span className="inline-flex items-center space-x-1 px-2 py-1 rounded-lg text-xs font-medium bg-rose-50 text-rose-700 border border-rose-100">
                               <Flame size={12} />
                               <span>{recipe.calories}</span>
                             </span>
                           )}
+
+                          {/* Time */}
                           {recipe.prep_time && (
-                            <span className="inline-flex items-center space-x-1 px-2 py-1 rounded-lg text-xs font-medium bg-blue-50 text-blue-700 border border-blue-100">
+                            <span className="inline-flex items-center space-x-1 px-2 py-1 rounded-lg text-xs font-medium bg-amber-50 text-amber-700 border border-amber-100">
                               <Clock size={12} />
                               <span>{recipe.prep_time}</span>
                             </span>

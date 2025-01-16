@@ -14,11 +14,10 @@ export function useShoppingList(userId?: string) {
   const generateList = useCallback(async () => {
     try {
       if (menuItems.length > 0) {
-        // Ensure all recipes have their ingredients loaded
+        // Obtener recetas con ingredientes
         const menuItemsWithIngredients = await Promise.all(
           menuItems.map(async (item) => {
             if (!item.recipe.recipe_ingredients || item.recipe.recipe_ingredients.length === 0) {
-              // Try to fetch recipe with ingredients
               const { data: recipeData, error } = await supabase
                 .from('recipes')
                 .select(`
@@ -49,12 +48,32 @@ export function useShoppingList(userId?: string) {
           })
         );
 
-        console.log('Generating shopping list for menu items:', menuItemsWithIngredients);
+        // Generar lista de compra
         const newShoppingList = generateShoppingList(menuItemsWithIngredients);
-        console.log('Generated shopping list:', newShoppingList);
-        setShoppingList(newShoppingList);
+        
+        // Obtener estado de los items
+        const { data: { user } } = await supabase.auth.getUser();
+        if (user) {
+          const { data: checkedItems } = await supabase
+            .from('shopping_list_items')
+            .select('*')
+            .eq('user_id', user.id);
+
+          if (checkedItems) {
+            // Actualizar la lista con los estados guardados
+            const updatedList = newShoppingList.map(item => {
+              const checkedItem = checkedItems.find(ci => ci.item_name === item.name);
+              return {
+                ...item,
+                checked: checkedItem?.checked || false
+              };
+            });
+            setShoppingList(updatedList);
+          } else {
+            setShoppingList(newShoppingList);
+          }
+        }
       } else {
-        console.log('No menu items, setting empty shopping list');
         setShoppingList([]);
       }
     } catch (error) {
@@ -73,29 +92,32 @@ export function useShoppingList(userId?: string) {
 
   const toggleItem = async (name: string, day?: string) => {
     try {
-      setShoppingList(prev => 
-        prev.map(item => {
-          if (item.name === name && (!day || item.days.includes(day))) {
-            return { ...item, checked: !item.checked };
-          }
-          return item;
-        })
-      );
+      const item = shoppingList.find(i => i.name === name);
+      if (!item) return;
 
       const { data: { user } } = await supabase.auth.getUser();
-      if (user) {
-        const item = shoppingList.find(i => i.name === name);
-        if (item) {
-          await supabase
-            .from('shopping_list_items')
-            .upsert({
-              user_id: user.id,
-              item_name: name,
-              checked: !item.checked,
-              updated_at: new Date().toISOString()
-            });
+      if (!user) return;
+
+      const newChecked = !item.checked;
+
+      // Actualizar en base de datos
+      await supabase
+        .from('shopping_list_items')
+        .upsert({
+          user_id: user.id,
+          item_name: name,
+          checked: newChecked,
+          days: item.days,
+          updated_at: new Date().toISOString()
+        });
+
+      // Actualizar estado local
+      setShoppingList(prev => prev.map(i => {
+        if (i.name === name) {
+          return { ...i, checked: newChecked };
         }
-      }
+        return i;
+      }));
     } catch (error) {
       console.error('Error toggling item:', error);
     }
@@ -104,23 +126,18 @@ export function useShoppingList(userId?: string) {
   const refreshList = async () => {
     setLoading(true);
     try {
-      // Refetch recipes to ensure we have the latest data
       await refetchRecipes();
       
-      // Force regenerate the shopping list
-      await generateList();
-      
-      // Clear checked items
-      setShoppingList(prev => prev.map(item => ({ ...item, checked: false })));
-      
-      // Update database if needed
       const { data: { user } } = await supabase.auth.getUser();
       if (user) {
+        // Limpiar estados
         await supabase
           .from('shopping_list_items')
           .update({ checked: false })
           .eq('user_id', user.id);
       }
+
+      await generateList();
     } catch (error) {
       console.error('Error refreshing shopping list:', error);
     } finally {

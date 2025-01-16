@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { ChefHat, Calendar, Activity } from 'lucide-react';
+import { User, Settings, History, Heart, Bell, LogOut, ChevronRight, Sun, Activity, Calendar } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 import { supabase } from '../../lib/supabase';
 import { NutritionistProfile } from './NutritionistProfile';
 import { UserProfile } from './UserProfile';
@@ -7,6 +8,7 @@ import { ProfileHeader } from './ProfileHeader';
 import { ProfileStats } from './ProfileStats';
 import { ProfileActivity } from './ProfileActivity';
 import { ProfileAchievements } from './ProfileAchievements';
+import { HouseholdSection } from './HouseholdSection';
 
 interface ProfileData {
   full_name: string;
@@ -18,11 +20,13 @@ interface ProfileData {
   updated_at: string | null;
   id: string;
   user_id: string;
+  household_id: string | null;
 }
 
 export function Profile() {
   const [profile, setProfile] = useState<ProfileData | null>(null);
   const [loading, setLoading] = useState(true);
+  const navigate = useNavigate();
 
   useEffect(() => {
     loadProfile();
@@ -57,6 +61,7 @@ export function Profile() {
   const handleLogout = async () => {
     try {
       await supabase.auth.signOut();
+      navigate('/menu');
     } catch (error) {
       console.error('Error signing out:', error);
     }
@@ -94,7 +99,7 @@ export function Profile() {
       id: 1,
       title: 'Chef Principiante',
       description: 'Completa tu primera receta',
-      icon: ChefHat,
+      icon: Activity,
       achieved: true
     },
     {
@@ -128,7 +133,14 @@ export function Profile() {
         onEditProfile={() => {/* TODO: Implement edit profile */}}
       />
 
-      <ProfileStats stats={stats} />
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <ProfileStats stats={stats} />
+        <HouseholdSection 
+          userId={profile.user_id}
+          householdId={profile.household_id}
+          onUpdate={loadProfile}
+        />
+      </div>
       
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <ProfileActivity />

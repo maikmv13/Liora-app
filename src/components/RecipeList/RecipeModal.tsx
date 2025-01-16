@@ -5,6 +5,7 @@ import {
   Dumbbell, Apple, Wheat, CircleDot
 } from 'lucide-react';
 import { Recipe } from '../../types';
+import { getUnitPlural } from '../../utils/getUnitPlural';
 
 interface RecipeModalProps {
   recipe: Recipe;
@@ -12,18 +13,6 @@ interface RecipeModalProps {
   onAddToMenu?: (recipe: Recipe) => void;
   isFavorite?: boolean;
   onToggleFavorite?: () => void;
-}
-
-interface RecipeIngredient {
-  ingredients: {
-    name: string;
-  };
-  quantity: number | string;
-  unit: string;
-}
-
-interface Recipe {
-  recipe_ingredients?: RecipeIngredient[];
 }
 
 export function RecipeModal({ 
@@ -203,7 +192,12 @@ export function RecipeModal({
                 </h3>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   {recipe.recipe_ingredients.map((ri, index) => {
-                    console.log('Ingredient:', ri);
+                    if (!ri.ingredients) {
+                      console.warn('Missing ingredient data:', ri);
+                      return null;
+                    }
+                    
+                    const unit = getUnitPlural(ri.unit, ri.quantity);
                     
                     return (
                       <div 
@@ -215,10 +209,10 @@ export function RecipeModal({
                         </div>
                         <div>
                           <p className="text-gray-900 font-medium">
-                            {ri?.ingredients?.name || 'Ingrediente sin nombre'}
+                            {ri.ingredients.name}
                           </p>
                           <p className="text-sm text-gray-500">
-                            {ri?.quantity || ''} {ri?.unit || ''}
+                            {ri.quantity} {unit}
                           </p>
                         </div>
                       </div>
@@ -252,7 +246,7 @@ export function RecipeModal({
           </div>
         </div>
 
-        {/* Footer Actions - Actualizado con esquinas redondeadas */}
+        {/* Footer Actions */}
         <div className="sticky bottom-0 flex flex-col sm:flex-row gap-3 p-4 border-t border-gray-100 bg-white/95 backdrop-blur-sm rounded-b-2xl">
           {onAddToMenu && (
             <button 
