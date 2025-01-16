@@ -2,20 +2,25 @@ import React, { useState } from 'react';
 import { Copy, Trash2, Calendar, Utensils, Moon, Flame, Search, Filter, ChevronDown, Star, Share2, Clock, ArrowUpDown } from 'lucide-react';
 import { MenuItem } from '../../types';
 import { weekDays } from './utils';
-import { deleteMenu, restoreMenu } from '../../services/weeklyMenu';
+import { deleteMenu } from '../../services/weeklyMenu';
 import type { ExtendedWeeklyMenuDB } from '../../services/weeklyMenu';
 
 interface MenuHistoryProps {
-  onRestore: (menu: MenuItem[]) => void;
+  onRestore: (menuId: string) => void;
   history: ExtendedWeeklyMenuDB[];
-  onHistoryChange: (value: ExtendedWeeklyMenuDB[]) => void;
+  onHistoryChange: (history: ExtendedWeeklyMenuDB[]) => void;
   onMenuArchived: (menu: ExtendedWeeklyMenuDB) => void;
 }
 
 type SortOption = 'date' | 'calories' | 'rating';
 type FilterOption = 'all' | 'breakfast' | 'lunch' | 'dinner' | 'snack';
 
-export function MenuHistory({ onRestore, history, onHistoryChange, onMenuArchived }: MenuHistoryProps) {
+export function MenuHistory({ 
+  onRestore, 
+  history = [], 
+  onHistoryChange,
+  onMenuArchived 
+}: MenuHistoryProps) {
   const [searchTerm, setSearchTerm] = useState('');
   const [sortBy, setSortBy] = useState<SortOption>('date');
   const [filterBy, setFilterBy] = useState<FilterOption>('all');
@@ -26,7 +31,7 @@ export function MenuHistory({ onRestore, history, onHistoryChange, onMenuArchive
   const handleDelete = async (menuId: string) => {
     try {
       await deleteMenu(menuId);
-      onHistoryChange(prev => prev.filter(menu => menu.id !== menuId));
+      onHistoryChange(history.filter(menu => menu.id !== menuId));
     } catch (error) {
       console.error('Error al eliminar el menú:', error);
     }
@@ -187,7 +192,7 @@ export function MenuHistory({ onRestore, history, onHistoryChange, onMenuArchive
                     />
                   </button>
                   <button
-                    onClick={() => restoreMenu(historyMenu.id)}
+                    onClick={() => onRestore(historyMenu.id)}
                     className="p-2 text-emerald-500 hover:bg-emerald-50 rounded-lg transition-colors border border-emerald-200"
                     title="Usar este menú"
                   >
@@ -219,8 +224,8 @@ export function MenuHistory({ onRestore, history, onHistoryChange, onMenuArchive
                 <div className="grid gap-3">
                   {weekDays.map(day => {
                     const dayKey = day.toLowerCase();
-                    const lunch = historyMenu[`${dayKey}_lunch` as keyof ExtendedWeeklyMenuDB];
-                    const dinner = historyMenu[`${dayKey}_dinner` as keyof ExtendedWeeklyMenuDB];
+                    const lunch = historyMenu[`${dayKey}_lunch_id` as keyof ExtendedWeeklyMenuDB];
+                    const dinner = historyMenu[`${dayKey}_dinner_id` as keyof ExtendedWeeklyMenuDB];
                     
                     return (
                       <div key={day} className="grid grid-cols-1 md:grid-cols-6 gap-2 md:gap-4 items-center">

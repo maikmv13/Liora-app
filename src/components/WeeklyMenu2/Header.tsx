@@ -1,14 +1,21 @@
 import React from 'react';
-import { Share2, Wand2, Loader2, Clock } from 'lucide-react';
+import { Share2, Wand2, Loader2, Clock, History } from 'lucide-react';
 
 interface HeaderProps {
   onGenerateMenu: () => void;
   onExport: () => void;
+  onToggleHistory: () => void;
   isGenerating: boolean;
   lastGenerated: string | null;
 }
 
-export function Header({ onGenerateMenu, onExport, isGenerating, lastGenerated }: HeaderProps) {
+export function Header({ 
+  onGenerateMenu, 
+  onExport, 
+  onToggleHistory,
+  isGenerating, 
+  lastGenerated 
+}: HeaderProps) {
   return (
     <div className="flex flex-col gap-4">
       <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-4">
@@ -16,7 +23,7 @@ export function Header({ onGenerateMenu, onExport, isGenerating, lastGenerated }
           <h2 className="text-2xl md:text-3xl font-bold text-gray-900">Menú Semanal</h2>
           <p className="text-sm md:text-base text-gray-600 mt-1">Planifica tus comidas para la semana</p>
         </div>
-        <div className="flex flex-col sm:flex-row gap-3">
+        <div className="flex flex-wrap gap-3">
           <button 
             onClick={onGenerateMenu}
             disabled={isGenerating}
@@ -39,6 +46,13 @@ export function Header({ onGenerateMenu, onExport, isGenerating, lastGenerated }
           >
             <Share2 size={20} />
             <span>Compartir</span>
+          </button>
+          <button 
+            onClick={onToggleHistory}
+            className="flex items-center justify-center space-x-2 px-4 py-2.5 bg-white/80 backdrop-blur-sm text-rose-500 rounded-xl hover:bg-white/90 transition-colors border border-rose-100 shadow-sm"
+          >
+            <History size={20} />
+            <span>Historial</span>
           </button>
         </div>
       </div>

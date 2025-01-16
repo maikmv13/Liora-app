@@ -13,9 +13,7 @@ import { supabase } from '../../../lib/supabase';
 export function useMenuActions(
   forUserId: string | undefined,
   onAddToMenu: (recipe: Recipe | null, day: string, meal: MealType) => void,
-  setCurrentMenuId: (id: string | null) => void,
-  setActiveMenu: (menu: ExtendedWeeklyMenuDB | null) => void,
-  setHistory: (history: ExtendedWeeklyMenuDB[]) => void
+  setCurrentMenuId: (id: string | null) => void
 ) {
   const [isGenerating, setIsGenerating] = useState(false);
   const [lastGenerated, setLastGenerated] = useState<string | null>(
@@ -99,10 +97,6 @@ export function useMenuActions(
       const currentMenu = await getActiveMenu(forUserId);
       if (currentMenu) {
         await archiveMenu(currentMenu.id);
-        const archivedMenu = await getActiveMenu(forUserId);
-        if (archivedMenu) {
-          setHistory(prev => [archivedMenu, ...prev]);
-        }
       }
 
       // Generate new menu using only favorite recipes
@@ -110,7 +104,6 @@ export function useMenuActions(
       const savedMenu = await createWeeklyMenu(newMenu, forUserId);
       
       setCurrentMenuId(savedMenu.id);
-      setActiveMenu(savedMenu);
 
       newMenu.forEach(menuItem => {
         onAddToMenu(menuItem.recipe, menuItem.day, menuItem.meal);
@@ -120,12 +113,8 @@ export function useMenuActions(
       setLastGenerated(timestamp);
       localStorage.setItem('lastMenuGenerated', timestamp);
 
-      const updatedHistory = await getMenuHistory();
-      setHistory(updatedHistory);
-
     } catch (error) {
       console.error('Error generating menu:', error);
-      setActiveMenu(null);
       throw error;
     } finally {
       setIsGenerating(false);

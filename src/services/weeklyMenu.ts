@@ -15,26 +15,7 @@ export interface RecipeDB extends Omit<Recipe, 'instructions'> {
 }
 
 export interface ExtendedWeeklyMenuDB extends WeeklyMenu {
-  monday_breakfast_recipe?: RecipeDB;
-  monday_lunch_recipe?: RecipeDB;
-  monday_snack_recipe?: RecipeDB;
-  monday_dinner_recipe?: RecipeDB;
-  tuesday_breakfast_recipe?: RecipeDB;
-  tuesday_lunch_recipe?: RecipeDB;
-  tuesday_snack_recipe?: RecipeDB;
-  tuesday_dinner_recipe?: RecipeDB;
-  wednesday_breakfast_recipe?: RecipeDB;
-  wednesday_lunch_recipe?: RecipeDB;
-  wednesday_snack_recipe?: RecipeDB;
-  wednesday_dinner_recipe?: RecipeDB;
-  thursday_breakfast_recipe?: RecipeDB;
-  thursday_lunch_recipe?: RecipeDB;
-  thursday_snack_recipe?: RecipeDB;
-  thursday_dinner_recipe?: RecipeDB;
-  friday_breakfast_recipe?: RecipeDB;
-  friday_lunch_recipe?: RecipeDB;
-  friday_snack_recipe?: RecipeDB;
-  friday_dinner_recipe?: RecipeDB;
+  recipes?: Recipe[];
 }
 
 /**
@@ -48,39 +29,41 @@ export async function getActiveMenu(userId?: string): Promise<ExtendedWeeklyMenu
       userId = user.id;
     }
 
-    const { data, error } = await supabase
+    // Primero obtenemos el menú activo
+    const { data: menu, error: menuError } = await supabase
       .from('weekly_menus')
-      .select(`
-        *,
-        monday_breakfast_recipe:recipes(id, name, category, meal_type),
-        monday_lunch_recipe:recipes(id, name, category, meal_type),
-        monday_snack_recipe:recipes(id, name, category, meal_type),
-        monday_dinner_recipe:recipes(id, name, category, meal_type),
-        tuesday_breakfast_recipe:recipes(id, name, category, meal_type),
-        tuesday_lunch_recipe:recipes(id, name, category, meal_type),
-        tuesday_snack_recipe:recipes(id, name, category, meal_type),
-        tuesday_dinner_recipe:recipes(id, name, category, meal_type),
-        wednesday_breakfast_recipe:recipes(id, name, category, meal_type),
-        wednesday_lunch_recipe:recipes(id, name, category, meal_type),
-        wednesday_snack_recipe:recipes(id, name, category, meal_type),
-        wednesday_dinner_recipe:recipes(id, name, category, meal_type),
-        thursday_breakfast_recipe:recipes(id, name, category, meal_type),
-        thursday_lunch_recipe:recipes(id, name, category, meal_type),
-        thursday_snack_recipe:recipes(id, name, category, meal_type),
-        thursday_dinner_recipe:recipes(id, name, category, meal_type),
-        friday_breakfast_recipe:recipes(id, name, category, meal_type),
-        friday_lunch_recipe:recipes(id, name, category, meal_type),
-        friday_snack_recipe:recipes(id, name, category, meal_type),
-        friday_dinner_recipe:recipes(id, name, category, meal_type)
-      `)
-      .eq('status', 'active' as const)
+      .select('*')
       .eq('user_id', userId)
-      .order('created_at', { ascending: false })
-      .limit(1)
-      .maybeSingle();
+      .eq('status', 'active')
+      .single();
 
-    if (error) throw error;
-    return data as ExtendedWeeklyMenuDB | null;
+    if (menuError) throw menuError;
+    if (!menu) return null;
+
+    // Obtenemos todas las recetas asociadas
+    const recipeIds = Object.entries(menu)
+      .filter(([key, value]) => 
+        key.endsWith('_id') && 
+        value !== null &&
+        typeof value === 'string'
+      )
+      .map(([_, value]) => value as string);
+
+    if (recipeIds.length > 0) {
+      const { data: recipes, error: recipesError } = await supabase
+        .from('recipes')
+        .select('*')
+        .in('id', recipeIds);
+
+      if (recipesError) throw recipesError;
+
+      return {
+        ...menu,
+        recipes: recipes || []
+      };
+    }
+
+    return menu;
   } catch (error) {
     console.error('Error getting active menu:', error);
     return null;
@@ -94,7 +77,7 @@ export async function updateMenuRecipe(
   menuId: string,
   day: string,
   meal: MealType,
-  recipeId: string
+  recipeId: string | null
 ): Promise<void> {
   try {
     const dayKey = Object.entries(DAY_MAPPING).find(([_, value]) => value === day)?.[0];
@@ -104,44 +87,15 @@ export async function updateMenuRecipe(
       throw new Error('Invalid day or meal type');
     }
 
-    const fieldName = `${dayKey}_${mealKey}` as keyof WeeklyMenuUpdate;
+    const fieldName = `${dayKey}_${mealKey}_id` as keyof WeeklyMenuUpdate;
     const { error } = await supabase
       .from('weekly_menus')
       .update({ [fieldName]: recipeId })
-      .eq('id',  );
-
-    if (error) throw error;
-  } catch (error) {
-    console.error('Error updating recipe:', error);
-    throw error;
-  }
-}
-
-/**
- * Removes a recipe from the menu
- */
-export async function removeMenuRecipe(
-  menuId: string,
-  day: string,
-  meal: MealType
-): Promise<void> {
-  try {
-    const dayKey = Object.entries(DAY_MAPPING).find(([_, value]) => value === day)?.[0];
-    const mealKey = MEAL_MAPPING[meal];
-    
-    if (!dayKey || !mealKey) {
-      throw new Error('Invalid day or meal type');
-    }
-
-    const fieldName = `${dayKey}_${mealKey}`;
-    const { error } = await supabase
-      .from('weekly_menus')
-      .update({ [fieldName]: null })
       .eq('id', menuId);
 
     if (error) throw error;
   } catch (error) {
-    console.error('Error removing recipe:', error);
+    console.error('Error updating recipe:', error);
     throw error;
   }
 }
@@ -165,12 +119,13 @@ export async function createWeeklyMenu(menuItems: MenuItem[], userId?: string): 
       start_date: new Date().toISOString(),
     };
 
+    // Map menu items to database fields
     menuItems.forEach(item => {
       const dayKey = Object.entries(DAY_MAPPING).find(([_, value]) => value === item.day)?.[0];
       const mealKey = MEAL_MAPPING[item.meal];
       
       if (dayKey && mealKey) {
-        const fieldName = `${dayKey}_${mealKey}` as keyof WeeklyMenuInsert;
+        const fieldName = `${dayKey}_${mealKey}_id` as keyof WeeklyMenuInsert;
         menuData[fieldName] = item.recipe.id;
       }
     });
@@ -184,7 +139,7 @@ export async function createWeeklyMenu(menuItems: MenuItem[], userId?: string): 
     if (error) throw error;
     if (!newMenu) throw new Error('Failed to create menu');
 
-    return newMenu as ExtendedWeeklyMenuDB;
+    return newMenu;
   } catch (error) {
     console.error('Error creating weekly menu:', error);
     throw error;
@@ -218,15 +173,44 @@ export async function getMenuHistory(): Promise<ExtendedWeeklyMenuDB[]> {
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) throw new Error('No authenticated user');
 
-    const { data, error } = await supabase
+    // Primero obtenemos los menús archivados
+    const { data: menus, error: menusError } = await supabase
       .from('weekly_menus')
-      .select()
+      .select('*')
       .eq('user_id', user.id)
       .eq('status', 'archived')
       .order('created_at', { ascending: false });
 
-    if (error) throw error;
-    return data || [];
+    if (menusError) throw menusError;
+    if (!menus || menus.length === 0) return [];
+
+    // Obtenemos todas las recetas asociadas a todos los menús
+    const recipeIds = menus.flatMap(menu => 
+      Object.entries(menu)
+        .filter(([key, value]) => 
+          key.endsWith('_id') && 
+          value !== null &&
+          typeof value === 'string'
+        )
+        .map(([_, value]) => value as string)
+    );
+
+    if (recipeIds.length > 0) {
+      const { data: recipes, error: recipesError } = await supabase
+        .from('recipes')
+        .select('*')
+        .in('id', recipeIds);
+
+      if (recipesError) throw recipesError;
+
+      // Añadir las recetas a cada menú
+      return menus.map(menu => ({
+        ...menu,
+        recipes: recipes || []
+      }));
+    }
+
+    return menus;
   } catch (error) {
     console.error('Error getting menu history:', error);
     return [];
@@ -275,61 +259,5 @@ export async function deleteMenu(menuId: string): Promise<void> {
   } catch (error) {
     console.error('Error deleting menu:', error);
     throw error;
-  }
-}
-
-/**
- * Converts database menu to MenuItem array
- */
-export async function convertDBToMenuItems(menu: ExtendedWeeklyMenuDB): Promise<MenuItem[]> {
-  const menuItems: MenuItem[] = [];
-  const days = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];
-  const meals = ['breakfast', 'lunch', 'snack', 'dinner'];
-
-  try {
-    const recipeIds = Array.from(new Set(
-      Object.entries(menu)
-        .filter(([key, value]) => 
-          days.some(day => key.startsWith(day)) && 
-          value !== null && 
-          typeof value === 'string'
-        )
-        .map(([_, value]) => value as string)
-    ));
-
-    if (recipeIds.length === 0) return menuItems;
-
-    const { data: recipes, error } = await supabase
-      .from('recipes')
-      .select('*')
-      .in('id', recipeIds);
-
-    if (error) throw error;
-    if (!recipes) return menuItems;
-
-    const recipeMap = new Map(recipes.map(recipe => [recipe.id, recipe]));
-
-    for (const day of days) {
-      for (const meal of meals) {
-        const fieldName = `${day}_${meal}` as keyof ExtendedWeeklyMenuDB;
-        const recipeId = menu[fieldName];
-        
-        if (typeof recipeId === 'string') {
-          const recipe = recipeMap.get(recipeId);
-          if (recipe) {
-            menuItems.push({
-              day: DAY_MAPPING[day],
-              meal: MEAL_TYPES[meal as keyof typeof MEAL_TYPES],
-              recipe
-            });
-          }
-        }
-      }
-    }
-
-    return menuItems;
-  } catch (error) {
-    console.error('Error converting menu items:', error);
-    return menuItems;
   }
 }
