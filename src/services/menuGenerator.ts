@@ -37,13 +37,13 @@ const mealRules: Record<MealType, MenuRules> = {
     }
   },
   desayuno: {
-    allowedCategories: ['Desayuno', 'Huevos', 'Vegetariano', 'Fast Food', 'Snack'],
+    allowedCategories: ['Desayuno'],  // Solo permitir categoría Desayuno
     restrictedCategories: {
       'Fast Food': { startDay: 7 }
     }
   },
   snack: {
-    allowedCategories: ['Snack', 'Desayuno', 'Frutas', 'Fast Food', 'Vegetariano'],
+    allowedCategories: ['Snack'],  // Solo permitir categoría Snack
     restrictedCategories: {
       'Fast Food': { startDay: 7 }
     }
@@ -64,12 +64,20 @@ function isValidSelection(
     return false;
   }
 
-  // Check if category is allowed for this meal type or if it's a compatible category
-  const isAllowedCategory = rules.allowedCategories.includes(recipe.category);
-  const isCompatibleCategory = recipe.meal_type === mealType;
-  
-  if (!isAllowedCategory && !isCompatibleCategory) {
+  // Para desayunos y snacks, solo permitir su categoría específica
+  if ((mealType === 'desayuno' && recipe.category !== 'Desayuno') ||
+      (mealType === 'snack' && recipe.category !== 'Snack')) {
     return false;
+  }
+
+  // Para otras comidas, verificar categorías permitidas
+  if (mealType !== 'desayuno' && mealType !== 'snack') {
+    const isAllowedCategory = rules.allowedCategories.includes(recipe.category);
+    const isCompatibleCategory = recipe.meal_type === mealType;
+    
+    if (!isAllowedCategory && !isCompatibleCategory) {
+      return false;
+    }
   }
 
   // Check Fast Food restrictions
@@ -130,13 +138,28 @@ export async function generateCompleteMenu(recipes: Recipe[]): Promise<MenuItem[
 
     // Add recipes to compatible meal types based on category
     for (const recipe of recipes) {
-      for (const [mealType, rules] of Object.entries(mealRules)) {
-        if (rules.allowedCategories.includes(recipe.category)) {
-          if (!recipesByMealType[mealType as MealType]) {
-            recipesByMealType[mealType as MealType] = [];
-          }
-          if (!recipesByMealType[mealType as MealType].includes(recipe)) {
-            recipesByMealType[mealType as MealType].push(recipe);
+      // Para desayunos y snacks, solo añadir si coincide la categoría exacta
+      if (recipe.category === 'Desayuno') {
+        if (!recipesByMealType['desayuno']) {
+          recipesByMealType['desayuno'] = [];
+        }
+        recipesByMealType['desayuno'].push(recipe);
+      } else if (recipe.category === 'Snack') {
+        if (!recipesByMealType['snack']) {
+          recipesByMealType['snack'] = [];
+        }
+        recipesByMealType['snack'].push(recipe);
+      } else {
+        // Para otras comidas, mantener la lógica original
+        for (const [mealType, rules] of Object.entries(mealRules)) {
+          if (mealType !== 'desayuno' && mealType !== 'snack' && 
+              rules.allowedCategories.includes(recipe.category)) {
+            if (!recipesByMealType[mealType as MealType]) {
+              recipesByMealType[mealType as MealType] = [];
+            }
+            if (!recipesByMealType[mealType as MealType].includes(recipe)) {
+              recipesByMealType[mealType as MealType].push(recipe);
+            }
           }
         }
       }

@@ -33,19 +33,6 @@ export function Register({ onClose, onRegisterSuccess, preSelectedUserType, onBa
     licenseNumber: ''
   });
 
-  const validatePassword = (password: string): string | null => {
-    if (password.length < 6) {
-      return 'La contraseña debe tener al menos 6 caracteres';
-    }
-    if (!/[A-Z]/.test(password)) {
-      return 'La contraseña debe contener al menos una mayúscula';
-    }
-    if (!/[0-9]/.test(password)) {
-      return 'La contraseña debe contener al menos un número';
-    }
-    return null;
-  };
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
@@ -61,13 +48,7 @@ export function Register({ onClose, onRegisterSuccess, preSelectedUserType, onBa
         throw new Error('Por favor, completa todos los campos requeridos');
       }
 
-      // Validar contraseña
-      const passwordError = validatePassword(formData.password);
-      if (passwordError) {
-        throw new Error(passwordError);
-      }
-
-      // Validar que las contraseñas coincidan
+      // Validar contraseñas
       if (formData.password !== formData.confirmPassword) {
         throw new Error('Las contraseñas no coinciden');
       }
@@ -77,7 +58,7 @@ export function Register({ onClose, onRegisterSuccess, preSelectedUserType, onBa
         throw new Error('Por favor, completa los campos de especialización y número de licencia');
       }
 
-      // 1. Registrar usuario en Auth
+      // 1. Registrar usuario
       const { data: authData, error: signUpError } = await supabase.auth.signUp({
         email: formData.email,
         password: formData.password,
@@ -92,13 +73,14 @@ export function Register({ onClose, onRegisterSuccess, preSelectedUserType, onBa
       if (signUpError) throw signUpError;
       if (!authData.user) throw new Error('No se pudo crear el usuario');
 
-      // 2. Crear perfil en la tabla profiles
+      // 2. Crear perfil con email
       const { error: profileError } = await supabase
         .from('profiles')
         .insert({
           user_id: authData.user.id,
           full_name: formData.fullName,
           user_type: userType,
+          email: formData.email,
           specialization: userType === 'nutritionist' ? formData.specialization : null,
           license_number: userType === 'nutritionist' ? formData.licenseNumber : null
         });
@@ -109,7 +91,7 @@ export function Register({ onClose, onRegisterSuccess, preSelectedUserType, onBa
         throw profileError;
       }
 
-      // Éxito - mostrar mensaje y cerrar
+      // Éxito
       alert('Registro exitoso. Ya puedes iniciar sesión.');
       onRegisterSuccess?.();
       onClose();
@@ -119,238 +101,6 @@ export function Register({ onClose, onRegisterSuccess, preSelectedUserType, onBa
     } finally {
       setLoading(false);
     }
-  };
-
-  const renderUserTypeSelection = () => (
-    <div className="space-y-6">
-      <div>
-        <h2 className="text-2xl font-bold text-gray-900">Crear cuenta</h2>
-        <p className="text-gray-600 mt-2">
-          Selecciona el tipo de cuenta que deseas crear
-        </p>
-      </div>
-
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <button
-          onClick={() => setUserType('user')}
-          className="flex items-center space-x-4 p-4 rounded-xl border-2 transition-all duration-200 hover:scale-105 bg-gradient-to-br from-rose-50 to-orange-50 border-rose-200 hover:border-rose-300"
-        >
-          <div className="bg-white p-3 rounded-xl shadow-sm">
-            <User className="w-6 h-6 text-rose-500" />
-          </div>
-          <div className="text-left">
-            <h3 className="font-semibold text-gray-900">Usuario</h3>
-            <p className="text-sm text-gray-600">
-              Accede a recetas y planes nutricionales
-            </p>
-          </div>
-        </button>
-
-        <button
-          onClick={() => setUserType('nutritionist')}
-          className="flex items-center space-x-4 p-4 rounded-xl border-2 transition-all duration-200 hover:scale-105 bg-gradient-to-br from-emerald-50 to-teal-50 border-emerald-200 hover:border-emerald-300"
-        >
-          <div className="bg-white p-3 rounded-xl shadow-sm">
-            <UserCog className="w-6 h-6 text-emerald-500" />
-          </div>
-          <div className="text-left">
-            <h3 className="font-semibold text-gray-900">Nutricionista</h3>
-            <p className="text-sm text-gray-600">
-              Gestiona pacientes y crea planes
-            </p>
-          </div>
-        </button>
-      </div>
-    </div>
-  );
-
-  const renderRegistrationForm = () => {
-    const isNutritionist = userType === 'nutritionist';
-    const gradientColors = isNutritionist
-      ? 'from-emerald-400 via-teal-500 to-emerald-600'
-      : 'from-orange-400 via-pink-500 to-rose-500';
-    const accentColor = isNutritionist ? 'emerald' : 'rose';
-
-    return (
-      <div className="space-y-6">
-        <div>
-          <button
-            onClick={() => setUserType(null)}
-            className="flex items-center space-x-2 text-gray-600 hover:text-gray-900 transition-colors mb-6"
-          >
-            <ChevronLeft size={20} />
-            <span>Volver</span>
-          </button>
-
-          <h2 className="text-2xl font-bold text-gray-900">
-            {isNutritionist ? 'Registro de Nutricionista' : 'Crear cuenta'}
-          </h2>
-          <p className="text-gray-600 mt-2">
-            {isNutritionist
-              ? 'Completa tus datos profesionales'
-              : 'Únete a nuestra comunidad'}
-          </p>
-        </div>
-
-        {error && (
-          <div className="p-3 rounded-lg bg-red-50 border border-red-200">
-            <p className="text-sm text-red-600">{error}</p>
-          </div>
-        )}
-
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Nombre completo
-            </label>
-            <input
-              type="text"
-              value={formData.fullName}
-              onChange={(e) => setFormData({ ...formData, fullName: e.target.value })}
-              className={`w-full px-4 py-2.5 bg-white/90 backdrop-blur-sm border border-${accentColor}-100 rounded-xl focus:ring-2 focus:ring-${accentColor}-500 focus:border-${accentColor}-500`}
-              placeholder="Tu nombre completo"
-              required
-            />
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Correo electrónico
-            </label>
-            <div className="relative">
-              <input
-                type="email"
-                value={formData.email}
-                onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                className={`w-full pl-10 pr-4 py-2.5 bg-white/90 backdrop-blur-sm border border-${accentColor}-100 rounded-xl focus:ring-2 focus:ring-${accentColor}-500 focus:border-${accentColor}-500`}
-                placeholder="tu@email.com"
-                required
-              />
-              <Mail size={18} className={`absolute left-3 top-3 text-${accentColor}-400`} />
-            </div>
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Contraseña
-            </label>
-            <div className="relative">
-              <input
-                type={showPassword ? 'text' : 'password'}
-                value={formData.password}
-                onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-                className={`w-full pl-10 pr-12 py-2.5 bg-white/90 backdrop-blur-sm border border-${accentColor}-100 rounded-xl focus:ring-2 focus:ring-${accentColor}-500 focus:border-${accentColor}-500`}
-                placeholder="••••••••"
-                required
-              />
-              <Lock size={18} className={`absolute left-3 top-3 text-${accentColor}-400`} />
-              <button
-                type="button"
-                onClick={() => setShowPassword(!showPassword)}
-                className={`absolute right-3 top-2.5 p-1 hover:bg-${accentColor}-50 rounded-lg transition-colors`}
-              >
-                {showPassword ? (
-                  <EyeOff size={16} className="text-gray-500" />
-                ) : (
-                  <Eye size={16} className="text-gray-500" />
-                )}
-              </button>
-            </div>
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Confirmar contraseña
-            </label>
-            <div className="relative">
-              <input
-                type={showConfirmPassword ? 'text' : 'password'}
-                value={formData.confirmPassword}
-                onChange={(e) => setFormData({ ...formData, confirmPassword: e.target.value })}
-                className={`w-full pl-10 pr-12 py-2.5 bg-white/90 backdrop-blur-sm border border-${accentColor}-100 rounded-xl focus:ring-2 focus:ring-${accentColor}-500 focus:border-${accentColor}-500`}
-                placeholder="••••••••"
-                required
-              />
-              <Lock size={18} className={`absolute left-3 top-3 text-${accentColor}-400`} />
-              <button
-                type="button"
-                onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                className={`absolute right-3 top-2.5 p-1 hover:bg-${accentColor}-50 rounded-lg transition-colors`}
-              >
-                {showConfirmPassword ? (
-                  <EyeOff size={16} className="text-gray-500" />
-                ) : (
-                  <Eye size={16} className="text-gray-500" />
-                )}
-              </button>
-            </div>
-          </div>
-
-          {isNutritionist && (
-            <>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Especialización
-                </label>
-                <div className="relative">
-                  <input
-                    type="text"
-                    value={formData.specialization}
-                    onChange={(e) => setFormData({ ...formData, specialization: e.target.value })}
-                    className={`w-full pl-10 pr-4 py-2.5 bg-white/90 backdrop-blur-sm border border-${accentColor}-100 rounded-xl focus:ring-2 focus:ring-${accentColor}-500 focus:border-${accentColor}-500`}
-                    placeholder="Ej: Nutrición deportiva"
-                    required
-                  />
-                  <Briefcase size={18} className={`absolute left-3 top-3 text-${accentColor}-400`} />
-                </div>
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Número de licencia
-                </label>
-                <div className="relative">
-                  <input
-                    type="text"
-                    value={formData.licenseNumber}
-                    onChange={(e) => setFormData({ ...formData, licenseNumber: e.target.value })}
-                    className={`w-full pl-10 pr-4 py-2.5 bg-white/90 backdrop-blur-sm border border-${accentColor}-100 rounded-xl focus:ring-2 focus:ring-${accentColor}-500 focus:border-${accentColor}-500`}
-                    placeholder="Ej: 123456-N"
-                    required
-                  />
-                  <FileCheck size={18} className={`absolute left-3 top-3 text-${accentColor}-400`} />
-                </div>
-              </div>
-            </>
-          )}
-
-          <div className="space-y-4 pt-4">
-            <button
-              type="submit"
-              disabled={loading}
-              className={`w-full flex items-center justify-center space-x-2 py-3 bg-gradient-to-r ${gradientColors} text-white rounded-xl hover:opacity-90 transition-opacity font-medium disabled:opacity-50 disabled:cursor-not-allowed`}
-            >
-              {loading ? (
-                <>
-                  <Loader2 size={20} className="animate-spin" />
-                  <span>Creando cuenta...</span>
-                </>
-              ) : (
-                <span>Crear cuenta</span>
-              )}
-            </button>
-
-            <button
-              type="button"
-              onClick={onBack || onClose}
-              className="w-full py-2.5 text-gray-600 hover:bg-gray-50 rounded-xl transition-colors text-sm"
-            >
-              ¿Ya tienes cuenta? Inicia sesión
-            </button>
-          </div>
-        </form>
-      </div>
-    );
   };
 
   return (
@@ -365,7 +115,227 @@ export function Register({ onClose, onRegisterSuccess, preSelectedUserType, onBa
           </button>
         </div>
 
-        {userType === null ? renderUserTypeSelection() : renderRegistrationForm()}
+        {userType === null ? (
+          <div className="space-y-6">
+            <div>
+              <h2 className="text-2xl font-bold text-gray-900">Crear cuenta</h2>
+              <p className="text-gray-600 mt-2">
+                Selecciona el tipo de cuenta que deseas crear
+              </p>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <button
+                onClick={() => setUserType('user')}
+                className="flex items-center space-x-4 p-4 rounded-xl border-2 transition-all duration-200 hover:scale-105 bg-gradient-to-br from-rose-50 to-orange-50 border-rose-200 hover:border-rose-300"
+              >
+                <div className="bg-white p-3 rounded-xl shadow-sm">
+                  <User className="w-6 h-6 text-rose-500" />
+                </div>
+                <div className="text-left">
+                  <h3 className="font-semibold text-gray-900">Usuario</h3>
+                  <p className="text-sm text-gray-600">
+                    Accede a recetas y planes nutricionales
+                  </p>
+                </div>
+              </button>
+
+              <button
+                onClick={() => setUserType('nutritionist')}
+                className="flex items-center space-x-4 p-4 rounded-xl border-2 transition-all duration-200 hover:scale-105 bg-gradient-to-br from-emerald-50 to-teal-50 border-emerald-200 hover:border-emerald-300"
+              >
+                <div className="bg-white p-3 rounded-xl shadow-sm">
+                  <UserCog className="w-6 h-6 text-emerald-500" />
+                </div>
+                <div className="text-left">
+                  <h3 className="font-semibold text-gray-900">Nutricionista</h3>
+                  <p className="text-sm text-gray-600">
+                    Gestiona pacientes y crea planes
+                  </p>
+                </div>
+              </button>
+            </div>
+          </div>
+        ) : (
+          <div className="space-y-6">
+            <div>
+              <button
+                onClick={() => setUserType(null)}
+                className="flex items-center space-x-2 text-gray-600 hover:text-gray-900 transition-colors mb-6"
+              >
+                <ChevronLeft size={20} />
+                <span>Volver</span>
+              </button>
+
+              <h2 className="text-2xl font-bold text-gray-900">
+                {userType === 'nutritionist' ? 'Registro de Nutricionista' : 'Crear cuenta'}
+              </h2>
+              <p className="text-gray-600 mt-2">
+                {userType === 'nutritionist'
+                  ? 'Completa tus datos profesionales'
+                  : 'Únete a nuestra comunidad'}
+              </p>
+            </div>
+
+            {error && (
+              <div className="p-3 rounded-lg bg-red-50 border border-red-200">
+                <p className="text-sm text-red-600">{error}</p>
+              </div>
+            )}
+
+            <form onSubmit={handleSubmit} className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Nombre completo
+                </label>
+                <input
+                  type="text"
+                  value={formData.fullName}
+                  onChange={(e) => setFormData({ ...formData, fullName: e.target.value })}
+                  className="w-full px-4 py-2.5 bg-white/90 backdrop-blur-sm border border-rose-100 rounded-xl focus:ring-2 focus:ring-rose-500 focus:border-rose-500"
+                  placeholder="Tu nombre completo"
+                  required
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Correo electrónico
+                </label>
+                <div className="relative">
+                  <input
+                    type="email"
+                    value={formData.email}
+                    onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                    className="w-full pl-10 pr-4 py-2.5 bg-white/90 backdrop-blur-sm border border-rose-100 rounded-xl focus:ring-2 focus:ring-rose-500 focus:border-rose-500"
+                    placeholder="tu@email.com"
+                    required
+                  />
+                  <Mail size={18} className="absolute left-3 top-3 text-rose-400" />
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Contraseña
+                </label>
+                <div className="relative">
+                  <input
+                    type={showPassword ? 'text' : 'password'}
+                    value={formData.password}
+                    onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+                    className="w-full pl-10 pr-12 py-2.5 bg-white/90 backdrop-blur-sm border border-rose-100 rounded-xl focus:ring-2 focus:ring-rose-500 focus:border-rose-500"
+                    placeholder="••••••••"
+                    required
+                  />
+                  <Lock size={18} className="absolute left-3 top-3 text-rose-400" />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="absolute right-3 top-2.5 p-1 hover:bg-rose-50 rounded-lg transition-colors"
+                  >
+                    {showPassword ? (
+                      <EyeOff size={16} className="text-gray-500" />
+                    ) : (
+                      <Eye size={16} className="text-gray-500" />
+                    )}
+                  </button>
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Confirmar contraseña
+                </label>
+                <div className="relative">
+                  <input
+                    type={showConfirmPassword ? 'text' : 'password'}
+                    value={formData.confirmPassword}
+                    onChange={(e) => setFormData({ ...formData, confirmPassword: e.target.value })}
+                    className="w-full pl-10 pr-12 py-2.5 bg-white/90 backdrop-blur-sm border border-rose-100 rounded-xl focus:ring-2 focus:ring-rose-500 focus:border-rose-500"
+                    placeholder="••••••••"
+                    required
+                  />
+                  <Lock size={18} className="absolute left-3 top-3 text-rose-400" />
+                  <button
+                    type="button"
+                    onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                    className="absolute right-3 top-2.5 p-1 hover:bg-rose-50 rounded-lg transition-colors"
+                  >
+                    {showConfirmPassword ? (
+                      <EyeOff size={16} className="text-gray-500" />
+                    ) : (
+                      <Eye size={16} className="text-gray-500" />
+                    )}
+                  </button>
+                </div>
+              </div>
+
+              {userType === 'nutritionist' && (
+                <>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Especialización
+                    </label>
+                    <div className="relative">
+                      <input
+                        type="text"
+                        value={formData.specialization}
+                        onChange={(e) => setFormData({ ...formData, specialization: e.target.value })}
+                        className="w-full pl-10 pr-4 py-2.5 bg-white/90 backdrop-blur-sm border border-rose-100 rounded-xl focus:ring-2 focus:ring-rose-500 focus:border-rose-500"
+                        placeholder="Ej: Nutrición deportiva"
+                        required
+                      />
+                      <Briefcase size={18} className="absolute left-3 top-3 text-rose-400" />
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Número de licencia
+                    </label>
+                    <div className="relative">
+                      <input
+                        type="text"
+                        value={formData.licenseNumber}
+                        onChange={(e) => setFormData({ ...formData, licenseNumber: e.target.value })}
+                        className="w-full pl-10 pr-4 py-2.5 bg-white/90 backdrop-blur-sm border border-rose-100 rounded-xl focus:ring-2 focus:ring-rose-500 focus:border-rose-500"
+                        placeholder="Ej: 123456-N"
+                        required
+                      />
+                      <FileCheck size={18} className="absolute left-3 top-3 text-rose-400" />
+                    </div>
+                  </div>
+                </>
+              )}
+
+              <div className="space-y-4 pt-4">
+                <button
+                  type="submit"
+                  disabled={loading}
+                  className="w-full flex items-center justify-center space-x-2 py-3 bg-gradient-to-r from-orange-400 via-pink-500 to-rose-500 text-white rounded-xl hover:opacity-90 transition-opacity font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  {loading ? (
+                    <>
+                      <Loader2 size={20} className="animate-spin" />
+                      <span>Creando cuenta...</span>
+                    </>
+                  ) : (
+                    <span>Crear cuenta</span>
+                  )}
+                </button>
+
+                <button
+                  type="button"
+                  onClick={onBack || onClose}
+                  className="w-full py-2.5 text-gray-600 hover:bg-gray-50 rounded-xl transition-colors text-sm"
+                >
+                  ¿Ya tienes cuenta? Inicia sesión
+                </button>
+              </div>
+            </form>
+          </div>
+        )}
       </div>
     </div>
   );

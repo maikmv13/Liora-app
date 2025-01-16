@@ -1,5 +1,6 @@
 import { ShoppingItem } from '../../../types';
 import { categoryOrder } from '../../../types/categories';
+import { getUnitPlural } from '../../../utils/getUnitPlural';
 
 export function filterAndSortItems(
   items: ShoppingItem[],
@@ -8,26 +9,35 @@ export function filterAndSortItems(
   servings: number,
   showCompleted: boolean
 ) {
-  // Adjust quantities based on servings
-  const adjustedItems = items.map(item => ({
-    ...item,
-    quantity: (item.quantity / 2) * servings
-  }));
+  // Ajustar cantidades según el número de comensales
+  const adjustedItems = items.map(item => {
+    const baseQuantity = viewMode === 'daily' && item.dailyQuantities?.[selectedDay]
+      ? item.dailyQuantities[selectedDay]
+      : item.quantity;
 
-  // Filter items based on view mode
-  const filteredItems = viewMode === 'weekly' 
-    ? adjustedItems 
+    return {
+      ...item,
+      quantity: (baseQuantity / 2) * servings // Ajustar para el número de comensales
+    };
+  });
+
+  // Filtrar items según el modo de vista
+  const filteredItems = viewMode === 'weekly'
+    ? adjustedItems
     : adjustedItems.filter(item => item.days.includes(selectedDay));
 
-  // Group items by category
+  // Agrupar por categoría
   const itemsByCategory = filteredItems.reduce((acc, item) => {
     if (!acc[item.category]) {
       acc[item.category] = [];
     }
     
     if (viewMode === 'daily') {
+      // En vista diaria, solo incluir la cantidad para ese día
+      const dailyQuantity = item.dailyQuantities?.[selectedDay] || 0;
       acc[item.category].push({
         ...item,
+        quantity: (dailyQuantity / 2) * servings,
         days: [selectedDay]
       });
     } else {
@@ -37,13 +47,25 @@ export function filterAndSortItems(
     return acc;
   }, {} as Record<string, ShoppingItem[]>);
 
-  // Sort categories and filter empty ones
+  // Ordenar categorías y filtrar vacías
   const sortedCategories = categoryOrder
     .filter(categoria => 
       itemsByCategory[categoria] && 
       itemsByCategory[categoria].length > 0 &&
       (showCompleted || itemsByCategory[categoria].some(item => !item.checked))
     );
+
+  // Ordenar items dentro de cada categoría
+  for (const category of sortedCategories) {
+    itemsByCategory[category].sort((a, b) => {
+      // Primero por estado (no comprados primero)
+      if (a.checked !== b.checked) {
+        return a.checked ? 1 : -1;
+      }
+      // Luego por nombre
+      return a.name.localeCompare(b.name);
+    });
+  }
 
   return {
     itemsByCategory,
@@ -74,7 +96,13 @@ export function generateExportContent(
     .map(categoria => {
       const items = itemsByCategory[categoria];
       const itemsList = items
-        .map(item => `${item.checked ? '✅' : '⬜'} ${item.name}: ${item.quantity} ${item.unit}`)
+        .map(item => {
+          const quantity = viewMode === 'daily' && item.dailyQuantities?.[selectedDay]
+            ? item.dailyQuantities[selectedDay]
+            : item.quantity;
+          const unit = getUnitPlural(item.unit, quantity);
+          return `${item.checked ? '✅' : '⬜'} ${item.name}: ${quantity.toFixed(1)} ${unit}`;
+        })
         .join('\n');
       return `*${categoria}*\n${itemsList}\n`;
     })

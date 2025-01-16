@@ -19,6 +19,8 @@ export interface ShoppingItem {
   category: IngredientCategory;
   checked: boolean;
   days: string[];
+  purchasedQuantity?: number;
+  dailyQuantities?: Record<string, number>;
 }
 
 export interface RecipeCardProps {

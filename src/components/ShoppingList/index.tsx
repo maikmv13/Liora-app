@@ -10,7 +10,7 @@ import { filterAndSortItems, generateExportContent } from './utils/listUtils';
 
 interface ShoppingListProps {
   readonly items: ShoppingItem[];
-  readonly onToggleItem: (nombre: string, dia?: string) => void;
+  readonly onToggleItem: (nombre: string, dia?: string, cantidad?: number) => void;
 }
 
 export function ShoppingList({ items, onToggleItem }: ShoppingListProps) {
@@ -58,6 +58,22 @@ export function ShoppingList({ items, onToggleItem }: ShoppingListProps) {
         ? prev.filter(c => c !== categoria)
         : [...prev, categoria]
     );
+  };
+
+  const handleToggleItem = (nombre: string, cantidad?: number) => {
+    // Si estamos en vista diaria, la cantidad será la porción diaria
+    if (viewMode === 'daily') {
+      const item = items.find(i => i.name === nombre);
+      if (item) {
+        // Calcular la cantidad diaria basada en los días totales
+        const diasTotales = item.days.length;
+        const cantidadDiaria = item.quantity / diasTotales;
+        onToggleItem(nombre, selectedDay, cantidad || cantidadDiaria);
+      }
+    } else {
+      // En vista semanal, toggle normal
+      onToggleItem(nombre);
+    }
   };
 
   return (
@@ -185,7 +201,8 @@ export function ShoppingList({ items, onToggleItem }: ShoppingListProps) {
               items={visibleItems}
               isExpanded={expandedCategories.includes(categoria)}
               onToggleExpand={() => toggleCategory(categoria)}
-              onToggleItem={(nombre) => onToggleItem(nombre, viewMode === 'daily' ? selectedDay : undefined)}
+              onToggleItem={handleToggleItem}
+              viewMode={viewMode}
             />
           );
         })}

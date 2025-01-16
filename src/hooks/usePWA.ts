@@ -5,30 +5,74 @@ interface BeforeInstallPromptEvent extends Event {
   userChoice: Promise<{ outcome: 'accepted' | 'dismissed' }>;
 }
 
+declare global {
+  interface WindowEventMap {
+    beforeinstallprompt: BeforeInstallPromptEvent;
+    appinstalled: Event;
+  }
+}
+
 export function usePWA() {
   const [deferredPrompt, setDeferredPrompt] = useState<BeforeInstallPromptEvent | null>(null);
   const [isInstallable, setIsInstallable] = useState(false);
+  const [isInstalled, setIsInstalled] = useState(false);
 
   useEffect(() => {
-    const handleBeforeInstallPrompt = (e: Event) => {
-      // Prevenir comportamiento por defecto
-      e.preventDefault();
-      console.log('🚀 PWA instalable detectada'); // Debug log
+    // Verificar si la app ya está instalada
+    const checkInstallState = () => {
+      const isStandalone = window.matchMedia('(display-mode: standalone)').matches ||
+                          (window.navigator as any).standalone ||
+                          document.referrer.includes('android-app://');
+
+      // Verificar también el localStorage
+      const wasInstalled = localStorage.getItem('pwaInstalled') === 'true';
       
-      // Guardar el evento
-      setDeferredPrompt(e as BeforeInstallPromptEvent);
-      setIsInstallable(true);
+      setIsInstalled(isStandalone || wasInstalled);
     };
 
-    window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
+    checkInstallState();
 
-    // Debug: verificar si el evento está registrado
-    console.log('🎯 Listener de PWA registrado');
+    // Manejar el evento beforeinstallprompt
+    const handleBeforeInstallPrompt = (e: BeforeInstallPromptEvent) => {
+      e.preventDefault();
+      console.log('🚀 PWA instalable detectada');
+      
+      // Solo guardar el prompt si la app no está instalada
+      if (!isInstalled) {
+        setDeferredPrompt(e);
+        setIsInstallable(true);
+      }
+    };
+
+    // Manejar el evento appinstalled
+    const handleAppInstalled = () => {
+      console.log('✅ PWA instalada correctamente');
+      localStorage.setItem('pwaInstalled', 'true');
+      setIsInstalled(true);
+      setIsInstallable(false);
+      setDeferredPrompt(null);
+    };
+
+    // Escuchar cambios en el modo de visualización
+    const mediaQuery = window.matchMedia('(display-mode: standalone)');
+    const handleDisplayModeChange = (e: MediaQueryListEvent) => {
+      if (e.matches) {
+        localStorage.setItem('pwaInstalled', 'true');
+        setIsInstalled(true);
+      }
+    };
+
+    // Registrar los event listeners
+    window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
+    window.addEventListener('appinstalled', handleAppInstalled);
+    mediaQuery.addEventListener('change', handleDisplayModeChange);
 
     return () => {
       window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
+      window.removeEventListener('appinstalled', handleAppInstalled);
+      mediaQuery.removeEventListener('change', handleDisplayModeChange);
     };
-  }, []);
+  }, [isInstalled]);
 
   const installPWA = async () => {
     if (!deferredPrompt) {
@@ -37,11 +81,16 @@ export function usePWA() {
     }
 
     try {
-      console.log('📱 Intentando mostrar el prompt de instalación');
+      console.log('📱 Mostrando prompt de instalación');
       await deferredPrompt.prompt();
       
       const choiceResult = await deferredPrompt.userChoice;
       console.log('✅ Resultado de instalación:', choiceResult.outcome);
+      
+      if (choiceResult.outcome === 'accepted') {
+        localStorage.setItem('pwaInstalled', 'true');
+        setIsInstalled(true);
+      }
       
       setDeferredPrompt(null);
       setIsInstallable(false);
@@ -51,7 +100,8 @@ export function usePWA() {
   };
 
   return {
-    isInstallable,
+    isInstallable: isInstallable && !isInstalled,
+    isInstalled,
     installPWA
   };
 }

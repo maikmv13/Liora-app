@@ -15,7 +15,6 @@ interface MobileViewProps {
   onViewRecipe: (menuItem: MenuItem) => void;
   onAddToMenu: (recipe: Recipe | null, day: WeekDay, meal: MealType) => void;
   activeMenu: ExtendedWeeklyMenuDB | null;
-  initialDay?: string;
 }
 
 export function MobileView({ 
@@ -27,13 +26,42 @@ export function MobileView({
   onRemoveMeal,
   onViewRecipe,
   onAddToMenu,
-  activeMenu,
-  initialDay
+  activeMenu
 }: MobileViewProps) {
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const [canScrollLeft, setCanScrollLeft] = React.useState(false);
   const [canScrollRight, setCanScrollRight] = React.useState(false);
   const [isScrolling, setIsScrolling] = React.useState(false);
+
+  // Función para obtener el día siguiente al actual
+  const getTomorrowDay = () => {
+    const today = new Date();
+    const tomorrow = new Date(today);
+    tomorrow.setDate(today.getDate() + 1);
+    return new Intl.DateTimeFormat('es-ES', { weekday: 'long' }).format(tomorrow)
+      .replace(/^\w/, c => c.toUpperCase()); // Capitalizar primera letra
+  };
+
+  // Función para obtener el índice del día siguiente
+  const getTomorrowIndex = () => {
+    const tomorrow = getTomorrowDay();
+    return weekDays.findIndex(day => day === tomorrow);
+  };
+
+  // Scroll automático al día siguiente al montar el componente
+  useEffect(() => {
+    if (scrollContainerRef.current) {
+      const tomorrowIndex = getTomorrowIndex();
+      if (tomorrowIndex !== -1) {
+        const cardWidth = scrollContainerRef.current.clientWidth;
+        scrollContainerRef.current.scrollTo({
+          left: tomorrowIndex * cardWidth,
+          behavior: 'smooth'
+        });
+        onDayChange(weekDays[tomorrowIndex]);
+      }
+    }
+  }, []); // Solo se ejecuta al montar el componente
 
   // Función para actualizar el día seleccionado basado en el scroll
   const updateSelectedDay = () => {
@@ -102,18 +130,6 @@ export function MobileView({
       }, 300); // Ajustar este tiempo según la duración de la animación
     }
   };
-
-  React.useEffect(() => {
-    if (scrollContainerRef.current && initialDay) {
-      const index = weekDays.findIndex(day => 
-        day.toLowerCase() === initialDay.toLowerCase()
-      );
-      if (index !== -1) {
-        const cardWidth = scrollContainerRef.current.offsetWidth;
-        scrollContainerRef.current.scrollLeft = index * cardWidth;
-      }
-    }
-  }, [initialDay, weekDays]);
 
   return (
     <div className="relative">

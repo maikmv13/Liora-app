@@ -1,13 +1,33 @@
 import React from 'react';
 import { ShoppingItem } from '../../../types';
+import { getUnitPlural } from '../../../utils/getUnitPlural';
 
 interface ShoppingItemRowProps {
   item: ShoppingItem;
   onToggle: () => void;
   isGroupCompleted: boolean;
+  viewMode: 'weekly' | 'daily';
+  selectedDay?: string;
 }
 
-export function ShoppingItemRow({ item, onToggle, isGroupCompleted }: ShoppingItemRowProps) {
+export function ShoppingItemRow({ 
+  item, 
+  onToggle, 
+  isGroupCompleted, 
+  viewMode,
+  selectedDay 
+}: ShoppingItemRowProps) {
+  // Obtener la cantidad correcta según el modo de vista
+  const getDisplayQuantity = () => {
+    if (viewMode === 'daily' && selectedDay && item.dailyQuantities) {
+      return item.dailyQuantities[selectedDay] || 0;
+    }
+    return item.quantity;
+  };
+
+  const quantity = getDisplayQuantity();
+  const unit = getUnitPlural(item.unit, quantity);
+
   return (
     <div className={`
       flex items-center justify-between p-2.5 md:p-4 transition-colors group
@@ -55,26 +75,28 @@ export function ShoppingItemRow({ item, onToggle, isGroupCompleted }: ShoppingIt
           `}>
             {item.name}
           </span>
-          <div className="flex flex-wrap gap-1 mt-0.5">
-            {item.days.map(dia => (
-              <span key={dia} className={`
-                text-[10px] md:text-xs px-1.5 py-0.5 rounded
-                ${isGroupCompleted
-                  ? 'text-emerald-600 bg-emerald-100'
-                  : 'text-gray-500 bg-gray-100'
-                }
-              `}>
-                {dia}
-              </span>
-            ))}
-          </div>
+          {viewMode === 'weekly' && (
+            <div className="flex flex-wrap gap-1 mt-0.5">
+              {item.days.map(dia => (
+                <span key={dia} className={`
+                  text-[10px] md:text-xs px-1.5 py-0.5 rounded
+                  ${isGroupCompleted
+                    ? 'text-emerald-600 bg-emerald-100'
+                    : 'text-gray-500 bg-gray-100'
+                  }
+                `}>
+                  {dia}
+                </span>
+              ))}
+            </div>
+          )}
         </div>
       </div>
       <span className={`
         text-xs md:text-sm ml-2 flex-shrink-0
         ${item.checked ? 'text-gray-400' : isGroupCompleted ? 'text-emerald-700' : 'text-gray-600'}
       `}>
-        {item.quantity} {item.unit}
+        {quantity.toFixed(1)} {unit}
       </span>
     </div>
   );
