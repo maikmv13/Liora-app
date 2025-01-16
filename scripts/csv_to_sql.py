@@ -98,6 +98,52 @@ def map_ingredient_category(category):
     }
     return category_mapping.get(category, 'Otras Categorías')
 
+def map_cuisine_type(cuisine):
+    """Mapea el tipo de cocina a los valores permitidos del enum cuisine_type"""
+    cuisine_mapping = {
+        'italiana': 'italiana',
+        'mexicana': 'mexicana',
+        'española': 'española',
+        'japonesa': 'japonesa',
+        'china': 'china',
+        'coreana': 'coreana',
+        'tailandesa': 'tailandesa',
+        'vietnamita': 'vietnamita',
+        'india': 'india',
+        'mediterránea': 'mediterránea',
+        'griega': 'griega',
+        'turca': 'turca',
+        'libanesa': 'libanesa',
+        'marroquí': 'marroquí',
+        'francesa': 'francesa',
+        'alemana': 'alemana',
+        'británica': 'británica',
+        'americana': 'americana',
+        'tex-mex': 'tex-mex',
+        'brasileña': 'brasileña',
+        'peruana': 'peruana',
+        'argentina': 'argentina',
+        'colombiana': 'colombiana',
+        'venezolana': 'venezolana',
+        'caribeña': 'caribeña',
+        'portuguesa': 'portuguesa',
+        'rusa': 'rusa',
+        'polaca': 'polaca',
+        'nórdica': 'nórdica',
+        'hawaiana': 'hawaiana',
+        'fusión': 'fusión',
+        'vegana': 'vegana',
+        'vegetariana': 'vegetariana',
+        'sin_gluten': 'sin_gluten',
+        'tradicional': 'tradicional',
+        'moderna': 'moderna',
+        'casera': 'casera',
+        'callejera': 'callejera',
+        'gourmet': 'gourmet',
+        'saludable': 'saludable'
+    }
+    return cuisine_mapping.get(cuisine.lower(), 'otra')
+
 def csv_to_sql(csv_file_path, sql_file_path):
     if not os.path.isfile(csv_file_path):
         raise FileNotFoundError(f"El archivo CSV {csv_file_path} no existe.")
@@ -148,7 +194,8 @@ def csv_to_sql(csv_file_path, sql_file_path):
                 'Ingredientes': ingredientes,
                 'Url': row.get('URL', '').replace("'", "''"),
                 'PDF_Url': row.get('PDF_URL', '').replace("'", "''"),
-                'image_url': row.get('Image_url', '').replace("'", "''")
+                'image_url': row.get('Image_url', '').replace("'", "''"),
+                'cuisine_type': row.get('Cuisine_type', '').strip()
             })
 
     # Generar SQL
@@ -171,10 +218,11 @@ INSERT INTO recipes (
     name, side_dish, meal_type, category, servings,
     calories, energy_kj, fats, saturated_fats, carbohydrates,
     sugars, fiber, proteins, sodium, prep_time, instructions,
-    url, pdf_url, image_url
+    url, pdf_url, image_url, cuisine_type
 ) VALUES\n"""
 
     for recipe in recipes:
+        cuisine = map_cuisine_type(recipe.get('cuisine_type', '').strip())
         sql += f"""(
     '{recipe['Plato']}',
     '{recipe['Acompañamiento']}',
@@ -194,7 +242,8 @@ INSERT INTO recipes (
     '{json.dumps(recipe['Instrucciones'])}'::jsonb,
     '{recipe['Url']}',
     '{recipe['PDF_Url']}',
-    '{recipe.get('image_url', '')}'
+    '{recipe.get('image_url', '')}',
+    '{cuisine}'
 ),\n"""
     sql = sql.rstrip(',\n') + ';\n\n'
 
