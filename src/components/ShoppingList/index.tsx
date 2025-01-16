@@ -196,3 +196,5 @@ export function ShoppingList({ items, onToggleItem }: ShoppingListProps) {
     </div>
   );
 }
+
+export default ShoppingList;

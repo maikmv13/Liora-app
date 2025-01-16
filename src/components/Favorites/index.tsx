@@ -147,3 +147,5 @@ export function Favorites({ favorites, onRemoveFavorite, onUpdateFavorite }: Fav
     </div>
   );
 }
+
+export default Favorites;

@@ -21,7 +21,7 @@ interface WeeklyMenu2Props {
   readonly forUserId?: string;
 }
 
-export function WeeklyMenu2({ weeklyMenu, onRecipeSelect, onAddToMenu, forUserId }: WeeklyMenu2Props) {
+export const WeeklyMenu2 = ({ weeklyMenu, onRecipeSelect, onAddToMenu, forUserId }: WeeklyMenu2Props) => {
   const { recipes, loading } = useRecipes();
   const {
     selectedDay,
@@ -198,4 +198,6 @@ export function WeeklyMenu2({ weeklyMenu, onRecipeSelect, onAddToMenu, forUserId
       )}
     </div>
   );
-}
+};
+
+export default WeeklyMenu2;

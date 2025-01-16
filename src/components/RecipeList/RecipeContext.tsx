@@ -12,14 +12,14 @@ interface RecipeContentProps {
   onToggleFavorite: (recipe: Recipe) => void;
 }
 
-export function RecipeContent({
+export const RecipeContent = ({
   loading,
   error,
   recipes,
   onRecipeSelect,
   favorites,
   onToggleFavorite
-}: RecipeContentProps) {
+}: RecipeContentProps) => {
   if (loading) {
     return (
       <div className="flex items-center justify-center p-8">
@@ -49,4 +49,6 @@ export function RecipeContent({
       onToggleFavorite={onToggleFavorite}
     />
   );
-} 
+};
+
+export default RecipeContent; 
