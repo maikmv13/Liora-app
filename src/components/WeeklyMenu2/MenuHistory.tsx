@@ -1,29 +1,23 @@
 import React, { useState } from 'react';
-import { Copy, Trash2, Calendar, Utensils, Moon, Flame, Search, Filter, ChevronDown, Star, Share2, Clock, ArrowUpDown } from 'lucide-react';
-import { MenuItem } from '../../types';
-import { weekDays } from './utils';
+import { 
+  Copy, Trash2, Calendar, Utensils, Moon, Flame, Search, 
+  Filter, ChevronDown, Star, Share2, Clock, ArrowUpDown,
+  Activity
+} from 'lucide-react';
+import { ExtendedWeeklyMenuDB } from '../../services/weeklyMenu';
 import { deleteMenu } from '../../services/weeklyMenu';
-import type { ExtendedWeeklyMenuDB } from '../../services/weeklyMenu';
 
 interface MenuHistoryProps {
-  onRestore: (menuId: string) => void;
   history: ExtendedWeeklyMenuDB[];
+  onRestore: (menuId: string) => void;
   onHistoryChange: (history: ExtendedWeeklyMenuDB[]) => void;
   onMenuArchived: (menu: ExtendedWeeklyMenuDB) => void;
 }
 
-type SortOption = 'date' | 'calories' | 'rating';
-type FilterOption = 'all' | 'breakfast' | 'lunch' | 'dinner' | 'snack';
-
-export function MenuHistory({ 
-  onRestore, 
-  history = [], 
-  onHistoryChange,
-  onMenuArchived 
-}: MenuHistoryProps) {
+export function MenuHistory({ history, onRestore, onHistoryChange }: MenuHistoryProps) {
   const [searchTerm, setSearchTerm] = useState('');
-  const [sortBy, setSortBy] = useState<SortOption>('date');
-  const [filterBy, setFilterBy] = useState<FilterOption>('all');
+  const [sortBy, setSortBy] = useState<'date' | 'calories' | 'rating'>('date');
+  const [filterBy, setFilterBy] = useState<'all' | 'breakfast' | 'lunch' | 'dinner' | 'snack'>('all');
   const [expandedMenuId, setExpandedMenuId] = useState<string | null>(null);
   const [page, setPage] = useState(1);
   const itemsPerPage = 5;
@@ -31,7 +25,7 @@ export function MenuHistory({
   const handleDelete = async (menuId: string) => {
     try {
       await deleteMenu(menuId);
-      onHistoryChange(history.filter(menu => menu.id !== menuId));
+      onHistoryChange(prev => prev.filter(menu => menu.id !== menuId));
     } catch (error) {
       console.error('Error al eliminar el menú:', error);
     }
@@ -72,11 +66,9 @@ export function MenuHistory({
         case 'date':
           return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
         case 'calories':
-          // Implement calorie sorting logic
-          return 0;
+          return 0; // Implementar lógica de calorías si es necesario
         case 'rating':
-          // Implement rating sorting logic
-          return 0;
+          return 0; // Implementar lógica de rating si es necesario
         default:
           return 0;
       }
@@ -89,8 +81,10 @@ export function MenuHistory({
     page * itemsPerPage
   );
 
+  const weekDays = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domingo'];
+
   return (
-    <div className="space-y-6">
+    <div id="menu-history" className="space-y-6">
       {/* Header with filters */}
       <div className="flex flex-col gap-4 bg-white/90 backdrop-blur-sm rounded-2xl p-4 border border-rose-100/20">
         <div className="flex items-center justify-between">
@@ -116,7 +110,7 @@ export function MenuHistory({
             <ArrowUpDown size={18} className="text-gray-400" />
             <select
               value={sortBy}
-              onChange={(e) => setSortBy(e.target.value as SortOption)}
+              onChange={(e) => setSortBy(e.target.value as 'date' | 'calories' | 'rating')}
               className="flex-1 px-3 py-2 bg-white rounded-xl border border-rose-100 focus:ring-2 focus:ring-rose-500"
             >
               <option value="date">Fecha</option>
@@ -130,7 +124,7 @@ export function MenuHistory({
             <Filter size={18} className="text-gray-400" />
             <select
               value={filterBy}
-              onChange={(e) => setFilterBy(e.target.value as FilterOption)}
+              onChange={(e) => setFilterBy(e.target.value as 'all' | 'breakfast' | 'lunch' | 'dinner' | 'snack')}
               className="flex-1 px-3 py-2 bg-white rounded-xl border border-rose-100 focus:ring-2 focus:ring-rose-500"
             >
               <option value="all">Todas las comidas</option>
@@ -169,7 +163,7 @@ export function MenuHistory({
                         </p>
                       </div>
                       <div className="flex items-center space-x-1">
-                        <Star size={14} className="text-amber-400" />
+                        <Activity size={14} className="text-amber-400" />
                         <span className="text-sm text-gray-500">4.5</span>
                       </div>
                     </div>
@@ -207,7 +201,7 @@ export function MenuHistory({
                   </button>
                   <button
                     onClick={() => {
-                      // Share menu logic
+                      // Implementar lógica de compartir
                     }}
                     className="p-2 text-blue-500 hover:bg-blue-50 rounded-lg transition-colors border border-blue-200"
                     title="Compartir menú"
