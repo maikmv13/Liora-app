@@ -21,7 +21,7 @@
       "short_name": "Hoy",
       "description": "Ver el menú de hoy",
       "url": "/?source=pwa",
-      "icons": [{ "src": "/icon-192.png", "sizes": "192x192" }]
+      "icons": [{ "src": "/icon.svg", "sizes": "any" }]
     }
   ],
   "categories": ["food", "lifestyle", "productivity"]
