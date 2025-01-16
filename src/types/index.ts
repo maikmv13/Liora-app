@@ -1,14 +1,14 @@
 import type { Database } from './supabase';
 import type { Recipe } from './recipe';
 
-export type MealType = 'comida' | 'cena' | 'desayuno' | 'snack';
+export type MealType = 'desayuno' | 'comida' | 'cena' | 'snack';
 export type UnitType = Database['public']['Enums']['unit_type'];
 export type IngredientCategory = Database['public']['Enums']['ingredient_category'];
 
 export interface MenuItem {
-  recipe: Recipe;
   day: string;
   meal: MealType;
+  recipe: Recipe;
 }
 
 export interface ShoppingItem {
