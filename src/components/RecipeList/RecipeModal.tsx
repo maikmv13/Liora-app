@@ -33,6 +33,11 @@ export function RecipeModal({
   isFavorite,
   onToggleFavorite 
 }: RecipeModalProps) {
+  const getImageUrl = (url: string, options: { width?: number, quality?: number, format?: string } = {}) => {
+    const { width = 800, quality = 80, format = 'webp' } = options;
+    return `${url}?quality=${quality}&width=${width}&format=${format}`;
+  };
+
   const instructions = recipe.instructions as Record<string, string> || {};
 
   // Nutritional info cards configuration
@@ -89,11 +94,34 @@ export function RecipeModal({
         <div className="relative h-48 rounded-t-2xl overflow-hidden flex-shrink-0">
           {recipe.image_url ? (
             <>
-              <img
-                src={recipe.image_url}
-                alt={recipe.name}
-                className="w-full h-full object-cover"
+              {/* Low quality placeholder */}
+              <div 
+                className="absolute inset-0 bg-cover bg-center blur-lg scale-110"
+                style={{ 
+                  backgroundImage: `url(${getImageUrl(recipe.image_url, { width: 50, quality: 10 })})`,
+                  opacity: 0.5 
+                }}
               />
+              
+              <picture>
+                {/* WebP version */}
+                <source
+                  type="image/webp"
+                  srcSet={`
+                    ${getImageUrl(recipe.image_url, { width: 400, format: 'webp' })} 400w,
+                    ${getImageUrl(recipe.image_url, { width: 800, format: 'webp' })} 800w
+                  `}
+                  sizes="(max-width: 768px) 400px, 800px"
+                />
+                {/* Fallback version */}
+                <img
+                  src={getImageUrl(recipe.image_url, { width: 800 })}
+                  alt={recipe.name}
+                  className="w-full h-full object-cover"
+                  loading="lazy"
+                  decoding="async"
+                />
+              </picture>
               <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
             </>
           ) : (

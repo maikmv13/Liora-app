@@ -88,6 +88,11 @@ export function RecipeSelectorSidebar({
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [isOpen, selectedIndex, onSelectRecipe, onClose, filteredRecipes]);
 
+  const getImageUrl = (url: string, options: { width?: number, quality?: number, format?: string } = {}) => {
+    const { width = 400, quality = 80, format = 'webp' } = options;
+    return `${url}?quality=${quality}&width=${width}&format=${format}`;
+  };
+
   return (
     <>
       {/* Overlay */}
@@ -212,11 +217,24 @@ export function RecipeSelectorSidebar({
                       {/* Recipe image or placeholder */}
                       <div className="w-20 h-20 rounded-lg bg-gray-100 flex-shrink-0 overflow-hidden">
                         {recipe.image_url ? (
-                          <img
-                            src={recipe.image_url}
-                            alt={recipe.name}
-                            className="w-full h-full object-cover"
-                          />
+                          <picture>
+                            {/* WebP version */}
+                            <source
+                              type="image/webp"
+                              srcSet={`
+                                ${getImageUrl(recipe.image_url, { width: 80, format: 'webp' })} 1x,
+                                ${getImageUrl(recipe.image_url, { width: 160, format: 'webp' })} 2x
+                              `}
+                            />
+                            {/* Fallback version */}
+                            <img
+                              src={getImageUrl(recipe.image_url, { width: 80 })}
+                              alt={recipe.name}
+                              className="w-full h-full object-cover"
+                              loading="lazy"
+                              decoding="async"
+                            />
+                          </picture>
                         ) : (
                           <div className="w-full h-full flex items-center justify-center">
                             <ChefHat size={24} className="text-gray-400" />
