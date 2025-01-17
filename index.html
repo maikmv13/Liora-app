@@ -2,7 +2,7 @@
 <html lang="es">
   <head>
     <meta charset="UTF-8" />
-    <title>MiCocina - Tu asistente culinario personal</title>
+    <title>Liora - Life in balance</title>
     
     <!-- Favicon y PWA icons -->
     <link rel="icon" type="image/svg+xml" href="/icon.svg" />
@@ -17,26 +17,100 @@
     <meta name="apple-mobile-web-app-title" content="Liora" />
     
     <!-- Meta description -->
-    <meta name="description" content="Tu asistente culinario personal. Organiza tus recetas, planifica menús y gestiona tu lista de la compra." />
+    <meta name="description" content="Encuentra el equilibrio en tu vida a través de la alimentación. Descubre recetas saludables, planifica tus menús y mantén un estilo de vida balanceado." />
+    <meta name="keywords" content="recetas saludables, equilibrio, bienestar, planificación de menús, vida saludable, nutrición balanceada" />
+    <meta name="author" content="Liora" />
     
     <!-- Open Graph / Social Media -->
     <meta property="og:type" content="website" />
     <meta property="og:title" content="Liora - Life in balance" />
-    <meta property="og:description" content="Tu asistente culinario personal. Organiza tus recetas, planifica menús y gestiona tu lista de la compra." />
+    <meta property="og:description" content="Encuentra el equilibrio en tu vida a través de la alimentación. Descubre recetas saludables, planifica tus menús y mantén un estilo de vida balanceado." />
     <meta property="og:image" content="/icon.svg" />
+    <meta property="og:url" content="https://liora.app" />
+    <meta property="og:site_name" content="Liora" />
+    
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="Liora - Life in balance" />
+    <meta name="twitter:description" content="Encuentra el equilibrio en tu vida a través de la alimentación. Descubre recetas saludables, planifica tus menús y mantén un estilo de vida balanceado." />
+    <meta name="twitter:image" content="/icon.svg" />
     
     <!-- PWA manifest -->
     <link rel="manifest" href="/manifest.json" />
+    
+    <!-- Preconnect to important origins -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    
+    <!-- Estilos inline para el fallback no-JS -->
+    <style>
+      .noscript-message {
+        background: linear-gradient(to right, #fb923c, #ec4899, #f43f5e);
+        min-height: 100vh;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        text-align: center;
+        color: white;
+        padding: 2rem;
+      }
+      
+      .logo-container {
+        background-color: rgba(255, 255, 255, 0.1);
+        padding: 0.5rem;
+        border-radius: 0.5rem;
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        margin-bottom: 1rem;
+      }
+      
+      .app-title {
+        font-size: 2rem;
+        font-weight: bold;
+        margin: 0.5rem 0;
+        background: linear-gradient(to right, white, rgba(255, 255, 255, 0.8));
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+      }
+      
+      .app-subtitle {
+        font-size: 0.625rem;
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+        color: rgba(255, 255, 255, 0.8);
+        margin-bottom: 2rem;
+      }
+      
+      .message {
+        font-size: 1rem;
+        line-height: 1.5;
+        max-width: 32rem;
+        margin: 0 auto;
+      }
+      
+      .message p {
+        margin: 0.5rem 0;
+      }
+    </style>
   </head>
   <body>
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
     
-    <!-- No-JS fallback -->
+    <!-- No-JS fallback con los estilos del Header -->
     <noscript>
-      <div style="padding: 2rem; text-align: center;">
-        <h1>Liora - Life in balance</h1>
-        <p>Necesitas habilitar JavaScript para usar esta aplicación.</p>
+      <div class="noscript-message">
+        <div class="logo-container">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M12 2L19 7V17L12 22L5 17V7L12 2Z" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" transform="rotate(45 12 12)"/>
+          </svg>
+        </div>
+        <h1 class="app-title">Liora</h1>
+        <div class="app-subtitle">Life in Balance</div>
+        <div class="message">
+          <p>Encuentra el equilibrio a través de la alimentación consciente.</p>
+          <p>Por favor, habilita JavaScript para acceder a todas las funcionalidades.</p>
+        </div>
       </div>
     </noscript>
   </body>
