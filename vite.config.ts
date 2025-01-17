@@ -8,7 +8,12 @@ export default defineConfig({
     react(),
     VitePWA({
       registerType: 'autoUpdate',
-      includeAssets: ['favicon.ico', 'apple-touch-icon.png', 'masked-icon.svg'],
+      includeAssets: [
+        'icon.svg',
+        'icon-192.png',
+        'icon-512.png',
+        'apple-touch-icon.png'
+      ],
       manifest: {
         name: "Liora - Life in Balance",
         short_name: "Liora",
@@ -22,8 +27,20 @@ export default defineConfig({
         icons: [
           {
             src: "/icon.svg",
-            sizes: "any",
+            sizes: "512x512",
             type: "image/svg+xml",
+            purpose: "any maskable"
+          },
+          {
+            src: "/icon-192.png",
+            sizes: "192x192",
+            type: "image/png",
+            purpose: "any maskable"
+          },
+          {
+            src: "/icon-512.png",
+            sizes: "512x512",
+            type: "image/png",
             purpose: "any maskable"
           }
         ],
