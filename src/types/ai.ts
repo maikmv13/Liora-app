@@ -7,11 +7,19 @@ export interface Message {
   timestamp: string;
 }
 
+export type ContextCategory = 
+  | 'recipes'
+  | 'shopping'
+  | 'nutrition'
+  | 'planning'
+  | 'general';
+
 export interface AIContext {
-  favorites: Recipe[];
+  userProfile: any;
+  favorites: any[];
   weeklyMenu: any[];
   shoppingList: any[];
-  userProfile: any;
+  categories: ContextCategory[];
 }
 
 export interface AIResponse {

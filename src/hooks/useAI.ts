@@ -1,35 +1,68 @@
 import { useState, useCallback } from 'react';
-import { ai } from '../services/ai';
-import type { Message, AIContext, AIResponse } from '../types/ai';
 import { supabase } from '../lib/supabase';
-import { useActiveMenu } from './useActiveMenu';
-import { useShoppingList } from './useShoppingList';
-import { useFavorites } from './useFavorites';
+import { getAIResponse } from '../services/ai';
+import type { Message, AIContext, ContextCategory } from '../types/ai';
 
 export function useAI() {
   const [messages, setMessages] = useState<Message[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<Error | null>(null);
 
-  const { menuItems } = useActiveMenu();
-  const { shoppingList } = useShoppingList();
-  const { favorites } = useFavorites();
+  const identifyCategory = (content: string): ContextCategory[] => {
+    const categories: ContextCategory[] = [];
+    
+    const patterns = {
+      recipes: /receta|cocinar|preparar|plato|comida|cena|menu/i,
+      shopping: /compra|lista|ingredientes|supermercado/i,
+      nutrition: /nutrición|calorías|proteínas|dieta|saludable/i,
+      planning: /planificar|semana|horario|organizar/i
+    };
 
-  const getUserContext = async (): Promise<AIContext> => {
+    Object.entries(patterns).forEach(([category, pattern]) => {
+      if (pattern.test(content)) {
+        categories.push(category as ContextCategory);
+      }
+    });
+
+    // Si no se identifica ninguna categoría, incluir todas
+    return categories.length > 0 ? categories : ['general'];
+  };
+
+  const getFilteredContext = async (categories: ContextCategory[]): Promise<AIContext> => {
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) throw new Error('Usuario no autenticado');
 
-    const { data: profile } = await supabase
-      .from('profiles')
-      .select('*')
-      .eq('user_id', user.id)
-      .single();
+    const queries = {
+      profile: supabase.from('profiles').select('*').eq('user_id', user.id).single(),
+      favorites: categories.includes('recipes') ? 
+        supabase.from('favorites').select('recipe_id, recipes(*)') : 
+        Promise.resolve({ data: [] }),
+      weeklyMenu: categories.includes('planning') ? 
+        supabase.from('weekly_menus').select('*') : 
+        Promise.resolve({ data: [] }),
+      shoppingList: categories.includes('shopping') ? 
+        supabase.from('shopping_list_items').select('*') : 
+        Promise.resolve({ data: [] })
+    };
+
+    const [
+      { data: profile },
+      { data: favorites },
+      { data: weeklyMenu },
+      { data: shoppingList }
+    ] = await Promise.all([
+      queries.profile,
+      queries.favorites,
+      queries.weeklyMenu,
+      queries.shoppingList
+    ]);
 
     return {
-      favorites,
-      weeklyMenu: menuItems,
-      shoppingList,
-      userProfile: profile
+      userProfile: profile,
+      favorites: favorites?.map(f => f.recipes) || [],
+      weeklyMenu: weeklyMenu || [],
+      shoppingList: shoppingList || [],
+      categories // Incluimos las categorías identificadas en el contexto
     };
   };
 
@@ -38,7 +71,6 @@ export function useAI() {
       setLoading(true);
       setError(null);
 
-      // Add user message
       const userMessage: Message = {
         id: crypto.randomUUID(),
         role: 'user',
@@ -48,11 +80,12 @@ export function useAI() {
 
       setMessages(prev => [...prev, userMessage]);
 
-      // Get context and send to AI
-      const context = await getUserContext();
-      const response = await ai.chat(content, context);
+      // Identificar categorías relevantes y obtener contexto filtrado
+      const categories = identifyCategory(content);
+      const context = await getFilteredContext(categories);
+      
+      const response = await getAIResponse([...messages, userMessage], context);
 
-      // Add AI response
       const aiMessage: Message = {
         id: crypto.randomUUID(),
         role: 'assistant',
@@ -64,18 +97,13 @@ export function useAI() {
       return response;
 
     } catch (error) {
-      console.error('Error sending message:', error);
+      console.error('Error en useAI:', error);
       setError(error as Error);
       throw error;
     } finally {
       setLoading(false);
     }
-  }, [favorites, menuItems, shoppingList]);
+  }, [messages]);
 
-  return {
-    messages,
-    loading,
-    error,
-    sendMessage
-  };
+  return { messages, loading, error, sendMessage };
 }
