@@ -1,5 +1,5 @@
 import React from 'react';
-import { Filter, Share2, ShoppingCart, Calendar, CalendarDays, Users, RefreshCw } from 'lucide-react';
+import { Filter, Share2, ShoppingCart, Calendar, CalendarDays, Users } from 'lucide-react';
 import { ShoppingItem } from '../../types';
 import { CategoryGroup } from './components/CategoryGroup';
 import { Progress } from './components/Progress';
@@ -25,8 +25,6 @@ export function ShoppingList({ items, onToggleItem }: ShoppingListProps) {
     setSelectedDay,
     servings,
     setServings,
-    refreshing,
-    handleRefresh
   } = useShoppingListState();
 
   const { itemsByCategory, sortedCategories, filteredItems } = filterAndSortItems(
@@ -92,19 +90,6 @@ export function ShoppingList({ items, onToggleItem }: ShoppingListProps) {
           </div>
         </div>
         <div className="flex flex-wrap gap-2 md:gap-3">
-          <button 
-            onClick={handleRefresh}
-            disabled={refreshing}
-            className={`flex items-center justify-center space-x-1 md:space-x-2 px-3 md:px-4 py-2 md:py-2.5 bg-white/90 backdrop-blur-sm text-rose-500 rounded-xl hover:bg-white transition-colors border border-rose-100 shadow-sm text-sm md:text-base ${
-              refreshing ? 'opacity-50 cursor-not-allowed' : ''
-            }`}
-          >
-            <RefreshCw 
-              size={16} 
-              className={`md:w-5 md:h-5 ${refreshing ? 'animate-spin' : ''}`} 
-            />
-            <span>{refreshing ? 'Actualizando...' : 'Actualizar'}</span>
-          </button>
           <button 
             onClick={() => setShowCompleted(!showCompleted)}
             className="flex items-center justify-center space-x-1 md:space-x-2 px-3 md:px-4 py-2 md:py-2.5 bg-white/90 backdrop-blur-sm text-rose-500 rounded-xl hover:bg-white transition-colors border border-rose-100 shadow-sm text-sm md:text-base"
