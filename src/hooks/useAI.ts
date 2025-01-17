@@ -105,5 +105,11 @@ export function useAI() {
     }
   }, [messages]);
 
-  return { messages, loading, error, sendMessage };
+  return { 
+    messages, 
+    setMessages,
+    loading, 
+    error, 
+    sendMessage 
+  };
 }

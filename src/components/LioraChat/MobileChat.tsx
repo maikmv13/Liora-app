@@ -19,10 +19,12 @@ export function MobileChat() {
       }, 500);
       return () => clearTimeout(timer);
     } else if (!hasInitialMessage) {
-      // Send initial message after welcome animation
-      const timer = setTimeout(async () => {
-        try {
-          await sendMessage(`¡Hola! 👋 Me alegro mucho de conocerte. Soy Liora, tu compañera nutricional personal, y estoy aquí para ayudarte a encontrar el equilibrio perfecto en tu alimentación. 🌱✨
+      // En lugar de usar sendMessage, vamos a crear directamente un mensaje de asistente
+      const timer = setTimeout(() => {
+        const initialMessage: Message = {
+          id: crypto.randomUUID(),
+          role: 'assistant', // Aseguramos que el rol es 'assistant'
+          content: `¡Hola! 👋 Me alegro mucho de conocerte. Soy Liora, tu compañera nutricional personal, y estoy aquí para ayudarte a encontrar el equilibrio perfecto en tu alimentación. 🌱✨
 
 Me encanta compartir consejos sobre nutrición, sugerir recetas deliciosas y saludables, y ayudarte a planificar tus comidas de manera inteligente. 🥗
 
@@ -31,15 +33,17 @@ Me encanta compartir consejos sobre nutrición, sugerir recetas deliciosas y sal
 - Consejos nutricionales
 - Planificación de menús
 - Ideas para snacks saludables
-- O cualquier otra duda sobre alimentación 😊`);
-          setHasInitialMessage(true);
-        } catch (error) {
-          console.error('Error sending initial message:', error);
-        }
+- O cualquier otra duda sobre alimentación 😊`,
+          timestamp: new Date().toISOString()
+        };
+        
+        // Actualizamos el estado de mensajes directamente
+        setMessages(prev => [...prev, initialMessage]);
+        setHasInitialMessage(true);
       }, 1000);
       return () => clearTimeout(timer);
     }
-  }, [welcomeIndex, hasInitialMessage, sendMessage]);
+  }, [welcomeIndex, hasInitialMessage]);
 
   const handleSubmit = async () => {
     if (!input.trim()) return;
