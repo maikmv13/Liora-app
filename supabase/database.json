@@ -1,0 +1,317 @@
+[
+  {
+    "table_schema": "public",
+    "constraint_name": "profiles_household_id_fkey",
+    "table_name": "profiles",
+    "column_name": "household_id",
+    "foreign_table_schema": "public",
+    "foreign_table_name": "households",
+    "foreign_column_name": "id"
+  },
+  {
+    "table_schema": "public",
+    "constraint_name": "recipe_ingredients_ingredient_id_fkey",
+    "table_name": "recipe_ingredients",
+    "column_name": "ingredient_id",
+    "foreign_table_schema": "public",
+    "foreign_table_name": "ingredients",
+    "foreign_column_name": "id"
+  },
+  {
+    "table_schema": "public",
+    "constraint_name": "recipe_ingredients_recipe_id_fkey",
+    "table_name": "recipe_ingredients",
+    "column_name": "recipe_id",
+    "foreign_table_schema": "public",
+    "foreign_table_name": "recipes",
+    "foreign_column_name": "id"
+  },
+  {
+    "table_schema": "public",
+    "constraint_name": "favorites_recipe_id_fkey",
+    "table_name": "favorites",
+    "column_name": "recipe_id",
+    "foreign_table_schema": "public",
+    "foreign_table_name": "recipes",
+    "foreign_column_name": "id"
+  },
+  {
+    "table_schema": "public",
+    "constraint_name": "recipe_completions_menu_id_fkey",
+    "table_name": "recipe_completions",
+    "column_name": "menu_id",
+    "foreign_table_schema": "public",
+    "foreign_table_name": "weekly_menus",
+    "foreign_column_name": "id"
+  },
+  {
+    "table_schema": "public",
+    "constraint_name": "recipe_completions_recipe_id_fkey",
+    "table_name": "recipe_completions",
+    "column_name": "recipe_id",
+    "foreign_table_schema": "public",
+    "foreign_table_name": "recipes",
+    "foreign_column_name": "id"
+  },
+  {
+    "table_schema": "public",
+    "constraint_name": "shopping_list_items_menu_id_fkey",
+    "table_name": "shopping_list_items",
+    "column_name": "menu_id",
+    "foreign_table_schema": "public",
+    "foreign_table_name": "weekly_menus",
+    "foreign_column_name": "id"
+  },
+  {
+    "table_schema": "public",
+    "constraint_name": "weekly_menus_friday_breakfast_id_fkey",
+    "table_name": "weekly_menus",
+    "column_name": "friday_breakfast_id",
+    "foreign_table_schema": "public",
+    "foreign_table_name": "recipes",
+    "foreign_column_name": "id"
+  },
+  {
+    "table_schema": "public",
+    "constraint_name": "weekly_menus_friday_dinner_id_fkey",
+    "table_name": "weekly_menus",
+    "column_name": "friday_dinner_id",
+    "foreign_table_schema": "public",
+    "foreign_table_name": "recipes",
+    "foreign_column_name": "id"
+  },
+  {
+    "table_schema": "public",
+    "constraint_name": "weekly_menus_friday_lunch_id_fkey",
+    "table_name": "weekly_menus",
+    "column_name": "friday_lunch_id",
+    "foreign_table_schema": "public",
+    "foreign_table_name": "recipes",
+    "foreign_column_name": "id"
+  },
+  {
+    "table_schema": "public",
+    "constraint_name": "weekly_menus_friday_snack_id_fkey",
+    "table_name": "weekly_menus",
+    "column_name": "friday_snack_id",
+    "foreign_table_schema": "public",
+    "foreign_table_name": "recipes",
+    "foreign_column_name": "id"
+  },
+  {
+    "table_schema": "public",
+    "constraint_name": "weekly_menus_monday_breakfast_id_fkey",
+    "table_name": "weekly_menus",
+    "column_name": "monday_breakfast_id",
+    "foreign_table_schema": "public",
+    "foreign_table_name": "recipes",
+    "foreign_column_name": "id"
+  },
+  {
+    "table_schema": "public",
+    "constraint_name": "weekly_menus_monday_dinner_id_fkey",
+    "table_name": "weekly_menus",
+    "column_name": "monday_dinner_id",
+    "foreign_table_schema": "public",
+    "foreign_table_name": "recipes",
+    "foreign_column_name": "id"
+  },
+  {
+    "table_schema": "public",
+    "constraint_name": "weekly_menus_monday_lunch_id_fkey",
+    "table_name": "weekly_menus",
+    "column_name": "monday_lunch_id",
+    "foreign_table_schema": "public",
+    "foreign_table_name": "recipes",
+    "foreign_column_name": "id"
+  },
+  {
+    "table_schema": "public",
+    "constraint_name": "weekly_menus_monday_snack_id_fkey",
+    "table_name": "weekly_menus",
+    "column_name": "monday_snack_id",
+    "foreign_table_schema": "public",
+    "foreign_table_name": "recipes",
+    "foreign_column_name": "id"
+  },
+  {
+    "table_schema": "public",
+    "constraint_name": "weekly_menus_saturday_breakfast_id_fkey",
+    "table_name": "weekly_menus",
+    "column_name": "saturday_breakfast_id",
+    "foreign_table_schema": "public",
+    "foreign_table_name": "recipes",
+    "foreign_column_name": "id"
+  },
+  {
+    "table_schema": "public",
+    "constraint_name": "weekly_menus_saturday_dinner_id_fkey",
+    "table_name": "weekly_menus",
+    "column_name": "saturday_dinner_id",
+    "foreign_table_schema": "public",
+    "foreign_table_name": "recipes",
+    "foreign_column_name": "id"
+  },
+  {
+    "table_schema": "public",
+    "constraint_name": "weekly_menus_saturday_lunch_id_fkey",
+    "table_name": "weekly_menus",
+    "column_name": "saturday_lunch_id",
+    "foreign_table_schema": "public",
+    "foreign_table_name": "recipes",
+    "foreign_column_name": "id"
+  },
+  {
+    "table_schema": "public",
+    "constraint_name": "weekly_menus_saturday_snack_id_fkey",
+    "table_name": "weekly_menus",
+    "column_name": "saturday_snack_id",
+    "foreign_table_schema": "public",
+    "foreign_table_name": "recipes",
+    "foreign_column_name": "id"
+  },
+  {
+    "table_schema": "public",
+    "constraint_name": "weekly_menus_sunday_breakfast_id_fkey",
+    "table_name": "weekly_menus",
+    "column_name": "sunday_breakfast_id",
+    "foreign_table_schema": "public",
+    "foreign_table_name": "recipes",
+    "foreign_column_name": "id"
+  },
+  {
+    "table_schema": "public",
+    "constraint_name": "weekly_menus_sunday_dinner_id_fkey",
+    "table_name": "weekly_menus",
+    "column_name": "sunday_dinner_id",
+    "foreign_table_schema": "public",
+    "foreign_table_name": "recipes",
+    "foreign_column_name": "id"
+  },
+  {
+    "table_schema": "public",
+    "constraint_name": "weekly_menus_sunday_lunch_id_fkey",
+    "table_name": "weekly_menus",
+    "column_name": "sunday_lunch_id",
+    "foreign_table_schema": "public",
+    "foreign_table_name": "recipes",
+    "foreign_column_name": "id"
+  },
+  {
+    "table_schema": "public",
+    "constraint_name": "weekly_menus_sunday_snack_id_fkey",
+    "table_name": "weekly_menus",
+    "column_name": "sunday_snack_id",
+    "foreign_table_schema": "public",
+    "foreign_table_name": "recipes",
+    "foreign_column_name": "id"
+  },
+  {
+    "table_schema": "public",
+    "constraint_name": "weekly_menus_thursday_breakfast_id_fkey",
+    "table_name": "weekly_menus",
+    "column_name": "thursday_breakfast_id",
+    "foreign_table_schema": "public",
+    "foreign_table_name": "recipes",
+    "foreign_column_name": "id"
+  },
+  {
+    "table_schema": "public",
+    "constraint_name": "weekly_menus_thursday_dinner_id_fkey",
+    "table_name": "weekly_menus",
+    "column_name": "thursday_dinner_id",
+    "foreign_table_schema": "public",
+    "foreign_table_name": "recipes",
+    "foreign_column_name": "id"
+  },
+  {
+    "table_schema": "public",
+    "constraint_name": "weekly_menus_thursday_lunch_id_fkey",
+    "table_name": "weekly_menus",
+    "column_name": "thursday_lunch_id",
+    "foreign_table_schema": "public",
+    "foreign_table_name": "recipes",
+    "foreign_column_name": "id"
+  },
+  {
+    "table_schema": "public",
+    "constraint_name": "weekly_menus_thursday_snack_id_fkey",
+    "table_name": "weekly_menus",
+    "column_name": "thursday_snack_id",
+    "foreign_table_schema": "public",
+    "foreign_table_name": "recipes",
+    "foreign_column_name": "id"
+  },
+  {
+    "table_schema": "public",
+    "constraint_name": "weekly_menus_tuesday_breakfast_id_fkey",
+    "table_name": "weekly_menus",
+    "column_name": "tuesday_breakfast_id",
+    "foreign_table_schema": "public",
+    "foreign_table_name": "recipes",
+    "foreign_column_name": "id"
+  },
+  {
+    "table_schema": "public",
+    "constraint_name": "weekly_menus_tuesday_dinner_id_fkey",
+    "table_name": "weekly_menus",
+    "column_name": "tuesday_dinner_id",
+    "foreign_table_schema": "public",
+    "foreign_table_name": "recipes",
+    "foreign_column_name": "id"
+  },
+  {
+    "table_schema": "public",
+    "constraint_name": "weekly_menus_tuesday_lunch_id_fkey",
+    "table_name": "weekly_menus",
+    "column_name": "tuesday_lunch_id",
+    "foreign_table_schema": "public",
+    "foreign_table_name": "recipes",
+    "foreign_column_name": "id"
+  },
+  {
+    "table_schema": "public",
+    "constraint_name": "weekly_menus_tuesday_snack_id_fkey",
+    "table_name": "weekly_menus",
+    "column_name": "tuesday_snack_id",
+    "foreign_table_schema": "public",
+    "foreign_table_name": "recipes",
+    "foreign_column_name": "id"
+  },
+  {
+    "table_schema": "public",
+    "constraint_name": "weekly_menus_wednesday_breakfast_id_fkey",
+    "table_name": "weekly_menus",
+    "column_name": "wednesday_breakfast_id",
+    "foreign_table_schema": "public",
+    "foreign_table_name": "recipes",
+    "foreign_column_name": "id"
+  },
+  {
+    "table_schema": "public",
+    "constraint_name": "weekly_menus_wednesday_dinner_id_fkey",
+    "table_name": "weekly_menus",
+    "column_name": "wednesday_dinner_id",
+    "foreign_table_schema": "public",
+    "foreign_table_name": "recipes",
+    "foreign_column_name": "id"
+  },
+  {
+    "table_schema": "public",
+    "constraint_name": "weekly_menus_wednesday_lunch_id_fkey",
+    "table_name": "weekly_menus",
+    "column_name": "wednesday_lunch_id",
+    "foreign_table_schema": "public",
+    "foreign_table_name": "recipes",
+    "foreign_column_name": "id"
+  },
+  {
+    "table_schema": "public",
+    "constraint_name": "weekly_menus_wednesday_snack_id_fkey",
+    "table_name": "weekly_menus",
+    "column_name": "wednesday_snack_id",
+    "foreign_table_schema": "public",
+    "foreign_table_name": "recipes",
+    "foreign_column_name": "id"
+  }
+]

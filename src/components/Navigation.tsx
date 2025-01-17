@@ -1,6 +1,6 @@
 import React from 'react';
-import { useNavigate } from 'react-router-dom';
-import { ChefHat, Calendar, ShoppingCart, Activity } from 'lucide-react';
+import { useNavigate, useLocation } from 'react-router-dom';
+import { ChefHat, Calendar, ShoppingCart, Bot } from 'lucide-react';
 
 interface NavigationProps {
   activeTab: string;
@@ -11,6 +11,12 @@ interface NavigationProps {
 
 export function Navigation({ activeTab, onTabChange, orientation = 'horizontal', user }: NavigationProps) {
   const navigate = useNavigate();
+  const location = useLocation();
+
+  // Hide navigation on Liora chat page
+  if (location.pathname === '/liora') {
+    return null;
+  }
 
   const handleTabChange = (id: string) => {
     onTabChange(id);
@@ -37,10 +43,10 @@ export function Navigation({ activeTab, onTabChange, orientation = 'horizontal',
       description: 'Lista'
     },
     {
-      id: 'vida-sana',
-      icon: Activity,
-      label: 'Vida Sana',
-      description: 'Bienestar'
+      id: 'liora',
+      icon: Bot,
+      label: 'Liora',
+      description: 'AI Assistant'
     }
   ];
 
