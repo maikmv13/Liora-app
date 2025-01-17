@@ -4,9 +4,13 @@ import type { Message, AIContext, AIResponse } from '../types/ai';
 const OPENAI_API_KEY = import.meta.env.VITE_OPENAI_API_KEY;
 const OPENAI_ORG_ID = import.meta.env.VITE_OPENAI_ORG_ID;
 
+if (!OPENAI_API_KEY) {
+  console.error('Error: VITE_OPENAI_API_KEY no está configurada');
+}
+
 const openai = new OpenAI({
   apiKey: OPENAI_API_KEY,
-  organization: OPENAI_ORG_ID,
+  organization: OPENAI_ORG_ID || undefined,
   dangerouslyAllowBrowser: true
 });
 
@@ -28,6 +32,7 @@ const SYSTEM_PROMPT = `
 
 export async function getAIResponse(messages: Message[], context: AIContext): Promise<AIResponse> {
   try {
+    console.log('Enviando mensaje a OpenAI con contexto:', context);
     const contextMessage = formatContext(context);
     
     const completion = await openai.chat.completions.create({
@@ -36,7 +41,7 @@ export async function getAIResponse(messages: Message[], context: AIContext): Pr
         { role: "system", content: SYSTEM_PROMPT },
         { role: "system", content: contextMessage },
         ...messages.map(msg => ({
-          role: msg.role,
+          role: msg.role as any, // 'user' | 'assistant' | 'system'
           content: msg.content
         }))
       ],
@@ -46,6 +51,7 @@ export async function getAIResponse(messages: Message[], context: AIContext): Pr
       frequency_penalty: 0.1
     });
 
+    console.log('Respuesta de OpenAI:', completion.choices[0].message);
     const response = completion.choices[0].message.content || '';
 
     return {
@@ -54,13 +60,14 @@ export async function getAIResponse(messages: Message[], context: AIContext): Pr
       actions: extractActions(response)
     };
   } catch (error) {
-    console.error('Error en AI Service:', error);
+    console.error('Error detallado en AI Service:', error);
     throw error;
   }
 }
 
 function formatContext(context: AIContext): string {
   const { favorites, weeklyMenu, shoppingList, userProfile } = context;
+  console.log('Formateando contexto:', context);
   
   return `
     Contexto actual del usuario:

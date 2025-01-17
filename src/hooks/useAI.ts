@@ -80,11 +80,18 @@ export function useAI() {
 
       setMessages(prev => [...prev, userMessage]);
 
-      // Identificar categorías relevantes y obtener contexto filtrado
+      // Verificar autenticación
+      const { data: { user } } = await supabase.auth.getUser();
+      console.log('Usuario autenticado:', user);
+
       const categories = identifyCategory(content);
+      console.log('Categorías identificadas:', categories);
+
       const context = await getFilteredContext(categories);
+      console.log('Contexto obtenido:', context);
       
       const response = await getAIResponse([...messages, userMessage], context);
+      console.log('Respuesta de AI:', response);
 
       const aiMessage: Message = {
         id: crypto.randomUUID(),
@@ -97,7 +104,7 @@ export function useAI() {
       return response;
 
     } catch (error) {
-      console.error('Error en useAI:', error);
+      console.error('Error detallado en useAI:', error);
       setError(error as Error);
       throw error;
     } finally {
