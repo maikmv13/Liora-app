@@ -10,6 +10,7 @@ export interface Recipe extends DbRecipe {
     ingredients?: DbIngredient;
   })[];
   isFavorite?: boolean;
+  cuisine_type?: CuisineType;
 }
 
 export interface FavoriteRecipe extends Recipe {

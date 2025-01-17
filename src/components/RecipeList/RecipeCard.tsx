@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Clock, Users, ChefHat, Flame, Heart, Sun, Moon } from 'lucide-react';
+import { Clock, Users, ChefHat, Flame, Heart, Coffee, Sun, Moon, Cookie } from 'lucide-react';
 import type { Recipe } from '../../types';
 import { categoryColors } from '../../utils/categoryColors';
 import { RecipeModal } from './RecipeModal';
@@ -151,11 +151,35 @@ export function RecipeCard({ recipe, favorites, onClick, onToggleFavorite }: Rec
               )}
             </div>
             <div className={`p-1.5 rounded-lg border shadow-sm ${
-              recipe.meal_type === 'comida' 
-                ? 'bg-amber-50 text-amber-500 border-amber-200'
-                : 'bg-indigo-50 text-indigo-500 border-indigo-200'
+              (() => {
+                switch(recipe.meal_type) {
+                  case 'desayuno':
+                    return 'bg-orange-50 text-orange-500 border-orange-200';
+                  case 'comida':
+                    return 'bg-amber-50 text-amber-500 border-amber-200';
+                  case 'cena':
+                    return 'bg-indigo-50 text-indigo-500 border-indigo-200';
+                  case 'snack':
+                    return 'bg-rose-50 text-rose-500 border-rose-200';
+                  default:
+                    return 'bg-gray-50 text-gray-500 border-gray-200';
+                }
+              })()
             }`}>
-              {recipe.meal_type === 'comida' ? <Sun size={16} /> : <Moon size={16} />}
+              {(() => {
+                switch(recipe.meal_type) {
+                  case 'desayuno':
+                    return <Coffee size={16} />;
+                  case 'comida':
+                    return <Sun size={16} />;
+                  case 'cena':
+                    return <Moon size={16} />;
+                  case 'snack':
+                    return <Cookie size={16} />;
+                  default:
+                    return <Sun size={16} />;
+                }
+              })()}
             </div>
           </div>
         </div>

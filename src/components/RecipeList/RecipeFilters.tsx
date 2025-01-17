@@ -1,5 +1,5 @@
 import React, { useRef, useState, useEffect } from 'react';
-import { Search, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Search, ChevronLeft, ChevronRight, Coffee, Sun, Moon, Cookie } from 'lucide-react';
 import { MealType } from '../../types';
 import { categories, mealTypes } from '../../types/categories';
 import { motion } from 'framer-motion';
@@ -131,6 +131,38 @@ export function RecipeFilters({
     </>
   );
 
+  const getMealTypeIcon = (mealType: string) => {
+    switch(mealType) {
+      case 'desayuno':
+        return <Coffee size={16} className="text-orange-500" />;
+      case 'comida':
+        return <Sun size={16} className="text-amber-500" />;
+      case 'cena':
+        return <Moon size={16} className="text-indigo-500" />;
+      case 'snack':
+        return <Cookie size={16} className="text-rose-500" />;
+      default:
+        return null;
+    }
+  };
+
+  const getMealTypeColors = (mealType: string, isSelected: boolean) => {
+    if (!isSelected) return 'bg-white/80 text-gray-600 hover:bg-rose-50 border border-rose-100/50';
+    
+    switch(mealType) {
+      case 'desayuno':
+        return 'bg-orange-100/80 text-orange-600 shadow-sm border border-orange-200/50';
+      case 'comida':
+        return 'bg-amber-100/80 text-amber-600 shadow-sm border border-amber-200/50';
+      case 'cena':
+        return 'bg-indigo-100/80 text-indigo-600 shadow-sm border border-indigo-200/50';
+      case 'snack':
+        return 'bg-rose-100/80 text-rose-600 shadow-sm border border-rose-200/50';
+      default:
+        return 'bg-rose-100/80 text-rose-600 shadow-sm border border-rose-200/50';
+    }
+  };
+
   return (
     <div className="space-y-4">
       {/* Search Bar */}
@@ -169,20 +201,18 @@ export function RecipeFilters({
                 <span>Todas</span>
               </span>
             </motion.button>
-            {mealTypes.map(({ id, label, emoji }) => (
+            {mealTypes.map(({ id, label }) => (
               <motion.button
                 key={id}
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
                 onClick={() => onMealTypeChange(id)}
                 className={`flex-none px-3 py-2 rounded-lg text-sm font-medium transition-all duration-200 whitespace-nowrap ${
-                  selectedMealType === id
-                    ? 'bg-rose-100/80 text-rose-600 shadow-sm border border-rose-200/50'
-                    : 'bg-white/80 text-gray-600 hover:bg-rose-50 border border-rose-100/50'
+                  getMealTypeColors(id, selectedMealType === id)
                 }`}
               >
                 <span className="flex items-center space-x-1.5">
-                  <span>{emoji}</span>
+                  {getMealTypeIcon(id)}
                   <span>{label}</span>
                 </span>
               </motion.button>
@@ -230,8 +260,8 @@ export function RecipeFilters({
             {[
               { id: null, label: 'Más recientes', emoji: '🕒' },
               { id: 'popular', label: 'Más populares', emoji: '⭐' },
-              { id: 'calories', label: 'Calorías', emoji: '🔥' },
-              { id: 'time', label: 'Tiempo', emoji: '⏱️' }
+              { id: 'calories', label: 'Menos calorías', emoji: '🔥' },
+              { id: 'time', label: 'Menos tiempo', emoji: '⏱️' }
             ].map(({ id, label, emoji }) => (
               <motion.button
                 key={label}

@@ -6,6 +6,7 @@ import {
 } from 'lucide-react';
 import { Recipe } from '../../types';
 import { getUnitPlural } from '../../utils/getUnitPlural';
+import { getCuisineEmoji } from '../../types/categories';
 
 interface RecipeModalProps {
   recipe: Recipe;
@@ -157,6 +158,13 @@ export function RecipeModal({
                 <div className="flex items-center space-x-2 p-3 bg-gray-50 rounded-xl border border-gray-100">
                   <Flame size={18} className="text-gray-500" />
                   <span className="text-gray-700 font-medium">{recipe.calories}</span>
+                </div>
+              )}
+              {recipe.cuisine_type && (
+                <div className="flex items-center space-x-2 p-3 bg-gray-50 rounded-xl border border-gray-100">
+                  <span className="text-gray-700 font-medium capitalize">
+                    {getCuisineEmoji(recipe.cuisine_type)} {recipe.cuisine_type}
+                  </span>
                 </div>
               )}
             </div>

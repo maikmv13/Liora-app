@@ -95,3 +95,53 @@ export const foodCategories = {
     'nachos', 'papel de horno', 'ingredientes al gusto'
   ]
 } as const;
+
+export const cuisineTypes = [
+  { id: 'italiana', label: 'Italiana', emoji: '🇮🇹' },
+  { id: 'mexicana', label: 'Mexicana', emoji: '🇲🇽' },
+  { id: 'española', label: 'Española', emoji: '🇪🇸' },
+  { id: 'japonesa', label: 'Japonesa', emoji: '🇯🇵' },
+  { id: 'china', label: 'China', emoji: '🇨🇳' },
+  { id: 'coreana', label: 'Coreana', emoji: '🇰🇷' },
+  { id: 'tailandesa', label: 'Tailandesa', emoji: '🇹🇭' },
+  { id: 'vietnamita', label: 'Vietnamita', emoji: '🇻🇳' },
+  { id: 'india', label: 'India', emoji: '🇮🇳' },
+  { id: 'mediterránea', label: 'Mediterránea', emoji: '🌊' },
+  { id: 'griega', label: 'Griega', emoji: '🇬🇷' },
+  { id: 'turca', label: 'Turca', emoji: '🇹🇷' },
+  { id: 'libanesa', label: 'Libanesa', emoji: '🇱🇧' },
+  { id: 'marroquí', label: 'Marroquí', emoji: '🇲🇦' },
+  { id: 'francesa', label: 'Francesa', emoji: '🇫🇷' },
+  { id: 'alemana', label: 'Alemana', emoji: '🇩🇪' },
+  { id: 'británica', label: 'Británica', emoji: '🇬🇧' },
+  { id: 'americana', label: 'Americana', emoji: '🇺🇸' },
+  { id: 'tex-mex', label: 'Tex-Mex', emoji: '🌮' },
+  { id: 'brasileña', label: 'Brasileña', emoji: '🇧🇷' },
+  { id: 'peruana', label: 'Peruana', emoji: '🇵🇪' },
+  { id: 'argentina', label: 'Argentina', emoji: '🇦🇷' },
+  { id: 'colombiana', label: 'Colombiana', emoji: '🇨🇴' },
+  { id: 'venezolana', label: 'Venezolana', emoji: '🇻🇪' },
+  { id: 'caribeña', label: 'Caribeña', emoji: '🌴' },
+  { id: 'portuguesa', label: 'Portuguesa', emoji: '🇵🇹' },
+  { id: 'rusa', label: 'Rusa', emoji: '🇷🇺' },
+  { id: 'polaca', label: 'Polaca', emoji: '🇵🇱' },
+  { id: 'nórdica', label: 'Nórdica', emoji: '❄️' },
+  { id: 'hawaiana', label: 'Hawaiana', emoji: '🌺' },
+  { id: 'fusión', label: 'Fusión', emoji: '🔄' },
+  { id: 'vegana', label: 'Vegana', emoji: '🌱' },
+  { id: 'vegetariana', label: 'Vegetariana', emoji: '🥗' },
+  { id: 'sin_gluten', label: 'Sin Gluten', emoji: '🌾' },
+  { id: 'tradicional', label: 'Tradicional', emoji: '📜' },
+  { id: 'moderna', label: 'Moderna', emoji: '🎯' },
+  { id: 'casera', label: 'Casera', emoji: '🏠' },
+  { id: 'callejera', label: 'Callejera', emoji: '🛵' },
+  { id: 'gourmet', label: 'Gourmet', emoji: '👨‍🍳' },
+  { id: 'saludable', label: 'Saludable', emoji: '💪' },
+  { id: 'otra', label: 'Otra', emoji: '🍽️' }
+] as const;
+
+// Función helper para obtener el emoji de un tipo de cocina
+export const getCuisineEmoji = (cuisineType: string) => {
+  const cuisine = cuisineTypes.find(c => c.id === cuisineType);
+  return cuisine?.emoji || '🍽️';
+};

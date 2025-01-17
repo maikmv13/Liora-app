@@ -142,7 +142,10 @@ def map_cuisine_type(cuisine):
         'gourmet': 'gourmet',
         'saludable': 'saludable'
     }
-    return cuisine_mapping.get(cuisine.lower(), 'otra')
+    # Limpiamos el string de entrada (quitamos espacios y convertimos a minúsculas)
+    cuisine = cuisine.lower().strip()
+    # Retornamos el valor mapeado o 'otra' si no existe
+    return cuisine_mapping.get(cuisine, 'otra')
 
 def csv_to_sql(csv_file_path, sql_file_path):
     if not os.path.isfile(csv_file_path):
@@ -195,7 +198,7 @@ def csv_to_sql(csv_file_path, sql_file_path):
                 'Url': row.get('URL', '').replace("'", "''"),
                 'PDF_Url': row.get('PDF_URL', '').replace("'", "''"),
                 'image_url': row.get('Image_url', '').replace("'", "''"),
-                'cuisine_type': row.get('Cuisine_type', '').strip()
+                'cuisine_type': row.get('cuisine_type', '').strip()
             })
 
     # Generar SQL
