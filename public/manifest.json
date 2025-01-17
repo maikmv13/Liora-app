@@ -1,7 +1,7 @@
 {
-  "name": "MiCocina",
-  "short_name": "MiCocina",
-  "description": "Tu asistente culinario personal",
+  "name": "Liora - Life in Balance",
+  "short_name": "Liora",
+  "description": "Encuentra el equilibrio en tu vida a través de la alimentación. Descubre recetas saludables, planifica tus menús y mantén un estilo de vida balanceado.",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#ffffff",
@@ -19,10 +19,10 @@
     {
       "name": "Menú de Hoy",
       "short_name": "Hoy",
-      "description": "Ver el menú de hoy",
+      "description": "Planifica tu alimentación balanceada",
       "url": "/?source=pwa",
       "icons": [{ "src": "/icon.svg", "sizes": "any" }]
     }
   ],
-  "categories": ["food", "lifestyle", "productivity"]
+  "categories": ["food", "lifestyle", "health", "wellness"]
 }

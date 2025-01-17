@@ -10,9 +10,9 @@ export default defineConfig({
       registerType: 'autoUpdate',
       includeAssets: ['favicon.ico', 'apple-touch-icon.png', 'masked-icon.svg'],
       manifest: {
-        name: "MiCocina",
-        short_name: "MiCocina",
-        description: "Tu asistente culinario personal",
+        name: "Liora - Life in Balance",
+        short_name: "Liora",
+        description: "Encuentra el equilibrio en tu vida a través de la alimentación. Descubre recetas saludables, planifica tus menús y mantén un estilo de vida balanceado.",
         theme_color: "#F43F5E",
         background_color: "#ffffff",
         display: "standalone",
@@ -33,7 +33,8 @@ export default defineConfig({
             sizes: "1170x2532",
             type: "image/png"
           }
-        ]
+        ],
+        categories: ["food", "lifestyle", "health", "wellness"]
       },
       workbox: {
         globPatterns: ['**/*.{js,css,html,ico,png,svg,json}'],
