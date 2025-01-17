@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { ChefHat, Search, Menu as MenuIcon, X } from 'lucide-react';
+import { Sparkles, Search, Menu as MenuIcon, X } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { MobileMenu } from './MobileMenu';
 
@@ -52,11 +52,10 @@ export function Header({
           <div className="flex items-center justify-between h-16">
             <div className="flex items-center space-x-3">
               <div className="bg-white/10 p-2 rounded-lg border border-white/20 group hover:bg-white/20 transition-all duration-300">
-                <ChefHat size={20} className="text-white transform group-hover:rotate-12 transition-transform" />
+                <Sparkles size={20} className="text-white transform group-hover:rotate-12 transition-transform" />
               </div>
-              <h1 className="text-xl tracking-tight text-white">
-                <span className="font-light">Mi</span>
-                <span className="font-bold">Cocina</span>
+              <h1 className="text-2xl tracking-tight text-white font-bold font-display">
+                Liora
               </h1>
             </div>
 
@@ -80,12 +79,11 @@ export function Header({
           <div className="flex items-center justify-between h-14">
             <div className="flex items-center space-x-3">
               <div className="bg-white/10 p-2 rounded-lg border border-white/20">
-                <ChefHat size={20} className="text-white" />
+                <Sparkles size={20} className="text-white" />
               </div>
               <div className="flex items-center space-x-2">
-                <h1 className="text-lg tracking-tight text-white">
-                  <span className="font-light">Mi</span>
-                  <span className="font-bold">Cocina</span>
+                <h1 className="text-xl tracking-tight text-white font-bold font-display">
+                  Liora
                 </h1>
                 {getActiveTabTitle() && (
                   <>
