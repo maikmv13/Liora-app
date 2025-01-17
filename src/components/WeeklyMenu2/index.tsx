@@ -1,20 +1,17 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect } from 'react';
 import { MenuItem, Recipe, MealType } from '../../types';
+import { ExtendedWeeklyMenuDB } from '../../services/weeklyMenu';
+import { TodayCard } from './TodayCard';
 import { MobileView } from './MobileView';
 import { DesktopView } from './DesktopView';
-import { TodayCard } from './TodayCard';
-import { RecipeSelectorSidebar } from './RecipeSelectorSidebar';
-import { RecipeModal } from '../RecipeList/RecipeModal';
+import { Header } from './Header';
 import { MenuHistory } from './MenuHistory';
-import { weekDays } from './utils';
+import { OnboardingWizard } from './OnboardingWizard';
+import { useMenuActions } from '../../hooks/useMenuActions';
 import { useRecipes } from '../../hooks/useRecipes';
 import { useActiveMenu } from '../../hooks/useActiveMenu';
-import { useMenuActions } from './hooks/useMenuActions';
-import { updateMenuRecipe, restoreMenu, getMenuHistory } from '../../services/weeklyMenu';
-import { Header } from './Header';
-import { MenuSkeleton } from './MenuSkeleton';
-import type { ExtendedWeeklyMenuDB } from '../../services/weeklyMenu';
 import { supabase } from '../../lib/supabase';
+import { weekDays } from './utils';
 
 export function WeeklyMenu2() {
   const [selectedDay, setSelectedDay] = useState<string>('Lunes');
@@ -27,7 +24,7 @@ export function WeeklyMenu2() {
     meal: MealType;
   } | null>(null);
 
-  // Obtener el usuario actual
+  // Get current user
   const [userId, setUserId] = useState<string | null>(null);
   useEffect(() => {
     const getUser = async () => {
@@ -39,12 +36,12 @@ export function WeeklyMenu2() {
     getUser();
   }, []);
 
-  // Obtener el menú activo y las recetas
+  // Get active menu and recipes
   const { menuItems: menu, loading, error, activeMenuId } = useActiveMenu(userId || undefined);
   const { recipes } = useRecipes();
 
-  // Manejar actualizaciones del menú
-  const handleAddToMenu = useCallback(async (recipe: Recipe | null, day: string, meal: MealType) => {
+  // Handle menu updates
+  const handleAddToMenu = async (recipe: Recipe | null, day: string, meal: MealType) => {
     try {
       if (!activeMenuId) {
         console.error('No hay un menú activo');
@@ -58,17 +55,52 @@ export function WeeklyMenu2() {
         recipeId: recipe?.id
       });
 
-      await updateMenuRecipe(activeMenuId, day, meal, recipe?.id || null);
+      const dayKey = Object.entries({
+        'Lunes': 'monday',
+        'Martes': 'tuesday',
+        'Miércoles': 'wednesday',
+        'Jueves': 'thursday',
+        'Viernes': 'friday',
+        'Sábado': 'saturday',
+        'Domingo': 'sunday'
+      }).find(([key]) => key === day)?.[1];
 
-      // Forzar recarga de la página para actualizar el menú
+      const mealKey = {
+        'desayuno': 'breakfast',
+        'comida': 'lunch',
+        'snack': 'snack',
+        'cena': 'dinner'
+      }[meal];
+
+      if (!dayKey || !mealKey) {
+        throw new Error('Invalid day or meal type');
+      }
+
+      const fieldName = `${dayKey}_${mealKey}_id`;
+
+      const { error: updateError } = await supabase
+        .from('weekly_menus')
+        .update({ [fieldName]: recipe?.id || null })
+        .eq('id', activeMenuId);
+
+      if (updateError) throw updateError;
+
+      // Force page reload to update menu
       window.location.reload();
     } catch (error) {
       console.error('Error al actualizar el menú:', error);
     }
-  }, [activeMenuId]);
+  };
 
-  // Acciones del menú (generar, exportar, etc.)
-  const { isGenerating, lastGenerated, handleGenerateMenu, handleExport } = useMenuActions(
+  // Menu actions (generate, export, etc.)
+  const { 
+    isGenerating, 
+    lastGenerated, 
+    showOnboarding,
+    setShowOnboarding,
+    handleGenerateMenu, 
+    handleExport 
+  } = useMenuActions(
     userId || undefined,
     handleAddToMenu,
     (menuId: string | null) => {
@@ -78,12 +110,18 @@ export function WeeklyMenu2() {
     }
   );
 
-  // Cargar historial de menús
+  // Load menu history
   useEffect(() => {
     const loadHistory = async () => {
       try {
-        const history = await getMenuHistory();
-        setMenuHistory(history);
+        const { data: history, error } = await supabase
+          .from('weekly_menus')
+          .select('*')
+          .eq('status', 'archived')
+          .order('created_at', { ascending: false });
+
+        if (error) throw error;
+        setMenuHistory(history || []);
       } catch (error) {
         console.error('Error loading menu history:', error);
       }
@@ -94,10 +132,23 @@ export function WeeklyMenu2() {
     }
   }, [showHistory]);
 
-  // Restaurar un menú del historial
+  // Restore menu from history
   const handleRestoreMenu = async (menuId: string) => {
     try {
-      await restoreMenu(menuId);
+      // Archive current active menu
+      if (activeMenuId) {
+        await supabase
+          .from('weekly_menus')
+          .update({ status: 'archived' })
+          .eq('id', activeMenuId);
+      }
+
+      // Restore selected menu
+      await supabase
+        .from('weekly_menus')
+        .update({ status: 'active' })
+        .eq('id', menuId);
+
       setShowHistory(false);
       window.location.reload();
     } catch (error) {
@@ -105,14 +156,14 @@ export function WeeklyMenu2() {
     }
   };
 
-  // Manejar selección de comidas
+  // Handle meal selection
   const handleMealClick = (day: string, meal: MealType) => {
     console.log('Seleccionando comida:', { day, meal });
     setSelectedMealInfo({ day, meal });
     setShowRecipeSelector(true);
   };
 
-  // Manejar selección de recetas
+  // Handle recipe selection
   const handleRecipeSelect = async (recipe: Recipe) => {
     if (selectedMealInfo) {
       console.log('Seleccionando receta:', {
@@ -133,7 +184,7 @@ export function WeeklyMenu2() {
 
   return (
     <div className="space-y-6">
-      {/* Header - Siempre visible */}
+      {/* Header */}
       <Header
         onGenerateMenu={() => handleGenerateMenu(recipes)}
         onExport={() => handleExport(menu)}
@@ -142,10 +193,12 @@ export function WeeklyMenu2() {
         lastGenerated={lastGenerated}
       />
 
-      {/* Contenido principal con skeleton loading */}
+      {/* Main content */}
       <div className="relative">
         {loading ? (
-          <MenuSkeleton />
+          <div className="flex items-center justify-center min-h-[400px]">
+            <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-rose-500"></div>
+          </div>
         ) : error ? (
           <div className="bg-white/90 backdrop-blur-sm rounded-2xl border border-red-200 p-6">
             <p className="text-red-600 text-center">{error}</p>
@@ -196,25 +249,17 @@ export function WeeklyMenu2() {
         )}
       </div>
 
-      {/* Modales y sidebars - Siempre disponibles */}
-      {showRecipeSelector && selectedMealInfo && (
-        <RecipeSelectorSidebar
-          isOpen={showRecipeSelector}
-          onClose={() => setShowRecipeSelector(false)}
-          onSelectRecipe={handleRecipeSelect}
-          selectedDay={selectedMealInfo.day}
-          selectedMeal={selectedMealInfo.meal}
+      {/* Onboarding Wizard */}
+      {showOnboarding && (
+        <OnboardingWizard
+          isOpen={showOnboarding}
+          onClose={() => setShowOnboarding(false)}
+          onComplete={() => setShowOnboarding(false)}
+          onGenerateMenu={() => handleGenerateMenu(recipes)}
         />
       )}
 
-      {selectedRecipe && (
-        <RecipeModal
-          recipe={selectedRecipe.recipe}
-          onClose={() => setSelectedRecipe(null)}
-          onAddToMenu={() => {}}
-        />
-      )}
-
+      {/* Menu History */}
       {showHistory && (
         <MenuHistory
           history={menuHistory}

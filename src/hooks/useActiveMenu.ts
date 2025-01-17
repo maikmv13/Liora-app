@@ -1,6 +1,49 @@
 import { useState, useEffect } from 'react';
 import { MenuItem } from '../types';
-import { supabase } from '../lib/supabase';
+import { supabase, retryOperation } from '../lib/supabase';
+
+// Helper function to convert DB menu to MenuItem array
+const convertToMenuItems = async (menu: any, recipes: any[]): Promise<MenuItem[]> => {
+  const items: MenuItem[] = [];
+  const dayMapping: Record<string, string> = {
+    'monday': 'Lunes',
+    'tuesday': 'Martes',
+    'wednesday': 'Miércoles',
+    'thursday': 'Jueves',
+    'friday': 'Viernes',
+    'saturday': 'Sábado',
+    'sunday': 'Domingo'
+  };
+
+  const mealMapping: Record<string, string> = {
+    'breakfast': 'desayuno',
+    'lunch': 'comida',
+    'dinner': 'cena',
+    'snack': 'snack'
+  };
+
+  // Iterate through days and meals
+  for (const [dbDay, day] of Object.entries(dayMapping)) {
+    for (const [dbMeal, meal] of Object.entries(mealMapping)) {
+      const recipeId = menu[`${dbDay}_${dbMeal}_id`];
+      if (recipeId) {
+        const recipe = recipes.find(r => r.id === recipeId);
+        if (recipe) {
+          items.push({
+            day,
+            meal,
+            recipe: {
+              ...recipe,
+              meal_type: meal
+            }
+          });
+        }
+      }
+    }
+  }
+
+  return items;
+};
 
 export function useActiveMenu(userId?: string) {
   const [menuItems, setMenuItems] = useState<MenuItem[]>([]);
@@ -8,104 +51,43 @@ export function useActiveMenu(userId?: string) {
   const [loading, setLoading] = useState(true);
   const [activeMenuId, setActiveMenuId] = useState<string | null>(null);
 
-  // Función para convertir los datos de la BD a MenuItem[]
-  const convertToMenuItems = async (menu: any) => {
-    try {
-      // Obtener todas las recetas necesarias
-      const recipeIds = Object.entries(menu)
-        .filter(([key, value]) => 
-          key.endsWith('_id') && 
-          value !== null &&
-          (key.includes('_breakfast_') || 
-           key.includes('_lunch_') || 
-           key.includes('_dinner_') || 
-           key.includes('_snack_'))
-        )
-        .map(([_, value]) => value);
-
-      if (recipeIds.length === 0) {
-        return [];
-      }
-
-      const { data: recipes, error: recipesError } = await supabase
-        .from('recipes')
-        .select('*')
-        .in('id', recipeIds);
-
-      if (recipesError) throw recipesError;
-
-      // Crear un mapa de recetas por ID
-      const recipesMap = new Map(recipes?.map(recipe => [recipe.id, recipe]));
-
-      // Convertir el menú a MenuItem[]
-      const items: MenuItem[] = [];
-      const days = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];
-      const meals = ['breakfast', 'lunch', 'dinner', 'snack'];
-      const dayMapping: Record<string, string> = {
-        'monday': 'Lunes',
-        'tuesday': 'Martes',
-        'wednesday': 'Miércoles',
-        'thursday': 'Jueves',
-        'friday': 'Viernes',
-        'saturday': 'Sábado',
-        'sunday': 'Domingo'
-      };
-      const mealMapping: Record<string, string> = {
-        'breakfast': 'desayuno',
-        'lunch': 'comida',
-        'dinner': 'cena',
-        'snack': 'snack'
-      };
-
-      for (const day of days) {
-        for (const meal of meals) {
-          const fieldName = `${day}_${meal}_id`;
-          const recipeId = menu[fieldName];
-          
-          if (recipeId && recipesMap.has(recipeId)) {
-            const recipe = recipesMap.get(recipeId);
-            items.push({
-              day: dayMapping[day],
-              meal: mealMapping[meal],
-              recipe: recipe!
-            });
-          }
-        }
-      }
-
-      return items;
-    } catch (error) {
-      console.error('Error converting menu:', error);
-      return [];
-    }
-  };
-
   useEffect(() => {
     let ignore = false;
+    let retryCount = 0;
+    const maxRetries = 3;
 
     const fetchActiveMenu = async () => {
       try {
         setLoading(true);
         setError(null);
 
-        if (!userId) {
-          setMenuItems([]);
-          setActiveMenuId(null);
-          return;
+        // Get user if not provided
+        let currentUserId = userId;
+        if (!currentUserId) {
+          const { data: { user }, error: userError } = await supabase.auth.getUser();
+          if (userError) throw userError;
+          if (!user) {
+            setMenuItems([]);
+            setActiveMenuId(null);
+            return;
+          }
+          currentUserId = user.id;
         }
 
-        // Obtener el menú activo
-        const { data: activeMenu, error: menuError } = await supabase
-          .from('weekly_menus')
-          .select('*')
-          .eq('user_id', userId)
-          .eq('status', 'active')
-          .order('created_at', { ascending: false })
-          .limit(1)
-          .single();
+        // Get active menu
+        const { data: menus, error: menuError } = await retryOperation(() =>
+          supabase
+            .from('weekly_menus')
+            .select('*')
+            .eq('user_id', currentUserId)
+            .eq('status', 'active')
+            .order('created_at', { ascending: false })
+            .limit(1)
+        );
 
         if (menuError) {
           if (menuError.code === 'PGRST116') {
+            // No results found - not an error
             setMenuItems([]);
             setActiveMenuId(null);
             return;
@@ -113,24 +95,65 @@ export function useActiveMenu(userId?: string) {
           throw menuError;
         }
 
-        if (!activeMenu) {
+        if (!menus || menus.length === 0) {
           setMenuItems([]);
           setActiveMenuId(null);
           return;
         }
 
-        // Guardar el ID del menú activo
-        setActiveMenuId(activeMenu.id);
+        const activeMenu = menus[0];
+        if (!ignore) setActiveMenuId(activeMenu.id);
 
-        // Convertir a MenuItem[]
-        const items = await convertToMenuItems(activeMenu);
-        if (!ignore) {
-          setMenuItems(items);
+        // Get recipe IDs from menu
+        const recipeIds = Object.entries(activeMenu)
+          .filter(([key, value]) => 
+            key.endsWith('_id') && 
+            value !== null &&
+            typeof value === 'string'
+          )
+          .map(([_, value]) => value as string);
+
+        if (recipeIds.length > 0) {
+          // Get recipes
+          const { data: recipes, error: recipesError } = await retryOperation(() =>
+            supabase
+              .from('recipes')
+              .select(`
+                *,
+                recipe_ingredients (
+                  id,
+                  quantity,
+                  unit,
+                  ingredient_id,
+                  ingredients (
+                    id,
+                    name,
+                    category
+                  )
+                )
+              `)
+              .in('id', recipeIds)
+          );
+
+          if (recipesError) throw recipesError;
+
+          // Convert to menu items
+          const items = await convertToMenuItems(activeMenu, recipes || []);
+          if (!ignore) {
+            setMenuItems(items);
+          }
+        } else {
+          if (!ignore) setMenuItems([]);
         }
       } catch (err) {
         console.error('Error fetching active menu:', err);
         if (!ignore) {
-          setError(err instanceof Error ? err.message : 'Error al cargar el menú');
+          if (retryCount < maxRetries) {
+            retryCount++;
+            setTimeout(fetchActiveMenu, 1000 * Math.pow(2, retryCount));
+          } else {
+            setError('Error al cargar el menú. Por favor, intenta de nuevo.');
+          }
         }
       } finally {
         if (!ignore) {
@@ -141,22 +164,20 @@ export function useActiveMenu(userId?: string) {
 
     fetchActiveMenu();
 
-    // Suscribirse a cambios en el menú activo
+    // Set up realtime subscription
     const subscription = supabase
-      .channel('weekly_menus_changes')
+      .channel('menu_changes')
       .on(
         'postgres_changes',
         {
           event: '*',
           schema: 'public',
           table: 'weekly_menus',
-          filter: `user_id=eq.${userId} AND status=eq.active`
+          filter: userId ? `user_id=eq.${userId}` : undefined
         },
-        async (payload) => {
-          console.log('Menu changed:', payload);
+        () => {
           if (!ignore) {
-            const items = await convertToMenuItems(payload.new);
-            setMenuItems(items);
+            fetchActiveMenu();
           }
         }
       )

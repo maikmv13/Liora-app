@@ -16,6 +16,16 @@ export function Header({
   isGenerating, 
   lastGenerated 
 }: HeaderProps) {
+  const formatDate = (dateString: string) => {
+    return new Intl.DateTimeFormat('es-ES', {
+      day: 'numeric',
+      month: 'long',
+      year: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit'
+    }).format(new Date(dateString));
+  };
+
   const scrollToHistory = () => {
     // Primero intentamos encontrar el elemento por ID
     const historyElement = document.getElementById('menu-history');
@@ -122,7 +132,7 @@ export function Header({
       {lastGenerated && (
         <div className="flex items-center space-x-2 text-sm text-gray-500 bg-rose-50/50 px-3 py-2 rounded-lg">
           <Clock size={16} className="text-rose-400" />
-          <span>Último menú generado: {lastGenerated}</span>
+          <span>Último menú generado: {formatDate(lastGenerated)}</span>
         </div>
       )}
     </div>

@@ -1,5 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { User, Settings, History, Heart, Bell, LogOut, ChevronRight, Sun, Activity, Calendar } from 'lucide-react';
+import { 
+  User, Settings, History, Heart, Bell, LogOut, ChevronRight, Sun, 
+  Activity, Calendar, ChefHat
+} from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '../../lib/supabase';
 import { NutritionistProfile } from './NutritionistProfile';
@@ -149,3 +152,5 @@ export function Profile() {
     </div>
   );
 }
+
+export default Profile;

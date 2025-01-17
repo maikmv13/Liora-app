@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Sparkles, Search, Menu as MenuIcon, X } from 'lucide-react';
+import { Sparkles, Search, Menu as MenuIcon, X, User, Leaf } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { MobileMenu } from './MobileMenu';
 
@@ -26,7 +26,6 @@ export function Header({
   const [showMobileMenu, setShowMobileMenu] = useState(false);
   const navigate = useNavigate();
 
-  // Función para obtener el título de la pestaña actual
   const getActiveTabTitle = () => {
     switch (activeTab) {
       case 'recetas':
@@ -52,11 +51,16 @@ export function Header({
           <div className="flex items-center justify-between h-16">
             <div className="flex items-center space-x-3">
               <div className="bg-white/10 p-2 rounded-lg border border-white/20 group hover:bg-white/20 transition-all duration-300">
-                <Sparkles size={20} className="text-white transform group-hover:rotate-12 transition-transform" />
+                <Leaf size={24} className="text-white transform rotate-45 group-hover:scale-110 transition-transform" />
               </div>
-              <h1 className="text-2xl tracking-tight text-white font-bold font-display">
-                Liora
-              </h1>
+              <div className="flex flex-col items-start">
+                <h1 className="text-2xl tracking-tight text-white font-bold font-display bg-gradient-to-r from-white to-white/80 text-transparent bg-clip-text">
+                  Liora
+                </h1>
+                <span className="text-[10px] uppercase tracking-widest text-white/80 font-medium">
+                  Life in Balance
+                </span>
+              </div>
             </div>
 
             <div className="flex items-center space-x-3">
@@ -66,6 +70,21 @@ export function Header({
                   className="p-2 hover:bg-white/10 rounded-lg transition-colors text-white"
                 >
                   <Search size={20} />
+                </button>
+              )}
+              {user ? (
+                <button
+                  onClick={() => navigate('/profile')}
+                  className="p-2 hover:bg-white/10 rounded-lg transition-colors text-white"
+                >
+                  <User size={20} />
+                </button>
+              ) : (
+                <button
+                  onClick={onLogin}
+                  className="px-4 py-2 bg-white/10 hover:bg-white/20 rounded-lg transition-colors text-white border border-white/20"
+                >
+                  Iniciar sesión
                 </button>
               )}
             </div>
@@ -79,35 +98,47 @@ export function Header({
           <div className="flex items-center justify-between h-14">
             <div className="flex items-center space-x-3">
               <div className="bg-white/10 p-2 rounded-lg border border-white/20">
-                <Sparkles size={20} className="text-white" />
+                <Leaf size={20} className="text-white transform rotate-45" />
               </div>
-              <div className="flex items-center space-x-2">
-                <h1 className="text-xl tracking-tight text-white font-bold font-display">
+              <div className="flex flex-col">
+                <h1 className="text-xl tracking-tight text-white font-bold font-display bg-gradient-to-r from-white to-white/80 text-transparent bg-clip-text">
                   Liora
                 </h1>
-                {getActiveTabTitle() && (
-                  <>
-                    <span className="text-white/50">•</span>
-                    <span className="text-white/90 text-sm font-medium">
-                      {getActiveTabTitle()}
-                    </span>
-                  </>
-                )}
+                <span className="text-[8px] uppercase tracking-widest text-white/80 font-medium">
+                  Life in Balance
+                </span>
               </div>
             </div>
 
-            <button
-              onClick={() => setShowMobileMenu(true)}
-              className="relative group"
-            >
-              <div className="p-2 bg-white/10 hover:bg-white/20 rounded-xl border border-white/20 transition-all duration-300">
-                <div className="w-5 space-y-1">
-                  <span className="block h-0.5 w-full bg-white transform transition-all duration-300 group-hover:rotate-45 group-hover:translate-y-1.5"></span>
-                  <span className="block h-0.5 w-full bg-white transition-all duration-300 group-hover:opacity-0"></span>
-                  <span className="block h-0.5 w-full bg-white transform transition-all duration-300 group-hover:-rotate-45 group-hover:-translate-y-1.5"></span>
+            <div className="flex items-center space-x-2">
+              {user ? (
+                <button
+                  onClick={() => navigate('/profile')}
+                  className="p-2 bg-white/10 hover:bg-white/20 rounded-xl border border-white/20 transition-all duration-300"
+                >
+                  <User size={20} className="text-white" />
+                </button>
+              ) : (
+                <button
+                  onClick={onLogin}
+                  className="p-2 bg-white/10 hover:bg-white/20 rounded-xl border border-white/20 transition-all duration-300"
+                >
+                  <User size={20} className="text-white" />
+                </button>
+              )}
+              <button
+                onClick={() => setShowMobileMenu(true)}
+                className="relative group"
+              >
+                <div className="p-2 bg-white/10 hover:bg-white/20 rounded-xl border border-white/20 transition-all duration-300">
+                  <div className="w-5 space-y-1">
+                    <span className="block h-0.5 w-full bg-white transform transition-all duration-300 group-hover:rotate-45 group-hover:translate-y-1.5"></span>
+                    <span className="block h-0.5 w-full bg-white transition-all duration-300 group-hover:opacity-0"></span>
+                    <span className="block h-0.5 w-full bg-white transform transition-all duration-300 group-hover:-rotate-45 group-hover:-translate-y-1.5"></span>
+                  </div>
                 </div>
-              </div>
-            </button>
+              </button>
+            </div>
           </div>
         </div>
       </header>

@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { 
   Copy, Trash2, Calendar, Utensils, Moon, Flame, Search, 
   Filter, ChevronDown, Star, Share2, Clock, ArrowUpDown,
-  Activity
+  Activity, Coffee, Cookie
 } from 'lucide-react';
 import { ExtendedWeeklyMenuDB } from '../../services/weeklyMenu';
 import { deleteMenu } from '../../services/weeklyMenu';
@@ -55,7 +55,10 @@ export function MenuHistory({ history, onRestore, onHistoryChange }: MenuHistory
         const searchLower = searchTerm.toLowerCase();
         return Object.entries(menu)
           .some(([key, value]) => 
-            key.includes('_lunch') || key.includes('_dinner') ? 
+            (key.includes('_breakfast_id') || 
+             key.includes('_lunch_id') || 
+             key.includes('_dinner_id') || 
+             key.includes('_snack_id')) ? 
             String(value).toLowerCase().includes(searchLower) : false
           );
       }
@@ -82,6 +85,22 @@ export function MenuHistory({ history, onRestore, onHistoryChange }: MenuHistory
   );
 
   const weekDays = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domingo'];
+  const dayKeys = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];
+
+  const getMealIcon = (meal: string) => {
+    switch (meal) {
+      case 'breakfast':
+        return <Coffee size={16} className="text-amber-400 flex-shrink-0" />;
+      case 'lunch':
+        return <Utensils size={16} className="text-rose-400 flex-shrink-0" />;
+      case 'snack':
+        return <Cookie size={16} className="text-emerald-400 flex-shrink-0" />;
+      case 'dinner':
+        return <Moon size={16} className="text-indigo-400 flex-shrink-0" />;
+      default:
+        return null;
+    }
+  };
 
   return (
     <div id="menu-history" className="space-y-6">
@@ -216,9 +235,11 @@ export function MenuHistory({ history, onRestore, onHistoryChange }: MenuHistory
             {expandedMenuId === historyMenu.id && (
               <div className="p-4">
                 <div className="grid gap-3">
-                  {weekDays.map(day => {
-                    const dayKey = day.toLowerCase();
+                  {weekDays.map((day, index) => {
+                    const dayKey = dayKeys[index];
+                    const breakfast = historyMenu[`${dayKey}_breakfast_id` as keyof ExtendedWeeklyMenuDB];
                     const lunch = historyMenu[`${dayKey}_lunch_id` as keyof ExtendedWeeklyMenuDB];
+                    const snack = historyMenu[`${dayKey}_snack_id` as keyof ExtendedWeeklyMenuDB];
                     const dinner = historyMenu[`${dayKey}_dinner_id` as keyof ExtendedWeeklyMenuDB];
                     
                     return (
@@ -226,20 +247,38 @@ export function MenuHistory({ history, onRestore, onHistoryChange }: MenuHistory
                         <div className="flex items-center justify-between md:justify-start space-x-2 font-medium text-gray-700 md:col-span-1">
                           <span>{day}</span>
                         </div>
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-2 md:col-span-5">
+                        <div className="grid grid-cols-1 md:grid-cols-4 gap-2 md:col-span-5">
+                          {/* Breakfast */}
+                          <div className="flex items-center justify-between space-x-2 bg-white rounded-lg p-2 border border-amber-100">
+                            <div className="flex items-center space-x-2 min-w-0">
+                              {getMealIcon('breakfast')}
+                              <span className="text-sm text-gray-600 truncate">
+                                {breakfast || '-'}
+                              </span>
+                            </div>
+                          </div>
                           {/* Lunch */}
                           <div className="flex items-center justify-between space-x-2 bg-white rounded-lg p-2 border border-rose-100">
                             <div className="flex items-center space-x-2 min-w-0">
-                              <Utensils size={16} className="text-rose-400 flex-shrink-0" />
+                              {getMealIcon('lunch')}
                               <span className="text-sm text-gray-600 truncate">
                                 {lunch || '-'}
                               </span>
                             </div>
                           </div>
-                          {/* Dinner */}
-                          <div className="flex items-center justify-between space-x-2 bg-white rounded-lg p-2 border border-rose-100">
+                          {/* Snack */}
+                          <div className="flex items-center justify-between space-x-2 bg-white rounded-lg p-2 border border-emerald-100">
                             <div className="flex items-center space-x-2 min-w-0">
-                              <Moon size={16} className="text-rose-400 flex-shrink-0" />
+                              {getMealIcon('snack')}
+                              <span className="text-sm text-gray-600 truncate">
+                                {snack || '-'}
+                              </span>
+                            </div>
+                          </div>
+                          {/* Dinner */}
+                          <div className="flex items-center justify-between space-x-2 bg-white rounded-lg p-2 border border-indigo-100">
+                            <div className="flex items-center space-x-2 min-w-0">
+                              {getMealIcon('dinner')}
                               <span className="text-sm text-gray-600 truncate">
                                 {dinner || '-'}
                               </span>
