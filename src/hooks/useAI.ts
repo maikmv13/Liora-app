@@ -68,6 +68,9 @@ export function useAI() {
 
   const sendMessage = useCallback(async (content: string) => {
     try {
+      // Evitar envíos múltiples si ya está cargando
+      if (loading) return;
+      
       setLoading(true);
       setError(null);
 
@@ -78,21 +81,16 @@ export function useAI() {
         timestamp: new Date().toISOString()
       };
 
+      // Añadir mensaje del usuario inmediatamente
       setMessages(prev => [...prev, userMessage]);
 
-      // Verificar autenticación
-      const { data: { user } } = await supabase.auth.getUser();
-      console.log('Usuario autenticado:', user);
-
       const categories = identifyCategory(content);
-      console.log('Categorías identificadas:', categories);
-
       const context = await getFilteredContext(categories);
-      console.log('Contexto obtenido:', context);
       
+      // Obtener una única respuesta
       const response = await getAIResponse([...messages, userMessage], context);
-      console.log('Respuesta de AI:', response);
 
+      // Añadir solo un mensaje de respuesta
       const aiMessage: Message = {
         id: crypto.randomUUID(),
         role: 'assistant',
@@ -106,11 +104,21 @@ export function useAI() {
     } catch (error) {
       console.error('Error detallado en useAI:', error);
       setError(error as Error);
+      
+      // Mensaje de error único
+      const errorMessage: Message = {
+        id: crypto.randomUUID(),
+        role: 'assistant',
+        content: 'Lo siento, ha ocurrido un error. ¿Podrías intentarlo de nuevo?',
+        timestamp: new Date().toISOString()
+      };
+      
+      setMessages(prev => [...prev, errorMessage]);
       throw error;
     } finally {
       setLoading(false);
     }
-  }, [messages]);
+  }, [messages, loading]); // Añadido loading a las dependencias
 
   return { 
     messages, 

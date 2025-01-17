@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { MobileChatHeader } from './components/MobileChatHeader';
 import { MobileChatInput } from './components/MobileChatInput';
 import { ChatMessage } from './components/ChatMessage';
@@ -8,53 +8,44 @@ import { useAI } from '../../hooks/useAI';
 export function MobileChat() {
   const [input, setInput] = useState('');
   const [welcomeIndex, setWelcomeIndex] = useState(0);
-  const [hasInitialMessage, setHasInitialMessage] = useState(false);
+  const [isThinking, setIsThinking] = useState(false);
   const { messages, loading, sendMessage } = useAI();
+  const messagesEndRef = useRef<HTMLDivElement>(null);
 
-  // Animate welcome message and send initial AI message
+  const scrollToBottom = () => {
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  };
+
+  // Scroll cuando cambian los mensajes o cuando está pensando
+  useEffect(() => {
+    scrollToBottom();
+  }, [messages, isThinking]);
+
   useEffect(() => {
     if (welcomeIndex < 4) {
       const timer = setTimeout(() => {
         setWelcomeIndex(prev => prev + 1);
       }, 500);
       return () => clearTimeout(timer);
-    } else if (!hasInitialMessage) {
-      // En lugar de usar sendMessage, vamos a crear directamente un mensaje de asistente
-      const timer = setTimeout(() => {
-        const initialMessage: Message = {
-          id: crypto.randomUUID(),
-          role: 'assistant', // Aseguramos que el rol es 'assistant'
-          content: `¡Hola! 👋 Me alegro mucho de conocerte. Soy Liora, tu compañera nutricional personal, y estoy aquí para ayudarte a encontrar el equilibrio perfecto en tu alimentación. 🌱✨
-
-Me encanta compartir consejos sobre nutrición, sugerir recetas deliciosas y saludables, y ayudarte a planificar tus comidas de manera inteligente. 🥗
-
-¿En qué te puedo ayudar hoy? Puedes preguntarme sobre:
-- Recomendaciones de recetas
-- Consejos nutricionales
-- Planificación de menús
-- Ideas para snacks saludables
-- O cualquier otra duda sobre alimentación 😊`,
-          timestamp: new Date().toISOString()
-        };
-        
-        // Actualizamos el estado de mensajes directamente
-        setMessages(prev => [...prev, initialMessage]);
-        setHasInitialMessage(true);
-      }, 1000);
-      return () => clearTimeout(timer);
     }
-  }, [welcomeIndex, hasInitialMessage]);
+  }, [welcomeIndex]);
 
   const handleSubmit = async () => {
     if (!input.trim()) return;
     
     const message = input;
     setInput('');
+    setIsThinking(true);
     
     try {
-      await sendMessage(message);
+      await Promise.all([
+        sendMessage(message),
+        new Promise(resolve => setTimeout(resolve, 1500))
+      ]);
     } catch (error) {
       console.error('Error sending message:', error);
+    } finally {
+      setIsThinking(false);
     }
   };
 
@@ -68,13 +59,28 @@ Me encanta compartir consejos sobre nutrición, sugerir recetas deliciosas y sal
         {messages.map((message) => (
           <ChatMessage key={message.id} message={message} />
         ))}
+
+        {isThinking && (
+          <div className="flex items-start space-x-3">
+            <div className="bg-white p-4 rounded-2xl shadow-sm max-w-[80%]">
+              <div className="flex space-x-2">
+                <div className="w-2 h-2 bg-rose-400 rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
+                <div className="w-2 h-2 bg-rose-400 rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
+                <div className="w-2 h-2 bg-rose-400 rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
+              </div>
+            </div>
+          </div>
+        )}
+        
+        {/* Elemento de referencia para el scroll */}
+        <div ref={messagesEndRef} />
       </div>
 
       <MobileChatInput
         value={input}
         onChange={setInput}
         onSubmit={handleSubmit}
-        loading={loading}
+        loading={loading || isThinking}
       />
     </div>
   );

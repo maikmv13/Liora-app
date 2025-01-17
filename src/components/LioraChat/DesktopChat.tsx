@@ -8,38 +8,17 @@ import { useAI } from '../../hooks/useAI';
 export function DesktopChat() {
   const [input, setInput] = useState('');
   const [welcomeIndex, setWelcomeIndex] = useState(0);
-  const [hasInitialMessage, setHasInitialMessage] = useState(false);
   const { messages, loading, sendMessage } = useAI();
 
-  // Animate welcome message and send initial AI message
+  // Solo animación del mensaje de bienvenida
   useEffect(() => {
     if (welcomeIndex < 4) {
       const timer = setTimeout(() => {
         setWelcomeIndex(prev => prev + 1);
       }, 500);
       return () => clearTimeout(timer);
-    } else if (!hasInitialMessage) {
-      // Send initial message after welcome animation
-      const timer = setTimeout(async () => {
-        try {
-          await sendMessage(`¡Hola! 👋 Me alegro mucho de conocerte. Soy Liora, tu compañera nutricional personal, y estoy aquí para ayudarte a encontrar el equilibrio perfecto en tu alimentación. 🌱✨
-
-Me encanta compartir consejos sobre nutrición, sugerir recetas deliciosas y saludables, y ayudarte a planificar tus comidas de manera inteligente. 🥗
-
-¿En qué te puedo ayudar hoy? Puedes preguntarme sobre:
-- Recomendaciones de recetas
-- Consejos nutricionales
-- Planificación de menús
-- Ideas para snacks saludables
-- O cualquier otra duda sobre alimentación 😊`);
-          setHasInitialMessage(true);
-        } catch (error) {
-          console.error('Error sending initial message:', error);
-        }
-      }, 1000);
-      return () => clearTimeout(timer);
     }
-  }, [welcomeIndex, hasInitialMessage, sendMessage]);
+  }, [welcomeIndex]);
 
   const handleSubmit = async () => {
     if (!input.trim()) return;
