@@ -56,14 +56,20 @@ export function MealCell({
           {isHovered && (
             <div className="absolute inset-0 bg-white/90 backdrop-blur-sm flex items-center justify-center gap-2">
               <button
-                onClick={onViewRecipe}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onViewRecipe();
+                }}
                 className="p-2 bg-rose-50 text-rose-500 rounded-lg hover:bg-rose-100 transition-colors border border-rose-200"
                 title="Ver receta"
               >
                 <Eye size={16} />
               </button>
               <button
-                onClick={onMealClick}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onMealClick();
+                }}
                 className="p-2 bg-rose-50 text-rose-500 rounded-lg hover:bg-rose-100 transition-colors border border-rose-200"
                 title="Cambiar receta"
               >

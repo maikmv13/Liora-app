@@ -14,6 +14,8 @@ import { useFavorites } from './hooks/useFavorites';
 import { HealthyPlateGuide } from './components/HealthyPlateGuide';
 import { MobileInstallButton } from './components/MobileInstallButton';
 import { ErrorBoundary } from './components/ErrorBoundary';
+import { ScrollToTop } from './components/ScrollToTop';
+import { ChefHat } from 'lucide-react';
 
 // Lazy load de componentes grandes
 const WeeklyMenu2 = lazy(() => import('./components/WeeklyMenu2'));
@@ -93,23 +95,31 @@ function App() {
     setShowLogin(false);
   };
 
-  // Componente de loading
+  // Componente de loading mejorado
   const LoadingFallback = () => (
-    <div className="flex items-center justify-center min-h-[50vh]">
-      <div className="text-gray-600">Cargando...</div>
+    <div className="flex flex-col items-center justify-center min-h-[50vh] gap-4">
+      <ChefHat className="w-12 h-12 text-rose-500 animate-bounce" />
+      <div className="text-gray-600 font-medium">Preparando tu menú...</div>
     </div>
   );
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-orange-50 to-rose-50 flex items-center justify-center">
-        <div className="text-gray-600">Cargando...</div>
+      <div className="min-h-screen bg-gradient-to-br from-orange-50 to-rose-50 flex flex-col items-center justify-center gap-4">
+        <div className="relative">
+          <ChefHat className="w-16 h-16 text-rose-500 animate-bounce" />
+          <div className="absolute -bottom-2 left-1/2 -translate-x-1/2 w-8 h-1 bg-gray-200 rounded-full animate-pulse" />
+        </div>
+        <div className="text-gray-600 font-medium animate-pulse">
+          Preparando tu menú...
+        </div>
       </div>
     );
   }
 
   return (
     <Router>
+      <ScrollToTop />
       <ErrorBoundary>
         <div className="min-h-screen bg-gradient-to-br from-orange-50 to-rose-50 relative">
           <Header

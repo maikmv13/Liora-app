@@ -12,8 +12,11 @@ import { useRecipes } from '../../hooks/useRecipes';
 import { useActiveMenu } from '../../hooks/useActiveMenu';
 import { supabase } from '../../lib/supabase';
 import { weekDays } from './utils';
+import { RecipeSelectorSidebar } from './RecipeSelectorSidebar';
+import { useLocation } from 'react-router-dom';
 
 export function WeeklyMenu2() {
+  const { pathname } = useLocation();
   const [selectedDay, setSelectedDay] = useState<string>('Lunes');
   const [showHistory, setShowHistory] = useState(false);
   const [menuHistory, setMenuHistory] = useState<ExtendedWeeklyMenuDB[]>([]);
@@ -39,6 +42,11 @@ export function WeeklyMenu2() {
   // Get active menu and recipes
   const { menuItems: menu, loading, error, activeMenuId } = useActiveMenu(userId || undefined);
   const { recipes } = useRecipes();
+
+  // Scroll to top on route change
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [pathname]);
 
   // Handle menu updates
   const handleAddToMenu = async (recipe: Recipe | null, day: string, meal: MealType) => {
@@ -183,92 +191,109 @@ export function WeeklyMenu2() {
   };
 
   return (
-    <div className="space-y-6">
-      {/* Header */}
-      <Header
-        onGenerateMenu={() => handleGenerateMenu(recipes)}
-        onExport={() => handleExport(menu)}
-        onToggleHistory={() => setShowHistory(!showHistory)}
-        isGenerating={isGenerating}
-        lastGenerated={lastGenerated}
+    <>
+      {/* Recipe Selector Sidebar */}
+      <RecipeSelectorSidebar
+        isOpen={showRecipeSelector}
+        onClose={() => {
+          setShowRecipeSelector(false);
+          setSelectedMealInfo(null);
+        }}
+        onSelectRecipe={handleRecipeSelect}
+        selectedDay={selectedMealInfo?.day || ''}
+        selectedMeal={selectedMealInfo?.meal || 'comida'}
       />
 
-      {/* Main content */}
-      <div className="relative">
-        {loading ? (
-          <div className="flex items-center justify-center min-h-[400px]">
-            <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-rose-500"></div>
-          </div>
-        ) : error ? (
-          <div className="bg-white/90 backdrop-blur-sm rounded-2xl border border-red-200 p-6">
-            <p className="text-red-600 text-center">{error}</p>
-            <button 
-              className="mt-4 px-4 py-2 bg-rose-500 text-white rounded-xl hover:bg-rose-600 mx-auto block"
-              onClick={() => window.location.reload()}
-            >
-              Intentar de nuevo
-            </button>
-          </div>
-        ) : (
-          <>
-            {/* Today's Menu */}
-            <TodayCard
-              menuItems={menu}
-              onViewRecipe={setSelectedRecipe}
-              activeMenu={null}
-            />
+      {/* Contenedor principal */}
+      <div>
+        {/* Header */}
+        <Header
+          className="mb-6"
+          onGenerateMenu={() => handleGenerateMenu(recipes)}
+          onExport={() => handleExport(menu)}
+          onToggleHistory={() => setShowHistory(!showHistory)}
+          isGenerating={isGenerating}
+          lastGenerated={lastGenerated}
+        />
 
-            {/* Weekly Menu View */}
-            <div className="mt-6">
-              <div className="hidden md:block">
-                <DesktopView
-                  weekDays={weekDays}
-                  weeklyMenu={menu}
-                  onMealClick={handleMealClick}
-                  onRemoveMeal={(day, meal) => handleAddToMenu(null, day, meal)}
-                  onViewRecipe={setSelectedRecipe}
-                  onAddToMenu={handleAddToMenu}
-                  activeMenu={null}
-                />
-              </div>
-              <div className="md:hidden">
-                <MobileView
-                  selectedDay={selectedDay}
-                  weekDays={weekDays}
-                  weeklyMenu={menu}
-                  onDayChange={setSelectedDay}
-                  onMealClick={handleMealClick}
-                  onRemoveMeal={(day, meal) => handleAddToMenu(null, day, meal)}
-                  onViewRecipe={setSelectedRecipe}
-                  onAddToMenu={handleAddToMenu}
-                  activeMenu={null}
-                />
-              </div>
+        {/* Main content */}
+        <div className="relative mb-6">
+          {loading ? (
+            <div className="flex items-center justify-center min-h-[400px]">
+              <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-rose-500"></div>
             </div>
-          </>
+          ) : error ? (
+            <div className="bg-white/90 backdrop-blur-sm rounded-2xl border border-red-200 p-6">
+              <p className="text-red-600 text-center">{error}</p>
+              <button 
+                className="mt-4 px-4 py-2 bg-rose-500 text-white rounded-xl hover:bg-rose-600 mx-auto block"
+                onClick={() => window.location.reload()}
+              >
+                Intentar de nuevo
+              </button>
+            </div>
+          ) : (
+            <>
+              {/* Today's Menu */}
+              <TodayCard
+                menuItems={menu}
+                onViewRecipe={setSelectedRecipe}
+                activeMenu={null}
+              />
+
+              {/* Weekly Menu View */}
+              <div className="mt-6">
+                <div className="hidden md:block">
+                  <DesktopView
+                    weekDays={weekDays}
+                    weeklyMenu={menu}
+                    onMealClick={handleMealClick}
+                    onRemoveMeal={(day, meal) => handleAddToMenu(null, day, meal)}
+                    onViewRecipe={setSelectedRecipe}
+                    onAddToMenu={handleAddToMenu}
+                    activeMenu={null}
+                  />
+                </div>
+                <div className="md:hidden">
+                  <MobileView
+                    selectedDay={selectedDay as 'Lunes' | 'Martes' | 'Miércoles' | 'Jueves' | 'Viernes' | 'Sábado' | 'Domingo'  }
+                    weekDays={weekDays}
+                    weeklyMenu={menu}
+                    onDayChange={setSelectedDay}
+                    onMealClick={handleMealClick}
+                    onRemoveMeal={(day, meal) => handleAddToMenu(null, day, meal)}
+                    onViewRecipe={setSelectedRecipe}
+                    onAddToMenu={handleAddToMenu}
+                    activeMenu={null}
+                  />
+                </div>
+              </div>
+            </>
+          )}
+        </div>
+
+        {/* Menu History y Onboarding Wizard */}
+        {showHistory && (
+          <div className="mb-6">
+            <MenuHistory
+              history={menuHistory}
+              onRestore={handleRestoreMenu}
+              onHistoryChange={setMenuHistory}
+              onMenuArchived={() => {}}
+            />
+          </div>
+        )}
+
+        {showOnboarding && (
+          <OnboardingWizard
+            isOpen={showOnboarding}
+            onClose={() => setShowOnboarding(false)}
+            onComplete={() => setShowOnboarding(false)}
+            onGenerateMenu={() => handleGenerateMenu(recipes)}
+          />
         )}
       </div>
-
-      {/* Onboarding Wizard */}
-      {showOnboarding && (
-        <OnboardingWizard
-          isOpen={showOnboarding}
-          onClose={() => setShowOnboarding(false)}
-          onComplete={() => setShowOnboarding(false)}
-          onGenerateMenu={() => handleGenerateMenu(recipes)}
-        />
-      )}
-
-      {/* Menu History */}
-      {showHistory && (
-        <MenuHistory
-          history={menuHistory}
-          onRestore={handleRestoreMenu}
-          onHistoryChange={setMenuHistory}
-          onMenuArchived={() => {}}
-        />
-      )}
-    </div>
+    </>
   );
 }
 
