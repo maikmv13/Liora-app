@@ -75,6 +75,25 @@ export function MenuSkeleton() {
             ))}
           </div>
         </div>
+        <div className="mt-4 bg-white/90 backdrop-blur-sm rounded-2xl border border-rose-100/20 overflow-hidden">
+          <div className="p-4 border-b border-rose-100/20">
+            <div className="flex items-center space-x-3">
+              <div className="w-10 h-10 bg-rose-100 rounded-lg"></div>
+              <div>
+                <div className="h-5 w-32 bg-rose-100 rounded"></div>
+                <div className="h-4 w-24 bg-rose-100/50 rounded mt-2"></div>
+              </div>
+            </div>
+          </div>
+          <div className="p-6 flex flex-col items-center justify-center space-y-4">
+            <div className="w-12 h-12 bg-rose-100 rounded-full"></div>
+            <div className="space-y-2">
+              <div className="h-4 w-32 bg-rose-100 rounded mx-auto"></div>
+              <div className="h-6 w-24 bg-rose-100 rounded mx-auto"></div>
+            </div>
+            <div className="h-4 w-48 bg-rose-100/50 rounded mx-auto"></div>
+          </div>
+        </div>
       </div>
     </div>
   );

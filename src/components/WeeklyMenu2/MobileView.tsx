@@ -4,6 +4,7 @@ import { ExtendedWeeklyMenuDB } from '../../services/weeklyMenu';
 import { DayCard } from './DayCard';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { DAYS, WeekDay } from './constants';
+import { NextWeekCard } from './NextWeekCard';
 
 interface MobileViewProps {
   selectedDay: WeekDay;
@@ -180,7 +181,7 @@ export function MobileView({
         {weekDays.map(day => (
           <div 
             key={day}
-            className="flex-none w-full snap-center px-2 first:pl-4 last:pr-4 transition-transform duration-300"
+            className="flex-none w-full snap-center px-2 first:pl-4 last:pr-2 transition-transform duration-300"
           >
             <DayCard
               day={day}
@@ -193,38 +194,53 @@ export function MobileView({
             />
           </div>
         ))}
+        
+        <div className="flex-none w-full snap-center px-2 pr-4 transition-transform duration-300 md:hidden">
+          <NextWeekCard />
+        </div>
       </div>
 
       {/* Day Indicators */}
-      <div className="flex justify-center space-x-1 mt-4">
-        {weekDays.map((day, index) => (
-          <button
-            key={day}
-            onClick={() => {
-              if (scrollContainerRef.current && !isScrolling) {
-                setIsScrolling(true);
-                const cardWidth = scrollContainerRef.current.clientWidth;
-                scrollContainerRef.current.scrollTo({
-                  left: index * cardWidth,
-                  behavior: 'smooth'
-                });
-                onDayChange(day);
-                setTimeout(() => setIsScrolling(false), 300);
-              }
-            }}
-            disabled={isScrolling}
-            className={`
-              w-2 h-2 rounded-full transition-all duration-300
-              ${selectedDay === day
-                ? 'bg-rose-500 w-4'
-                : isScrolling
-                  ? 'bg-rose-200 cursor-not-allowed'
-                  : 'bg-rose-200 hover:bg-rose-300'
-              }
-            `}
-            aria-label={`Ir a ${day}`}
-          />
-        ))}
+      <div className="flex justify-center space-x-1 mt-4 md:hidden">
+        {weekDays.concat(['next']).map((day, index) => {
+          const isNextWeek = day === 'next';
+          const isSelected = isNextWeek ? 
+            Math.round(scrollContainerRef.current?.scrollLeft ?? 0) === (weekDays.length * (scrollContainerRef.current?.clientWidth ?? 0)) : 
+            selectedDay === day;
+
+          return (
+            <button
+              key={day}
+              onClick={() => {
+                if (scrollContainerRef.current && !isScrolling) {
+                  setIsScrolling(true);
+                  const cardWidth = scrollContainerRef.current.clientWidth;
+                  scrollContainerRef.current.scrollTo({
+                    left: index * cardWidth,
+                    behavior: 'smooth'
+                  });
+                  if (!isNextWeek) {
+                    onDayChange(day as WeekDay);
+                  }
+                  setTimeout(() => setIsScrolling(false), 300);
+                }
+              }}
+              disabled={isScrolling}
+              className={`
+                w-2 h-2 rounded-full transition-all duration-300
+                ${isSelected
+                  ? isNextWeek 
+                    ? 'bg-orange-500 w-4'
+                    : 'bg-rose-500 w-4'
+                  : isScrolling
+                    ? 'bg-rose-200 cursor-not-allowed'
+                    : 'bg-rose-200 hover:bg-rose-300'
+                }
+              `}
+              aria-label={isNextWeek ? 'Próxima semana' : `Ir a ${day}`}
+            />
+          );
+        })}
       </div>
     </div>
   );
