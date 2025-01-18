@@ -11,7 +11,7 @@ const welcomeMessage = {
   role: 'assistant',
   content: `¡Hola! 👋 Soy Liora, tu asistente nutricional personal.
 
-Estoy aquí para ayudarte a encontrar el equilibrio perfecto en tu alimentación, con consejos personalizados y recetas saludables.`,
+Estoy aquí para ayudarte a encontrar el equilibrio perfecto en tu alimentación y tus hábitos.`,
   timestamp: new Date().toISOString()
 };
 
