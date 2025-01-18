@@ -51,26 +51,17 @@ export function Onboarding({ onComplete, onLogin }: OnboardingProps) {
   return (
     <div className="fixed inset-0 z-50 overflow-hidden">
       {/* Colorful gradient background */}
-      <div className="absolute inset-0 bg-gradient-to-br from-violet-400/20 via-fuchsia-400/20 to-rose-400/20" />
+      <div className="absolute inset-0 bg-gradient-to-br from-violet-400/40 via-fuchsia-400/40 to-rose-400/40" />
 
       {/* SVG Pattern overlay */}
-      <div className="absolute inset-0 opacity-[0.03]" aria-hidden="true">
+      <div className="absolute inset-0 opacity-[0.05]" aria-hidden="true">
         <svg className="w-full h-full" xmlns="http://www.w3.org/2000/svg">
           <defs>
-            <pattern id="hero-pattern" width="32" height="32" patternUnits="userSpaceOnUse">
-              <path d="M0 32V.5H32" fill="none" stroke="currentColor" strokeOpacity="0.2"></path>
-            </pattern>
-            <pattern id="dots-pattern" width="48" height="48" patternUnits="userSpaceOnUse">
-              <circle cx="12" cy="12" r="1" fill="currentColor" fillOpacity="0.2"/>
-              <circle cx="36" cy="36" r="1" fill="currentColor" fillOpacity="0.2"/>
-            </pattern>
-            <pattern id="squares-pattern" width="64" height="64" patternUnits="userSpaceOnUse">
-              <path d="M8 8h8v8H8zM40 40h8v8h-8z" fill="currentColor" fillOpacity="0.1"/>
+            <pattern id="plus-pattern" width="24" height="24" patternUnits="userSpaceOnUse">
+              <path d="M10 2v8H2v4h8v8h4v-8h8v-4h-8V2h-4z" fill="currentColor" fillOpacity="0.2"/>
             </pattern>
           </defs>
-          <rect width="100%" height="100%" fill="url(#hero-pattern)"></rect>
-          <rect width="100%" height="100%" fill="url(#dots-pattern)"></rect>
-          <rect width="100%" height="100%" fill="url(#squares-pattern)"></rect>
+          <rect width="100%" height="100%" fill="url(#plus-pattern)"></rect>
         </svg>
       </div>
 
@@ -118,28 +109,30 @@ export function Onboarding({ onComplete, onLogin }: OnboardingProps) {
       </div>
 
       {/* Progress Dots */}
-      <div className="fixed bottom-24 md:bottom-8 left-0 right-0 flex flex-col md:flex-row items-center justify-center space-y-4 md:space-y-0 md:space-x-2 z-10">
-        <div className="flex space-x-2">
-          {SCREENS.map((_, i) => (
-            <motion.button
-              key={i}
-              onClick={() => handleDotClick(i)}
-              className={`w-2 h-2 rounded-full transition-all focus:outline-none ${
-                i === currentScreen
-                  ? 'w-4 bg-rose-500'
-                  : 'bg-gray-300 hover:bg-gray-400'
-              }`}
-              whileHover={{ scale: 1.2 }}
-              whileTap={{ scale: 0.9 }}
-              initial={false}
-              animate={{
-                width: i === currentScreen ? 16 : 8,
-              }}
-              transition={{ duration: 0.2 }}
-            />
-          ))}
+      {currentScreen !== SCREENS.length - 1 && (
+        <div className="fixed bottom-24 md:bottom-8 left-0 right-0 flex flex-col md:flex-row items-center justify-center space-y-4 md:space-y-0 md:space-x-2 z-10">
+          <div className="flex space-x-2">
+            {SCREENS.map((_, i) => (
+              <motion.button
+                key={i}
+                onClick={() => handleDotClick(i)}
+                className={`w-2 h-2 rounded-full transition-all focus:outline-none ${
+                  i === currentScreen
+                    ? 'w-4 bg-rose-500'
+                    : 'bg-gray-300 hover:bg-gray-400'
+                }`}
+                whileHover={{ scale: 1.2 }}
+                whileTap={{ scale: 0.9 }}
+                initial={false}
+                animate={{
+                  width: i === currentScreen ? 16 : 8,
+                }}
+                transition={{ duration: 0.2 }}
+              />
+            ))}
+          </div>
         </div>
-      </div>
+      )}
     </div>
   );
 }

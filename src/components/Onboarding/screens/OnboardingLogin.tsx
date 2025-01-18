@@ -114,9 +114,9 @@ export function OnboardingLogin({ onNext, onLogin, isFirst }: ScreenProps) {
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="text-center mb-12"
+          className="text-center mb-5"
         >
-          <div className="relative w-20 h-20 mx-auto mb-6">
+          <div className="relative w-20 h-20 mx-auto mb-4">
             <div className="absolute inset-0 bg-gradient-to-br from-rose-400 to-pink-500 rounded-2xl rotate-6" />
             <div className="absolute inset-0 bg-white rounded-2xl flex items-center justify-center">
               <User className="w-10 h-10 text-rose-500" />

@@ -9,9 +9,7 @@ import { ChatMessage } from '../../LioraChat/components/ChatMessage';
 const welcomeMessage = {
   id: 'welcome-1',
   role: 'assistant',
-  content: `¡Hola! 👋 Soy Liora, tu asistente nutricional personal.
-
-Estoy aquí para ayudarte a encontrar el equilibrio perfecto en tu alimentación y tus hábitos.`,
+  content: `¡Hola! 👋 Soy Liora, tu asistente nutricional personal.`,
   timestamp: new Date().toISOString()
 };
 
@@ -53,8 +51,8 @@ export function WelcomeScreen({ onNext }: ScreenProps) {
           transition={{ duration: 0.5 }}
           className="relative mb-6 md:mb-8"
         >
-          <div className="bg-white/30 backdrop-blur-sm p-4 md:p-6 rounded-2xl border border-white/20 shadow-xl">
-            <Bot size={40} className="text-rose-500" />
+          <div className="bg-white p-4 md:p-5 rounded-2xl shadow-xl">
+            <Bot size={32} className="text-rose-500" />
             <motion.div
               animate={{ 
                 scale: [1, 1.2, 1],
@@ -65,7 +63,7 @@ export function WelcomeScreen({ onNext }: ScreenProps) {
                 repeat: Infinity,
                 repeatType: "reverse"
               }}
-              className="absolute -top-2 -right-2 bg-rose-500 rounded-full p-1.5 md:p-2"
+              className="absolute -top-2 -right-2 bg-rose-500 rounded-full p-1.5"
             >
               <Sparkles size={12} className="text-white" />
             </motion.div>
@@ -80,7 +78,7 @@ export function WelcomeScreen({ onNext }: ScreenProps) {
             className="text-6xl md:text-8xl font-bold tracking-tight"
           >
             <span className="bg-gradient-to-r from-violet-500 via-fuchsia-500 to-rose-500 text-transparent bg-clip-text">
-              LIORA
+              Liora
             </span>
           </motion.h1>
           
@@ -137,7 +135,21 @@ export function WelcomeScreen({ onNext }: ScreenProps) {
           onClick={onNext}
           className="fixed bottom-8 left-4 right-4 md:relative md:mt-8 md:w-full px-6 md:px-8 py-4 bg-gradient-to-r from-violet-500 via-fuchsia-500 to-rose-500 text-white rounded-xl font-medium shadow-lg hover:shadow-xl active:scale-95 transition-all duration-300 max-w-sm mx-auto"
         >
-          Comenzar mi viaje
+          <div className="flex items-center justify-center space-x-2">
+            <span>Comenzar mi viaje</span>
+            <motion.span
+              animate={{ 
+                x: [0, 4, 0],
+              }}
+              transition={{ 
+                duration: 1.5,
+                repeat: Infinity,
+                ease: "easeInOut"
+              }}
+            >
+              →
+            </motion.span>
+          </div>
         </motion.button>
       </div>
     </div>
