@@ -17,6 +17,7 @@ import { ScrollToTop } from './components/ScrollToTop';
 import { ChefHat, Leaf, Sparkles } from 'lucide-react';
 import { FloatingChatButton } from './components/FloatingChatButton';
 import { HealthyPlateGuide } from './components/HealthyPlateGuide';
+import { Onboarding } from './components/Onboarding';
 
 // Lazy load components
 const WeeklyMenu2 = lazy(() => import('./components/WeeklyMenu2'));
@@ -43,6 +44,9 @@ function App() {
     loading: favoritesLoading,
     error: favoritesError 
   } = useFavorites();
+  const [onboardingCompleted, setOnboardingCompleted] = useState(() => {
+    return localStorage.getItem('onboardingCompleted') === 'true';
+  });
 
   useEffect(() => {
     if (!menuLoading && activeMenuItems.length > 0 && user) {
@@ -97,6 +101,11 @@ function App() {
     setShowLogin(false);
   };
 
+  const handleOnboardingComplete = () => {
+    localStorage.setItem('onboardingCompleted', 'true');
+    setOnboardingCompleted(true);
+  };
+
   // Enhanced loading component with animation
   const LoadingFallback = () => (
     <div className="min-h-screen bg-gradient-to-br from-rose-50 to-purple-50 flex flex-col items-center justify-center">
@@ -138,6 +147,23 @@ function App() {
 
   if (loading) {
     return <LoadingFallback />;
+  }
+
+  if (!user && !onboardingCompleted) {
+    return (
+      <Router>
+        <Onboarding 
+          onComplete={handleOnboardingComplete}
+          onLogin={() => setShowLogin(true)}
+        />
+        {showLogin && (
+          <Login
+            onClose={() => setShowLogin(false)}
+            onLoginSuccess={handleLoginSuccess}
+          />
+        )}
+      </Router>
+    );
   }
 
   return (
