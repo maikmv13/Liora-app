@@ -1,10 +1,18 @@
 import React from 'react';
-import { ArrowLeft, Bot, Sparkles, Circle } from 'lucide-react';
+import { ArrowLeft, Bot, Sparkles, Circle, Trash2 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
+import { useAI } from '../../../hooks/useAI';
 
 export function MobileChatHeader() {
   const navigate = useNavigate();
+  const { clearMessages } = useAI();
+
+  const handleClearChat = () => {
+    if (window.confirm('¿Estás seguro de que quieres borrar el historial del chat?')) {
+      clearMessages();
+    }
+  };
 
   return (
     <motion.div 
@@ -51,6 +59,16 @@ export function MobileChatHeader() {
             </div>
           </div>
         </div>
+
+        <motion.button
+          whileHover={{ scale: 1.05 }}
+          whileTap={{ scale: 0.95 }}
+          onClick={handleClearChat}
+          className="p-2 text-white/70 hover:text-white hover:bg-white/10 rounded-full transition-colors"
+          title="Borrar historial"
+        >
+          <Trash2 size={20} />
+        </motion.button>
       </div>
     </motion.div>
   );

@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import { supabase } from '../lib/supabase';
 import { openai } from '../services/ai';
 import type { Message, AIContext, ContextCategory } from '../types/ai';
@@ -11,8 +11,64 @@ interface DBResult<T> {
 
 export function useAI() {
   const [messages, setMessages] = useState<Message[]>([]);
+  const [sessionId] = useState(() => crypto.randomUUID());
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<Error | null>(null);
+
+  // Extraer loadChatHistory para poder reutilizarlo
+  const loadChatHistory = async () => {
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
+
+      const { data, error } = await supabase
+        .from('chat_history')
+        .select('*')
+        .eq('user_id', user.id)
+        .order('created_at', { ascending: true })
+        .limit(50);
+
+      if (error) throw error;
+
+      if (data) {
+        setMessages(data.map(msg => ({
+          id: msg.id,
+          role: msg.role,
+          content: msg.content,
+          timestamp: msg.timestamp
+        })));
+      }
+    } catch (error) {
+      console.error('Error loading chat history:', error);
+    }
+  };
+
+  // Usar loadChatHistory en useEffect
+  useEffect(() => {
+    loadChatHistory();
+  }, []);
+
+  // Guardar mensaje en la base de datos
+  const saveChatMessage = async (message: Message) => {
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
+
+      const { error } = await supabase
+        .from('chat_history')
+        .insert({
+          user_id: user.id,
+          content: message.content,
+          role: message.role,
+          timestamp: message.timestamp,
+          session_id: sessionId
+        });
+
+      if (error) throw error;
+    } catch (error) {
+      console.error('Error saving chat message:', error);
+    }
+  };
 
   const identifyCategory = (content: string): ContextCategory[] => {
     const categories: ContextCategory[] = [];
@@ -202,17 +258,18 @@ export function useAI() {
 
   const sendMessage = useCallback(async (content: string) => {
     try {
-      if (loading) return;
       setLoading(true);
       setError(null);
 
+      // Crear y guardar mensaje del usuario
       const userMessage: Message = {
         id: crypto.randomUUID(),
         role: 'user',
         content,
         timestamp: new Date().toISOString()
       };
-
+      
+      await saveChatMessage(userMessage);
       setMessages(prev => [...prev, userMessage]);
 
       const categories = identifyCategory(content);
@@ -243,6 +300,7 @@ export function useAI() {
         ]
       });
 
+      // Crear y guardar respuesta de la IA
       const aiMessage: Message = {
         id: crypto.randomUUID(),
         role: 'assistant',
@@ -250,27 +308,50 @@ export function useAI() {
         timestamp: new Date().toISOString()
       };
 
+      await saveChatMessage(aiMessage);
       setMessages(prev => [...prev, aiMessage]);
 
     } catch (error) {
-      console.error('Error en useAI:', error);
+      console.error('Error in sendMessage:', error);
       setError(error as Error);
-      
-      const errorMessage: Message = {
-        id: crypto.randomUUID(),
-        role: 'assistant',
-        content: 'Lo siento, ha ocurrido un error. ¿Podrías intentarlo de nuevo?',
-        timestamp: new Date().toISOString()
-      };
-      
-      setMessages(prev => [...prev, errorMessage]);
-      throw error;
     } finally {
       setLoading(false);
     }
   }, [messages, loading]);
 
-  return { messages, sendMessage, loading, error };
+  const clearMessages = useCallback(async () => {
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
+
+      // Limpiar mensajes en la UI
+      setMessages([]);
+
+      // Borrar todos los mensajes del usuario en la base de datos
+      const { error } = await supabase
+        .from('chat_history')
+        .delete()
+        .eq('user_id', user.id);
+
+      if (error) {
+        console.error('Error deleting messages:', error);
+        throw error;
+      }
+
+    } catch (error) {
+      console.error('Error clearing messages:', error);
+      // Recargar mensajes si hay error
+      loadChatHistory();
+    }
+  }, []);
+
+  return {
+    messages,
+    loading,
+    error,
+    sendMessage,
+    clearMessages
+  };
 }
 // Función mejorada para formatear el menú
 const formatWeeklyMenu = (menu: AIContext['weeklyMenu'][0]) => {

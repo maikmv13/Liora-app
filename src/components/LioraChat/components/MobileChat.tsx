@@ -12,14 +12,22 @@ export function MobileChat() {
   const [isThinking, setIsThinking] = useState(false);
   const { messages, loading, sendMessage } = useAI();
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const isFirstVisit = useRef(localStorage.getItem('liora_visited') === null);
 
   const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    if (!isFirstVisit.current) {
+      messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    } else {
+      messagesEndRef.current?.scrollIntoView();
+      localStorage.setItem('liora_visited', 'true');
+      isFirstVisit.current = false;
+    }
   };
 
-  // Scroll cuando cambian los mensajes o cuando está pensando
   useEffect(() => {
-    scrollToBottom();
+    if (messages.length > 0 || isThinking) {
+      scrollToBottom();
+    }
   }, [messages, isThinking]);
 
   useEffect(() => {
@@ -55,7 +63,7 @@ export function MobileChat() {
       <FallingEmojis />
       <MobileChatHeader />
       
-      <div className="flex-1 overflow-y-auto pt-4 pb-32 px-0 space-y-4 custom-scrollbar">
+      <div className="flex-1 overflow-y-auto pt-4 pb-5 px-0 space-y-4 custom-scrollbar">
         <WelcomeMessage welcomeIndex={welcomeIndex} isMobile />
         
         {messages.map((message) => (

@@ -16,6 +16,19 @@ interface RecipeModalProps {
   onToggleFavorite?: () => void;
 }
 
+interface RecipeIngredient {
+  id: string;
+  recipe_id: string;
+  ingredient_id: string;
+  quantity: number;
+  unit: string;
+  ingredient: {
+    id: string;
+    name: string;
+    category: string;
+  };
+}
+
 export function RecipeModal({ 
   recipe, 
   onClose, 
@@ -69,6 +82,8 @@ export function RecipeModal({
       color: 'purple'
     }
   ];
+
+  console.log('Recipe ingredients:', recipe.recipe_ingredients);
 
   return (
     <div 
@@ -199,9 +214,9 @@ export function RecipeModal({
                   Ingredientes
                 </h3>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  {recipe.recipe_ingredients.map((ri, index) => {
-                    if (!ri.ingredients) {
-                      console.warn('Missing ingredient data:', ri);
+                  {recipe.recipe_ingredients?.map((ri: RecipeIngredient, index) => {
+                    if (!ri?.ingredient?.name) {
+                      console.warn('Ingredient data structure:', ri);
                       return null;
                     }
                     
@@ -209,7 +224,7 @@ export function RecipeModal({
                     
                     return (
                       <div 
-                        key={index}
+                        key={`${ri.ingredient_id}-${index}`}
                         className="flex items-center space-x-3 p-3 bg-gray-50 rounded-xl border border-gray-100"
                       >
                         <div className="p-2 bg-white rounded-lg">
@@ -217,7 +232,7 @@ export function RecipeModal({
                         </div>
                         <div>
                           <p className="text-gray-900 font-medium">
-                            {ri.ingredients.name}
+                            {ri.ingredient.name}
                           </p>
                           <p className="text-sm text-gray-500">
                             {ri.quantity} {unit}
