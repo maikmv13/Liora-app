@@ -11,7 +11,6 @@ interface OnboardingProps {
 
 export function Onboarding({ onComplete, onLogin }: OnboardingProps) {
   const [currentScreen, setCurrentScreen] = useState(0);
-  const [dragDirection, setDragDirection] = useState<number>(0);
 
   const SCREENS = [
     { id: 'welcome', Component: WelcomeScreen },
@@ -31,14 +30,20 @@ export function Onboarding({ onComplete, onLogin }: OnboardingProps) {
     }
   };
 
-  const handleDragEnd = (event: MouseEvent | TouchEvent | PointerEvent, info: PanInfo) => {
+  const handleDragEnd = (_: MouseEvent | TouchEvent | PointerEvent, info: PanInfo) => {
     const swipeThreshold = 50;
-    const { offset } = info;
+    const { offset, velocity } = info;
 
-    if (Math.abs(offset.x) > swipeThreshold) {
-      if (offset.x > 0 && currentScreen > 0) {
+    if (Math.abs(velocity.x) > 200) {
+      if (velocity.x > 0) {
         handlePrev();
-      } else if (offset.x < 0 && currentScreen < SCREENS.length - 1) {
+      } else {
+        handleNext();
+      }
+    } else if (Math.abs(offset.x) > swipeThreshold) {
+      if (offset.x > 0) {
+        handlePrev();
+      } else {
         handleNext();
       }
     }
@@ -54,11 +59,13 @@ export function Onboarding({ onComplete, onLogin }: OnboardingProps) {
       <div className="absolute inset-0 bg-gradient-to-br from-violet-400/40 via-fuchsia-400/40 to-rose-400/40" />
 
       {/* SVG Pattern overlay */}
-      <div className="absolute inset-0 opacity-[0.05]" aria-hidden="true">
+      <div className="absolute inset-0 opacity-[0.10]" aria-hidden="true">
         <svg className="w-full h-full" xmlns="http://www.w3.org/2000/svg">
           <defs>
-            <pattern id="plus-pattern" width="24" height="24" patternUnits="userSpaceOnUse">
-              <path d="M10 2v8H2v4h8v8h4v-8h8v-4h-8V2h-4z" fill="currentColor" fillOpacity="0.2"/>
+            <pattern id="plus-pattern" width="20" height="20" patternUnits="userSpaceOnUse">
+              <g transform="rotate(45, 16, 16)">
+                <path d="M14 6v8H6v4h8v8h4v-8h8v-4h-8V6h-4z" fill="currentColor" fillOpacity="0.2"/>
+              </g>
             </pattern>
           </defs>
           <rect width="100%" height="100%" fill="url(#plus-pattern)"></rect>
@@ -73,26 +80,41 @@ export function Onboarding({ onComplete, onLogin }: OnboardingProps) {
       </div>
 
       {/* Content */}
-      <div className="relative h-full">
+      <div className="relative h-full overflow-y-auto">
         <motion.div 
           className="h-full"
           drag="x"
           dragConstraints={{ left: 0, right: 0 }}
-          dragElastic={0.2}
+          dragElastic={0.3}
           onDragEnd={handleDragEnd}
-          animate={{ x: dragDirection }}
+          dragTransition={{ bounceStiffness: 600, bounceDamping: 20 }}
         >
-          <AnimatePresence mode="wait">
+          <AnimatePresence initial={false} mode="wait">
             {SCREENS.map(({ id, Component }, index) => (
               <motion.div
                 key={id}
-                className={`h-full ${
+                className={`${
                   index === currentScreen ? 'opacity-100 visible' : 'opacity-0 invisible absolute inset-0'
+                } ${
+                  id === 'login' ? 'h-auto' : 'h-full flex items-center'
                 }`}
-                initial={{ opacity: 0, x: 100 }}
-                animate={{ opacity: 1, x: 0 }}
-                exit={{ opacity: 0, x: -100 }}
-                transition={{ duration: 0.3 }}
+                initial={{ opacity: 0, x: index > currentScreen ? 100 : -100 }}
+                animate={{ 
+                  opacity: 1, 
+                  x: 0,
+                  transition: {
+                    x: { type: "spring", stiffness: 300, damping: 30 },
+                    opacity: { duration: 0.2 }
+                  }
+                }}
+                exit={{ 
+                  opacity: 0,
+                  x: index < currentScreen ? -100 : 100,
+                  transition: {
+                    x: { type: "spring", stiffness: 300, damping: 30 },
+                    opacity: { duration: 0.2 }
+                  }
+                }}
               >
                 <Component
                   onNext={handleNext}

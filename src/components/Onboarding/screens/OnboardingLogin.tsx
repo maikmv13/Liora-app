@@ -4,6 +4,7 @@ import { Eye, EyeOff, Mail, Lock, ChevronLeft, User, UserCog, Loader2, Sparkles 
 import { supabase } from '../../../lib/supabase';
 import { FallingEmojis } from '../../LioraChat/components/FallingEmojis';
 import { ScreenProps } from './types';
+import { Register } from '../../Register';
 
 const ERROR_MESSAGES = {
   'Invalid login credentials': 'El correo o la contraseña son incorrectos',
@@ -20,6 +21,7 @@ export function OnboardingLogin({ onNext, onLogin, isFirst }: ScreenProps) {
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const [showRegister, setShowRegister] = useState(false);
   const [formData, setFormData] = useState({
     email: '',
     password: '',
@@ -108,91 +110,107 @@ export function OnboardingLogin({ onNext, onLogin, isFirst }: ScreenProps) {
 
   if (!userType) {
     return (
-      <div className="min-h-screen flex flex-col items-center justify-center p-4">
+      <div className="min-h-screen flex flex-col p-4 pt-8 mt-12 md:mt-16">
         <FallingEmojis />
         
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="text-center mb-5"
-        >
-          <div className="relative w-20 h-20 mx-auto mb-4">
-            <div className="absolute inset-0 bg-gradient-to-br from-rose-400 to-pink-500 rounded-2xl rotate-6" />
-            <div className="absolute inset-0 bg-white rounded-2xl flex items-center justify-center">
-              <User className="w-10 h-10 text-rose-500" />
+        <div className="w-full max-w-sm mx-auto">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="text-center mb-5"
+          >
+            <div className="relative w-20 h-20 mx-auto mb-4">
+              <div className="absolute inset-0 bg-gradient-to-br from-rose-400 to-pink-500 rounded-2xl rotate-6" />
+              <div className="absolute inset-0 bg-white rounded-2xl flex items-center justify-center">
+                <User className="w-10 h-10 text-rose-500" />
+              </div>
+              <motion.div
+                animate={{ 
+                  scale: [1, 1.2, 1],
+                  rotate: [0, 360]
+                }}
+                transition={{ 
+                  duration: 2,
+                  repeat: Infinity,
+                  repeatType: "reverse"
+                }}
+                className="absolute -top-2 -right-2 bg-rose-500 rounded-full p-1.5"
+              >
+                <Sparkles size={12} className="text-white" />
+              </motion.div>
             </div>
-            <motion.div
-              animate={{ 
-                scale: [1, 1.2, 1],
-                rotate: [0, 360]
-              }}
-              transition={{ 
-                duration: 2,
-                repeat: Infinity,
-                repeatType: "reverse"
-              }}
-              className="absolute -top-2 -right-2 bg-rose-500 rounded-full p-1.5"
+
+            <h2 className="text-3xl font-bold mb-2">
+              <span className="bg-gradient-to-r from-rose-500 via-pink-500 to-purple-500 text-transparent bg-clip-text">
+                ¡Bienvenido! 👋
+              </span>
+            </h2>
+            <p className="text-gray-600">
+              Selecciona tu tipo de cuenta para continuar
+            </p>
+          </motion.div>
+
+          <div className="w-full max-w-sm space-y-4">
+            <motion.button
+              initial={{ opacity: 0, x: -20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ delay: 0.2 }}
+              onClick={() => setUserType('user')}
+              className="w-full flex items-center space-x-4 p-4 rounded-xl border-2 transition-all duration-200 hover:scale-105 bg-gradient-to-br from-rose-50 to-orange-50 border-rose-200 hover:border-rose-300"
             >
-              <Sparkles size={12} className="text-white" />
-            </motion.div>
+              <div className="bg-white p-3 rounded-xl shadow-sm">
+                <User className="w-6 h-6 text-rose-500" />
+              </div>
+              <div className="text-left">
+                <h3 className="font-semibold text-gray-900">Usuario</h3>
+                <p className="text-sm text-gray-600">
+                  Accede a recetas y planes nutricionales
+                </p>
+              </div>
+            </motion.button>
+
+            <motion.button
+              initial={{ opacity: 0, x: -20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ delay: 0.3 }}
+              onClick={() => setUserType('nutritionist')}
+              className="w-full flex items-center space-x-4 p-4 rounded-xl border-2 transition-all duration-200 hover:scale-105 bg-gradient-to-br from-emerald-50 to-teal-50 border-emerald-200 hover:border-emerald-300"
+            >
+              <div className="bg-white p-3 rounded-xl shadow-sm">
+                <UserCog className="w-6 h-6 text-emerald-500" />
+              </div>
+              <div className="text-left">
+                <h3 className="font-semibold text-gray-900">Nutricionista</h3>
+                <p className="text-sm text-gray-600">
+                  Gestiona pacientes y crea planes
+                </p>
+              </div>
+            </motion.button>
           </div>
-
-          <h2 className="text-3xl font-bold mb-2">
-            <span className="bg-gradient-to-r from-rose-500 via-pink-500 to-purple-500 text-transparent bg-clip-text">
-              ¡Bienvenido! 👋
-            </span>
-          </h2>
-          <p className="text-gray-600">
-            Selecciona tu tipo de cuenta para continuar
-          </p>
-        </motion.div>
-
-        <div className="w-full max-w-sm space-y-4">
-          <motion.button
-            initial={{ opacity: 0, x: -20 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ delay: 0.2 }}
-            onClick={() => setUserType('user')}
-            className="w-full flex items-center space-x-4 p-4 rounded-xl border-2 transition-all duration-200 hover:scale-105 bg-gradient-to-br from-rose-50 to-orange-50 border-rose-200 hover:border-rose-300"
-          >
-            <div className="bg-white p-3 rounded-xl shadow-sm">
-              <User className="w-6 h-6 text-rose-500" />
-            </div>
-            <div className="text-left">
-              <h3 className="font-semibold text-gray-900">Usuario</h3>
-              <p className="text-sm text-gray-600">
-                Accede a recetas y planes nutricionales
-              </p>
-            </div>
-          </motion.button>
-
-          <motion.button
-            initial={{ opacity: 0, x: -20 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ delay: 0.3 }}
-            onClick={() => setUserType('nutritionist')}
-            className="w-full flex items-center space-x-4 p-4 rounded-xl border-2 transition-all duration-200 hover:scale-105 bg-gradient-to-br from-emerald-50 to-teal-50 border-emerald-200 hover:border-emerald-300"
-          >
-            <div className="bg-white p-3 rounded-xl shadow-sm">
-              <UserCog className="w-6 h-6 text-emerald-500" />
-            </div>
-            <div className="text-left">
-              <h3 className="font-semibold text-gray-900">Nutricionista</h3>
-              <p className="text-sm text-gray-600">
-                Gestiona pacientes y crea planes
-              </p>
-            </div>
-          </motion.button>
         </div>
       </div>
     );
   }
 
+  if (showRegister) {
+    return (
+      <Register
+        onClose={() => setShowRegister(false)}
+        onRegisterSuccess={() => {
+          setShowRegister(false);
+          onLogin?.();
+        }}
+        preSelectedUserType={userType}
+        onBack={() => setShowRegister(false)}
+      />
+    );
+  }
+
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center p-4">
+    <div className="min-h-screen flex flex-col p-4 pt-8">
       <FallingEmojis />
 
-      <div className="w-full max-w-sm">
+      <div className="w-full max-w-sm mx-auto">
         <button
           onClick={() => setUserType(null)}
           className="flex items-center space-x-2 text-gray-600 hover:text-gray-900 transition-colors mb-8"
@@ -334,7 +352,13 @@ export function OnboardingLogin({ onNext, onLogin, isFirst }: ScreenProps) {
 
             <div className="mt-4 text-center">
               <p className="text-sm text-gray-500">
-                ¿No tienes cuenta? <button type="button" className="text-rose-500 hover:text-rose-600 font-medium">Regístrate aquí</button>
+                ¿No tienes cuenta? <button
+                  type="button"
+                  onClick={() => setShowRegister(true)}
+                  className="text-rose-500 hover:text-rose-600 font-medium"
+                >
+                  Regístrate aquí
+                </button>
               </p>
             </div>
           </div>
