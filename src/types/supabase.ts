@@ -1,5 +1,3 @@
-import type { MenuItem } from './index';
-
 export type Json =
   | string
   | number

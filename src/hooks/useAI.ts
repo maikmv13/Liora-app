@@ -2,7 +2,6 @@ import { useState, useCallback } from 'react';
 import { supabase } from '../lib/supabase';
 import { openai } from '../services/ai';
 import type { Message, AIContext, ContextCategory } from '../types/ai';
-import type { Database } from '../types/supabase';
 import { categories, mealTypes } from '../types/categories';
 
 interface DBResult<T> {
@@ -120,25 +119,49 @@ export function useAI() {
 
       shoppingList: (categories.includes('shopping')
         ? supabase
-            .from('shopping_lists')
+            .from('shopping_list_items')
             .select(`
               id,
-              user_id,
-              name,
-              items:shopping_list_items!inner (
+              item_name,
+              category,
+              quantity,
+              unit,
+              checked,
+              shopping_lists!inner (
                 id,
-                item_name,
-                category,
-                quantity,
-                unit,
-                checked
+                user_id,
+                name
               )
             `)
-            .eq('user_id', user.id)
+            .eq('shopping_lists.user_id', user.id)
             .order('created_at', { ascending: false })
             .limit(1)
             .single()
-        : Promise.resolve({ data: null })) as Promise<DBResult<AIContext['shoppingList']>>
+        : Promise.resolve({ data: null })) as Promise<DBResult<AIContext['shoppingList']>>,
+
+      favorites: (categories.includes('recipes')
+        ? supabase
+            .from('favorites')
+            .select(`
+              id,
+              recipe_id,
+              created_at,
+              notes,
+              rating,
+              last_cooked,
+              tags,
+              recipes:recipe_id (
+                id,
+                name,
+                meal_type,
+                category,
+                instructions
+              )
+            `)
+            .eq('user_id', user.id)
+            .order('rating', { ascending: false })
+            .limit(5)
+        : Promise.resolve({ data: [] })) as Promise<DBResult<AIContext['favorites']>>
     };
 
     try {
@@ -146,18 +169,21 @@ export function useAI() {
         { data: profile, error: profileError },
         { data: weeklyMenu, error: weeklyMenuError },
         { data: recipes, error: recipesError },
-        { data: shoppingList, error: shoppingListError }
+        { data: shoppingList, error: shoppingListError },
+        { data: favorites, error: favoritesError }
       ] = await Promise.all([
         queries.profile,
         queries.weeklyMenu,
         queries.recipes,
-        queries.shoppingList
+        queries.shoppingList,
+        queries.favorites
       ]);
 
       if (profileError) throw profileError;
       if (weeklyMenuError) throw weeklyMenuError;
       if (recipesError) throw recipesError;
       if (shoppingListError) throw shoppingListError;
+      if (favoritesError) throw favoritesError;
       if (!profile) throw new Error('Perfil no encontrado');
 
       return {
@@ -165,6 +191,7 @@ export function useAI() {
         weeklyMenu: weeklyMenu || [],
         recipes: recipes || [],
         shoppingList: shoppingList,
+        favorites: favorites || [],
         categories
       };
     } catch (error) {

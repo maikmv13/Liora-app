@@ -15,26 +15,26 @@ const convertToMenuItems = async (menu: any, recipes: any[]): Promise<MenuItem[]
     'sunday': 'Domingo'
   };
 
-  const mealMapping: Record<string, string> = {
+  // Mapeo correcto entre columnas DB y meal_type
+  const dbToMealType: Record<string, string> = {
     'breakfast': 'desayuno',
     'lunch': 'comida',
     'dinner': 'cena',
     'snack': 'snack'
   };
 
-  // Iterate through days and meals
   for (const [dbDay, day] of Object.entries(dayMapping)) {
-    for (const [dbMeal, meal] of Object.entries(mealMapping)) {
+    for (const [dbMeal, mealType] of Object.entries(dbToMealType)) {
       const recipeId = menu[`${dbDay}_${dbMeal}_id`];
       if (recipeId) {
         const recipe = recipes.find(r => r.id === recipeId);
         if (recipe) {
           items.push({
             day,
-            meal,
+            meal: mealType, // Usamos el valor correcto del enum
             recipe: {
               ...recipe,
-              meal_type: meal
+              meal_type: mealType // Aseguramos consistencia con el enum
             }
           });
         }
