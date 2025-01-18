@@ -10,7 +10,6 @@ export function DesktopChat() {
   const [welcomeIndex, setWelcomeIndex] = useState(0);
   const { messages, loading, sendMessage } = useAI();
 
-  // Solo animación del mensaje de bienvenida
   useEffect(() => {
     if (welcomeIndex < 4) {
       const timer = setTimeout(() => {
@@ -33,12 +32,19 @@ export function DesktopChat() {
     }
   };
 
+  const handleQuerySelect = (query: string) => {
+    setInput(query);
+  };
+
   return (
     <div className="flex flex-col h-screen bg-gradient-to-br from-rose-50/50 to-purple-50/50">
       <ChatHeader />
       
       <div className="flex-1 overflow-y-auto p-4 space-y-4 custom-scrollbar">
-        <WelcomeMessage welcomeIndex={welcomeIndex} />
+        <WelcomeMessage 
+          welcomeIndex={welcomeIndex} 
+          onSelectQuery={handleQuerySelect}
+        />
         
         {messages.map((message) => (
           <ChatMessage key={message.id} message={message} />

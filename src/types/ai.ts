@@ -1,10 +1,12 @@
 import type { Database } from './supabase';
+import type { Recipe } from './recipe';
 
 export interface Message {
   id: string;
   role: 'user' | 'assistant';
   content: string;
   timestamp: string;
+  recipes?: Recipe[]; // Add support for recipe array
 }
 
 export type ContextCategory = 

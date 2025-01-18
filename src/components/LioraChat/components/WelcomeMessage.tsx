@@ -1,10 +1,11 @@
-import React from 'react';
-import { Bot, Sparkles, Heart, Calendar, Apple, Brain } from 'lucide-react';
+import React, { useState } from 'react';
+import { Bot, Sparkles, Heart, Calendar, Apple, Brain, ChevronDown, ChevronRight } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 interface WelcomeMessageProps {
   welcomeIndex: number;
   isMobile?: boolean;
+  onSelectQuery?: (query: string) => void;
 }
 
 const WELCOME_FEATURES = [
@@ -14,7 +15,13 @@ const WELCOME_FEATURES = [
     description: "Consejos adaptados a tus necesidades y objetivos",
     color: "text-rose-500",
     bgColor: "bg-rose-50",
-    delay: 1.5
+    delay: 1.5,
+    queries: [
+      "¿Cuántas calorías debería consumir al día?",
+      "¿Qué alimentos me ayudan a ganar masa muscular?",
+      "¿Cómo puedo mejorar mi digestión?",
+      "¿Qué alimentos debo evitar para perder peso?"
+    ]
   },
   {
     icon: Calendar,
@@ -22,7 +29,13 @@ const WELCOME_FEATURES = [
     description: "Organiza tus comidas de forma saludable y equilibrada",
     color: "text-orange-500",
     bgColor: "bg-orange-50",
-    delay: 1.8
+    delay: 1.8,
+    queries: [
+      "¿Puedes sugerirme un menú semanal equilibrado?",
+      "¿Qué puedo cocinar hoy con pollo?",
+      "Necesito ideas para cenas ligeras",
+      "¿Qué desayunos saludables me recomiendas?"
+    ]
   },
   {
     icon: Apple,
@@ -30,7 +43,13 @@ const WELCOME_FEATURES = [
     description: "Descubre platos nutritivos y deliciosos",
     color: "text-emerald-500",
     bgColor: "bg-emerald-50",
-    delay: 2.1
+    delay: 2.1,
+    queries: [
+      "¿Tienes alguna receta vegetariana fácil?",
+      "¿Cómo preparar un batido proteico casero?",
+      "Necesito recetas sin gluten",
+      "¿Qué postres saludables me recomiendas?"
+    ]
   },
   {
     icon: Brain,
@@ -38,11 +57,26 @@ const WELCOME_FEATURES = [
     description: "Aprende sobre alimentación y bienestar",
     color: "text-purple-500",
     bgColor: "bg-purple-50",
-    delay: 2.4
+    delay: 2.4,
+    queries: [
+      "¿Cómo mantener buenos hábitos alimenticios?",
+      "Tips para hacer la compra de forma saludable",
+      "¿Cómo leer correctamente las etiquetas nutricionales?",
+      "Consejos para comer sano fuera de casa"
+    ]
   }
 ];
 
-export function WelcomeMessage({ welcomeIndex, isMobile = false }: WelcomeMessageProps) {
+export function WelcomeMessage({ welcomeIndex, isMobile = false, onSelectQuery }: WelcomeMessageProps) {
+  const [expandedSection, setExpandedSection] = useState<number | null>(null);
+
+  const handleQueryClick = (query: string) => {
+    if (onSelectQuery) {
+      onSelectQuery(query);
+      setExpandedSection(null);
+    }
+  };
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
@@ -87,14 +121,6 @@ export function WelcomeMessage({ welcomeIndex, isMobile = false }: WelcomeMessag
                       Liora
                     </span>
                   </h2>
-                  <motion.div
-                    initial={{ opacity: 0, scale: 0.5 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    transition={{ delay: 0.2 }}
-                    className="absolute -top-1 -right-1 bg-rose-100 rounded-full p-1"
-                  >
-                    <Sparkles size={8} className="text-rose-500" />
-                  </motion.div>
                 </motion.div>
               )}
             </AnimatePresence>
@@ -137,17 +163,59 @@ export function WelcomeMessage({ welcomeIndex, isMobile = false }: WelcomeMessag
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: feature.delay }}
-                className="bg-white rounded-xl p-4 border border-gray-100 shadow-sm hover:shadow-md transition-shadow"
+                className="bg-white rounded-xl border border-gray-100 shadow-sm hover:shadow-md transition-all duration-300"
               >
-                <div className="flex items-start space-x-3">
-                  <div className={`p-2 rounded-lg ${feature.bgColor}`}>
-                    <feature.icon size={18} className={feature.color} />
+                {/* Feature Header */}
+                <button
+                  onClick={() => setExpandedSection(expandedSection === index ? null : index)}
+                  className="w-full p-4 flex items-start justify-between space-x-3 hover:bg-gray-50 transition-colors rounded-t-xl"
+                >
+                  <div className="flex items-start space-x-3">
+                    <div className={`p-2 rounded-lg ${feature.bgColor}`}>
+                      <feature.icon size={18} className={feature.color} />
+                    </div>
+                    <div className="text-left">
+                      <h3 className="font-medium text-gray-900">{feature.title}</h3>
+                      <p className="text-sm text-gray-500 mt-0.5">{feature.description}</p>
+                    </div>
                   </div>
-                  <div>
-                    <h3 className="font-medium text-gray-900">{feature.title}</h3>
-                    <p className="text-sm text-gray-500 mt-0.5">{feature.description}</p>
+                  <div className={`mt-1 transition-transform duration-200 ${
+                    expandedSection === index ? 'rotate-180' : ''
+                  }`}>
+                    <ChevronDown size={16} className="text-gray-400" />
                   </div>
-                </div>
+                </button>
+
+                {/* Expandable Queries Section */}
+                <AnimatePresence>
+                  {expandedSection === index && (
+                    <motion.div
+                      initial={{ height: 0, opacity: 0 }}
+                      animate={{ height: 'auto', opacity: 1 }}
+                      exit={{ height: 0, opacity: 0 }}
+                      transition={{ duration: 0.2 }}
+                      className="overflow-hidden border-t border-gray-100"
+                    >
+                      <div className="p-4 space-y-2">
+                        {feature.queries.map((query, qIndex) => (
+                          <motion.button
+                            key={qIndex}
+                            initial={{ x: -20, opacity: 0 }}
+                            animate={{ x: 0, opacity: 1 }}
+                            transition={{ delay: qIndex * 0.1 }}
+                            onClick={() => handleQueryClick(query)}
+                            className="w-full flex items-center justify-between p-2 rounded-lg hover:bg-gray-50 text-left group transition-colors"
+                          >
+                            <span className="text-sm text-gray-600 group-hover:text-gray-900">
+                              {query}
+                            </span>
+                            <ChevronRight size={16} className="text-gray-400 group-hover:text-gray-600" />
+                          </motion.button>
+                        ))}
+                      </div>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
               </motion.div>
             )}
           </AnimatePresence>

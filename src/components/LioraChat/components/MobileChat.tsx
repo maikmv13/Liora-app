@@ -58,13 +58,21 @@ export function MobileChat() {
     }
   };
 
+  const handleQuerySelect = (query: string) => {
+    setInput(query);
+  };
+
   return (
     <div className="flex flex-col min-h-screen bg-gradient-to-br from-rose-50/50 to-purple-50/50">
       <FallingEmojis />
       <MobileChatHeader />
       
       <div className="flex-1 overflow-y-auto pt-4 pb-5 px-0 space-y-4 custom-scrollbar">
-        <WelcomeMessage welcomeIndex={welcomeIndex} isMobile />
+        <WelcomeMessage 
+          welcomeIndex={welcomeIndex} 
+          isMobile 
+          onSelectQuery={handleQuerySelect}
+        />
         
         {messages.map((message) => (
           <ChatMessage key={message.id} message={message} />
