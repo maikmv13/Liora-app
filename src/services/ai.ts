@@ -1,18 +1,24 @@
 import OpenAI from 'openai';
 
-// En desarrollo, mostramos advertencias en lugar de errores
+// Configuración de OpenAI
+const config: { apiKey: string; organization?: string } = {
+  apiKey: import.meta.env.VITE_OPENAI_API_KEY || ''
+};
+
+// Solo añadimos el organization ID si está presente
+if (import.meta.env.VITE_OPENAI_ORG_ID) {
+  config.organization = import.meta.env.VITE_OPENAI_ORG_ID;
+}
+
+// En desarrollo, mostramos advertencias
 if (import.meta.env.DEV) {
-  if (!import.meta.env.VITE_OPENAI_API_KEY) {
-    console.warn('OpenAI API Key no encontrada en desarrollo. Las claves están configuradas en Netlify para producción.');
-  }
-  if (!import.meta.env.VITE_OPENAI_ORG_ID) {
-    console.warn('OpenAI Organization ID no encontrado en desarrollo. Las claves están configuradas en Netlify para producción.');
+  if (!config.apiKey) {
+    console.warn('OpenAI API Key no encontrada en desarrollo.');
   }
 }
 
 export const openai = new OpenAI({
-  apiKey: import.meta.env.VITE_OPENAI_API_KEY || 'dummy-key-for-dev',
-  organization: import.meta.env.VITE_OPENAI_ORG_ID || 'dummy-org-for-dev',
+  ...config,
   dangerouslyAllowBrowser: true
 });
 
@@ -27,16 +33,12 @@ export interface OpenAIResponse {
   }>;
 }
 
-// Funciones helper para validación que tienen en cuenta el entorno
+// Funciones helper para validación
 export const validateApiKey = () => {
-  return import.meta.env.PROD || !!import.meta.env.VITE_OPENAI_API_KEY;
+  return !!config.apiKey;
 };
 
-export const validateOrgId = () => {
-  return import.meta.env.PROD || !!import.meta.env.VITE_OPENAI_ORG_ID;
-};
-
-// Helper para verificar si estamos en un entorno donde OpenAI debería funcionar
+// Helper para verificar si OpenAI está disponible
 export const isOpenAIAvailable = () => {
-  return import.meta.env.PROD || (validateApiKey() && validateOrgId());
+  return validateApiKey();
 };
