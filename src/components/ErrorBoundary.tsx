@@ -1,6 +1,7 @@
 import React, { Component, ErrorInfo, ReactNode } from 'react';
 import { AlertTriangle, RefreshCw, Home, ArrowLeft, Copy, Check } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { supabase } from '../lib/supabase';
 
 interface Props {
   children: ReactNode;
@@ -14,6 +15,25 @@ interface State {
   copied: boolean;
 }
 
+interface ErrorLog {
+  error_message: string;
+  stack_trace: string;
+  component_stack: string;
+  user_id?: string;
+  browser_info: string;
+  created_at: string;
+  url: string;
+  additional_context: {
+    viewport: {
+      width: number;
+      height: number;
+    };
+    language: string;
+    platform: string;
+  };
+  severity: 'low' | 'medium' | 'high' | 'critical';
+}
+
 export class ErrorBoundary extends Component<Props, State> {
   public state: State = {
     hasError: false,
@@ -23,18 +43,69 @@ export class ErrorBoundary extends Component<Props, State> {
     copied: false
   };
 
+  private determineErrorSeverity(error: Error): ErrorLog['severity'] {
+    // Lógica para determinar la severidad basada en el tipo de error
+    if (error instanceof TypeError || error instanceof ReferenceError) {
+      return 'high';
+    }
+    if (error instanceof SyntaxError) {
+      return 'critical';
+    }
+    if (error.message.includes('Network') || error.message.includes('fetch')) {
+      return 'medium';
+    }
+    return 'low';
+  }
+
+  private async logErrorToSupabase(error: Error, errorInfo: ErrorInfo) {
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      
+      const errorLog: ErrorLog = {
+        error_message: error.message,
+        stack_trace: error.stack || '',
+        component_stack: errorInfo.componentStack,
+        user_id: user?.id,
+        browser_info: navigator.userAgent,
+        created_at: new Date().toISOString(),
+        url: window.location.href,
+        additional_context: {
+          viewport: {
+            width: window.innerWidth,
+            height: window.innerHeight
+          },
+          language: navigator.language,
+          platform: navigator.platform
+        },
+        severity: this.determineErrorSeverity(error)
+      };
+
+      const { error: supabaseError } = await supabase
+        .from('error_logs')
+        .insert([errorLog]);
+
+      if (supabaseError) {
+        console.error('Error al registrar en Supabase:', supabaseError);
+      }
+    } catch (loggingError) {
+      console.error('Error al intentar registrar el error:', loggingError);
+    }
+  }
+
   public static getDerivedStateFromError(error: Error): Partial<State> {
     return { hasError: true, error };
   }
 
   public componentDidCatch(error: Error, errorInfo: ErrorInfo) {
-    console.error('Error caught by boundary:', error);
-    console.error('Error info:', errorInfo);
+    console.error('Error capturado por boundary:', error);
+    console.error('Información del error:', errorInfo);
     
     this.setState({
       error,
       errorInfo
     });
+
+    this.logErrorToSupabase(error, errorInfo);
   }
 
   private handleReload = () => {
@@ -63,7 +134,7 @@ export class ErrorBoundary extends Component<Props, State> {
       this.setState({ copied: true });
       setTimeout(() => this.setState({ copied: false }), 2000);
     } catch (err) {
-      console.error('Error copying to clipboard:', err);
+      console.error('Error al copiar al portapapeles:', err);
     }
   };
 
