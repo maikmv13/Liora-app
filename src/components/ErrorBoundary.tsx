@@ -1,5 +1,5 @@
 import React, { Component, ErrorInfo, ReactNode } from 'react';
-import { AlertTriangle, RefreshCw, Home, ArrowLeft } from 'lucide-react';
+import { AlertTriangle, RefreshCw, Home, ArrowLeft, Copy, Check } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 interface Props {
@@ -11,6 +11,7 @@ interface State {
   error: Error | null;
   errorInfo: ErrorInfo | null;
   showDetails: boolean;
+  copied: boolean;
 }
 
 export class ErrorBoundary extends Component<Props, State> {
@@ -18,7 +19,8 @@ export class ErrorBoundary extends Component<Props, State> {
     hasError: false,
     error: null,
     errorInfo: null,
-    showDetails: false
+    showDetails: false,
+    copied: false
   };
 
   public static getDerivedStateFromError(error: Error): Partial<State> {
@@ -33,9 +35,6 @@ export class ErrorBoundary extends Component<Props, State> {
       error,
       errorInfo
     });
-
-    // Here you could send error reports to your error tracking service
-    // Example: Sentry.captureException(error);
   }
 
   private handleReload = () => {
@@ -52,6 +51,20 @@ export class ErrorBoundary extends Component<Props, State> {
 
   private toggleDetails = () => {
     this.setState(prev => ({ showDetails: !prev.showDetails }));
+  };
+
+  private copyErrorDetails = async () => {
+    try {
+      const { error, errorInfo } = this.state;
+      const errorDetails = `Error: ${error?.toString()}\n\nStack Trace:\n${errorInfo?.componentStack}`;
+      
+      await navigator.clipboard.writeText(errorDetails);
+      
+      this.setState({ copied: true });
+      setTimeout(() => this.setState({ copied: false }), 2000);
+    } catch (err) {
+      console.error('Error copying to clipboard:', err);
+    }
   };
 
   public render() {
@@ -117,12 +130,33 @@ export class ErrorBoundary extends Component<Props, State> {
               {/* Error Details (for developers) */}
               {(this.state.error || this.state.errorInfo) && (
                 <div className="mt-6">
-                  <button
-                    onClick={this.toggleDetails}
-                    className="text-sm text-gray-500 hover:text-gray-700 transition-colors"
-                  >
-                    {this.state.showDetails ? 'Ocultar' : 'Mostrar'} detalles técnicos
-                  </button>
+                  <div className="flex items-center justify-between">
+                    <button
+                      onClick={this.toggleDetails}
+                      className="text-sm text-gray-500 hover:text-gray-700 transition-colors"
+                    >
+                      {this.state.showDetails ? 'Ocultar' : 'Mostrar'} detalles técnicos
+                    </button>
+
+                    <motion.button
+                      whileHover={{ scale: 1.05 }}
+                      whileTap={{ scale: 0.95 }}
+                      onClick={this.copyErrorDetails}
+                      className="flex items-center space-x-2 px-3 py-1.5 bg-gray-50 text-gray-600 rounded-lg hover:bg-gray-100 transition-colors text-sm"
+                    >
+                      {this.state.copied ? (
+                        <>
+                          <Check size={14} className="text-green-500" />
+                          <span>¡Copiado!</span>
+                        </>
+                      ) : (
+                        <>
+                          <Copy size={14} />
+                          <span>Copiar error</span>
+                        </>
+                      )}
+                    </motion.button>
+                  </div>
 
                   <AnimatePresence>
                     {this.state.showDetails && (

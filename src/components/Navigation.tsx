@@ -13,10 +13,16 @@ export function Navigation({ activeTab, onTabChange, orientation = 'horizontal',
   const navigate = useNavigate();
   const location = useLocation();
 
-  // Hide navigation on Liora chat page
+  // Ocultar navegación solo en Liora chat
   if (location.pathname === '/liora') {
     return null;
   }
+
+  // Mapeo de rutas especiales a sus pestañas correspondientes
+  const routeTabMapping: { [key: string]: string } = {
+    '/favoritos': 'recetas',
+    // Añadir aquí más mapeos si son necesarios
+  };
 
   const handleTabChange = (id: string) => {
     onTabChange(id);
