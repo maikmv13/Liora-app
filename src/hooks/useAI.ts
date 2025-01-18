@@ -6,51 +6,57 @@ import type { Recipe } from '../types';
 
 export function useAI() {
   const [messages, setMessages] = useState<Message[]>([]);
-  const [sessionId] = useState(() => crypto.randomUUID());
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<Error | null>(null);
 
-  // Load chat history
+  // Load chat history on mount
   useEffect(() => {
+    const loadChatHistory = async () => {
+      try {
+        const { data: { user } } = await supabase.auth.getUser();
+        if (!user) return;
+
+        const { data, error } = await supabase
+          .from('chat_history')
+          .select('*')
+          .eq('user_id', user.id)
+          .order('created_at', { ascending: true })
+          .limit(50);
+
+        if (error) throw error;
+
+        if (data) {
+          setMessages(data.map(msg => ({
+            id: msg.id,
+            role: msg.role,
+            content: msg.content,
+            timestamp: msg.timestamp,
+            recipes: msg.recipes
+          })));
+        }
+      } catch (error) {
+        console.error('Error loading chat history:', error);
+      }
+    };
+
     loadChatHistory();
   }, []);
 
-  const loadChatHistory = async () => {
-    try {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) return;
-
-      const { data, error } = await supabase
-        .from('chat_history')
-        .select('*')
-        .eq('user_id', user.id)
-        .order('created_at', { ascending: true })
-        .limit(50);
-
-      if (error) throw error;
-
-      if (data) {
-        setMessages(data.map(msg => ({
-          id: msg.id,
-          role: msg.role,
-          content: msg.content,
-          timestamp: msg.timestamp,
-          recipes: msg.recipes
-        })));
-      }
-    } catch (error) {
-      console.error('Error loading chat history:', error);
-    }
-  };
-
   const searchRecipes = async (query: string): Promise<Recipe[]> => {
     try {
+      // Extract ingredients from query
+      const ingredients = query.toLowerCase()
+        .replace(/receta|con|de|y|para|hacer/g, '')
+        .trim()
+        .split(/[,\s]+/)
+        .filter(word => word.length > 2);
+
       // Extract potential categories from query
       const categoryKeywords = {
-        'Carnes': ['carne', 'ternera', 'cerdo', 'pollo', 'pavo'],
-        'Pescados': ['pescado', 'atún', 'salmón', 'merluza'],
+        'Aves': ['pollo', 'pavo', 'ave', 'pechuga', 'muslo'],
+        'Pescados': ['pescado', 'atún', 'salmón', 'merluza', 'bacalao'],
         'Vegetariano': ['vegetariano', 'vegetal', 'verdura'],
-        'Pastas y Arroces': ['pasta', 'arroz', 'espagueti'],
+        'Pastas y Arroces': ['pasta', 'arroz', 'espagueti', 'macarrón'],
         'Ensaladas': ['ensalada', 'verde'],
         'Sopas y Cremas': ['sopa', 'crema', 'caldo'],
         'Desayuno': ['desayuno', 'breakfast'],
@@ -63,13 +69,22 @@ export function useAI() {
         )
         .map(([category]) => category);
 
-      // If no specific category found, search in all
+      // If no specific category found, try to determine from ingredients
       if (categories.length === 0) {
-        categories = Object.keys(categoryKeywords);
+        if (ingredients.some(ing => ['pollo', 'pavo', 'pechuga', 'muslo'].includes(ing))) {
+          categories = ['Aves'];
+        } else if (ingredients.some(ing => ['pescado', 'atún', 'salmón'].includes(ing))) {
+          categories = ['Pescados'];
+        }
       }
 
-      // First try exact match with recipe name
-      const { data: nameMatches, error: nameError } = await supabase
+      // If still no category, use a default set
+      if (categories.length === 0) {
+        categories = ['Aves', 'Pescados', 'Vegetariano', 'Pastas y Arroces'];
+      }
+
+      // First try matching recipes with ingredients
+      const { data: ingredientMatches, error: ingredientError } = await supabase
         .from('recipes')
         .select(`
           *,
@@ -84,16 +99,51 @@ export function useAI() {
             )
           )
         `)
-        .ilike('name', `%${query}%`)
         .in('category', categories)
-        .limit(3);
+        .limit(10);
 
-      if (nameError) throw nameError;
-      if (nameMatches && nameMatches.length > 0) {
-        return nameMatches;
+      if (ingredientError) throw ingredientError;
+
+      if (ingredientMatches) {
+        // Score recipes based on ingredient matches
+        const scoredRecipes = ingredientMatches.map(recipe => {
+          let score = 0;
+          const recipeIngredients = recipe.recipe_ingredients?.map(ri => 
+            ri.ingredients?.name.toLowerCase()
+          ) || [];
+
+          // Score based on ingredient matches
+          ingredients.forEach(ingredient => {
+            if (recipeIngredients.some(ri => ri?.includes(ingredient))) {
+              score += 2;
+            }
+          });
+
+          // Bonus score for name match
+          if (recipe.name.toLowerCase().includes(query.toLowerCase())) {
+            score += 3;
+          }
+
+          // Bonus score for exact category match
+          if (categories.length === 1 && recipe.category === categories[0]) {
+            score += 2;
+          }
+
+          return { recipe, score };
+        });
+
+        // Sort by score and take top 3
+        const topMatches = scoredRecipes
+          .sort((a, b) => b.score - a.score)
+          .slice(0, 3)
+          .map(({ recipe }) => recipe);
+
+        if (topMatches.length > 0) {
+          return topMatches;
+        }
       }
 
-      // If no name matches, try category matches
+      // Fallback to basic category search if no ingredient matches
       const { data: categoryMatches, error: categoryError } = await supabase
         .from('recipes')
         .select(`
@@ -121,17 +171,6 @@ export function useAI() {
     }
   };
 
-  const isRecipeQuery = (content: string): boolean => {
-    const recipeKeywords = [
-      'receta', 'cocinar', 'preparar', 'plato', 'comida',
-      'cena', 'desayuno', 'almuerzo', 'menú', 'menu',
-      'quiero', 'cómo', 'como', 'hacer'
-    ];
-    return recipeKeywords.some(keyword => 
-      content.toLowerCase().includes(keyword)
-    );
-  };
-
   const sendMessage = useCallback(async (content: string) => {
     try {
       setLoading(true);
@@ -144,40 +183,48 @@ export function useAI() {
         content,
         timestamp: new Date().toISOString()
       };
-      
-      await saveChatMessage(userMessage);
+
+      // Save user message
+      await supabase.from('chat_history').insert({
+        user_id: (await supabase.auth.getUser()).data.user?.id,
+        content,
+        role: 'user',
+        timestamp: userMessage.timestamp
+      });
+
       setMessages(prev => [...prev, userMessage]);
 
-      // Check if it's a recipe query
-      if (isRecipeQuery(content)) {
+      // Check if it's a recipe request
+      if (content.toLowerCase().includes('receta')) {
         const recipes = await searchRecipes(content);
         
-        if (recipes.length > 0) {
-          // Create recipe message
-          const recipeMessage: Message = {
-            id: crypto.randomUUID(),
-            role: 'assistant',
-            content: '¡He encontrado estas recetas que podrían interesarte! 👩‍🍳✨',
-            timestamp: new Date().toISOString(),
-            recipes: recipes
-          };
+        // Create AI response with recipes
+        const aiMessage: Message = {
+          id: crypto.randomUUID(),
+          role: 'assistant',
+          content: `¡Aquí tienes algunas recetas que podrían interesarte! 👩‍🍳✨`,
+          timestamp: new Date().toISOString(),
+          recipes
+        };
 
-          await saveChatMessage(recipeMessage);
-          setMessages(prev => [...prev, recipeMessage]);
-          return;
-        }
+        // Save AI message
+        await supabase.from('chat_history').insert({
+          user_id: (await supabase.auth.getUser()).data.user?.id,
+          content: aiMessage.content,
+          role: 'assistant',
+          timestamp: aiMessage.timestamp,
+          recipes
+        });
+
+        setMessages(prev => [...prev, aiMessage]);
+        return;
       }
 
-      // Regular chat flow
-      const systemPrompt = `Eres un asistente experto en nutrición y planificación de comidas.
-        Si el usuario pregunta por recetas específicas, responde con sugerencias concretas.
-        Usa emojis apropiados y mantén un tono amigable y profesional.
-        Si no encuentras una receta específica, ofrece alternativas saludables.`;
-
+      // Regular chat completion
       const response = await openai.chat.completions.create({
         model: 'gpt-3.5-turbo',
         messages: [
-          { role: 'system', content: systemPrompt },
+          { role: 'system', content: 'Eres un asistente experto en nutrición y planificación de comidas.' },
           ...messages.map(m => ({ role: m.role, content: m.content })),
           { role: 'user', content }
         ]
@@ -190,7 +237,14 @@ export function useAI() {
         timestamp: new Date().toISOString()
       };
 
-      await saveChatMessage(aiMessage);
+      // Save AI message
+      await supabase.from('chat_history').insert({
+        user_id: (await supabase.auth.getUser()).data.user?.id,
+        content: aiMessage.content,
+        role: 'assistant',
+        timestamp: aiMessage.timestamp
+      });
+
       setMessages(prev => [...prev, aiMessage]);
 
     } catch (error) {
@@ -201,45 +255,23 @@ export function useAI() {
     }
   }, [messages]);
 
-  const saveChatMessage = async (message: Message) => {
-    try {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) return;
-
-      const { error } = await supabase
-        .from('chat_history')
-        .insert({
-          user_id: user.id,
-          content: message.content,
-          role: message.role,
-          timestamp: message.timestamp,
-          session_id: sessionId,
-          recipes: message.recipes
-        });
-
-      if (error) throw error;
-    } catch (error) {
-      console.error('Error saving chat message:', error);
-    }
-  };
-
   const clearMessages = useCallback(async () => {
     try {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) return;
 
+      // Clear messages in UI
       setMessages([]);
 
-      const { error } = await supabase
+      // Delete all user messages from database
+      await supabase
         .from('chat_history')
         .delete()
         .eq('user_id', user.id);
 
-      if (error) throw error;
-
     } catch (error) {
       console.error('Error clearing messages:', error);
-      loadChatHistory();
+      setError(error as Error);
     }
   }, []);
 
