@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence, PanInfo } from 'framer-motion';
 import { WelcomeScreen } from './screens/WelcomeScreen';
 import { FeaturesScreen } from './screens/FeaturesScreen';
 import { OnboardingLogin } from './screens/OnboardingLogin';
@@ -11,6 +11,7 @@ interface OnboardingProps {
 
 export function Onboarding({ onComplete, onLogin }: OnboardingProps) {
   const [currentScreen, setCurrentScreen] = useState(0);
+  const [dragDirection, setDragDirection] = useState<number>(0);
 
   const SCREENS = [
     { id: 'welcome', Component: WelcomeScreen },
@@ -28,6 +29,23 @@ export function Onboarding({ onComplete, onLogin }: OnboardingProps) {
     if (currentScreen > 0) {
       setCurrentScreen(prev => prev - 1);
     }
+  };
+
+  const handleDragEnd = (event: MouseEvent | TouchEvent | PointerEvent, info: PanInfo) => {
+    const swipeThreshold = 50;
+    const { offset } = info;
+
+    if (Math.abs(offset.x) > swipeThreshold) {
+      if (offset.x > 0 && currentScreen > 0) {
+        handlePrev();
+      } else if (offset.x < 0 && currentScreen < SCREENS.length - 1) {
+        handleNext();
+      }
+    }
+  };
+
+  const handleDotClick = (index: number) => {
+    setCurrentScreen(index);
   };
 
   return (
@@ -65,38 +83,59 @@ export function Onboarding({ onComplete, onLogin }: OnboardingProps) {
 
       {/* Content */}
       <div className="relative h-full">
-        <div className="h-full">
-          {SCREENS.map(({ id, Component }, index) => (
-            <div 
-              key={id}
-              className={`h-full transition-all duration-500 ${
-                index === currentScreen ? 'opacity-100 visible' : 'opacity-0 invisible absolute inset-0'
-              }`}
-            >
-              <Component
-                onNext={handleNext}
-                onPrev={handlePrev}
-                onComplete={onComplete}
-                onLogin={onLogin}
-                isLast={index === SCREENS.length - 1}
-                isFirst={index === 0}
-              />
-            </div>
-          ))}
-        </div>
+        <motion.div 
+          className="h-full"
+          drag="x"
+          dragConstraints={{ left: 0, right: 0 }}
+          dragElastic={0.2}
+          onDragEnd={handleDragEnd}
+          animate={{ x: dragDirection }}
+        >
+          <AnimatePresence mode="wait">
+            {SCREENS.map(({ id, Component }, index) => (
+              <motion.div
+                key={id}
+                className={`h-full ${
+                  index === currentScreen ? 'opacity-100 visible' : 'opacity-0 invisible absolute inset-0'
+                }`}
+                initial={{ opacity: 0, x: 100 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: -100 }}
+                transition={{ duration: 0.3 }}
+              >
+                <Component
+                  onNext={handleNext}
+                  onPrev={handlePrev}
+                  onComplete={onComplete}
+                  onLogin={onLogin}
+                  isLast={index === SCREENS.length - 1}
+                  isFirst={index === 0}
+                />
+              </motion.div>
+            ))}
+          </AnimatePresence>
+        </motion.div>
       </div>
 
       {/* Progress Dots */}
       <div className="fixed bottom-24 md:bottom-8 left-0 right-0 flex flex-col md:flex-row items-center justify-center space-y-4 md:space-y-0 md:space-x-2 z-10">
         <div className="flex space-x-2">
           {SCREENS.map((_, i) => (
-            <motion.div
+            <motion.button
               key={i}
-              className={`w-2 h-2 rounded-full transition-all ${
+              onClick={() => handleDotClick(i)}
+              className={`w-2 h-2 rounded-full transition-all focus:outline-none ${
                 i === currentScreen
                   ? 'w-4 bg-rose-500'
                   : 'bg-gray-300 hover:bg-gray-400'
               }`}
+              whileHover={{ scale: 1.2 }}
+              whileTap={{ scale: 0.9 }}
+              initial={false}
+              animate={{
+                width: i === currentScreen ? 16 : 8,
+              }}
+              transition={{ duration: 0.2 }}
             />
           ))}
         </div>
