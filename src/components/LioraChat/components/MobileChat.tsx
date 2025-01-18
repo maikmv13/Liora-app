@@ -1,10 +1,10 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { MobileChatHeader } from './components/MobileChatHeader';
-import { MobileChatInput } from './components/MobileChatInput';
-import { ChatMessage } from './components/ChatMessage';
-import { WelcomeMessage } from './components/WelcomeMessage';
-import { useAI } from '../../hooks/useAI';
-import { FallingEmojis } from './components/FallingEmojis';
+import { MobileChatHeader } from './MobileChatHeader';
+import { MobileChatInput } from './MobileChatInput';
+import { ChatMessage } from './ChatMessage';
+import { WelcomeMessage } from './WelcomeMessage';
+import { useAI } from '../../../hooks/useAI';
+import { FallingEmojis } from './FallingEmojis';
 
 export function MobileChat() {
   const [input, setInput] = useState('');

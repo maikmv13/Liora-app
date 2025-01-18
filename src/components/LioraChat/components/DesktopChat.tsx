@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { ChatHeader } from './components/ChatHeader';
-import { ChatInput } from './components/ChatInput';
-import { ChatMessage } from './components/ChatMessage';
-import { WelcomeMessage } from './components/WelcomeMessage';
-import { useAI } from '../../hooks/useAI';
+import { ChatHeader } from './ChatHeader';
+import { ChatInput } from './ChatInput';
+import { ChatMessage } from './ChatMessage';
+import { WelcomeMessage } from './WelcomeMessage';
+import { useAI } from '../../../hooks/useAI';
 
 export function DesktopChat() {
   const [input, setInput] = useState('');

@@ -63,6 +63,11 @@ export function MobileChatInput({ value, onChange, onSubmit, loading, disabled }
     // No ocultamos las sugerencias inmediatamente para permitir seleccionar otras
   };
 
+  const addEmoji = (emoji: any) => {
+    onChange(value + emoji.native);
+    setShowEmojiPicker(false);
+  };
+
   return (
     <motion.div 
       initial={{ opacity: 0, y: 20 }}
