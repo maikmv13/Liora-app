@@ -61,7 +61,7 @@ export function OnboardingWizard({
             )
           `)
           .eq('meal_type', currentMealType)
-          .in('category', mealTypeCategories[currentMealType]);
+          .in('category', mealTypeCategories[currentMealType] as any);
 
         if (recipesError) throw recipesError;
 
@@ -74,7 +74,7 @@ export function OnboardingWizard({
         if (favsError) throw favsError;
 
         // Update state
-        setRecipes(recipesData || []);
+        setRecipes(recipesData as Recipe[]);
         setFavorites(favsData?.map(f => f.recipe_id) || []);
 
         // Calculate stats
