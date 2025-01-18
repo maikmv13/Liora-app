@@ -1,7 +1,7 @@
 import React from 'react';
 import { 
   X, ChefHat, Calendar, ShoppingCart, Activity, User, 
-  LogIn, Settings, LogOut, Apple, Heart 
+  LogIn, Settings, LogOut, Apple, Heart, Bot 
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
@@ -47,16 +47,22 @@ export function MobileMenu({ isOpen, onClose, user, onLogin, onProfile, activeTa
       icon: ShoppingCart, 
       label: 'Lista de Compra',
       onClick: () => navigate('/compra')
+    },
+    { 
+      id: 'liora', 
+      icon: Bot, 
+      label: 'Chat con Liora',
+      onClick: () => navigate('/liora')
     }
   ];
 
   const additionalItems = [
     {
-      id: 'vida-sana',
-      icon: Apple,
-      label: 'Vida Sana',
-      onClick: () => navigate('/vida-sana'),
-      description: 'Consejos y bienestar'
+      id: 'salud',
+      icon: Heart,
+      label: 'Salud',
+      onClick: () => navigate('/salud'),
+      description: 'Guía nutricional'
     },
     {
       id: 'profile',
@@ -92,7 +98,7 @@ export function MobileMenu({ isOpen, onClose, user, onLogin, onProfile, activeTa
               <div className="bg-white/10 p-2 rounded-lg">
                 <ChefHat size={20} />
               </div>
-              <span className="font-medium">MiCocina</span>
+              <span className="font-medium">Liora</span>
             </div>
             <button 
               onClick={onClose}

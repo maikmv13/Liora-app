@@ -15,6 +15,8 @@ import { MobileInstallButton } from './components/MobileInstallButton';
 import { ErrorBoundary } from './components/ErrorBoundary';
 import { ScrollToTop } from './components/ScrollToTop';
 import { ChefHat, Leaf, Sparkles } from 'lucide-react';
+import { FloatingChatButton } from './components/FloatingChatButton';
+import { HealthyPlateGuide } from './components/HealthyPlateGuide';
 
 // Lazy load components
 const WeeklyMenu2 = lazy(() => import('./components/WeeklyMenu2'));
@@ -222,6 +224,10 @@ function App() {
                   } 
                 />
                 <Route 
+                  path="/salud" 
+                  element={<HealthyPlateGuide />} 
+                />
+                <Route 
                   path="/liora" 
                   element={<LioraChat />} 
                 />
@@ -238,6 +244,7 @@ function App() {
           )}
 
           <MobileInstallButton />
+          <FloatingChatButton />
         </div>
       </ErrorBoundary>
     </Router>

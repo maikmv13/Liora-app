@@ -4,6 +4,7 @@ import { MobileChatInput } from './components/MobileChatInput';
 import { ChatMessage } from './components/ChatMessage';
 import { WelcomeMessage } from './components/WelcomeMessage';
 import { useAI } from '../../hooks/useAI';
+import { FallingEmojis } from './components/FallingEmojis';
 
 export function MobileChat() {
   const [input, setInput] = useState('');
@@ -51,6 +52,7 @@ export function MobileChat() {
 
   return (
     <div className="flex flex-col min-h-screen bg-gradient-to-br from-rose-50/50 to-purple-50/50">
+      <FallingEmojis />
       <MobileChatHeader />
       
       <div className="flex-1 overflow-y-auto pt-4 pb-32 px-0 space-y-4 custom-scrollbar">

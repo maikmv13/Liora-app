@@ -1,6 +1,6 @@
 import React from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { ChefHat, Calendar, ShoppingCart, Bot } from 'lucide-react';
+import { ChefHat, Calendar, ShoppingCart, Bot, Heart } from 'lucide-react';
 
 interface NavigationProps {
   activeTab: string;
@@ -43,10 +43,10 @@ export function Navigation({ activeTab, onTabChange, orientation = 'horizontal',
       description: 'Lista'
     },
     {
-      id: 'liora',
-      icon: Bot,
-      label: 'Liora',
-      description: 'AI Assistant'
+      id: 'salud',
+      icon: Heart,
+      label: 'Salud',
+      description: 'Guía'
     }
   ];
 
