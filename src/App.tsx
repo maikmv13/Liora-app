@@ -32,7 +32,6 @@ function App() {
   const [weeklyMenu, setWeeklyMenu] = useState<MenuItem[]>([]);
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
-  const [showLogin, setShowLogin] = useState(false);
   const { menuItems: activeMenuItems, loading: menuLoading } = useActiveMenu(user?.id);
   const { shoppingList, toggleItem } = useShoppingList(user?.id);
   const { recipes, loading: recipesLoading } = useRecipes();
@@ -76,7 +75,7 @@ function App() {
 
   const handleToggleFavorite = async (recipe: Recipe) => {
     if (!user) {
-      setShowLogin(true);
+      setOnboardingCompleted(false);
       return;
     }
     
@@ -91,14 +90,6 @@ function App() {
     } catch (error) {
       console.error('Error toggling favorite:', error);
     }
-  };
-
-  const handleLogin = () => {
-    setShowLogin(true);
-  };
-
-  const handleLoginSuccess = () => {
-    setShowLogin(false);
   };
 
   const handleOnboardingComplete = () => {
@@ -154,14 +145,8 @@ function App() {
       <Router>
         <Onboarding 
           onComplete={handleOnboardingComplete}
-          onLogin={() => setShowLogin(true)}
+          onLogin={() => {}}
         />
-        {showLogin && (
-          <Login
-            onClose={() => setShowLogin(false)}
-            onLoginSuccess={handleLoginSuccess}
-          />
-        )}
       </Router>
     );
   }
@@ -176,7 +161,7 @@ function App() {
             onSearchChange={setSearchTerm}
             activeTab={activeTab}
             onTabChange={setActiveTab}
-            onLogin={handleLogin}
+            onLogin={() => setOnboardingCompleted(false)}
             user={user}
             onProfile={() => setActiveTab('profile')}
           />
@@ -261,13 +246,6 @@ function App() {
               </Routes>
             </Suspense>
           </main>
-
-          {showLogin && (
-            <Login
-              onClose={() => setShowLogin(false)}
-              onLoginSuccess={handleLoginSuccess}
-            />
-          )}
 
           <MobileInstallButton />
           <FloatingChatButton />

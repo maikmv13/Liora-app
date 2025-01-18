@@ -1,7 +1,7 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 import { Apple } from 'lucide-react';
-import { ScreenProps } from './types';
+import { ScreenProps } from '../types';
 import { ScreenLayout } from '../components/ScreenLayout';
 
 const features = [
