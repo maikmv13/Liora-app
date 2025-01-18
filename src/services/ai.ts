@@ -1,18 +1,21 @@
 import OpenAI from 'openai';
 import type { Message, AIContext, AIResponse } from '../types/ai';
 
-const OPENAI_API_KEY = import.meta.env.VITE_OPENAI_API_KEY;
-const OPENAI_ORG_ID = import.meta.env.VITE_OPENAI_ORG_ID;
-
-if (!OPENAI_API_KEY) {
-  console.error('Error: VITE_OPENAI_API_KEY no está configurada');
-}
-
-const openai = new OpenAI({
-  apiKey: OPENAI_API_KEY,
-  organization: OPENAI_ORG_ID || undefined,
+// Crear instancia de OpenAI con la API key del ambiente y permitir uso en navegador
+export const openai = new OpenAI({
+  apiKey: import.meta.env.VITE_OPENAI_API_KEY,
+  organization: import.meta.env.VITE_OPENAI_ORG_ID,
   dangerouslyAllowBrowser: true
 });
+
+// Asegurarnos de que las variables de entorno existen
+if (!import.meta.env.VITE_OPENAI_API_KEY) {
+  throw new Error('Missing OpenAI API Key');
+}
+
+if (!import.meta.env.VITE_OPENAI_ORG_ID) {
+  throw new Error('Missing OpenAI Organization ID');
+}
 
 const SYSTEM_PROMPT = `
   Eres Liora, una asistente nutricional experta y amigable. Tu objetivo es ayudar a los usuarios a mantener una alimentación saludable y equilibrada.
@@ -66,15 +69,14 @@ export async function getAIResponse(messages: Message[], context: AIContext): Pr
 }
 
 function formatContext(context: AIContext): string {
-  const { favorites, weeklyMenu, shoppingList, userProfile } = context;
-  console.log('Formateando contexto:', context);
-  
   return `
     Contexto actual del usuario:
-    - Nombre: ${userProfile?.full_name || 'Usuario'}
-    - Favoritos: ${favorites.length} recetas
-    - Menú Semanal: ${weeklyMenu.length} comidas
-    - Lista de Compra: ${shoppingList.length} items
+    - Nombre: ${context.userProfile?.full_name || 'Usuario'}
+    - Recetas disponibles: ${context.recipes.length} recetas
+    - Menú Semanal: ${context.weeklyMenu.length} comidas planificadas
+    - Lista de Compra: ${context.shoppingList ? 'Disponible' : 'No disponible'}
+    
+    Categorías de consulta: ${context.categories.join(', ')}
   `.trim();
 }
 

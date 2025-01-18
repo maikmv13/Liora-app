@@ -13,10 +13,8 @@ import { useActiveMenu } from '../../hooks/useActiveMenu';
 import { supabase } from '../../lib/supabase';
 import { weekDays } from './utils';
 import { RecipeSelectorSidebar } from './RecipeSelectorSidebar';
-import { useLocation } from 'react-router-dom';
 
 export function WeeklyMenu2() {
-  const { pathname } = useLocation();
   const [selectedDay, setSelectedDay] = useState<string>('Lunes');
   const [showHistory, setShowHistory] = useState(false);
   const [menuHistory, setMenuHistory] = useState<ExtendedWeeklyMenuDB[]>([]);
@@ -42,11 +40,6 @@ export function WeeklyMenu2() {
   // Get active menu and recipes
   const { menuItems: menu, loading, error, activeMenuId } = useActiveMenu(userId || undefined);
   const { recipes } = useRecipes();
-
-  // Scroll to top on route change
-  useEffect(() => {
-    window.scrollTo(0, 0);
-  }, [pathname]);
 
   // Handle menu updates
   const handleAddToMenu = async (recipe: Recipe | null, day: string, meal: MealType) => {

@@ -1,4 +1,4 @@
-import type { Recipe } from './recipe';
+import type { Database } from './supabase';
 
 export interface Message {
   id: string;
@@ -14,11 +14,34 @@ export type ContextCategory =
   | 'planning'
   | 'general';
 
+type DbProfile = Database['public']['Tables']['profiles']['Row'];
+type DbWeeklyMenu = Database['public']['Tables']['weekly_menus']['Row'];
+type DbRecipe = Database['public']['Tables']['recipes']['Row'];
+type DbShoppingList = Database['public']['Tables']['shopping_lists']['Row'];
+type DbRecipeIngredient = Database['public']['Tables']['recipe_ingredients']['Row'];
+type DbIngredient = Database['public']['Tables']['ingredients']['Row'];
+
+interface RecipeWithIngredients extends DbRecipe {
+  recipe_ingredients: (DbRecipeIngredient & {
+    ingredients: DbIngredient;
+  })[];
+}
+
+interface WeeklyMenuWithRecipes extends DbWeeklyMenu {
+  [K in keyof DbWeeklyMenu as K extends `${string}_breakfast_id` | `${string}_lunch_id` | `${string}_dinner_id` | `${string}_snack_id` ? K : never]: {
+    id: string;
+    name: string;
+    description?: string;
+    meal_type: Database['public']['Enums']['meal_type'];
+    category: Database['public']['Enums']['meal_category'];
+  } | null;
+}
+
 export interface AIContext {
-  userProfile: any;
-  favorites: any[];
-  weeklyMenu: any[];
-  shoppingList: any[];
+  userProfile: DbProfile;
+  weeklyMenu: WeeklyMenuWithRecipes[];
+  recipes: RecipeWithIngredients[];
+  shoppingList: DbShoppingList | null;
   categories: ContextCategory[];
 }
 

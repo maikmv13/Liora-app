@@ -53,7 +53,7 @@ export function MobileChat() {
     <div className="flex flex-col min-h-screen bg-gradient-to-br from-rose-50/50 to-purple-50/50">
       <MobileChatHeader />
       
-      <div className="flex-1 overflow-y-auto pt-16 pb-32 p-4 space-y-4 custom-scrollbar">
+      <div className="flex-1 overflow-y-auto pt-4 pb-32 px-0 space-y-4 custom-scrollbar">
         <WelcomeMessage welcomeIndex={welcomeIndex} isMobile />
         
         {messages.map((message) => (
@@ -72,7 +72,6 @@ export function MobileChat() {
           </div>
         )}
         
-        {/* Elemento de referencia para el scroll */}
         <div ref={messagesEndRef} />
       </div>
 

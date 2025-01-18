@@ -4,12 +4,14 @@ import { motion, AnimatePresence } from 'framer-motion';
 import data from '@emoji-mart/data';
 import Picker from '@emoji-mart/react';
 
-// Quick suggestions with full queries
+// Quick suggestions con emojis más relevantes
 const QUICK_SUGGESTIONS = [
-  { text: "🍽️ ¿Qué debería cenar hoy?", query: "¿Qué debería cenar hoy? Necesito una idea saludable y fácil de preparar" },
-  { text: "🥗 ¿Cómo mejorar mi nutrición?", query: "¿Cómo puedo mejorar mi nutrición? Dame consejos prácticos" },
-  { text: "📋 Plan de comidas semanal", query: "Necesito un plan de comidas saludable para toda la semana" },
-  { text: "🍳 Desayuno saludable", query: "¿Qué desayuno saludable y nutritivo me recomiendas?" }
+  { text: "🍽️ Menú de hoy", query: "¿Qué tengo planificado para comer hoy?" },
+  { text: "🥗 Sugerir receta", query: "Sugiéreme una receta saludable" },
+  { text: "📋 Ver plan semanal", query: "Muéstrame mi plan de comidas de esta semana" },
+  { text: "🛒 Lista de compra", query: "¿Qué necesito comprar?" },
+  { text: "🥑 Consejo nutricional", query: "Dame un consejo de nutrición" },
+  { text: "🍳 Ideas desayuno", query: "¿Qué puedo desayunar mañana?" }
 ];
 
 interface MobileChatInputProps {
@@ -24,9 +26,9 @@ export function MobileChatInput({ value, onChange, onSubmit, loading, disabled }
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
   const [isComposing, setIsComposing] = useState(false);
-  const [hasInteracted, setHasInteracted] = useState(false);
   const [showSuggestions, setShowSuggestions] = useState(true);
 
+  // Ajustar altura del textarea
   useEffect(() => {
     if (textareaRef.current) {
       textareaRef.current.style.height = 'auto';
@@ -34,11 +36,10 @@ export function MobileChatInput({ value, onChange, onSubmit, loading, disabled }
     }
   }, [value]);
 
-  // Ocultar sugerencias cuando el usuario empieza a escribir
+  // Gestionar visibilidad de sugerencias
   useEffect(() => {
     if (value.trim()) {
       setShowSuggestions(false);
-      setHasInteracted(true);
     }
   }, [value]);
 
@@ -46,22 +47,20 @@ export function MobileChatInput({ value, onChange, onSubmit, loading, disabled }
     if (e.key === 'Enter' && !e.shiftKey && !isComposing) {
       e.preventDefault();
       onSubmit();
-      setHasInteracted(true);
       setShowSuggestions(false);
     }
   };
 
-  const addEmoji = (emoji: any) => {
-    onChange(value + emoji.native);
-    setShowEmojiPicker(false);
-    setHasInteracted(true);
+  const handleFocus = () => {
+    if (!value.trim()) {
+      setShowSuggestions(true);
+    }
   };
 
   const handleSuggestionClick = (suggestion: string) => {
     onChange(suggestion);
-    setShowSuggestions(false);
-    setHasInteracted(true);
     textareaRef.current?.focus();
+    // No ocultamos las sugerencias inmediatamente para permitir seleccionar otras
   };
 
   return (
@@ -72,27 +71,28 @@ export function MobileChatInput({ value, onChange, onSubmit, loading, disabled }
     >
       {/* Quick Suggestions */}
       <AnimatePresence>
-        {showSuggestions && !hasInteracted && !value && (
+        {showSuggestions && (
           <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: 20 }}
-            className="absolute bottom-full left-0 right-0 bg-white/95 backdrop-blur-sm border-t border-gray-200 py-3 px-4"
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: 'auto' }}
+            exit={{ opacity: 0, height: 0 }}
+            className="mb-2 overflow-hidden"
           >
-            <p className="text-xs font-medium text-gray-500 mb-3">Sugerencias</p>
-            <div className="flex flex-wrap gap-2">
-              {QUICK_SUGGESTIONS.map((suggestion, index) => (
-                <motion.button
-                  key={suggestion.text}
-                  initial={{ opacity: 0, x: -20 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{ delay: index * 0.1 }}
-                  onClick={() => handleSuggestionClick(suggestion.query)}
-                  className="flex-none px-4 py-2 bg-gray-50 hover:bg-rose-50 rounded-xl text-sm text-gray-700 transition-colors whitespace-nowrap"
-                >
-                  {suggestion.text}
-                </motion.button>
-              ))}
+            <div className="overflow-x-auto scrollbar-hide -mx-4 px-4">
+              <div className="flex space-x-2 py-1 min-w-min">
+                {QUICK_SUGGESTIONS.map((suggestion, index) => (
+                  <motion.button
+                    key={suggestion.text}
+                    initial={{ opacity: 0, x: -20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ delay: index * 0.1 }}
+                    onClick={() => handleSuggestionClick(suggestion.query)}
+                    className="flex-none px-4 py-2 bg-gray-50 hover:bg-rose-50 rounded-xl text-sm text-gray-700 transition-colors whitespace-nowrap"
+                  >
+                    {suggestion.text}
+                  </motion.button>
+                ))}
+              </div>
             </div>
           </motion.div>
         )}
@@ -143,10 +143,11 @@ export function MobileChatInput({ value, onChange, onSubmit, loading, disabled }
             value={value}
             onChange={(e) => onChange(e.target.value)}
             onKeyPress={handleKeyPress}
+            onFocus={handleFocus}
             onCompositionStart={() => setIsComposing(true)}
             onCompositionEnd={() => setIsComposing(false)}
             placeholder="Escribe un mensaje..."
-            className="w-full pl-4 pr-10 py-2.5 bg-gray-100 rounded-2xl resize-none focus:outline-none focus:ring-2 focus:ring-rose-500 placeholder-gray-500"
+            className="w-full pl-4 pr-10 py-2.5 bg-gray-50 rounded-2xl resize-none focus:outline-none focus:ring-2 focus:ring-rose-500 placeholder-gray-500"
             rows={1}
             style={{ maxHeight: '100px' }}
             disabled={disabled}
