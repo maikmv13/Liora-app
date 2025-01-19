@@ -12,7 +12,7 @@ interface HeroImageProps {
 
 export function HeroImage({ recipe, onBack, onToggleFavorite, isFavorite }: HeroImageProps) {
   return (
-    <div className="relative w-full aspect-[16/9] mt-16">
+    <div className="relative w-full aspect-[16/9] mt-5">
       {recipe.image_url ? (
         <img
           src={recipe.image_url}
@@ -31,13 +31,13 @@ export function HeroImage({ recipe, onBack, onToggleFavorite, isFavorite }: Hero
         initial={{ opacity: 0, x: -10 }}
         animate={{ opacity: 1, x: 0 }}
         onClick={onBack}
-        className="absolute top-4 left-4 p-2 mb-2 bg-black/20 hover:bg-black/30 backdrop-blur-sm rounded-xl text-white transition-colors"
+        className="absolute top-12 left-4 p-2 mb-2 bg-black/20 hover:bg-black/30 backdrop-blur-sm rounded-xl text-white transition-colors"
       >
         <ArrowLeft size={15} />
       </motion.button>
 
       {/* Botones de acción */}
-      <div className="absolute top-4 right-4 flex items-center space-x-2">
+      <div className="absolute top-12 right-4 flex items-center space-x-2">
         <motion.button
           initial={{ opacity: 0, y: -10 }}
           animate={{ opacity: 1, y: 0 }}
