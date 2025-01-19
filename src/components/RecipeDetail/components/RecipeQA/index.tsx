@@ -51,16 +51,16 @@ export function RecipeQA({ recipe }: RecipeQAProps) {
     setInput('');
     
     try {
-      await sendMessage(`About the recipe "${recipe.name}": ${message}`);
+      await sendMessage(`Sobre la receta "${recipe.name}": ${message}`);
     } catch (error) {
-      console.error('Error sending message:', error);
+      console.error('Error al enviar mensaje:', error);
     }
   };
 
   const handleQuestionClick = async (question: string) => {
     setIsExpanded(true);
     setActiveTab('chat');
-    await sendMessage(`About the recipe "${recipe.name}": ${question}`);
+    await sendMessage(`Sobre la receta "${recipe.name}": ${question}`);
   };
 
   return (
