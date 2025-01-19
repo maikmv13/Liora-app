@@ -5,7 +5,8 @@ import type { Recipe } from '../../../../types';
 import { useAI } from '../../../../hooks/useAI';
 import { ChatInput } from './ChatInput';
 import { QuickQuestions } from './QuickQuestions';
-import { ChatMessages } from './ChatMessages';
+import { ChatMessage } from '../../../LioraChat/components/ChatMessage';
+import { Loader2 } from 'lucide-react';
 
 interface RecipeQAProps {
   recipe: Recipe;
@@ -51,7 +52,7 @@ export function RecipeQA({ recipe }: RecipeQAProps) {
     setInput('');
     
     try {
-      await sendMessage(`Sobre la receta "${recipe.name}": ${message}`);
+      await sendMessage(message);
     } catch (error) {
       console.error('Error al enviar mensaje:', error);
     }
@@ -60,29 +61,29 @@ export function RecipeQA({ recipe }: RecipeQAProps) {
   const handleQuestionClick = async (question: string) => {
     setIsExpanded(true);
     setActiveTab('chat');
-    await sendMessage(`Sobre la receta "${recipe.name}": ${question}`);
+    await sendMessage(question);
   };
 
   return (
     <>
       {/* Main Drawer */}
-      <div className="fixed inset-x-0 bottom-16 z-40">
+      <div className="fixed inset-x-0 bottom-[3.25rem] z-40">
         <AnimatePresence>
           <motion.div
             initial={false}
             animate={{
-              height: isExpanded ? 'calc(100vh - 8rem)' : '12rem',
+              height: isExpanded ? 'calc(100vh - 7rem)' : '12rem',
             }}
             transition={{
               type: "spring",
               damping: 30,
               stiffness: 200
             }}
-            className="bg-white rounded-t-2xl shadow-lg border border-rose-100 overflow-hidden"
+            className="bg-white/70 backdrop-blur-sm rounded-t-2xl shadow-lg border border-rose-100 overflow-hidden"
           >
             {/* Header */}
-            <div className="sticky top-0 z-10 bg-white border-b border-rose-100">
-              <div className="flex items-center justify-between p-4">
+            <div className="sticky top-0 z-10 bg-white/95 backdrop-blur-sm border-b border-rose-100">
+              <div className="flex items-center justify-between py-2 px-4">
                 <div className="flex items-center space-x-3">
                   <div className="relative">
                     <div className="bg-rose-100 p-2 rounded-lg">
@@ -167,12 +168,24 @@ export function RecipeQA({ recipe }: RecipeQAProps) {
                   {activeTab === 'chat' ? (
                     <div 
                       ref={chatContainerRef}
-                      className="flex-1 p-4 space-y-4 pb-24"
+                      className="flex-1 p-4 space-y-4 pb-16"
                     >
-                      <ChatMessages messages={messages} loading={loading} />
+                      {messages.map((message) => (
+                        <ChatMessage 
+                          key={message.id}
+                          message={message}
+                        />
+                      ))}
+                      
+                      {loading && (
+                        <div className="flex items-center space-x-2 text-gray-500">
+                          <Loader2 size={16} className="animate-spin" />
+                          <span>Pensando...</span>
+                        </div>
+                      )}
                     </div>
                   ) : (
-                    <div className="p-4">
+                    <div className="p-3">
                       <QuickQuestions
                         questions={quickQuestions}
                         isLoading={isGenerating}
@@ -182,11 +195,13 @@ export function RecipeQA({ recipe }: RecipeQAProps) {
                   )}
                 </div>
               ) : (
-                <QuickQuestions
-                  questions={quickQuestions}
-                  isLoading={isGenerating}
-                  onQuestionClick={handleQuestionClick}
-                />
+                <div className="p-3">
+                  <QuickQuestions
+                    questions={quickQuestions}
+                    isLoading={isGenerating}
+                    onQuestionClick={handleQuestionClick}
+                  />
+                </div>
               )}
             </div>
           </motion.div>
@@ -194,7 +209,7 @@ export function RecipeQA({ recipe }: RecipeQAProps) {
       </div>
 
       {/* Fixed Input at Bottom */}
-      <div className="fixed bottom-0 left-0 right-0 p-4 bg-white border-t border-rose-100 z-50">
+      <div className="fixed bottom-0 left-0 right-0 px-3 py-2 bg-white/95 backdrop-blur-sm border-t border-rose-100 z-50">
         <ChatInput
           value={input}
           onChange={setInput}

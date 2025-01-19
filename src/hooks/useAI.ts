@@ -46,29 +46,68 @@ export function useAI() {
 
   const generateRecipeQuestions = async (recipe: Recipe) => {
     try {
-      const prompt = `Genera 5 preguntas cortas y específicas sobre la receta "${recipe.name}". 
-      Considera:
-      1. Ingredientes y sustitutos
-      2. Técnicas de preparación
-      3. Aspectos nutricionales
-      4. Consejos y trucos
-      5. Problemas comunes y soluciones
-      
-      Formatea: Devuelve solo las preguntas, una por línea, sin números ni viñetas.`;
+      const recipeContext = `
+        Receta: ${recipe.name}
+        Acompañamiento: ${recipe.side_dish}
+        Tipo de comida: ${recipe.meal_type}
+        Categoría: ${recipe.category}
+        
+        Información nutricional:
+        - Porciones: ${recipe.servings}
+        - Calorías: ${recipe.calories}
+        - Energía (KJ): ${recipe.energy_kj}
+        - Proteínas: ${recipe.proteins}
+        - Carbohidratos: ${recipe.carbohydrates}
+          · Azúcares: ${recipe.sugars}
+          · Fibra: ${recipe.fiber}
+        - Grasas: ${recipe.fats}
+          · Grasas saturadas: ${recipe.saturated_fats}
+        - Sodio: ${recipe.sodium}
+        
+        Tiempos:
+        - Preparación: ${recipe.prep_time}
+        
+        Ingredientes:
+        ${recipe.ingredients?.map(ing => `- ${ing.amount} ${ing.unit} ${ing.name}`).join('\n')}
+        
+        Instrucciones detalladas:
+        ${recipe.instructions}
+      `;
+
+      const prompt = `
+        Como chef experto, genera 3 preguntas muy concisas y específicas sobre esta receta.
+        Las preguntas deben ser cortas enfocándote en:
+
+        - Técnicas específicas de preparación y puntos críticos
+        - Adaptaciones según valores nutricionales (bajo en sodio, sin azúcar, etc.)
+        - Maridaje y acompañamientos basados en el side dish sugerido
+        - Ajustes de porciones y conservación
+        
+        Contexto de la receta:
+        ${recipeContext}
+
+        Formato: Devuelve solo las preguntas, una por línea, sin números ni viñetas.
+        Las preguntas deben ser específicas para esta receta y sus características únicas.
+      `;
 
       const response = await openai.chat.completions.create({
         model: 'gpt-3.5-turbo',
         messages: [
-          { role: 'system', content: 'You are a culinary expert assistant.' },
+          { 
+            role: 'system', 
+            content: `Eres un chef experto especializado en ${recipe.name} ${recipe.side_dish}.
+                     Tu objetivo es ayudar a los usuarios a dominar esta receta considerando sus valores nutricionales y características específicas.` 
+          },
           { role: 'user', content: prompt }
         ],
-        temperature: 0.7,
-        max_tokens: 200
+        temperature: 0.3,
+        max_tokens: 300
       });
 
       const questions = response.choices[0].message.content?.split('\n')
         .filter(q => q.trim().length > 0)
-        .map(q => q.trim());
+        .map(q => q.trim())
+        .slice(0, 3); // Aseguramos solo 3 preguntas
 
       return questions || [];
     } catch (error) {
@@ -82,7 +121,6 @@ export function useAI() {
       setLoading(true);
       setError(null);
 
-      // Get current user
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error('User not authenticated');
 
@@ -105,39 +143,26 @@ export function useAI() {
 
       setMessages(prev => [...prev, userMessage]);
 
-      // Check if it's a recipe question generation request
-      if (content.includes('Generate 5 short, specific questions')) {
-        const questions = content.split('\n')
-          .filter(q => q.trim().length > 0 && !q.includes('Generate'))
-          .map(q => q.trim());
-
-        const aiMessage: Message = {
-          id: crypto.randomUUID(),
-          role: 'assistant',
-          content: questions.join('\n'),
-          timestamp: new Date().toISOString()
-        };
-
-        await supabase.from('chat_history').insert({
-          user_id: user.id,
-          session_id: sessionId,
-          content: aiMessage.content,
-          role: 'assistant',
-          timestamp: aiMessage.timestamp
-        });
-
-        setMessages(prev => [...prev, aiMessage]);
-        return questions;
-      }
-
-      // Regular chat completion
+      // Regular chat completion with enhanced context
       const response = await openai.chat.completions.create({
         model: 'gpt-3.5-turbo',
         messages: [
-          { role: 'system', content: 'You are a culinary expert assistant.' },
+          { 
+            role: 'system', 
+            content: `Eres un asistente culinario experto. Tienes acceso a toda la información de la receta:
+              - Ingredientes y cantidades
+              - Instrucciones paso a paso
+              - Valores nutricionales
+              - Tiempos de preparación y cocción
+              
+              Proporciona respuestas concisas con emojis y bien estructuradas, basadas en datos reales de la receta.
+              Si no tienes información específica sobre algo, indícalo claramente.`
+          },
           ...messages.map(m => ({ role: m.role, content: m.content })),
           { role: 'user', content }
-        ]
+        ],
+        temperature: 0.3,
+        max_tokens: 100
       });
 
       const aiMessage: Message = {

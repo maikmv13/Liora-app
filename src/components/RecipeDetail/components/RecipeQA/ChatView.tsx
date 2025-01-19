@@ -60,7 +60,7 @@ export function ChatView({ recipe, messages, loading, onClose, onSendMessage }: 
       {/* Messages Container */}
       <div 
         ref={chatContainerRef}
-        className="flex-1 overflow-y-auto p-4 space-y-4"
+        className="flex-1 overflow-y-auto p-4 space-y-4 bg-white/80"
         style={{ paddingBottom: 'calc(4rem + env(safe-area-inset-bottom))' }}
       >
         {messages.map((message) => (
@@ -69,7 +69,7 @@ export function ChatView({ recipe, messages, loading, onClose, onSendMessage }: 
       </div>
 
       {/* Fixed Input at Bottom */}
-      <div className="sticky bottom-0 left-0 right-0 border-t border-rose-100 bg-white/95 backdrop-blur-sm p-4">
+      <div className="sticky bottom-0 left-0 right-0 border-t border-rose-100 bg-white/90 backdrop-blur-sm p-4">
         <ChatInput
           value={input}
           onChange={setInput}
