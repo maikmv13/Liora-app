@@ -29,6 +29,7 @@ export function WeeklyMenu2() {
   const [isLoading, setIsLoading] = useState(true);
   const [userId, setUserId] = useState<string | null>(null);
   const [showOnboarding, setShowOnboarding] = useState(false);
+  const [showOnboardingWizard, setShowOnboardingWizard] = useState(false);
 
   // Verificar autenticación primero
   useEffect(() => {
@@ -109,7 +110,7 @@ export function WeeklyMenu2() {
     }
   };
 
-  // Menu actions (generate, export, etc.)
+  // Menu actions (generate, export, etc.) - MOVIDO DESPUÉS DE handleAddToMenu
   const { 
     isGenerating, 
     lastGenerated, 
@@ -126,6 +127,63 @@ export function WeeklyMenu2() {
       }
     }
   );
+
+  // Verificar si hay suficientes recetas favoritas
+  const checkFavoriteRecipes = async () => {
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return false;
+
+      const { data: favorites } = await supabase
+        .from('favorites')
+        .select('recipe_id, recipes!favorites_recipe_id_fkey (meal_type)')
+        .eq('user_id', user.id);
+
+      if (!favorites || favorites.length === 0) return false;
+
+      // Contar recetas por tipo de comida
+      const mealTypeCounts = favorites.reduce((acc, fav) => {
+        const mealType = fav.recipes?.meal_type;
+        if (mealType) {
+          acc[mealType] = (acc[mealType] || 0) + 1;
+        }
+        return acc;
+      }, {} as Record<string, number>);
+
+      // Verificar mínimos por tipo de comida (2 por cada tipo)
+      const hasEnough = Object.entries(mealTypeCounts).every(([type, count]) => count >= 2);
+      
+      return hasEnough;
+    } catch (error) {
+      console.error('Error checking favorites:', error);
+      return false;
+    }
+  };
+
+  // Manejar la generación del menú
+  const handleGenerateMenuClick = async () => {
+    try {
+      const hasEnoughFavorites = await checkFavoriteRecipes();
+      
+      if (!hasEnoughFavorites) {
+        setShowOnboardingWizard(true);
+        return;
+      }
+
+      try {
+        await handleGenerateMenu(recipes);
+      } catch (error) {
+        // Si el error es por falta de recetas, mostrar el wizard
+        if (error instanceof Error && error.message.includes('No hay suficientes recetas')) {
+          setShowOnboardingWizard(true);
+        } else {
+          throw error;
+        }
+      }
+    } catch (error) {
+      console.error('Error al generar menú:', error);
+    }
+  };
 
   // Load menu history
   useEffect(() => {
@@ -244,12 +302,23 @@ export function WeeklyMenu2() {
         selectedMeal={selectedMealInfo?.meal || 'comida'}
       />
 
+      {/* Onboarding Wizard */}
+      <OnboardingWizard
+        isOpen={showOnboardingWizard}
+        onClose={() => setShowOnboardingWizard(false)}
+        onComplete={() => {
+          setShowOnboardingWizard(false);
+          handleGenerateMenu(recipes);
+        }}
+        onGenerateMenu={() => handleGenerateMenu(recipes)}
+      />
+
       {/* Contenedor principal */}
       <div>
         {/* Header */}
         <Header
           className="mb-6"
-          onGenerateMenu={() => handleGenerateMenu(recipes)}
+          onGenerateMenu={handleGenerateMenuClick}
           onExport={() => handleExport(menu)}
           onToggleHistory={() => setShowHistory(!showHistory)}
           isGenerating={isGenerating}

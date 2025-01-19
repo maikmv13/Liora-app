@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { ChefHat, X, Check, Search, Heart, Clock, Users, Flame } from 'lucide-react';
+import { ChefHat, X, Check, Search, Heart, Clock, Users, Flame, Sparkles } from 'lucide-react';
 import { MealType, Recipe } from '../../types';
 import { mealTypes, mealTypeCategories } from '../../types/categories';
 import { supabase } from '../../lib/supabase';
@@ -43,8 +43,8 @@ export function OnboardingWizard({
         const { data: { user } } = await supabase.auth.getUser();
         if (!user) return;
 
-        // Get recipes for current meal type
-        const { data: recipesData, error: recipesError } = await supabase
+        // Get all recipes
+        const { data: allRecipes, error: recipesError } = await supabase
           .from('recipes')
           .select(`
             *,
@@ -60,8 +60,7 @@ export function OnboardingWizard({
               )
             )
           `)
-          .eq('meal_type', currentMealType)
-          .in('category', mealTypeCategories[currentMealType] as any);
+          .order('created_at', { ascending: false });
 
         if (recipesError) throw recipesError;
 
@@ -73,8 +72,8 @@ export function OnboardingWizard({
 
         if (favsError) throw favsError;
 
-        // Update state
-        setRecipes(recipesData as Recipe[]);
+        // Filter recipes by current meal type
+        setRecipes(allRecipes.filter(r => r.meal_type === currentMealType));
         setFavorites(favsData?.map(f => f.recipe_id) || []);
 
         // Calculate stats
@@ -109,6 +108,21 @@ export function OnboardingWizard({
     setTotalFavorites(total);
     setProgress((total / TOTAL_REQUIRED) * 100);
   }, [favoriteStats]);
+
+  // Añadir efecto para cambiar automáticamente de meal type
+  useEffect(() => {
+    const currentCount = favoriteStats[currentMealType] || 0;
+    if (currentCount >= 2) {
+      const mealTypes = ['desayuno', 'comida', 'snack', 'cena'] as MealType[];
+      const currentIndex = mealTypes.indexOf(currentMealType);
+      const nextIndex = (currentIndex + 1) % mealTypes.length;
+      
+      // Solo cambiar si el siguiente tipo no está completo
+      if (favoriteStats[mealTypes[nextIndex]] < 2) {
+        setCurrentMealType(mealTypes[nextIndex]);
+      }
+    }
+  }, [favoriteStats, currentMealType]);
 
   const handleToggleFavorite = async (recipe: Recipe) => {
     try {
@@ -178,208 +192,252 @@ export function OnboardingWizard({
     }
   };
 
+  const handleRandomSelection = async () => {
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
+
+      // Obtener todas las recetas
+      const { data: allRecipes } = await supabase
+        .from('recipes')
+        .select('*')
+        .order('created_at', { ascending: false });
+
+      if (!allRecipes) return;
+
+      // Agrupar por tipo de comida
+      const recipesByType = allRecipes.reduce((acc, recipe) => {
+        if (!acc[recipe.meal_type]) {
+          acc[recipe.meal_type] = [];
+        }
+        acc[recipe.meal_type].push(recipe);
+        return acc;
+      }, {} as Record<MealType, Recipe[]>);
+
+      // Seleccionar 2 recetas aleatorias de cada tipo
+      for (const mealType of Object.keys(recipesByType)) {
+        const recipes = recipesByType[mealType as MealType];
+        const selected = recipes
+          .sort(() => Math.random() - 0.5)
+          .slice(0, 2);
+
+        // Añadir a favoritos
+        for (const recipe of selected) {
+          if (!favorites.includes(recipe.id)) {
+            await handleToggleFavorite(recipe);
+          }
+        }
+      }
+    } catch (error) {
+      console.error('Error en selección aleatoria:', error);
+    }
+  };
+
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-      <div className="bg-white/95 backdrop-blur-md rounded-2xl w-full max-w-4xl max-h-[90vh] overflow-hidden flex flex-col">
-        {/* Header */}
-        <div className="p-4 md:p-6 border-b border-gray-200">
-          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-4">
-            <div className="flex items-center space-x-3">
-              <div className="bg-rose-50 p-3 rounded-xl">
-                <ChefHat size={24} className="text-rose-500" />
-              </div>
-              <div>
-                <h2 className="text-xl md:text-2xl font-bold text-gray-900">Personaliza tu menú</h2>
-                <p className="text-sm md:text-base text-gray-600">
-                  Selecciona tus recetas favoritas para generar menús personalizados
-                </p>
-              </div>
-            </div>
-            <button
-              onClick={onClose}
-              className="p-2 hover:bg-gray-100 rounded-xl transition-colors"
-            >
-              <X size={20} className="text-gray-500" />
-            </button>
-          </div>
-
-          {/* Progress bar */}
-          <div className="flex items-center space-x-4">
-            <div className="flex-1">
-              <div className="h-2 bg-gray-100 rounded-full overflow-hidden">
-                <div 
-                  className="h-full bg-gradient-to-r from-orange-400 via-pink-500 to-rose-500 transition-all duration-500"
-                  style={{ width: `${progress}%` }}
-                />
-              </div>
-              <div className="flex justify-between mt-2 text-xs md:text-sm">
-                <span className="text-gray-600">
-                  {totalFavorites} de {TOTAL_REQUIRED} recetas favoritas
-                </span>
-                <span className="text-gray-500">
-                  {Math.round(progress)}%
-                </span>
-              </div>
-            </div>
-          </div>
-
-          {/* Meal type indicators - Scrollable on mobile */}
-          <div className="flex overflow-x-auto gap-2 mt-4 pb-2 md:pb-0 md:gap-4 scrollbar-hide">
-            {mealTypes.map(({ id, label, emoji, requiredRecipes }) => {
-              const isComplete = isMealTypeComplete(id as MealType);
-              return (
-                <button 
-                  key={id}
-                  onClick={() => setCurrentMealType(id as MealType)}
-                  className={`flex-none flex items-center space-x-2 px-3 py-1.5 rounded-lg transition-colors ${
-                    id === currentMealType
-                      ? getMealTypeColor(id as MealType)
-                      : isComplete
-                        ? 'bg-emerald-50 text-emerald-600'
-                        : 'bg-gray-50 text-gray-500'
-                  }`}
-                >
-                  {isComplete ? (
-                    <Check size={20} className="text-emerald-500" />
-                  ) : (
-                    <span>{emoji}</span>
-                  )}
-                  <div className="flex flex-col">
-                    <span className="text-sm font-medium whitespace-nowrap">{label}</span>
-                    <span className="text-xs">
-                      {favoriteStats[id as MealType] || 0}/{requiredRecipes}
-                    </span>
-                  </div>
-                </button>
-              );
-            })}
-          </div>
-
-          {/* Search */}
-          <div className="relative mt-4">
-            <input
-              type="text"
-              placeholder="Buscar recetas..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full pl-10 pr-4 py-2.5 bg-white rounded-xl border border-gray-200 focus:ring-2 focus:ring-rose-500"
-            />
-            <Search size={18} className="absolute left-3 top-3 text-gray-400" />
-          </div>
-        </div>
-
-        {/* Content */}
-        <div className="flex-1 overflow-y-auto p-4 md:p-6">
-          {loading ? (
-            <div className="flex items-center justify-center h-48">
-              <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-rose-500"></div>
-            </div>
-          ) : recipes.length === 0 ? (
-            <div className="text-center py-12">
-              <ChefHat size={32} className="mx-auto text-gray-400 mb-2" />
-              <p className="text-gray-600">No hay recetas disponibles</p>
-            </div>
-          ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {recipes
-                .filter(recipe => 
-                  recipe.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                  recipe.category.toLowerCase().includes(searchTerm.toLowerCase())
-                )
-                .map(recipe => (
-                  <div
-                    key={recipe.id}
-                    className="bg-white rounded-xl border border-gray-200 overflow-hidden hover:shadow-md transition-shadow"
-                  >
-                    {/* Recipe Image */}
-                    <div className="relative aspect-[16/9] bg-gray-100">
-                      {recipe.image_url ? (
-                        <img
-                          src={recipe.image_url}
-                          alt={recipe.name}
-                          className="w-full h-full object-cover"
-                        />
-                      ) : (
-                        <div className="w-full h-full flex items-center justify-center">
-                          <ChefHat size={32} className="text-gray-400" />
+    <div className={`fixed inset-0 z-50 bg-black/50 backdrop-blur-sm ${isOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'} transition-opacity duration-200`}>
+      <div className="fixed inset-0 overflow-hidden">
+        <div className="absolute inset-0 overflow-hidden">
+          <div className="fixed inset-y-0 right-0 flex max-w-full">
+            <div className="w-screen max-w-2xl">
+              <div className="flex h-full flex-col bg-white shadow-xl">
+                {/* Header mejorado */}
+                <div className="flex-shrink-0 border-b border-gray-100 bg-white/90 backdrop-blur-sm sticky top-0 z-10">
+                  <div className="p-4 flex items-center justify-between">
+                    <div className="flex items-center space-x-3">
+                      <div className="relative">
+                        <div className="bg-rose-100 p-2 rounded-lg">
+                          <ChefHat size={20} className="text-rose-500" />
                         </div>
-                      )}
+                        <div className="absolute -top-1 -right-1 bg-rose-500 rounded-full p-1">
+                          <Sparkles size={8} className="text-white" />
+                        </div>
+                      </div>
+                      <div>
+                        <h2 className="font-medium text-gray-900">✨ Personaliza tu menú</h2>
+                        <p className="text-sm text-gray-500">
+                          Selecciona al menos 2 recetas de cada tipo
+                        </p>
+                      </div>
                     </div>
+                    <button
+                      onClick={onClose}
+                      className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+                    >
+                      <X size={20} className="text-gray-500" />
+                    </button>
+                  </div>
 
-                    {/* Recipe Info */}
-                    <div className="p-4">
-                      <h3 className="font-medium text-gray-900 line-clamp-2">
-                        {recipe.name}
-                      </h3>
+                  {/* Progress bar */}
+                  <div className="px-4 pb-2">
+                    <div className="h-2 bg-gray-100 rounded-full overflow-hidden">
+                      <div 
+                        className="h-full bg-gradient-to-r from-orange-400 via-pink-500 to-rose-500 transition-all duration-500"
+                        style={{ width: `${progress}%` }}
+                      />
+                    </div>
+                    <div className="flex justify-between mt-1 text-xs text-gray-500">
+                      <span>🎯 {totalFavorites} de {TOTAL_REQUIRED} recetas seleccionadas</span>
+                    </div>
+                  </div>
+
+                  {/* Meal Type Selector mejorado */}
+                  <div className="px-4 pb-3 flex gap-2 overflow-x-auto scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-transparent">
+                    {[
+                      { id: 'desayuno', label: 'Desayuno', emoji: '🍳', icon: '☀️' },
+                      { id: 'comida', label: 'Comida', emoji: '🍽️', icon: '🌞' },
+                      { id: 'snack', label: 'Snack', emoji: '🥨', icon: '🎯' },
+                      { id: 'cena', label: 'Cena', emoji: '🌙', icon: '🌛' }
+                    ].map(({ id, label, emoji, icon }) => {
+                      const isActive = currentMealType === id;
+                      const count = favoriteStats[id as MealType] || 0;
+                      const isComplete = count >= 2;
                       
-                      <div className="flex flex-wrap gap-2 mt-2">
-                        <span className="inline-flex items-center px-2 py-1 rounded-lg text-xs font-medium bg-gray-100 text-gray-700">
-                          {recipe.category}
-                        </span>
-                        {recipe.calories && (
-                          <span className="inline-flex items-center space-x-1 px-2 py-1 rounded-lg text-xs font-medium bg-rose-50 text-rose-600">
-                            <Flame size={12} />
-                            <span>{recipe.calories}</span>
-                          </span>
-                        )}
-                      </div>
-
-                      <div className="flex items-center justify-between mt-4">
-                        <div className="flex items-center space-x-4 text-sm text-gray-500">
-                          <div className="flex items-center">
-                            <Users size={14} className="mr-1" />
-                            <span>{recipe.servings}</span>
-                          </div>
-                          <div className="flex items-center">
-                            <Clock size={14} className="mr-1" />
-                            <span>{recipe.prep_time || "30 min"}</span>
-                          </div>
-                        </div>
+                      return (
                         <button
-                          onClick={() => handleToggleFavorite(recipe)}
-                          className={`p-2 rounded-lg transition-colors ${
-                            favorites.includes(recipe.id)
-                              ? 'bg-rose-50 text-rose-500'
-                              : 'hover:bg-rose-50 text-gray-400 hover:text-rose-500'
-                          }`}
+                          key={id}
+                          onClick={() => setCurrentMealType(id as MealType)}
+                          className={`
+                            flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm whitespace-nowrap
+                            transition-all duration-200 hover:scale-105
+                            ${isActive 
+                              ? 'bg-rose-500 text-white shadow-md scale-105' 
+                              : isComplete
+                                ? 'bg-emerald-50 text-emerald-600'
+                                : 'bg-gray-50 text-gray-500 hover:bg-gray-100'
+                            }
+                          `}
                         >
-                          <Heart 
-                            size={20} 
-                            className={favorites.includes(recipe.id) ? 'fill-current' : ''} 
-                          />
+                          <span className="text-base">{emoji}</span>
+                          <span className="font-medium">{label}</span>
+                          <span className={`text-xs px-1.5 py-0.5 rounded-full ${
+                            count >= 2 ? 'bg-emerald-500 text-white' : 'bg-white/20'
+                          }`}>
+                            {icon} {count}/2
+                          </span>
                         </button>
-                      </div>
-                    </div>
+                      );
+                    })}
                   </div>
-                ))}
-            </div>
-          )}
-        </div>
+                </div>
 
-        {/* Footer */}
-        <div className="p-4 md:p-6 border-t border-gray-200">
-          <div className="flex justify-end space-x-3">
-            <button
-              onClick={onClose}
-              className="px-4 py-2 text-gray-600 hover:bg-gray-100 rounded-xl transition-colors"
-            >
-              Cancelar
-            </button>
-            <button
-              onClick={handleComplete}
-              disabled={progress < 100}
-              className={`
-                px-4 py-2 rounded-xl font-medium transition-colors
-                ${progress >= 100
-                  ? 'bg-gradient-to-r from-orange-400 via-pink-500 to-rose-500 text-white hover:from-orange-500 hover:via-pink-600 hover:to-rose-600'
-                  : 'bg-gray-100 text-gray-400 cursor-not-allowed'
-                }
-              `}
-            >
-              {progress >= 100 ? 'Generar Menú' : 'Selecciona más recetas'}
-            </button>
+                {/* Content */}
+                <div className="flex-1 overflow-y-auto p-4 md:p-6">
+                  {loading ? (
+                    <div className="flex items-center justify-center h-48">
+                      <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-rose-500"></div>
+                    </div>
+                  ) : recipes.length === 0 ? (
+                    <div className="text-center py-12">
+                      <ChefHat size={32} className="mx-auto text-gray-400 mb-2" />
+                      <p className="text-gray-600">No hay recetas disponibles</p>
+                    </div>
+                  ) : (
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                      {recipes
+                        .filter(recipe => 
+                          recipe.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                          recipe.category.toLowerCase().includes(searchTerm.toLowerCase())
+                        )
+                        .map(recipe => (
+                          <div
+                            key={recipe.id}
+                            className="bg-white rounded-xl border border-gray-200 overflow-hidden hover:shadow-md transition-shadow"
+                          >
+                            {/* Recipe Image */}
+                            <div className="relative aspect-[16/9] bg-gray-100">
+                              {recipe.image_url ? (
+                                <img
+                                  src={recipe.image_url}
+                                  alt={recipe.name}
+                                  className="w-full h-full object-cover"
+                                />
+                              ) : (
+                                <div className="w-full h-full flex items-center justify-center">
+                                  <ChefHat size={32} className="text-gray-400" />
+                                </div>
+                              )}
+                            </div>
+
+                            {/* Recipe Info */}
+                            <div className="p-4">
+                              <h3 className="font-medium text-gray-900 line-clamp-2">
+                                {recipe.name}
+                              </h3>
+                              
+                              <div className="flex flex-wrap gap-2 mt-2">
+                                <span className="inline-flex items-center px-2 py-1 rounded-lg text-xs font-medium bg-gray-100 text-gray-700">
+                                  {recipe.category}
+                                </span>
+                                {recipe.calories && (
+                                  <span className="inline-flex items-center space-x-1 px-2 py-1 rounded-lg text-xs font-medium bg-rose-50 text-rose-600">
+                                    <Flame size={12} />
+                                    <span>{recipe.calories}</span>
+                                  </span>
+                                )}
+                              </div>
+
+                              <div className="flex items-center justify-between mt-4">
+                                <div className="flex items-center space-x-4 text-sm text-gray-500">
+                                  <div className="flex items-center">
+                                    <Users size={14} className="mr-1" />
+                                    <span>{recipe.servings}</span>
+                                  </div>
+                                  <div className="flex items-center">
+                                    <Clock size={14} className="mr-1" />
+                                    <span>{recipe.prep_time || "30 min"}</span>
+                                  </div>
+                                </div>
+                                <button
+                                  onClick={() => handleToggleFavorite(recipe)}
+                                  className={`p-2 rounded-lg transition-colors ${
+                                    favorites.includes(recipe.id)
+                                      ? 'bg-rose-50 text-rose-500'
+                                      : 'hover:bg-rose-50 text-gray-400 hover:text-rose-500'
+                                  }`}
+                                >
+                                  <Heart 
+                                    size={20} 
+                                    className={favorites.includes(recipe.id) ? 'fill-current' : ''} 
+                                  />
+                                </button>
+                              </div>
+                            </div>
+                          </div>
+                        ))}
+                    </div>
+                  )}
+                </div>
+
+                {/* Footer modificado */}
+                <div className="p-4 border-t border-gray-200">
+                  <div className="flex justify-end space-x-3">
+                    <button
+                      onClick={handleRandomSelection}
+                      className="px-6 py-2 bg-gradient-to-r from-purple-500 to-indigo-500 text-white rounded-lg font-medium transition-all duration-200 hover:shadow-lg hover:scale-105 flex items-center gap-2"
+                    >
+                      <span>🎲</span>
+                      <span>Selección Aleatoria</span>
+                      <span>✨</span>
+                    </button>
+                    <button
+                      onClick={handleComplete}
+                      disabled={progress < 100}
+                      className={`
+                        px-6 py-2 rounded-lg font-medium transition-all duration-200
+                        ${progress >= 100
+                          ? 'bg-gradient-to-r from-orange-400 via-pink-500 to-rose-500 text-white hover:shadow-lg hover:scale-105'
+                          : 'bg-gray-100 text-gray-400 cursor-not-allowed'
+                        }
+                      `}
+                    >
+                      {progress >= 100 ? '✨ Generar Menú' : '🔒 Selecciona más recetas'}
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </div>
