@@ -13,6 +13,7 @@ import { useActiveMenu } from '../../hooks/useActiveMenu';
 import { supabase } from '../../lib/supabase';
 import { weekDays } from './utils';
 import { RecipeSelectorSidebar } from './RecipeSelectorSidebar';
+import { Navigate } from 'react-router-dom';
 
 export function WeeklyMenu2() {
   const [selectedDay, setSelectedDay] = useState<string>('Lunes');
@@ -25,39 +26,47 @@ export function WeeklyMenu2() {
     meal: MealType;
   } | null>(null);
 
-  // Get current user
-  const [userId, setUserId] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [userId, setUserId] = useState<string | null>(null);
+  const [showOnboarding, setShowOnboarding] = useState(false);
 
+  // Verificar autenticación primero
   useEffect(() => {
-    const getUser = async () => {
+    const checkAuth = async () => {
       try {
         const { data: { user } } = await supabase.auth.getUser();
         setUserId(user?.id || null);
+        if (!user) {
+          setShowOnboarding(true);
+        }
       } catch (error) {
         console.error('Error checking auth:', error);
-        setUserId(null);
+        setShowOnboarding(true);
       } finally {
         setIsLoading(false);
       }
     };
-    getUser();
+    checkAuth();
   }, []);
 
-  // Get active menu and recipes
-  const { menuItems: menu, loading: menuLoading, error, activeMenuId } = useActiveMenu(userId || undefined);
+  // Solo cargar el menú si hay usuario
+  const { 
+    menuItems: menu, 
+    loading: menuLoading, 
+    error 
+  } = useActiveMenu(userId || undefined);
   const { recipes } = useRecipes();
 
   // Handle menu updates
   const handleAddToMenu = async (recipe: Recipe | null, day: string, meal: MealType) => {
     try {
-      if (!activeMenuId) {
-        console.error('No hay un menú activo');
+      if (!userId) {
+        console.error('No hay un usuario autenticado');
         return;
       }
 
       console.log('Actualizando menú:', {
-        menuId: activeMenuId,
+        menuId: userId,
         day,
         meal,
         recipeId: recipe?.id
@@ -89,7 +98,7 @@ export function WeeklyMenu2() {
       const { error: updateError } = await supabase
         .from('weekly_menus')
         .update({ [fieldName]: recipe?.id || null })
-        .eq('id', activeMenuId);
+        .eq('id', userId);
 
       if (updateError) throw updateError;
 
@@ -104,8 +113,8 @@ export function WeeklyMenu2() {
   const { 
     isGenerating, 
     lastGenerated, 
-    showOnboarding,
-    setShowOnboarding,
+    showOnboarding: menuShowOnboarding,
+    setShowOnboarding: setMenuShowOnboarding,
     handleGenerateMenu, 
     handleExport 
   } = useMenuActions(
@@ -144,11 +153,11 @@ export function WeeklyMenu2() {
   const handleRestoreMenu = async (menuId: string) => {
     try {
       // Archive current active menu
-      if (activeMenuId) {
+      if (userId) {
         await supabase
           .from('weekly_menus')
           .update({ status: 'archived' })
-          .eq('id', activeMenuId);
+          .eq('id', userId);
       }
 
       // Restore selected menu
@@ -190,7 +199,7 @@ export function WeeklyMenu2() {
     }
   };
 
-  // Si está cargando, mostramos el loading
+  // Loading state
   if (isLoading) {
     return (
       <div className="flex items-center justify-center min-h-[400px]">
@@ -199,15 +208,10 @@ export function WeeklyMenu2() {
     );
   }
 
-  // Si no hay usuario o showOnboarding es true, mostramos el onboarding
+  // Si no hay usuario o showOnboarding es true, mostrar onboarding
   if (!userId || showOnboarding) {
     return (
-      <OnboardingWizard
-        isOpen={true}
-        onClose={() => setShowOnboarding(false)}
-        onComplete={() => setShowOnboarding(false)}
-        onGenerateMenu={() => handleGenerateMenu(recipes)}
-      />
+      <Navigate to="/" replace />
     );
   }
 

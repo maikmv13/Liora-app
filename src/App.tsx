@@ -27,7 +27,7 @@ const ShoppingList = lazy(() => import('./components/ShoppingList'));
 const RecipeContent = lazy(() => import('./components/RecipeList/RecipeContext'));
 const LioraChat = lazy(() => import('./components/LioraChat'));
 
-// Nuevo componente que estará dentro del Router
+// Componente que contiene el contenido de la app
 function AppContent() {
   const location = useLocation();
   const [searchTerm, setSearchTerm] = useState('');
@@ -145,17 +145,15 @@ function AppContent() {
 
   if (!user && !onboardingCompleted) {
     return (
-      <Router>
-        <Onboarding 
-          onComplete={handleOnboardingComplete}
-          onLogin={() => {}}
-        />
-      </Router>
+      <Onboarding 
+        onComplete={handleOnboardingComplete}
+        onLogin={() => {}}
+      />
     );
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-orange-50 to-rose-50 relative">
+    <div className="min-h-screen bg-gradient-to-br from-rose-50 to-orange-50 relative">
       <Header
         searchTerm={searchTerm}
         onSearchChange={setSearchTerm}
@@ -267,6 +265,7 @@ function AppContent() {
   );
 }
 
+// Componente principal que solo maneja el Router
 function App() {
   return (
     <Router>
