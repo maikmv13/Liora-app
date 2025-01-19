@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Bot, Sparkles } from 'lucide-react';
 import { ScreenProps } from './types';
@@ -22,6 +22,30 @@ const followUpMessage = {
 };
 
 export function WelcomeScreen({ onNext }: ScreenProps) {
+  const [messages, setMessages] = useState<typeof welcomeMessage[]>([welcomeMessage]);
+  const [isTyping, setIsTyping] = useState(false);
+  const hasShownSecondMessage = React.useRef(false);
+
+  useEffect(() => {
+    const showSecondMessage = async () => {
+      if (hasShownSecondMessage.current) return;
+      hasShownSecondMessage.current = true;
+
+      // Pausa antes de mostrar el typing del segundo mensaje
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      
+      // Mostrar typing para el segundo mensaje
+      setIsTyping(true);
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      
+      // Mostrar segundo mensaje
+      setMessages(prev => [...prev, followUpMessage]);
+      setIsTyping(false);
+    };
+
+    showSecondMessage();
+  }, []);
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-violet-500/5 via-fuchsia-500/5 to-rose-500/5 overflow-hidden">
       {/* SVG Pattern Background */}
@@ -108,30 +132,47 @@ export function WelcomeScreen({ onNext }: ScreenProps) {
           </motion.div>
         </div>
 
-        {/* Welcome Messages */}
-        <div className="w-full space-y-4">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.6 }}
-          >
-            <ChatMessage message={welcomeMessage} />
-          </motion.div>
-
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 1.2 }}
-          >
-            <ChatMessage message={followUpMessage} />
-          </motion.div>
+        {/* Welcome Messages - Centrados horizontalmente */}
+        <div className="w-full max-w-md mx-auto space-y-4">
+          {messages.map((message) => (
+            <motion.div
+              key={message.id}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="flex justify-center"
+            >
+              <div className="w-full max-w-[90%] md:max-w-[85%]">
+                <ChatMessage message={message} />
+              </div>
+            </motion.div>
+          ))}
+          
+          {isTyping && (
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="flex justify-center"
+            >
+              <div className="w-full max-w-[90%] md:max-w-[85%]">
+                <ChatMessage 
+                  message={{
+                    id: 'typing',
+                    role: 'assistant',
+                    content: '',
+                    timestamp: new Date().toISOString()
+                  }}
+                  isTyping={true}
+                />
+              </div>
+            </motion.div>
+          )}
         </div>
 
         {/* Start Button */}
         <motion.button
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 1.8 }}
+          transition={{ delay: 3 }}
           onClick={onNext}
           className="fixed bottom-8 left-4 right-4 md:relative md:mt-8 md:w-full px-6 md:px-8 py-4 bg-gradient-to-r from-violet-500 via-fuchsia-500 to-rose-500 text-white rounded-xl font-medium shadow-lg hover:shadow-xl active:scale-95 transition-all duration-300 max-w-sm mx-auto"
         >

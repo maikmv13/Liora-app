@@ -81,7 +81,7 @@ export function FeaturesScreen({ onNext }: ScreenProps) {
               </span>
             </h2>
             <p className="text-base md:text-lg text-gray-600 mt-2">
-              Todo lo que necesitas para una vida saludable 🌱
+              Aprende a cómo vivir estable en una balanza!
             </p>
             <motion.div
               animate={{ 
