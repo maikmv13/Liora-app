@@ -27,18 +27,25 @@ export function WeeklyMenu2() {
 
   // Get current user
   const [userId, setUserId] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+
   useEffect(() => {
     const getUser = async () => {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (user) {
-        setUserId(user.id);
+      try {
+        const { data: { user } } = await supabase.auth.getUser();
+        setUserId(user?.id || null);
+      } catch (error) {
+        console.error('Error checking auth:', error);
+        setUserId(null);
+      } finally {
+        setIsLoading(false);
       }
     };
     getUser();
   }, []);
 
   // Get active menu and recipes
-  const { menuItems: menu, loading, error, activeMenuId } = useActiveMenu(userId || undefined);
+  const { menuItems: menu, loading: menuLoading, error, activeMenuId } = useActiveMenu(userId || undefined);
   const { recipes } = useRecipes();
 
   // Handle menu updates
@@ -183,6 +190,42 @@ export function WeeklyMenu2() {
     }
   };
 
+  // Si está cargando, mostramos el loading
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center min-h-[400px]">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-rose-500"></div>
+      </div>
+    );
+  }
+
+  // Si no hay usuario o showOnboarding es true, mostramos el onboarding
+  if (!userId || showOnboarding) {
+    return (
+      <OnboardingWizard
+        isOpen={true}
+        onClose={() => setShowOnboarding(false)}
+        onComplete={() => setShowOnboarding(false)}
+        onGenerateMenu={() => handleGenerateMenu(recipes)}
+      />
+    );
+  }
+
+  // Si hay error en la carga del menú
+  if (error) {
+    return (
+      <div className="bg-white/90 backdrop-blur-sm rounded-2xl border border-red-200 p-6">
+        <p className="text-red-600 text-center">{error}</p>
+        <button 
+          className="mt-4 px-4 py-2 bg-rose-500 text-white rounded-xl hover:bg-rose-600 mx-auto block"
+          onClick={() => window.location.reload()}
+        >
+          Intentar de nuevo
+        </button>
+      </div>
+    );
+  }
+
   return (
     <>
       {/* Recipe Selector Sidebar */}
@@ -211,19 +254,9 @@ export function WeeklyMenu2() {
 
         {/* Main content */}
         <div className="relative mb-6">
-          {loading ? (
+          {menuLoading ? (
             <div className="flex items-center justify-center min-h-[400px]">
               <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-rose-500"></div>
-            </div>
-          ) : error ? (
-            <div className="bg-white/90 backdrop-blur-sm rounded-2xl border border-red-200 p-6">
-              <p className="text-red-600 text-center">{error}</p>
-              <button 
-                className="mt-4 px-4 py-2 bg-rose-500 text-white rounded-xl hover:bg-rose-600 mx-auto block"
-                onClick={() => window.location.reload()}
-              >
-                Intentar de nuevo
-              </button>
             </div>
           ) : (
             <>
@@ -275,15 +308,6 @@ export function WeeklyMenu2() {
               onMenuArchived={() => {}}
             />
           </div>
-        )}
-
-        {showOnboarding && (
-          <OnboardingWizard
-            isOpen={showOnboarding}
-            onClose={() => setShowOnboarding(false)}
-            onComplete={() => setShowOnboarding(false)}
-            onGenerateMenu={() => handleGenerateMenu(recipes)}
-          />
         )}
       </div>
     </>
