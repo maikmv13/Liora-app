@@ -4,7 +4,7 @@ import { openai } from '../services/ai';
 import type { Message, AIContext, ContextCategory } from '../types/ai';
 import type { Recipe } from '../types';
 
-export function useAI() {
+export function useAI(recipe?: Recipe) {
   const [messages, setMessages] = useState<Message[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<Error | null>(null);
@@ -68,20 +68,19 @@ export function useAI() {
         - Preparación: ${recipe.prep_time}
         
         Ingredientes:
-        ${recipe.ingredients?.map(ing => `- ${ing.amount} ${ing.unit} ${ing.name}`).join('\n')}
+        ${recipe.recipe_ingredients?.map(ing => `- ${ing.quantity} ${ing.unit} ${ing.ingredients?.name}`).join('\n')}
         
         Instrucciones detalladas:
         ${recipe.instructions}
       `;
 
       const prompt = `
-        Como chef experto, genera 3 preguntas muy concisas y específicas sobre esta receta.
+        Como chef experto, genera 3 preguntas cortas sobre esta receta.
         Las preguntas deben ser cortas enfocándote en:
 
-        - Técnicas específicas de preparación y puntos críticos
-        - Adaptaciones según valores nutricionales (bajo en sodio, sin azúcar, etc.)
-        - Maridaje y acompañamientos basados en el side dish sugerido
-        - Ajustes de porciones y conservación
+        - Técnicas de preparación y puntos críticos
+        - Dudas sobre las instrucciones
+        - Métodos de conservación
         
         Contexto de la receta:
         ${recipeContext}
@@ -96,12 +95,12 @@ export function useAI() {
           { 
             role: 'system', 
             content: `Eres un chef experto especializado en ${recipe.name} ${recipe.side_dish}.
-                     Tu objetivo es ayudar a los usuarios a dominar esta receta considerando sus valores nutricionales y características específicas.` 
+                     Tu objetivo es ayudar a los usuarios a entender esta receta considerando sus aracterísticas específicas.` 
           },
           { role: 'user', content: prompt }
         ],
-        temperature: 0.3,
-        max_tokens: 300
+        temperature: 0.2,
+        max_tokens: 200
       });
 
       const questions = response.choices[0].message.content?.split('\n')
@@ -132,15 +131,6 @@ export function useAI() {
         timestamp: new Date().toISOString()
       };
 
-      // Save user message
-      await supabase.from('chat_history').insert({
-        user_id: user.id,
-        session_id: sessionId,
-        content,
-        role: 'user',
-        timestamp: userMessage.timestamp
-      });
-
       setMessages(prev => [...prev, userMessage]);
 
       // Regular chat completion with enhanced context
@@ -149,20 +139,21 @@ export function useAI() {
         messages: [
           { 
             role: 'system', 
-            content: `Eres un asistente culinario experto. Tienes acceso a toda la información de la receta:
-              - Ingredientes y cantidades
-              - Instrucciones paso a paso
-              - Valores nutricionales
-              - Tiempos de preparación y cocción
-              
-              Proporciona respuestas concisas con emojis y bien estructuradas, basadas en datos reales de la receta.
-              Si no tienes información específica sobre algo, indícalo claramente.`
+            content: recipe ? `Eres un asistente culinario experto ayudando con la receta "${recipe.name} ${recipe.side_dish}".
+              Tienes acceso a:
+              - Porciones: ${recipe.servings}
+              - Tiempo: ${recipe.prep_time}
+              - Ingredientes y cantidades: ${recipe.recipe_ingredients?.map(ing => `- ${ing.quantity} ${ing.unit} ${ing.ingredients?.name}`).join('\n')}
+              - Instrucciones: ${recipe.instructions}
+
+              Proporciona respuestas concisas con emojis y bien estructuradas.` 
+            : 'Eres un asistente culinario experto.'
           },
           ...messages.map(m => ({ role: m.role, content: m.content })),
           { role: 'user', content }
         ],
-        temperature: 0.3,
-        max_tokens: 100
+        temperature: 0.2,
+        max_tokens: 500
       });
 
       const aiMessage: Message = {
@@ -190,7 +181,7 @@ export function useAI() {
     } finally {
       setLoading(false);
     }
-  }, [messages, sessionId]);
+  }, [messages, sessionId, recipe]);
 
   const clearMessages = useCallback(async () => {
     try {

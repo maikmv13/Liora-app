@@ -18,7 +18,7 @@ export function RecipeQA({ recipe }: RecipeQAProps) {
   const [quickQuestions, setQuickQuestions] = useState<string[]>([]);
   const [isGenerating, setIsGenerating] = useState(true);
   const [activeTab, setActiveTab] = useState<'chat' | 'questions'>('questions');
-  const { messages, loading, sendMessage, generateRecipeQuestions } = useAI();
+  const { messages, loading, sendMessage, generateRecipeQuestions } = useAI(recipe);
   const chatContainerRef = React.useRef<HTMLDivElement>(null);
 
   // Generate quick questions on mount
@@ -215,6 +215,7 @@ export function RecipeQA({ recipe }: RecipeQAProps) {
           onChange={setInput}
           onSubmit={handleSendMessage}
           loading={loading}
+          recipe={recipe}
         />
       </div>
     </>
