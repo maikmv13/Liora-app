@@ -31,10 +31,10 @@ export function RecipeQADrawer({ recipe }: RecipeQADrawerProps) {
     const generateFAQs = async () => {
       try {
         setIsGeneratingFAQs(true);
-        await sendMessage(`Generate 5 short, specific questions about ${recipe.name} recipe. Consider ingredients, preparation method, nutritional value, and tips. Format as a list.`);
+        await sendMessage(`Genera 5 preguntas cortas y específicas sobre la receta ${recipe.name}. Considera los ingredientes, el método de preparación, el valor nutricional y consejos. Formatea como una lista.`);
         setIsGeneratingFAQs(false);
       } catch (error) {
-        console.error('Error generating FAQs:', error);
+        console.error('Error al generar preguntas:', error);
         setIsGeneratingFAQs(false);
       }
     };
@@ -82,13 +82,13 @@ export function RecipeQADrawer({ recipe }: RecipeQADrawerProps) {
     setInput('');
     
     try {
-      await sendMessage(`About the recipe "${recipe.name}": ${message}`);
+      await sendMessage(`Sobre la receta "${recipe.name}": ${message}`);
       
       if (chatContainerRef.current) {
         chatContainerRef.current.scrollTop = chatContainerRef.current.scrollHeight;
       }
     } catch (error) {
-      console.error('Error sending message:', error);
+      console.error('Error al enviar mensaje:', error);
     }
   };
 
