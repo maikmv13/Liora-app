@@ -32,47 +32,49 @@ export function DayCard({
 
   // Obtener el día actual y el siguiente
   const today = new Date();
-  const tomorrow = new Date(today);
-  tomorrow.setDate(today.getDate() + 1);
+  const currentDay = new Intl.DateTimeFormat('es-ES', { weekday: 'long' }).format(today).toLowerCase();
+  const isToday = currentDay === day.toLowerCase();
   
-  const currentDay = new Intl.DateTimeFormat('es-ES', { weekday: 'long' }).format(today);
-  const nextDay = new Intl.DateTimeFormat('es-ES', { weekday: 'long' }).format(tomorrow);
-  
-  const isToday = currentDay.toLowerCase() === day.toLowerCase();
   // El lunes nunca será "mañana" y si hoy es domingo, ningún día será "mañana"
-  const isTomorrow = today.getDay() !== 0 && 
-                    nextDay.toLowerCase() === day.toLowerCase() && 
-                    day.toLowerCase() !== 'lunes';
+  const isTomorrow = React.useMemo(() => {
+    if (today.getDay() === 0 || day.toLowerCase() === 'lunes') return false;
+    
+    const tomorrow = new Date(today);
+    tomorrow.setDate(today.getDate() + 1);
+    const nextDay = new Intl.DateTimeFormat('es-ES', { weekday: 'long' }).format(tomorrow).toLowerCase();
+    
+    return nextDay === day.toLowerCase();
+  }, [day]);
 
-  // Scroll automático al día siguiente al cargar la página en móvil
+  // Scroll automático
   React.useEffect(() => {
-    const isMobile = window.innerWidth < 768;
-    const shouldScroll = isTomorrow && isMobile;
+    const handleScroll = () => {
+      const isMobile = window.innerWidth < 768;
+      if (!isMobile) return;
 
-    if (shouldScroll) {
-      // Pequeño timeout para asegurar que los elementos están renderizados
-      const timeoutId = setTimeout(() => {
-        const element = document.getElementById(`day-card-${day}`);
-        if (element) {
-          element.scrollIntoView({ behavior: 'auto', block: 'nearest' });
+      try {
+        if (today.getDay() === 0) {
+          // Si es domingo, scroll al NextWeekCard
+          const nextWeekCard = document.getElementById('next-week-card');
+          if (nextWeekCard) {
+            nextWeekCard.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+          }
+        } else if (isTomorrow) {
+          // Si es el día de mañana (excepto lunes), scroll a ese día
+          const dayCard = document.getElementById(`day-card-${day}`);
+          if (dayCard) {
+            dayCard.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+          }
         }
-      }, 100);
+      } catch (error) {
+        console.error('Error en scroll automático:', error);
+      }
+    };
 
-      return () => clearTimeout(timeoutId);
-    }
-
-    // Si es domingo, hacemos scroll al NextWeekCard
-    if (today.getDay() === 0 && isMobile) {
-      const timeoutId = setTimeout(() => {
-        const element = document.getElementById('next-week-card');
-        if (element) {
-          element.scrollIntoView({ behavior: 'auto', block: 'nearest' });
-        }
-      }, 100);
-
-      return () => clearTimeout(timeoutId);
-    }
-  }, []); // Solo se ejecuta al montar el componente
+    // Pequeño delay para asegurar que los elementos están renderizados
+    const timeoutId = setTimeout(handleScroll, 500);
+    return () => clearTimeout(timeoutId);
+  }, [day, isTomorrow]);
 
   const mealTypes: MealType[] = ['desayuno', 'comida', 'snack', 'cena'];
 
