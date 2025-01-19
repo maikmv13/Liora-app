@@ -39,7 +39,10 @@ export function DayCard({
   const nextDay = new Intl.DateTimeFormat('es-ES', { weekday: 'long' }).format(tomorrow);
   
   const isToday = currentDay.toLowerCase() === day.toLowerCase();
-  const isTomorrow = nextDay.toLowerCase() === day.toLowerCase();
+  // El lunes nunca será "mañana" y si hoy es domingo, ningún día será "mañana"
+  const isTomorrow = today.getDay() !== 0 && 
+                    nextDay.toLowerCase() === day.toLowerCase() && 
+                    day.toLowerCase() !== 'lunes';
 
   // Scroll automático al día siguiente al cargar la página en móvil
   React.useEffect(() => {
@@ -50,6 +53,18 @@ export function DayCard({
       // Pequeño timeout para asegurar que los elementos están renderizados
       const timeoutId = setTimeout(() => {
         const element = document.getElementById(`day-card-${day}`);
+        if (element) {
+          element.scrollIntoView({ behavior: 'auto', block: 'nearest' });
+        }
+      }, 100);
+
+      return () => clearTimeout(timeoutId);
+    }
+
+    // Si es domingo, hacemos scroll al NextWeekCard
+    if (today.getDay() === 0 && isMobile) {
+      const timeoutId = setTimeout(() => {
+        const element = document.getElementById('next-week-card');
         if (element) {
           element.scrollIntoView({ behavior: 'auto', block: 'nearest' });
         }

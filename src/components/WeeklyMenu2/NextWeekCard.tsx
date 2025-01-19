@@ -8,8 +8,16 @@ export function NextWeekCard() {
     const calculateTimeLeft = () => {
       const now = new Date();
       const nextSunday = new Date();
-      nextSunday.setDate(now.getDate() + (7 - now.getDay()));
-      nextSunday.setHours(21, 0, 0, 0);
+      
+      // Si hoy es domingo y son menos de las 21:00, el reset es hoy
+      // Si no, el reset es el próximo domingo
+      if (now.getDay() === 0 && now.getHours() < 21) {
+        nextSunday.setHours(21, 0, 0, 0);
+      } else {
+        // Calculamos el próximo domingo
+        nextSunday.setDate(now.getDate() + ((7 - now.getDay()) % 7));
+        nextSunday.setHours(21, 0, 0, 0);
+      }
 
       const difference = nextSunday.getTime() - now.getTime();
       
@@ -29,13 +37,18 @@ export function NextWeekCard() {
   // Obtener el próximo lunes
   const getNextMonday = () => {
     const date = new Date();
-    date.setDate(date.getDate() + (7 - date.getDay()) + 1);
+    const day = date.getDay();
+    const daysUntilMonday = day === 0 ? 1 : 8 - day;
+    date.setDate(date.getDate() + daysUntilMonday);
     return new Intl.DateTimeFormat('es-ES', { weekday: 'long' }).format(date)
       .replace(/^\w/, c => c.toUpperCase());
   };
 
   return (
-    <div className="bg-gradient-to-br from-orange-50 to-rose-50 backdrop-blur-md rounded-2xl overflow-hidden h-full border border-orange-200 shadow-lg">
+    <div 
+      id="next-week-card"
+      className="bg-gradient-to-br from-orange-50 to-rose-50 backdrop-blur-md rounded-2xl overflow-hidden h-full border border-orange-200 shadow-lg"
+    >
       <div className="px-4 py-3 border-b border-orange-100 bg-white/50">
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-2">
