@@ -151,3 +151,12 @@ export function RecipeCard({ recipe, favorites, onToggleFavorite }: RecipeCardPr
     </div>
   );
 }
+
+export const mapRecipeToCardProps = (recipe: Recipe): RecipeCardProps => {
+  return {
+    id: recipe.id,
+    title: recipe.title,
+    description: recipe.description,
+    // ... resto de las propiedades mapeadas ...
+  };
+};
