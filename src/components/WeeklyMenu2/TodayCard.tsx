@@ -7,6 +7,7 @@ import {
 } from 'lucide-react';
 import { MenuItem } from '../../types';
 import { supabase } from '../../lib/supabase';
+import { useNavigate } from 'react-router-dom';
 
 interface TodayCardProps {
   menuItems: MenuItem[];
@@ -16,6 +17,7 @@ interface TodayCardProps {
 
 export function TodayCard({ menuItems, onViewRecipe, activeMenu }: TodayCardProps) {
   const [completions, setCompletions] = useState<Record<string, any>>({});
+  const navigate = useNavigate();
   
   const today = new Intl.DateTimeFormat('es-ES', { 
     weekday: 'long',
@@ -342,7 +344,7 @@ export function TodayCard({ menuItems, onViewRecipe, activeMenu }: TodayCardProp
                     {/* Hover Actions */}
                     <div className="absolute inset-0 bg-white/90 backdrop-blur-sm opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
                       <button
-                        onClick={() => onViewRecipe(menuItem)}
+                        onClick={() => navigate(`/recipe/${menuItem.recipe.id}`)}
                         className="p-2 bg-rose-50 text-rose-500 rounded-lg hover:bg-rose-100 transition-colors border border-rose-200"
                         title="Ver receta"
                       >

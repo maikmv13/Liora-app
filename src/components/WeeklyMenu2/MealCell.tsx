@@ -2,6 +2,7 @@ import React from 'react';
 import { X, Plus, Flame, Eye, PenSquare } from 'lucide-react';
 import { MenuItem, MealType } from '../../types';
 import { getMealIcon, getMealLabel } from './utils';
+import { useNavigate } from 'react-router-dom';
 
 interface MealCellProps {
   meal: MealType;
@@ -22,6 +23,7 @@ export function MealCell({
   onViewRecipe,
   variant = 'prominent'
 }: MealCellProps) {
+  const navigate = useNavigate();
   const isMainMeal = meal === 'comida' || meal === 'cena';
   const isCompact = !isMainMeal;
 
@@ -58,7 +60,7 @@ export function MealCell({
               <button
                 onClick={(e) => {
                   e.stopPropagation();
-                  onViewRecipe();
+                  navigate(`/recipe/${menuItem.recipe.id}`);
                 }}
                 className="p-2 bg-rose-50 text-rose-500 rounded-lg hover:bg-rose-100 transition-colors border border-rose-200"
                 title="Ver receta"

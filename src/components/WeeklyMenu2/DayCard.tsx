@@ -4,6 +4,7 @@ import { ExtendedWeeklyMenuDB } from '../../services/weeklyMenu';
 import { MealCell } from './MealCell';
 import { Calendar, Sparkles } from 'lucide-react';
 import { WeekDay } from './constants';
+import { useNavigate } from 'react-router-dom';
 
 interface DayCardProps {
   day: WeekDay;
@@ -27,6 +28,7 @@ export function DayCard({
   expanded = false
 }: DayCardProps) {
   const [hoveredMeal, setHoveredMeal] = React.useState<MealType | null>(null);
+  const navigate = useNavigate();
 
   // Obtener el día actual y el siguiente
   const today = new Date();
@@ -142,7 +144,7 @@ export function DayCard({
                 isHovered={hoveredMeal === meal}
                 onMealClick={() => onMealClick(meal)}
                 onRemove={() => onRemoveMeal(meal)}
-                onViewRecipe={() => menuItem && onViewRecipe(menuItem)}
+                onViewRecipe={() => menuItem && navigate(`/recipe/${menuItem.recipe.id}`)}
                 variant={isMainMeal ? 'prominent' : 'compact'}
               />
             </div>
