@@ -67,74 +67,113 @@ export function RecipeQA({ recipe }: RecipeQAProps) {
   return (
     <>
       {/* Main Drawer */}
-      <div className="fixed inset-x-0 bottom-[3.25rem] z-40">
+      <div 
+        className="fixed inset-x-0 bottom-[3.25rem] z-40"
+        data-qa-container
+        data-expanded={isExpanded}
+      >
         <AnimatePresence>
           <motion.div
             initial={false}
-            animate={{
-              height: isExpanded ? 'calc(100vh - 7rem)' : '12rem',
+            animate={isExpanded ? {
+              height: 'calc(100vh - 7rem)',
+              scale: 1
+            } : {
+              height: '7.5rem',
+              scale: [1, 0.97, 1, 0.98, 1]
             }}
-            transition={{
+            style={{
+              transformOrigin: 'bottom'
+            }}
+            transition={isExpanded ? {
               type: "spring",
               damping: 30,
               stiffness: 200
+            } : {
+              scale: {
+                duration: 0.5,
+                repeat: Infinity,
+                repeatDelay: 3,
+                times: [0, 0.2, 0.4, 0.6, 1],
+                ease: "easeInOut"
+              },
+              height: {
+                type: "spring",
+                damping: 30,
+                stiffness: 200
+              }
             }}
             className="bg-white/70 backdrop-blur-sm rounded-t-2xl shadow-lg border border-rose-100 overflow-hidden"
           >
             {/* Header */}
-            <div className="sticky top-0 z-10 bg-white/95 backdrop-blur-sm border-b border-rose-100">
-              <div className="flex items-center justify-between py-2 px-4">
-                <div className="flex items-center space-x-3">
-                  <div className="relative">
-                    <div className="bg-rose-100 p-2 rounded-lg">
-                      <Bot size={20} className="text-rose-500" />
+            <div className="sticky top-0 z-10">
+              <div className="bg-gradient-to-r from-rose-500 to-rose-400 px-4 py-2.5 rounded-t-2xl">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center space-x-3">
+                    <div className="relative">
+                      <div className="bg-white/10 backdrop-blur-sm p-2 rounded-lg">
+                        <Bot size={18} className="text-white" />
+                      </div>
+                      <motion.div
+                        animate={{ 
+                          scale: [1, 1.2, 1],
+                          rotate: [0, 360]
+                        }}
+                        transition={{ 
+                          duration: 2,
+                          repeat: Infinity,
+                          repeatType: "reverse"
+                        }}
+                        className="absolute -top-1 -right-1 bg-white rounded-full p-1"
+                      >
+                        <Sparkles size={8} className="text-rose-500" />
+                      </motion.div>
                     </div>
-                    <motion.div
-                      animate={{ 
-                        scale: [1, 1.2, 1],
-                        rotate: [0, 360]
-                      }}
-                      transition={{ 
-                        duration: 2,
-                        repeat: Infinity,
-                        repeatType: "reverse"
-                      }}
-                      className="absolute -top-1 -right-1 bg-rose-500 rounded-full p-1"
-                    >
-                      <Sparkles size={8} className="text-white" />
-                    </motion.div>
+                    <div>
+                      <h3 className="font-medium text-white text-sm">Pregúntale a Liora sobre</h3>
+                      <p className="text-xs text-white/80 truncate max-w-[200px]">{recipe.name} {recipe.side_dish}</p>
+                    </div>
                   </div>
-                  <div>
-                    <h3 className="font-medium text-gray-900">Preguntas sobre la receta</h3>
-                    <p className="text-sm text-gray-500">{recipe.name}</p>
-                  </div>
-                </div>
-                <div className="flex items-center space-x-2">
-                  <button
-                    onClick={() => setIsExpanded(!isExpanded)}
-                    className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
-                  >
-                    <ChevronUp 
-                      size={20} 
-                      className={`text-gray-500 transform transition-transform ${
-                        isExpanded ? 'rotate-180' : ''
-                      }`}
-                    />
-                  </button>
-                  {isExpanded && (
+                  <div className="flex items-center space-x-1">
+                    {isExpanded && (
+                      <button
+                        onClick={() => setActiveTab(activeTab === 'chat' ? 'questions' : 'chat')}
+                        className="p-1.5 hover:bg-white/10 rounded-lg transition-colors"
+                      >
+                        {activeTab === 'chat' ? (
+                          <HelpCircle size={18} className="text-white" />
+                        ) : (
+                          <MessageCircle size={18} className="text-white" />
+                        )}
+                      </button>
+                    )}
                     <button
-                      onClick={() => setIsExpanded(false)}
-                      className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+                      onClick={() => setIsExpanded(!isExpanded)}
+                      className="p-1.5 hover:bg-white/10 rounded-lg transition-colors"
+                      data-expand-button
                     >
-                      <X size={20} className="text-gray-500" />
+                      <ChevronUp 
+                        size={18} 
+                        className={`text-white transform transition-transform ${
+                          isExpanded ? 'rotate-180' : ''
+                        }`}
+                      />
                     </button>
-                  )}
+                    {isExpanded && (
+                      <button
+                        onClick={() => setIsExpanded(false)}
+                        className="p-1.5 hover:bg-white/10 rounded-lg transition-colors"
+                      >
+                        <X size={18} className="text-white" />
+                      </button>
+                    )}
+                  </div>
                 </div>
               </div>
 
               {/* Tabs - Only show when expanded */}
               {isExpanded && (
-                <div className="flex border-t border-rose-100">
+                <div className="flex bg-white border-b border-rose-100">
                   <button
                     onClick={() => setActiveTab('questions')}
                     className={`flex-1 flex items-center justify-center space-x-2 py-2 text-sm font-medium transition-colors ${
@@ -144,10 +183,11 @@ export function RecipeQA({ recipe }: RecipeQAProps) {
                     }`}
                   >
                     <HelpCircle size={16} />
-                    <span>Preguntas Frecuentes</span>
+                    <span>Preguntas</span>
                   </button>
                   <button
                     onClick={() => setActiveTab('chat')}
+                    data-tab="chat"
                     className={`flex-1 flex items-center justify-center space-x-2 py-2 text-sm font-medium transition-colors ${
                       activeTab === 'chat'
                         ? 'text-rose-600 border-b-2 border-rose-500'
@@ -190,6 +230,7 @@ export function RecipeQA({ recipe }: RecipeQAProps) {
                         questions={quickQuestions}
                         isLoading={isGenerating}
                         onQuestionClick={handleQuestionClick}
+                        isExpanded={true}
                       />
                     </div>
                   )}
@@ -200,6 +241,7 @@ export function RecipeQA({ recipe }: RecipeQAProps) {
                     questions={quickQuestions}
                     isLoading={isGenerating}
                     onQuestionClick={handleQuestionClick}
+                    isExpanded={false}
                   />
                 </div>
               )}

@@ -85,7 +85,7 @@ export function MobileChatInput({ value, onChange, onSubmit, loading, disabled }
       <motion.div 
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        className="fixed bottom-0 left-0 right-0 border-t border-gray-200 bg-white/95 backdrop-blur-sm px-4 py-2 shadow-lg z-50"
+        className="fixed bottom-0 left-0 right-0 border-t border-gray-200 bg-white/95 backdrop-blur-sm p-4 shadow-lg z-50"
       >
         {/* Emoji Picker */}
         <AnimatePresence>
@@ -113,20 +113,22 @@ export function MobileChatInput({ value, onChange, onSubmit, loading, disabled }
           )}
         </AnimatePresence>
 
-        <div className="max-w-lg mx-auto flex items-end space-x-2">
+        <div className="max-w-lg mx-auto flex items-center gap-2 bg-gray-50 rounded-2xl p-2">
           {/* Emoji Button */}
           <motion.button
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
             onClick={() => setShowEmojiPicker(!showEmojiPicker)}
-            className="p-2.5 text-gray-500 hover:text-rose-500 transition-colors rounded-full"
-            aria-label="Emojis"
+            className="flex items-center justify-center w-10 h-10 text-gray-500 hover:text-rose-500 hover:bg-rose-100/50 transition-colors rounded-xl"
           >
-            <Smile size={24} />
+            <Smile size={20} />
           </motion.button>
 
+          {/* Divider */}
+          <div className="w-px h-8 bg-gray-200 mx-1" />
+
           {/* Input Field */}
-          <div className="flex-1 relative">
+          <div className="flex-1 relative flex items-center">
             <textarea
               ref={textareaRef}
               value={value}
@@ -136,11 +138,14 @@ export function MobileChatInput({ value, onChange, onSubmit, loading, disabled }
               onCompositionStart={() => setIsComposing(true)}
               onCompositionEnd={() => setIsComposing(false)}
               placeholder="Escribe un mensaje..."
-              className="w-full pl-4 pr-10 py-2.5 bg-gray-50 rounded-2xl resize-none focus:outline-none focus:ring-2 focus:ring-rose-500 placeholder-gray-500"
+              className="w-full px-3 py-2.5 bg-transparent rounded-xl resize-none focus:outline-none placeholder-gray-500 min-h-[40px] max-h-[100px] leading-5"
               rows={1}
-              style={{ maxHeight: '100px' }}
+              style={{ 
+                maxHeight: '100px',
+                marginTop: '0',
+                marginBottom: '0'
+              }}
               disabled={disabled}
-              aria-label="Mensaje"
             />
             
             <AnimatePresence>
@@ -149,7 +154,7 @@ export function MobileChatInput({ value, onChange, onSubmit, loading, disabled }
                   initial={{ opacity: 0, scale: 0.5 }}
                   animate={{ opacity: 1, scale: 1 }}
                   exit={{ opacity: 0, scale: 0.5 }}
-                  className="absolute right-3 bottom-3"
+                  className="absolute right-2 top-1/2 -translate-y-1/2"
                 >
                   <Sparkles size={16} className="text-rose-400 animate-pulse" />
                 </motion.div>
@@ -163,8 +168,7 @@ export function MobileChatInput({ value, onChange, onSubmit, loading, disabled }
             whileTap={{ scale: 0.95 }}
             onClick={handleSubmit}
             disabled={!value.trim() || loading || disabled}
-            className="p-2.5 bg-rose-500 text-white rounded-full hover:bg-rose-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed shadow-sm focus:outline-none focus:ring-2 focus:ring-rose-500 focus:ring-offset-2"
-            aria-label="Enviar mensaje"
+            className="flex items-center justify-center w-10 h-10 bg-rose-500 text-white rounded-xl hover:bg-rose-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed shadow-sm"
           >
             <Send size={20} />
           </motion.button>

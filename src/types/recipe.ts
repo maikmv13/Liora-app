@@ -3,12 +3,15 @@ import type { Database } from './supabase';
 type DbRecipe = Database['public']['Tables']['recipes']['Row'];
 type DbIngredient = Database['public']['Tables']['ingredients']['Row'];
 type DbRecipeIngredient = Database['public']['Tables']['recipe_ingredients']['Row'];
-type DbFavorite = Database['public']['Tables']['favorites']['Row'];
 
+// Definimos el tipo para los ingredientes de la receta
+export interface RecipeIngredient extends Omit<DbRecipeIngredient, 'ingredients'> {
+  ingredients: DbIngredient;  // La relación con la tabla ingredients
+}
+
+// Actualizamos la interfaz Recipe
 export interface Recipe extends DbRecipe {
-  recipe_ingredients?: (DbRecipeIngredient & {
-    ingredients?: DbIngredient;
-  })[];
+  recipe_ingredients?: RecipeIngredient[];
   isFavorite?: boolean;
   cuisine_type?: CuisineType;
 }

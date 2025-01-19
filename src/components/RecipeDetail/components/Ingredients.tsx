@@ -1,16 +1,43 @@
 import React, { useState } from 'react';
 import { Soup, Check } from 'lucide-react';
-import type { Recipe } from '../../../types';
+import type { Recipe, RecipeIngredient } from '../../../types';
 import { getUnitPlural } from '../../../utils/getUnitPlural';
+import { useAI } from '../../../hooks/useAI';
 
-interface IngredientsProps {
+type IngredientsProps = Readonly<{
   recipe: Recipe;
-  isExpanded: boolean;
-  onToggle: () => void;
-}
+}>;
 
-export function Ingredients({ recipe, isExpanded, onToggle }: IngredientsProps) {
+export function Ingredients({ recipe }: IngredientsProps) {
   const [checkedIngredients, setCheckedIngredients] = useState<Set<string>>(new Set());
+  const { askAboutStep } = useAI(recipe);
+
+  console.log('=== Debug Ingredients ===');
+  console.log('Recipe:', recipe);
+  console.log('Recipe ingredients:', recipe.recipe_ingredients);
+
+  // Validación temprana
+  if (!recipe.recipe_ingredients || recipe.recipe_ingredients.length === 0) {
+    console.log('No recipe ingredients found');
+    return null;
+  }
+
+  // Agrupamos los ingredientes por categoría
+  const groupedIngredients = recipe.recipe_ingredients.reduce((acc, ri) => {
+    if (!ri.ingredients) {
+      console.log('Missing ingredients for:', ri);
+      return acc;
+    }
+    
+    const category = ri.ingredients.category || 'Otros';
+    if (!acc[category]) {
+      acc[category] = [];
+    }
+    acc[category].push(ri);
+    return acc;
+  }, {} as Record<string, RecipeIngredient[]>);
+
+  console.log('Grouped ingredients:', groupedIngredients);
 
   const handleToggleIngredient = (ingredientId: string) => {
     setCheckedIngredients(prev => {
@@ -24,35 +51,34 @@ export function Ingredients({ recipe, isExpanded, onToggle }: IngredientsProps) 
     });
   };
 
-  if (!recipe.recipe_ingredients || recipe.recipe_ingredients.length === 0) {
-    return null;
-  }
-
   return (
-    <div className="bg-white">
-      <button
-        onClick={onToggle}
-        className="w-full flex items-center justify-between p-4 border-t border-gray-100"
-      >
-        <div className="flex items-center space-x-2">
-          <Soup size={20} className="text-rose-500" />
-          <div>
-            <h2 className="font-medium text-gray-900">Ingredientes</h2>
-            <p className="text-sm text-gray-500">
-              {recipe.recipe_ingredients.length} ingredientes
-            </p>
+    <div className="bg-white rounded-xl shadow-sm">
+      <div className="p-4">
+        <div className="flex items-center space-x-3 mb-4">
+          <div className="bg-rose-50 p-2 rounded-lg">
+            <Soup size={20} className="text-rose-500" />
+          </div>
+          <div className="flex-1">
+            <div className="flex items-center justify-between">
+              <h2 className="font-medium text-gray-900">Ingredientes</h2>
+              <span className="text-sm text-gray-500">
+                {checkedIngredients.size} de {recipe.recipe_ingredients.length}
+              </span>
+            </div>
           </div>
         </div>
-      </button>
 
-      {isExpanded && (
-        <div className="p-4 space-y-2">
+        <div className="space-y-2">
           {recipe.recipe_ingredients.map((ri) => {
-            if (!ri?.ingredients?.name) return null;
-            
+            // Validación de seguridad
+            if (!ri.ingredients || !ri.ingredients.name) {
+              console.log('Invalid ingredient:', ri);
+              return null;
+            }
+
             const unit = getUnitPlural(ri.unit, ri.quantity);
             const isChecked = checkedIngredients.has(ri.id);
-            
+
             return (
               <button
                 key={ri.id}
@@ -88,7 +114,7 @@ export function Ingredients({ recipe, isExpanded, onToggle }: IngredientsProps) 
             );
           })}
         </div>
-      )}
+      </div>
     </div>
   );
 }

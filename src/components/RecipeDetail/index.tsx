@@ -22,6 +22,11 @@ export function RecipeDetail({ recipes, onToggleFavorite, favorites }: RecipeDet
   const isFavorite = favorites.some(f => f.id === id);
   const [expandedSection, setExpandedSection] = useState<'ingredients' | 'instructions' | 'nutrition' | null>('ingredients');
 
+  // Añadimos logs para debug
+  console.log('=== Debug RecipeDetail ===');
+  console.log('Found recipe:', recipe);
+  console.log('Recipe ingredients before passing:', recipe?.recipe_ingredients);
+
   if (!recipe) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-rose-50 to-orange-50 flex items-center justify-center p-4">
@@ -50,7 +55,9 @@ export function RecipeDetail({ recipes, onToggleFavorite, favorites }: RecipeDet
       />
 
       <div className="w-full">
-        <QuickInfo recipe={recipe} />
+        <div className="bg-gradient-to-b from-rose-50/80 to-rose-50/80">
+          <QuickInfo recipe={recipe} />
+        </div>
 
         <NutritionalInfo 
           recipe={recipe}

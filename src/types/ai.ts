@@ -6,7 +6,7 @@ export interface Message {
   role: 'user' | 'assistant';
   content: string;
   timestamp: string;
-  recipes?: Recipe[]; // Add support for recipe array
+  recipe?: Recipe; // Añadimos la propiedad recipe opcional
 }
 
 export type ContextCategory = 
