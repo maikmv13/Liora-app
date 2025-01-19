@@ -53,7 +53,10 @@ export function RecipeDetail({ recipes, onToggleFavorite, favorites }: RecipeDet
         />
 
         <div className="w-full">
-          <HeroImage recipe={recipe} />
+          <HeroImage 
+            recipe={recipe} 
+            onBack={() => navigate(-1)}
+          />
           
           <QuickInfo recipe={recipe} />
 

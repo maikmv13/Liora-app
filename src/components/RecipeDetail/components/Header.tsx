@@ -4,13 +4,12 @@ import { ArrowLeft, Heart, Share2 } from 'lucide-react';
 import type { Recipe } from '../../../types';
 
 interface HeaderProps {
-  onBack: () => void;
   onToggleFavorite: () => void;
   isFavorite: boolean;
   recipe: Recipe;
 }
 
-export function Header({ onBack, onToggleFavorite, isFavorite }: HeaderProps) {
+export function Header({ onToggleFavorite, isFavorite }: HeaderProps) {
   return (
     <motion.div
       initial={{ opacity: 0, y: -20 }}
@@ -18,13 +17,7 @@ export function Header({ onBack, onToggleFavorite, isFavorite }: HeaderProps) {
       className="fixed top-0 left-0 right-0 z-30 bg-white/80 backdrop-blur-md"
     >
       <div className="max-w-screen-2xl mx-auto">
-        <div className="flex items-center justify-between px-4 h-14">
-          <button
-            onClick={onBack}
-            className="p-2 -ml-2 hover:bg-gray-100 rounded-full transition-colors"
-          >
-            <ArrowLeft size={20} className="text-gray-700" />
-          </button>
+        <div className="flex items-center justify-end px-4 h-14">
           <div className="flex items-center space-x-2">
             <button
               onClick={onToggleFavorite}
