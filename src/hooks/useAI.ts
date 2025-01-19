@@ -5,9 +5,9 @@ import type { Message, AIContext, ContextCategory } from '../types/ai';
 import type { Recipe } from '../types';
 import { searchRecipes } from '../services/recipes';
 
-// Primero definimos los tipos de consultas que podemos recibir
+// Actualizamos los tipos para incluir todos los casos
 type QueryIntent = {
-  type: 'recipe_search' | 'recipe_step' | 'ingredient_info' | 'cooking_technique' | 'nutrition_info' | 'general';
+  type: 'recipe_search' | 'ingredient_based_search' | 'meal_type_search' | 'recipe_step' | 'ingredient_info' | 'cooking_technique' | 'nutrition_info' | 'general';
   confidence: number;
   entities?: {
     recipe?: string;
@@ -17,41 +17,50 @@ type QueryIntent = {
   };
 };
 
-// Palabras clave para cada categoría
+// Unificamos todas las palabras clave en un solo lugar
 const INTENT_KEYWORDS = {
   recipe_search: [
-    'receta',
-    'preparar',
-    'cocinar',
-    'hacer',
-    'elaborar',
-    'preparación',
-    'plato',
-    'comida',
-    'cena',
-    'almuerzo',
-    'desayuno'
+    'receta', 'preparar', 'cocinar', 'hacer', 'elaborar',
+    'preparación', 'plato', 'comida', 'cena', 'almuerzo', 'desayuno'
   ],
   ingredient_based_search: [
-    'ingredientes',
-    'tengo',
-    'usar',
-    'utilizar',
-    'aprovechar',
-    'con',
-    'usando'
+    'ingredientes', 'tengo', 'usar', 'utilizar', 'aprovechar',
+    'con', 'usando'
   ],
   meal_type_search: [
-    'vegetariano',
-    'vegano',
-    'saludable',
-    'rápido',
-    'fácil',
-    'ligero',
-    'postre',
-    'ensalada'
+    'vegetariano', 'vegano', 'saludable', 'rápido', 'fácil',
+    'ligero', 'postre', 'ensalada'
+  ],
+  cooking_technique: [
+    'técnica', 'método', 'cocer', 'hornear', 'freír', 'saltear'
+  ],
+  nutrition_info: [
+    'calorías', 'proteínas', 'nutrientes', 'saludable', 'dieta'
   ]
 };
+
+// Actualizar la interfaz Message (agregar al inicio del archivo)
+interface Message {
+  id: string;
+  role: 'user' | 'assistant';
+  type: 'text' | 'card';   // Nuevo campo para diferenciar el tipo de mensaje
+  content: string;
+  timestamp: string;
+  recipe?: Recipe;  // Cambiamos recipes por recipe para tarjetas individuales
+}
+
+interface RecipeCardMessage extends Message {
+  type: 'card';
+  recipe: Recipe;  // Una sola receta por tarjeta
+  onView?: () => void;
+  onShare?: () => void;
+}
+
+interface TextMessage extends Message {
+  type: 'text';
+}
+
+type ChatMessage = TextMessage | RecipeCardMessage;
 
 function analyzeQuery(content: string): QueryIntent {
   const normalizedContent = content.toLowerCase();
@@ -71,7 +80,15 @@ function analyzeQuery(content: string): QueryIntent {
     }
   });
 
-  // Extraer entidades relevantes
+  return {
+    type: detectedType,
+    confidence: maxConfidence,
+    entities: extractEntities(normalizedContent)
+  };
+}
+
+// Separamos la extracción de entidades para mayor claridad
+function extractEntities(content: string) {
   const entities: QueryIntent['entities'] = {};
   
   // Detectar números de paso
@@ -80,19 +97,15 @@ function analyzeQuery(content: string): QueryIntent {
     entities.step = parseInt(stepMatch[1]);
   }
 
-  // Detectar nombres de ingredientes (ejemplo simplificado)
+  // Detectar ingredientes comunes
   const commonIngredients = ['sal', 'azúcar', 'harina', 'huevos', 'leche'];
   commonIngredients.forEach(ing => {
-    if (normalizedContent.includes(ing)) {
+    if (content.includes(ing)) {
       entities.ingredient = ing;
     }
   });
 
-  return {
-    type: detectedType,
-    confidence: maxConfidence,
-    entities
-  };
+  return entities;
 }
 
 export function useAI(recipe?: Recipe) {
@@ -122,9 +135,10 @@ export function useAI(recipe?: Recipe) {
           setMessages(data.map(msg => ({
             id: msg.id,
             role: msg.role,
+            type: msg.type,
             content: msg.content,
             timestamp: msg.timestamp,
-            recipes: msg.recipes
+            recipe: msg.recipe
           })));
         }
       } catch (error) {
@@ -211,103 +225,58 @@ export function useAI(recipe?: Recipe) {
       setLoading(true);
       setError(null);
 
-      const normalizedContent = content.toLowerCase();
+      const intent = analyzeQuery(content);
       
-      // Crear mensaje del usuario
+      // Mensaje del usuario (siempre tipo texto)
       const userMessage: Message = {
         id: crypto.randomUUID(),
         role: 'user',
+        type: 'text',
         content,
-        timestamp: new Date().toISOString()
+        timestamp: new Date().toISOString(),
+        recipe: recipe
       };
-
       setMessages(prev => [...prev, userMessage]);
 
-      // Detectar intención de búsqueda de recetas
-      const isRecipeSearch = INTENT_KEYWORDS.recipe_search.some(keyword => 
-        normalizedContent.includes(keyword)
-      );
-
-      const isIngredientBasedSearch = INTENT_KEYWORDS.ingredient_based_search.some(keyword => 
-        normalizedContent.includes(keyword)
-      );
-
-      const isMealTypeSearch = INTENT_KEYWORDS.meal_type_search.some(keyword => 
-        normalizedContent.includes(keyword)
-      );
-
-      // Si es una búsqueda relacionada con recetas
-      if (isRecipeSearch || isIngredientBasedSearch || isMealTypeSearch) {
-        const suggestedRecipes = await searchRecipes(content);
-        
+      // Manejar diferentes tipos de intención
+      let suggestedRecipes: Recipe[] = [];
+      
+      // Búsqueda de recetas
+      if (['recipe_search', 'ingredient_based_search', 'meal_type_search'].includes(intent.type)) {
+        suggestedRecipes = await searchRecipes(content);
         if (suggestedRecipes.length > 0) {
-          // Mensaje introductorio según el tipo de búsqueda
-          let introMessage = 'He encontrado estas recetas que podrían interesarte:';
-          
-          if (isIngredientBasedSearch) {
-            introMessage = 'Puedes preparar estas recetas con esos ingredientes:';
-          } else if (isMealTypeSearch) {
-            introMessage = 'Aquí tienes algunas opciones que coinciden con lo que buscas:';
-          }
-
-          // Enviar mensaje con la primera receta
-          const recipeMessage: Message = {
-            id: crypto.randomUUID(),
-            role: 'assistant',
-            content: introMessage,
-            timestamp: new Date().toISOString(),
-            recipe: suggestedRecipes[0]
-          };
-          
-          setMessages(prev => [...prev, recipeMessage]);
-
-          // Si hay más recetas, sugerir explorarlas
-          if (suggestedRecipes.length > 1) {
-            const suggestionsMessage: Message = {
-              id: crypto.randomUUID(),
-              role: 'assistant',
-              content: '¿Te gustaría ver más recetas similares? Puedo mostrarte otras opciones.',
-              timestamp: new Date().toISOString()
-            };
-            
-            setMessages(prev => [...prev, suggestionsMessage]);
-          }
-          
-          return;
-        } else {
-          // Si no encontramos recetas, continuar con una respuesta normal
-          const noRecipesMessage: Message = {
-            id: crypto.randomUUID(),
-            role: 'assistant',
-            content: 'No he encontrado recetas exactas para tu búsqueda, pero puedo ayudarte a encontrar alternativas. ¿Qué tipo de plato te gustaría preparar?',
-            timestamp: new Date().toISOString()
-          };
-          
-          setMessages(prev => [...prev, noRecipesMessage]);
+          await handleRecipeSearchResponse(suggestedRecipes, intent.type);
           return;
         }
       }
 
-      // Si no es una búsqueda de recetas, continuar con la respuesta normal del chat
+      // Preguntas sobre pasos específicos
+      if (intent.type === 'recipe_step' && intent.entities?.step && recipe) {
+        await askAboutStep(intent.entities.step, recipe.instructions);
+        return;
+      }
+
+      // Respuesta general del chat
+      const context = buildAIContext(intent, recipe, suggestedRecipes);
       const response = await openai.chat.completions.create({
         model: 'gpt-3.5-turbo',
         messages: [
-          { 
-            role: 'system', 
-            content: getSystemPrompt(recipe, analyzeQuery(content))
-          },
+          { role: 'system', content: getSystemPrompt(recipe, intent) },
           ...messages.map(m => ({ role: m.role, content: m.content })),
-          { role: 'user', content }
+          { role: 'user', content: `${context}\n\n${content}` }
         ],
         temperature: 0.2,
         max_tokens: 500
       });
 
+      // Mensaje del asistente (tipo texto para respuestas generales)
       const aiMessage: Message = {
         id: crypto.randomUUID(),
         role: 'assistant',
+        type: 'text',
         content: response.choices[0].message.content || 'Lo siento, no pude generar una respuesta.',
-        timestamp: new Date().toISOString()
+        timestamp: new Date().toISOString(),
+        recipe: recipe
       };
 
       setMessages(prev => [...prev, aiMessage]);
@@ -339,10 +308,14 @@ export function useAI(recipe?: Recipe) {
     }
   }, [sessionId]);
 
-  const askAboutStep = async (stepNumber: number, instruction: string) => {
+  const askAboutStep = async (stepNumber: number, instructions: string | null) => {
     try {
       setLoading(true);
       
+      if (!instructions) {
+        throw new Error('No se encontraron instrucciones para esta receta');
+      }
+
       // Primero expandimos el chat y cambiamos a la pestaña de chat
       const recipeQA = document.querySelector('[data-qa-container]');
       if (recipeQA) {
@@ -363,7 +336,7 @@ export function useAI(recipe?: Recipe) {
       }
 
       // Preparamos el contenido del mensaje
-      const messageContent = `💡 *Consulta sobre el Paso ${stepNumber}*:\n"${instruction}"\n\n¿Podrías explicar este paso con más detalle? ¿Hay alguna técnica o consejo especial a tener en cuenta?`;
+      const messageContent = `💡 *Consulta sobre el Paso ${stepNumber}*:\n"${instructions}"\n\n¿Podrías explicar este paso con más detalle? ¿Hay alguna técnica o consejo especial a tener en cuenta?`;
 
       // Enviamos el mensaje usando la función existente sendMessage
       // que ya maneja el estado de mensajes y la base de datos
@@ -375,6 +348,67 @@ export function useAI(recipe?: Recipe) {
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleRecipeSearchResponse = async (
+    suggestedRecipes: Recipe[], 
+    intentType: QueryIntent['type']
+  ) => {
+    // Mensaje introductorio
+    const introMessage: TextMessage = {
+      id: crypto.randomUUID(),
+      role: 'assistant',
+      type: 'text',
+      content: formatIntroduction(intentType),
+      timestamp: new Date().toISOString(),
+    };
+
+    // Convertir cada receta en un mensaje tipo card
+    const recipeCards: RecipeCardMessage[] = suggestedRecipes.slice(0, 3).map(recipe => ({
+      id: crypto.randomUUID(),
+      role: 'assistant',
+      type: 'card',
+      content: '',  // El contenido se maneja en el componente RecipeCard
+      timestamp: new Date().toISOString(),
+      recipe,  // Pasamos la receta completa
+      onView: () => handleViewRecipe(recipe),
+      onShare: () => handleShareRecipe(recipe)
+    }));
+
+    // Mensaje de seguimiento
+    const followUpMessage: TextMessage = {
+      id: crypto.randomUUID(),
+      role: 'assistant',
+      type: 'text',
+      content: '¿Te gustaría saber más detalles sobre alguna de estas recetas?',
+      timestamp: new Date().toISOString(),
+    };
+
+    setMessages(prev => [...prev, introMessage, ...recipeCards, followUpMessage]);
+  };
+
+  const formatIntroduction = (intentType: QueryIntent['type']): string => {
+    const intros = {
+      recipe_search: 'He encontrado estas recetas que podrían interesarte:',
+      ingredient_based_search: 'Basado en los ingredientes mencionados, te sugiero:',
+      meal_type_search: 'He encontrado estas opciones que coinciden con tus preferencias:'
+    };
+    return intros[intentType as keyof typeof intros] || 'Aquí tienes algunas sugerencias:';
+  };
+
+  // Funciones auxiliares para manejar las acciones de la tarjeta
+  const handleViewRecipe = (recipe: Recipe) => {
+    // Aquí puedes implementar la navegación a la vista detallada de la receta
+    console.log('Ver receta:', recipe);
+    // Por ejemplo:
+    // navigate(`/recipes/${recipe.id}`);
+  };
+
+  const handleShareRecipe = (recipe: Recipe) => {
+    // Implementar la funcionalidad de compartir
+    console.log('Compartir receta:', recipe);
+    // Por ejemplo:
+    // shareRecipe(recipe);
   };
 
   return {
@@ -423,3 +457,44 @@ async function findMatchingRecipe(query: string): Promise<Recipe | null> {
     return null;
   }
 }
+
+// Función auxiliar para construir el contexto según la intención
+const buildAIContext = (
+  intent: QueryIntent, 
+  recipe?: Recipe, 
+  suggestedRecipes: Recipe[] = []
+): string => {
+  let context = '';
+
+  switch (intent.type) {
+    case 'ingredient_info':
+      if (intent.entities?.ingredient) {
+        context = `Información sobre el ingrediente: ${intent.entities.ingredient}`;
+      }
+      break;
+    case 'cooking_technique':
+      if (intent.entities?.technique) {
+        context = `Explicación sobre la técnica: ${intent.entities.technique}`;
+      }
+      break;
+    case 'nutrition_info':
+      if (recipe) {
+        context = `
+          Información nutricional de la receta:
+          - Calorías: ${recipe.calories}
+          - Proteínas: ${recipe.proteins}
+          - Carbohidratos: ${recipe.carbohydrates}
+          - Grasas: ${recipe.fats}
+        `;
+      }
+      break;
+    default:
+      if (suggestedRecipes.length > 0) {
+        context = `Teniendo en cuenta las siguientes recetas sugeridas: ${
+          suggestedRecipes.map(r => r.name).join(', ')
+        }`;
+      }
+  }
+
+  return context;
+};
