@@ -44,7 +44,7 @@ export function RecipeDetail({ recipes, onToggleFavorite, favorites }: RecipeDet
 
   return (
     <>
-      <div className="min-h-screen bg-gray-50">
+      <div className="min-h-screen bg-gray-50 w-full">
         <Header 
           onBack={() => navigate(-1)}
           onToggleFavorite={() => onToggleFavorite(recipe)}
@@ -52,33 +52,35 @@ export function RecipeDetail({ recipes, onToggleFavorite, favorites }: RecipeDet
           recipe={recipe}
         />
 
-        <HeroImage recipe={recipe} />
-        
-        <QuickInfo recipe={recipe} />
+        <div className="w-full">
+          <HeroImage recipe={recipe} />
+          
+          <QuickInfo recipe={recipe} />
 
-        <NutritionalInfo 
-          recipe={recipe}
-          isExpanded={expandedSection === 'nutrition'}
-          onToggle={() => setExpandedSection(
-            expandedSection === 'nutrition' ? null : 'nutrition'
-          )}
-        />
+          <NutritionalInfo 
+            recipe={recipe}
+            isExpanded={expandedSection === 'nutrition'}
+            onToggle={() => setExpandedSection(
+              expandedSection === 'nutrition' ? null : 'nutrition'
+            )}
+          />
 
-        <Ingredients
-          recipe={recipe}
-          isExpanded={expandedSection === 'ingredients'}
-          onToggle={() => setExpandedSection(
-            expandedSection === 'ingredients' ? null : 'ingredients'
-          )}
-        />
+          <Ingredients
+            recipe={recipe}
+            isExpanded={expandedSection === 'ingredients'}
+            onToggle={() => setExpandedSection(
+              expandedSection === 'ingredients' ? null : 'ingredients'
+            )}
+          />
 
-        <Instructions
-          recipe={recipe}
-          isExpanded={expandedSection === 'instructions'}
-          onToggle={() => setExpandedSection(
-            expandedSection === 'instructions' ? null : 'instructions'
-          )}
-        />
+          <Instructions
+            recipe={recipe}
+            isExpanded={expandedSection === 'instructions'}
+            onToggle={() => setExpandedSection(
+              expandedSection === 'instructions' ? null : 'instructions'
+            )}
+          />
+        </div>
       </div>
 
       <RecipeQA recipe={recipe} />

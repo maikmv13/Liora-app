@@ -27,7 +27,9 @@ const ShoppingList = lazy(() => import('./components/ShoppingList'));
 const RecipeContent = lazy(() => import('./components/RecipeList/RecipeContext'));
 const LioraChat = lazy(() => import('./components/LioraChat'));
 
-function App() {
+// Nuevo componente que estará dentro del Router
+function AppContent() {
+  const location = useLocation();
   const [searchTerm, setSearchTerm] = useState('');
   const [activeTab, setActiveTab] = useState('recetas');
   const [weeklyMenu, setWeeklyMenu] = useState<MenuItem[]>([]);
@@ -153,114 +155,124 @@ function App() {
   }
 
   return (
+    <div className="min-h-screen bg-gradient-to-br from-orange-50 to-rose-50 relative">
+      <Header
+        searchTerm={searchTerm}
+        onSearchChange={setSearchTerm}
+        activeTab={activeTab}
+        onTabChange={setActiveTab}
+        onLogin={() => setOnboardingCompleted(false)}
+        user={user}
+        onProfile={() => setActiveTab('profile')}
+      />
+
+      <Navigation
+        activeTab={activeTab}
+        onTabChange={setActiveTab}
+        user={user}
+      />
+
+      <main className={`container mx-auto pb-24 md:pb-8 ${
+        location.pathname.startsWith('/recipe/') 
+          ? '' 
+          : 'px-4 pt-20'
+      }`}>
+        <Suspense fallback={<LoadingFallback />}>
+          <Routes>
+            <Route 
+              path="/recetas" 
+              element={
+                <RecipeContent
+                  loading={recipesLoading}
+                  error={null}
+                  recipes={recipes}
+                  onRecipeSelect={() => {}}
+                  favorites={favorites.map(f => f.id)}
+                  onToggleFavorite={handleToggleFavorite}
+                />
+              } 
+            />
+            <Route 
+              path="/recipe/:id" 
+              element={
+                <RecipeDetail 
+                  recipes={recipes}
+                  onToggleFavorite={handleToggleFavorite}
+                  favorites={favorites}
+                />
+              } 
+            />
+            <Route 
+              path="/menu" 
+              element={
+                <WeeklyMenu2
+                  weeklyMenu={weeklyMenu}
+                  onRecipeSelect={() => {}}
+                  onAddToMenu={handleAddToMenu}
+                  forUserId={user?.id}
+                />
+              } 
+            />
+            <Route 
+              path="/compra" 
+              element={
+                <ShoppingList
+                  items={shoppingList}
+                  onToggleItem={toggleItem}
+                />
+              } 
+            />
+            <Route 
+              path="/favoritos" 
+              element={
+                user ? (
+                  <Favorites
+                    favorites={favorites}
+                    onRemoveFavorite={removeFavorite}
+                    onUpdateFavorite={updateFavorite}
+                    loading={favoritesLoading}
+                    error={favoritesError}
+                  />
+                ) : (
+                  <Navigate to="/menu" replace />
+                )
+              } 
+            />
+            <Route 
+              path="/profile" 
+              element={
+                user ? (
+                  <Profile />
+                ) : (
+                  <Navigate to="/menu" replace />
+                )
+              } 
+            />
+            <Route 
+              path="/salud" 
+              element={<HealthyPlateGuide />} 
+            />
+            <Route 
+              path="/liora" 
+              element={<LioraChat />} 
+            />
+            <Route path="/" element={<Navigate to="/recetas" replace />} />
+          </Routes>
+        </Suspense>
+      </main>
+
+      <MobileInstallButton />
+      <FloatingChatButton />
+    </div>
+  );
+}
+
+function App() {
+  return (
     <Router>
-      <ScrollToTop />
       <ErrorBoundary>
-        <div className="min-h-screen bg-gradient-to-br from-orange-50 to-rose-50 relative">
-          <Header
-            searchTerm={searchTerm}
-            onSearchChange={setSearchTerm}
-            activeTab={activeTab}
-            onTabChange={setActiveTab}
-            onLogin={() => setOnboardingCompleted(false)}
-            user={user}
-            onProfile={() => setActiveTab('profile')}
-          />
-
-          <Navigation
-            activeTab={activeTab}
-            onTabChange={setActiveTab}
-            user={user}
-          />
-
-          <main className="container mx-auto px-4 pt-20 pb-24 md:pb-8">
-            <Suspense fallback={<LoadingFallback />}>
-              <Routes>
-                <Route 
-                  path="/recetas" 
-                  element={
-                    <RecipeContent
-                      loading={recipesLoading}
-                      error={null}
-                      recipes={recipes}
-                      onRecipeSelect={() => {}}
-                      favorites={favorites.map(f => f.id)}
-                      onToggleFavorite={handleToggleFavorite}
-                    />
-                  } 
-                />
-                <Route 
-                  path="/recipe/:id" 
-                  element={
-                    <RecipeDetail 
-                      recipes={recipes}
-                      onToggleFavorite={handleToggleFavorite}
-                      favorites={favorites}
-                    />
-                  } 
-                />
-                <Route 
-                  path="/menu" 
-                  element={
-                    <WeeklyMenu2
-                      weeklyMenu={weeklyMenu}
-                      onRecipeSelect={() => {}}
-                      onAddToMenu={handleAddToMenu}
-                      forUserId={user?.id}
-                    />
-                  } 
-                />
-                <Route 
-                  path="/compra" 
-                  element={
-                    <ShoppingList
-                      items={shoppingList}
-                      onToggleItem={toggleItem}
-                    />
-                  } 
-                />
-                <Route 
-                  path="/favoritos" 
-                  element={
-                    user ? (
-                      <Favorites
-                        favorites={favorites}
-                        onRemoveFavorite={removeFavorite}
-                        onUpdateFavorite={updateFavorite}
-                        loading={favoritesLoading}
-                        error={favoritesError}
-                      />
-                    ) : (
-                      <Navigate to="/menu" replace />
-                    )
-                  } 
-                />
-                <Route 
-                  path="/profile" 
-                  element={
-                    user ? (
-                      <Profile />
-                    ) : (
-                      <Navigate to="/menu" replace />
-                    )
-                  } 
-                />
-                <Route 
-                  path="/salud" 
-                  element={<HealthyPlateGuide />} 
-                />
-                <Route 
-                  path="/liora" 
-                  element={<LioraChat />} 
-                />
-                <Route path="/" element={<Navigate to="/recetas" replace />} />
-              </Routes>
-            </Suspense>
-          </main>
-
-          <MobileInstallButton />
-          <FloatingChatButton />
-        </div>
+        <ScrollToTop />
+        <AppContent />
       </ErrorBoundary>
     </Router>
   );
