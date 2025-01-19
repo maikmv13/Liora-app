@@ -35,8 +35,14 @@ export function DayCard({
   const currentDay = new Intl.DateTimeFormat('es-ES', { weekday: 'long' }).format(today).toLowerCase();
   const isToday = currentDay === day.toLowerCase();
   
-  // El lunes nunca será "mañana" y si hoy es domingo, ningún día será "mañana"
+  // Modificar la lógica para el "mañana"
   const isTomorrow = React.useMemo(() => {
+    // Si es domingo después de las 21:00, el lunes es "mañana"
+    if (today.getDay() === 0 && today.getHours() >= 21 && day.toLowerCase() === 'lunes') {
+      return true;
+    }
+    
+    // Lógica original para otros días
     if (today.getDay() === 0 || day.toLowerCase() === 'lunes') return false;
     
     const tomorrow = new Date(today);
@@ -46,24 +52,18 @@ export function DayCard({
     return nextDay === day.toLowerCase();
   }, [day]);
 
-  // Scroll automático
+  // Scroll lateral solo en móvil
   React.useEffect(() => {
     const handleScroll = () => {
       const isMobile = window.innerWidth < 768;
       if (!isMobile) return;
 
       try {
-        if (today.getDay() === 0) {
-          // Si es domingo, scroll al NextWeekCard
-          const nextWeekCard = document.getElementById('next-week-card');
-          if (nextWeekCard) {
-            nextWeekCard.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-          }
-        } else if (isTomorrow) {
-          // Si es el día de mañana (excepto lunes), scroll a ese día
+        if (isToday) {
+          // Solo hacer scroll lateral al día actual
           const dayCard = document.getElementById(`day-card-${day}`);
           if (dayCard) {
-            dayCard.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+            dayCard.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
           }
         }
       } catch (error) {
@@ -74,7 +74,7 @@ export function DayCard({
     // Pequeño delay para asegurar que los elementos están renderizados
     const timeoutId = setTimeout(handleScroll, 500);
     return () => clearTimeout(timeoutId);
-  }, [day, isTomorrow]);
+  }, [day, isToday]);
 
   const mealTypes: MealType[] = ['desayuno', 'comida', 'snack', 'cena'];
 
