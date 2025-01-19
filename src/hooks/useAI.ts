@@ -46,15 +46,15 @@ export function useAI() {
 
   const generateRecipeQuestions = async (recipe: Recipe) => {
     try {
-      const prompt = `Generate 5 concise, specific questions about the recipe "${recipe.name}". 
-      Focus on:
-      1. Ingredients and substitutions
-      2. Preparation techniques
-      3. Nutritional aspects
-      4. Tips and tricks
-      5. Common issues and solutions
+      const prompt = `Genera 5 preguntas cortas y específicas sobre la receta "${recipe.name}". 
+      Considera:
+      1. Ingredientes y sustitutos
+      2. Técnicas de preparación
+      3. Aspectos nutricionales
+      4. Consejos y trucos
+      5. Problemas comunes y soluciones
       
-      Format: Return ONLY the questions, one per line, without numbers or bullets.`;
+      Formatea: Devuelve solo las preguntas, una por línea, sin números ni viñetas.`;
 
       const response = await openai.chat.completions.create({
         model: 'gpt-3.5-turbo',
