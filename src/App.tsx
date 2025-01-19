@@ -18,6 +18,7 @@ import { ChefHat, Leaf, Sparkles } from 'lucide-react';
 import { FloatingChatButton } from './components/FloatingChatButton';
 import { HealthyPlateGuide } from './components/HealthyPlateGuide';
 import { Onboarding } from './components/Onboarding';
+import { RecipeDetail } from './components/RecipeDetail';
 
 // Lazy load components
 const WeeklyMenu2 = lazy(() => import('./components/WeeklyMenu2'));
@@ -155,170 +156,113 @@ function App() {
     <Router>
       <ScrollToTop />
       <ErrorBoundary>
-        <AppContent 
-          searchTerm={searchTerm}
-          activeTab={activeTab}
-          setActiveTab={setActiveTab}
-          setSearchTerm={setSearchTerm}
-          user={user}
-          onboardingCompleted={onboardingCompleted}
-          setOnboardingCompleted={setOnboardingCompleted}
-          weeklyMenu={weeklyMenu}
-          recipes={recipes}
-          favorites={favorites}
-          shoppingList={shoppingList}
-          toggleItem={toggleItem}
-          handleAddToMenu={handleAddToMenu}
-          handleToggleFavorite={handleToggleFavorite}
-          recipesLoading={recipesLoading}
-          favoritesLoading={favoritesLoading}
-          favoritesError={favoritesError}
-          removeFavorite={removeFavorite}
-          updateFavorite={updateFavorite}
-          LoadingFallback={LoadingFallback}
-        />
+        <div className="min-h-screen bg-gradient-to-br from-orange-50 to-rose-50 relative">
+          <Header
+            searchTerm={searchTerm}
+            onSearchChange={setSearchTerm}
+            activeTab={activeTab}
+            onTabChange={setActiveTab}
+            onLogin={() => setOnboardingCompleted(false)}
+            user={user}
+            onProfile={() => setActiveTab('profile')}
+          />
+
+          <Navigation
+            activeTab={activeTab}
+            onTabChange={setActiveTab}
+            user={user}
+          />
+
+          <main className="container mx-auto px-4 pt-20 pb-24 md:pb-8">
+            <Suspense fallback={<LoadingFallback />}>
+              <Routes>
+                <Route 
+                  path="/recetas" 
+                  element={
+                    <RecipeContent
+                      loading={recipesLoading}
+                      error={null}
+                      recipes={recipes}
+                      onRecipeSelect={() => {}}
+                      favorites={favorites.map(f => f.id)}
+                      onToggleFavorite={handleToggleFavorite}
+                    />
+                  } 
+                />
+                <Route 
+                  path="/recipe/:id" 
+                  element={
+                    <RecipeDetail 
+                      recipes={recipes}
+                      onToggleFavorite={handleToggleFavorite}
+                      favorites={favorites}
+                    />
+                  } 
+                />
+                <Route 
+                  path="/menu" 
+                  element={
+                    <WeeklyMenu2
+                      weeklyMenu={weeklyMenu}
+                      onRecipeSelect={() => {}}
+                      onAddToMenu={handleAddToMenu}
+                      forUserId={user?.id}
+                    />
+                  } 
+                />
+                <Route 
+                  path="/compra" 
+                  element={
+                    <ShoppingList
+                      items={shoppingList}
+                      onToggleItem={toggleItem}
+                    />
+                  } 
+                />
+                <Route 
+                  path="/favoritos" 
+                  element={
+                    user ? (
+                      <Favorites
+                        favorites={favorites}
+                        onRemoveFavorite={removeFavorite}
+                        onUpdateFavorite={updateFavorite}
+                        loading={favoritesLoading}
+                        error={favoritesError}
+                      />
+                    ) : (
+                      <Navigate to="/menu" replace />
+                    )
+                  } 
+                />
+                <Route 
+                  path="/profile" 
+                  element={
+                    user ? (
+                      <Profile />
+                    ) : (
+                      <Navigate to="/menu" replace />
+                    )
+                  } 
+                />
+                <Route 
+                  path="/salud" 
+                  element={<HealthyPlateGuide />} 
+                />
+                <Route 
+                  path="/liora" 
+                  element={<LioraChat />} 
+                />
+                <Route path="/" element={<Navigate to="/recetas" replace />} />
+              </Routes>
+            </Suspense>
+          </main>
+
+          <MobileInstallButton />
+          <FloatingChatButton />
+        </div>
       </ErrorBoundary>
     </Router>
-  );
-}
-
-// Nuevo componente para manejar la lógica que requiere Router
-function AppContent({ 
-  searchTerm, 
-  activeTab, 
-  setActiveTab,
-  setSearchTerm,
-  user,
-  onboardingCompleted,
-  setOnboardingCompleted,
-  weeklyMenu,
-  recipes,
-  favorites,
-  shoppingList,
-  toggleItem,
-  handleAddToMenu,
-  handleToggleFavorite,
-  recipesLoading,
-  favoritesLoading,
-  favoritesError,
-  removeFavorite,
-  updateFavorite,
-  LoadingFallback
-}) {
-  const location = useLocation();
-
-  useEffect(() => {
-    const path = location.pathname.substring(1);
-    const mainTabs = ['recetas', 'menu', 'compra', 'salud'];
-    const specialRoutes = {
-      'favoritos': 'recetas'
-    };
-
-    if (mainTabs.includes(path)) {
-      setActiveTab(path);
-    } else if (specialRoutes[path]) {
-      setActiveTab(specialRoutes[path]);
-    } else {
-      setActiveTab('');
-    }
-  }, [location.pathname, setActiveTab]);
-
-  return (
-    <div className="min-h-screen bg-gradient-to-br from-orange-50 to-rose-50 relative">
-      <Header
-        searchTerm={searchTerm}
-        onSearchChange={setSearchTerm}
-        activeTab={activeTab}
-        onTabChange={setActiveTab}
-        onLogin={() => setOnboardingCompleted(false)}
-        user={user}
-        onProfile={() => setActiveTab('profile')}
-      />
-
-      <Navigation
-        activeTab={activeTab}
-        onTabChange={setActiveTab}
-        user={user}
-      />
-
-      <main className="container mx-auto px-4 pt-20 pb-24 md:pb-8">
-        <Suspense fallback={<LoadingFallback />}>
-          <Routes>
-            <Route 
-              path="/recetas" 
-              element={
-                <RecipeContent
-                  loading={recipesLoading}
-                  error={null}
-                  recipes={recipes}
-                  onRecipeSelect={() => {}}
-                  favorites={favorites.map(f => f.id)}
-                  onToggleFavorite={handleToggleFavorite}
-                />
-              } 
-            />
-            <Route 
-              path="/menu" 
-              element={
-                <WeeklyMenu2
-                  weeklyMenu={weeklyMenu}
-                  onRecipeSelect={() => {}}
-                  onAddToMenu={handleAddToMenu}
-                  forUserId={user?.id}
-                />
-              } 
-            />
-            <Route 
-              path="/compra" 
-              element={
-                <ShoppingList
-                  items={shoppingList}
-                  onToggleItem={toggleItem}
-                />
-              } 
-            />
-            <Route 
-              path="/favoritos" 
-              element={
-                user ? (
-                  <Favorites
-                    favorites={favorites}
-                    onRemoveFavorite={removeFavorite}
-                    onUpdateFavorite={updateFavorite}
-                    loading={favoritesLoading}
-                    error={favoritesError}
-                  />
-                ) : (
-                  <Navigate to="/menu" replace />
-                )
-              } 
-            />
-            <Route 
-              path="/profile" 
-              element={
-                user ? (
-                  <Profile />
-                ) : (
-                  <Navigate to="/menu" replace />
-                )
-              } 
-            />
-            <Route 
-              path="/salud" 
-              element={<HealthyPlateGuide />} 
-            />
-            <Route 
-              path="/liora" 
-              element={<LioraChat />} 
-            />
-            <Route path="/" element={<Navigate to="/recetas" replace />} />
-          </Routes>
-        </Suspense>
-      </main>
-
-      <MobileInstallButton />
-      <FloatingChatButton />
-    </div>
   );
 }
 

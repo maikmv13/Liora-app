@@ -41,45 +41,36 @@ export function RecipeList({ recipes, onRecipeSelect, favorites, onToggleFavorit
   });
 
   return (
-    <div className="space-y-6">
-      {/* Favorites Banner */}
-      <div className="relative">
-        {/* Decorative circles */}
-        <div className="absolute inset-0 overflow-hidden rounded-2xl">
-          <div className="absolute top-0 right-0 w-64 h-64 bg-white/5 rounded-full -translate-y-1/2 translate-x-1/2 backdrop-blur-3xl -z-10" />
-          <div className="absolute bottom-0 left-0 w-48 h-48 bg-white/5 rounded-full translate-y-1/2 -translate-x-1/2 backdrop-blur-3xl -z-10" />
-        </div>
-
-        {/* Banner content */}
-        <button
-          onClick={() => navigate('/favoritos')}
-          className="relative w-full overflow-hidden group rounded-2xl"
-        >
-          <div className="absolute inset-0 bg-gradient-to-r from-rose-400 via-pink-500 to-purple-500 opacity-90 group-hover:opacity-100 transition-opacity" />
-          
-          <div className="relative flex items-center justify-between p-6 md:p-8">
-            <div className="flex items-center space-x-4">
-              <div className="bg-white/20 p-3 rounded-xl backdrop-blur-sm border border-white/30 group-hover:scale-110 transition-transform duration-300">
-                <Heart size={24} className="text-white" />
-              </div>
-              <div className="text-left">
-                <h3 className="text-white text-lg md:text-xl font-bold flex items-center space-x-2">
-                  <span>Tus Recetas Favoritas</span>
-                  <Sparkles size={20} className="text-amber-300 animate-pulse" />
-                </h3>
-                <p className="text-white/90 text-sm md:text-base mt-1">
-                  👩‍🍳 {favorites.length} favoritas de {recipes.length} recetas disponibles
-                </p>
-              </div>
+    <div className="space-y-4 md:space-y-6">
+      {/* Favorites Banner - Optimized for mobile */}
+      <button
+        onClick={() => navigate('/favoritos')}
+        className="relative w-full overflow-hidden group rounded-2xl"
+      >
+        <div className="absolute inset-0 bg-gradient-to-r from-rose-400 via-pink-500 to-purple-500 opacity-90 group-hover:opacity-100 transition-opacity" />
+        
+        <div className="relative flex items-center justify-between p-3 md:p-6">
+          <div className="flex items-center space-x-3 md:space-x-4">
+            <div className="bg-white/20 p-2 md:p-3 rounded-xl backdrop-blur-sm border border-white/30 group-hover:scale-110 transition-transform duration-300">
+              <Heart size={20} className="text-white md:w-6 md:h-6" />
             </div>
-            
-            <div className="flex items-center space-x-2 bg-white/10 px-4 py-2 rounded-xl backdrop-blur-sm border border-white/30 group-hover:bg-white/20 transition-colors">
-              <span className="text-white font-medium hidden md:block">Ver Favoritos</span>
-              <ArrowRight size={20} className="text-white transform group-hover:translate-x-1 transition-transform" />
+            <div className="text-left">
+              <h3 className="text-white text-base md:text-xl font-bold flex items-center space-x-2">
+                <span>Tus Recetas Favoritas</span>
+                <Sparkles size={16} className="text-amber-300 animate-pulse md:w-5 md:h-5" />
+              </h3>
+              <p className="text-white/90 text-xs md:text-base mt-0.5">
+                👩‍🍳 {favorites.length} favoritas de {recipes.length} recetas
+              </p>
             </div>
           </div>
-        </button>
-      </div>
+          
+          <div className="flex items-center space-x-2 bg-white/10 px-3 py-1.5 md:px-4 md:py-2 rounded-xl backdrop-blur-sm border border-white/30 group-hover:bg-white/20 transition-colors">
+            <span className="text-white font-medium text-sm md:text-base hidden md:block">Ver Favoritos</span>
+            <ArrowRight size={18} className="text-white transform group-hover:translate-x-1 transition-transform md:w-5 md:h-5" />
+          </div>
+        </div>
+      </button>
 
       {/* Filters */}
       <RecipeFilters
@@ -108,12 +99,12 @@ export function RecipeList({ recipes, onRecipeSelect, favorites, onToggleFavorit
 
       {/* Empty State */}
       {sortedRecipes.length === 0 && (
-        <div className="text-center py-12 bg-white/90 backdrop-blur-sm rounded-2xl border border-rose-100 shadow-sm">
-          <div className="bg-rose-50 w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-4">
-            <ChefHat size={32} className="text-rose-500" />
+        <div className="text-center py-8 md:py-12 bg-white/90 backdrop-blur-sm rounded-2xl border border-rose-100 shadow-sm">
+          <div className="bg-rose-50 w-12 h-12 md:w-16 md:h-16 rounded-2xl flex items-center justify-center mx-auto mb-3 md:mb-4">
+            <ChefHat size={24} className="text-rose-500 md:w-8 md:h-8" />
           </div>
           <p className="text-gray-900 font-medium">No se encontraron recetas 😔</p>
-          <p className="text-gray-500 text-sm mt-1">Prueba con otros filtros ✨</p>
+          <p className="text-sm md:text-base text-gray-500 mt-1">Prueba con otros filtros ✨</p>
         </div>
       )}
     </div>

@@ -7,8 +7,8 @@ export function FloatingChatButton() {
   const navigate = useNavigate();
   const location = useLocation();
 
-  // No mostrar el botón si estamos en la página de chat
-  if (location.pathname === '/liora') {
+  // No mostrar el botón si estamos en la página de chat o en recipe details
+  if (location.pathname === '/liora' || location.pathname.startsWith('/recipe/')) {
     return null;
   }
 
@@ -46,4 +46,4 @@ export function FloatingChatButton() {
       </span>
     </motion.button>
   );
-} 
+}
