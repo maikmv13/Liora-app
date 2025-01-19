@@ -1,16 +1,18 @@
 import React from 'react';
-import { ChefHat, Flame, ArrowLeft } from 'lucide-react';
+import { ChefHat, Flame, ArrowLeft, Heart, Share2 } from 'lucide-react';
 import type { Recipe } from '../../../types';
 import { motion } from 'framer-motion';
 
 interface HeroImageProps {
   recipe: Recipe;
   onBack: () => void;
+  onToggleFavorite: () => void;
+  isFavorite: boolean;
 }
 
-export function HeroImage({ recipe, onBack }: HeroImageProps) {
+export function HeroImage({ recipe, onBack, onToggleFavorite, isFavorite }: HeroImageProps) {
   return (
-    <div className="relative w-full aspect-[16/9]">
+    <div className="relative w-full aspect-[16/9] mt-16">
       {recipe.image_url ? (
         <img
           src={recipe.image_url}
@@ -24,17 +26,44 @@ export function HeroImage({ recipe, onBack }: HeroImageProps) {
       )}
       <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-black/30" />
       
-      {/* Recipe Title con botón de volver */}
-      <div className="absolute bottom-0 left-0 right-0 p-4">
-        <motion.button
-          initial={{ opacity: 0, x: -10 }}
-          animate={{ opacity: 1, x: 0 }}
-          onClick={onBack}
-          className="p-2 mb-2 bg-black/20 hover:bg-black/30 backdrop-blur-sm rounded-xl text-white transition-colors"
-        >
-          <ArrowLeft size={15} />
-        </motion.button>
+      {/* Botón de volver */}
+      <motion.button
+        initial={{ opacity: 0, x: -10 }}
+        animate={{ opacity: 1, x: 0 }}
+        onClick={onBack}
+        className="absolute top-4 left-4 p-2 mb-2 bg-black/20 hover:bg-black/30 backdrop-blur-sm rounded-xl text-white transition-colors"
+      >
+        <ArrowLeft size={15} />
+      </motion.button>
 
+      {/* Botones de acción */}
+      <div className="absolute top-4 right-4 flex items-center space-x-2">
+        <motion.button
+          initial={{ opacity: 0, y: -10 }}
+          animate={{ opacity: 1, y: 0 }}
+          onClick={onToggleFavorite}
+          className={`p-2 backdrop-blur-sm rounded-xl transition-colors ${
+            isFavorite 
+              ? 'bg-rose-500 text-white hover:bg-rose-600' 
+              : 'bg-black/20 text-white hover:bg-black/30'
+          }`}
+        >
+          <Heart size={15} fill={isFavorite ? 'currentColor' : 'none'} />
+        </motion.button>
+        <motion.button
+          initial={{ opacity: 0, y: -10 }}
+          animate={{ opacity: 1, y: 0 }}
+          onClick={() => {
+            // Implement share functionality
+          }}
+          className="p-2 bg-black/20 hover:bg-black/30 backdrop-blur-sm rounded-xl text-white transition-colors"
+        >
+          <Share2 size={15} />
+        </motion.button>
+      </div>
+
+      {/* Recipe Title */}
+      <div className="absolute bottom-0 left-0 right-0 p-4">
         <h1 className="text-2xl font-bold text-white mb-1">{recipe.name}</h1>
         
         {recipe.side_dish && (

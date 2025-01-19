@@ -2,7 +2,6 @@ import React, { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { ChefHat } from 'lucide-react';
 import type { Recipe } from '../../types';
-import { Header } from './components/Header';
 import { HeroImage } from './components/HeroImage';
 import { QuickInfo } from './components/QuickInfo';
 import { NutritionalInfo } from './components/NutritionalInfo';
@@ -21,7 +20,6 @@ export function RecipeDetail({ recipes, onToggleFavorite, favorites }: RecipeDet
   const navigate = useNavigate();
   const recipe = recipes.find(r => r.id === id);
   const isFavorite = favorites.some(f => f.id === id);
-  
   const [expandedSection, setExpandedSection] = useState<'ingredients' | 'instructions' | 'nutrition' | null>('ingredients');
 
   if (!recipe) {
@@ -43,51 +41,44 @@ export function RecipeDetail({ recipes, onToggleFavorite, favorites }: RecipeDet
   }
 
   return (
-    <>
-      <div className="min-h-screen bg-gray-50 w-full">
-        <Header 
-          onBack={() => navigate(-1)}
-          onToggleFavorite={() => onToggleFavorite(recipe)}
-          isFavorite={isFavorite}
+    <div className="min-h-screen bg-white">
+      <HeroImage 
+        recipe={recipe}
+        onBack={() => navigate(-1)}
+        onToggleFavorite={() => onToggleFavorite(recipe)}
+        isFavorite={isFavorite}
+      />
+
+      <div className="w-full">
+        <QuickInfo recipe={recipe} />
+
+        <NutritionalInfo 
           recipe={recipe}
+          isExpanded={expandedSection === 'nutrition'}
+          onToggle={() => setExpandedSection(
+            expandedSection === 'nutrition' ? null : 'nutrition'
+          )}
         />
 
-        <div className="w-full">
-          <HeroImage 
-            recipe={recipe} 
-            onBack={() => navigate(-1)}
-          />
-          
-          <QuickInfo recipe={recipe} />
+        <Ingredients
+          recipe={recipe}
+          isExpanded={expandedSection === 'ingredients'}
+          onToggle={() => setExpandedSection(
+            expandedSection === 'ingredients' ? null : 'ingredients'
+          )}
+        />
 
-          <NutritionalInfo 
-            recipe={recipe}
-            isExpanded={expandedSection === 'nutrition'}
-            onToggle={() => setExpandedSection(
-              expandedSection === 'nutrition' ? null : 'nutrition'
-            )}
-          />
-
-          <Ingredients
-            recipe={recipe}
-            isExpanded={expandedSection === 'ingredients'}
-            onToggle={() => setExpandedSection(
-              expandedSection === 'ingredients' ? null : 'ingredients'
-            )}
-          />
-
-          <Instructions
-            recipe={recipe}
-            isExpanded={expandedSection === 'instructions'}
-            onToggle={() => setExpandedSection(
-              expandedSection === 'instructions' ? null : 'instructions'
-            )}
-          />
-        </div>
+        <Instructions
+          recipe={recipe}
+          isExpanded={expandedSection === 'instructions'}
+          onToggle={() => setExpandedSection(
+            expandedSection === 'instructions' ? null : 'instructions'
+          )}
+        />
       </div>
 
       <RecipeQA recipe={recipe} />
-    </>
+    </div>
   );
 }
 
