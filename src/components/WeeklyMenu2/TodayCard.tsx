@@ -248,9 +248,9 @@ export function TodayCard({ menuItems, onViewRecipe, activeMenu }: TodayCardProp
                   <div className="relative">
                     {/* Mobile Layout */}
                     <div className="sm:hidden flex space-x-3">
-                      {/* Square Image */}
+                      {/* Square Image - Reduced size */}
                       {menuItem.recipe.image_url ? (
-                        <div className="relative w-20 h-20 flex-shrink-0 rounded-lg overflow-hidden">
+                        <div className="relative w-16 h-16 flex-shrink-0 rounded-lg overflow-hidden">
                           <img
                             src={menuItem.recipe.image_url}
                             alt={menuItem.recipe.name}
@@ -259,18 +259,18 @@ export function TodayCard({ menuItems, onViewRecipe, activeMenu }: TodayCardProp
                           <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent" />
                         </div>
                       ) : (
-                        <div className="w-20 h-20 flex-shrink-0 bg-gray-100 rounded-lg flex items-center justify-center">
-                          <ChefHat size={24} className="text-gray-400" />
+                        <div className="w-16 h-16 flex-shrink-0 bg-gray-100 rounded-lg flex items-center justify-center">
+                          <ChefHat size={20} className="text-gray-400" />
                         </div>
                       )}
 
                       {/* Recipe Info */}
                       <div className="flex-1 min-w-0">
-                        <h4 className="font-medium text-sm text-gray-900 group-hover:text-rose-600 transition-colors line-clamp-2">
+                        <h4 className="font-medium text-base text-gray-900 group-hover:text-rose-600 transition-colors line-clamp-2">
                           {menuItem.recipe.name}
                         </h4>
                         {menuItem.recipe.side_dish && (
-                          <p className="text-xs text-gray-500 mt-0.5 line-clamp-1">
+                          <p className="text-sm text-gray-500 mt-0.5 line-clamp-1">
                             {menuItem.recipe.side_dish}
                           </p>
                         )}
@@ -301,48 +301,50 @@ export function TodayCard({ menuItems, onViewRecipe, activeMenu }: TodayCardProp
 
                     {/* Desktop Layout */}
                     <div className="hidden sm:block">
-                      {menuItem.recipe.image_url && (
-                        <div className="relative w-full h-24 mb-2 rounded-lg overflow-hidden">
-                          <img
-                            src={menuItem.recipe.image_url}
-                            alt={menuItem.recipe.name}
-                            className="w-full h-full object-cover"
-                          />
-                          <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent" />
-                        </div>
-                      )}
+                      <div className="flex space-x-3">
+                        {menuItem.recipe.image_url && (
+                          <div className="relative w-20 h-20 flex-shrink-0 rounded-lg overflow-hidden">
+                            <img
+                              src={menuItem.recipe.image_url}
+                              alt={menuItem.recipe.name}
+                              className="w-full h-full object-cover"
+                            />
+                            <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent" />
+                          </div>
+                        )}
 
-                      <div>
-                        <h4 className="font-medium text-sm text-gray-900 group-hover:text-rose-600 transition-colors line-clamp-2">
-                          {menuItem.recipe.name}
-                        </h4>
-                        {menuItem.recipe.side_dish && (
-                          <p className="text-xs text-gray-500 mt-0.5 line-clamp-1">
-                            {menuItem.recipe.side_dish}
+                        <div className="flex-1 min-w-0">
+                          <h4 className="font-medium text-base text-gray-900 group-hover:text-rose-600 transition-colors line-clamp-2">
+                            {menuItem.recipe.name}
+                          </h4>
+                          {menuItem.recipe.side_dish && (
+                            <p className="text-sm text-gray-500 mt-0.5 line-clamp-1">
+                              {menuItem.recipe.side_dish}
+                            </p>
+                          )}
+                          <p className="text-xs text-gray-400 mt-0.5">
+                            {menuItem.recipe.category}
                           </p>
-                        )}
-                        <p className="text-xs text-gray-400 mt-0.5">
-                          {menuItem.recipe.category}
-                        </p>
-                        {(isCompleted || isSkipped) && (
-                          <span className={`inline-flex items-center space-x-1 px-1.5 py-0.5 rounded-full text-[10px] font-medium mt-1 ${
-                            isCompleted 
-                              ? 'bg-green-50 text-green-600'
-                              : 'bg-gray-50 text-gray-600'
-                          }`}>
-                            {isCompleted ? (
-                              <>
-                                <Check size={10} className="flex-shrink-0" />
-                                <span>Completada</span>
-                              </>
-                            ) : (
-                              <>
-                                <X size={10} className="flex-shrink-0" />
-                                <span>Saltada</span>
-                              </>
-                            )}
-                          </span>
-                        )}
+                          {(isCompleted || isSkipped) && (
+                            <span className={`inline-flex items-center space-x-1 px-1.5 py-0.5 rounded-full text-[10px] font-medium mt-1 ${
+                              isCompleted 
+                                ? 'bg-green-50 text-green-600'
+                                : 'bg-gray-50 text-gray-600'
+                            }`}>
+                              {isCompleted ? (
+                                <>
+                                  <Check size={10} className="flex-shrink-0" />
+                                  <span>Completada</span>
+                                </>
+                              ) : (
+                                <>
+                                  <X size={10} className="flex-shrink-0" />
+                                  <span>Saltada</span>
+                                </>
+                              )}
+                            </span>
+                          )}
+                        </div>
                       </div>
                     </div>
 
