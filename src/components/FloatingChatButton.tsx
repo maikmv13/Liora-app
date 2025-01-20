@@ -7,8 +7,15 @@ export function FloatingChatButton() {
   const navigate = useNavigate();
   const location = useLocation();
 
-  // No mostrar el botón si estamos en la página de chat o en recipe details
-  if (location.pathname === '/liora' || location.pathname.startsWith('/recipe/') || location.pathname.startsWith('/onboardingwizard')) {
+  // No mostrar el botón si estamos en la página de chat, recipe details, onboarding o onboarding wizard
+  if (
+    location.pathname === '/liora' || 
+    location.pathname.startsWith('/recipe/') || 
+    location.pathname === '/onboarding' ||
+    location.pathname.startsWith('/onboardingwizard') ||
+    // Verificar si el OnboardingWizard está abierto usando una clase en el body o un data attribute
+    document.querySelector('[data-onboarding-wizard="true"]')
+  ) {
     return null;
   }
 

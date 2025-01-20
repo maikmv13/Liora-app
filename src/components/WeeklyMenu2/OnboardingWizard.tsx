@@ -124,6 +124,19 @@ export function OnboardingWizard({
     }
   }, [favoriteStats, currentMealType]);
 
+  useEffect(() => {
+    // Añadir/remover el data attribute cuando el wizard se abre/cierra
+    if (isOpen) {
+      document.documentElement.setAttribute('data-onboarding-wizard', 'true');
+    } else {
+      document.documentElement.removeAttribute('data-onboarding-wizard');
+    }
+
+    return () => {
+      document.documentElement.removeAttribute('data-onboarding-wizard');
+    };
+  }, [isOpen]);
+
   const handleToggleFavorite = async (recipe: Recipe) => {
     try {
       const { data: { user } } = await supabase.auth.getUser();
