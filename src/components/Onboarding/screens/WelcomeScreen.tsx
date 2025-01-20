@@ -8,7 +8,7 @@ import { ChatMessage } from '../../LioraChat/components/ChatMessage';
 // Initial welcome message
 const welcomeMessage = {
   id: 'welcome-1',
-  role: 'assistant',
+  role: 'assistant' as const,
   content: `¡Hola! 👋 Soy Liora, tu asistente nutricional personal.`,
   timestamp: new Date().toISOString()
 };
@@ -16,7 +16,7 @@ const welcomeMessage = {
 // Follow-up message
 const followUpMessage = {
   id: 'welcome-2',
-  role: 'assistant',
+  role: 'assistant' as const,
   content: `¿Comenzamos este viaje juntos hacia una vida más saludable? 🌱✨`,
   timestamp: new Date(Date.now() + 1000).toISOString()
 };

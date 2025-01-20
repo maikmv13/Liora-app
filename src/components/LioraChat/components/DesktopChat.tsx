@@ -1,12 +1,16 @@
 import React, { useState, useEffect } from 'react';
-import { ChatHeader } from './ChatHeader';
 import { ChatInput } from './ChatInput';
 import { ChatMessage } from './ChatMessage';
 import { WelcomeMessage } from './WelcomeMessage';
 import { useAI } from '../../../hooks/useAI';
 
-export function DesktopChat() {
-  const [input, setInput] = useState('');
+interface DesktopChatProps {
+  initialInput?: string;
+  onQuerySelect?: (query: string) => void;
+}
+
+export function DesktopChat({ initialInput = '', onQuerySelect }: DesktopChatProps) {
+  const [input, setInput] = useState(initialInput);
   const [welcomeIndex, setWelcomeIndex] = useState(0);
   const { messages, loading, sendMessage } = useAI();
 
@@ -34,12 +38,11 @@ export function DesktopChat() {
 
   const handleQuerySelect = (query: string) => {
     setInput(query);
+    onQuerySelect?.(query);
   };
 
   return (
     <div className="flex flex-col h-screen bg-gradient-to-br from-rose-50/50 to-purple-50/50">
-      <ChatHeader />
-      
       <div className="flex-1 overflow-y-auto p-4 space-y-4 custom-scrollbar">
         <WelcomeMessage 
           welcomeIndex={welcomeIndex} 

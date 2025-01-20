@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Recipe, MealType } from '../../types';
-import { RecipeCard, mapRecipeToCardProps } from './RecipeCard';
+import { RecipeCard } from './RecipeCard';
 import { ChefHat, Heart, Sparkles, ArrowRight } from 'lucide-react';
 import { RecipeFilters } from './RecipeFilters';
 import { useNavigate } from 'react-router-dom';
@@ -90,7 +90,7 @@ export function RecipeList({ recipes, onRecipeSelect, favorites, onToggleFavorit
           <RecipeCard 
             key={recipe.id}
             recipe={recipe}
-            favorites={favorites}
+            favorites={favorites.map(f => f.recipe_id)}
             onClick={() => onRecipeSelect(recipe)}
             onToggleFavorite={() => onToggleFavorite(recipe)}
           />

@@ -1,5 +1,5 @@
 import React from 'react';
-import { Recipe } from '../../types';
+import { MealType, Recipe } from '../../types';
 import { parsePreparationTime } from '../../utils/timeUtils';
 import { RecipeFilters } from './RecipeFilters';
 import { RecipeCard } from './RecipeCard';

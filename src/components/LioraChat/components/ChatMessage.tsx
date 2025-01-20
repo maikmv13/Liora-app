@@ -1,34 +1,28 @@
-import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Bot, User, Star, Sparkles } from 'lucide-react';
 import { motion } from 'framer-motion';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import type { Message } from '../../../types/ai';
-import { RecipeCard } from './RecipeCard';
+import { RecipeMessage } from './RecipeMessage';
 
 interface ChatMessageProps {
   message: Message;
+  isTyping?: boolean;
 }
 
-export function ChatMessage({ message }: ChatMessageProps) {
+export function ChatMessage({ message, isTyping }: ChatMessageProps) {
   const navigate = useNavigate();
 
-  // Si el mensaje contiene una receta, mostrar RecipeCard
+  // Si el mensaje contiene una receta, mostrar RecipeMessage
   if (message.recipe) {
     return (
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="flex justify-start"
-      >
-        <RecipeCard 
-          recipe={message.recipe}
-          onView={() => navigate(`/recipes/${message.recipe.id}`)}
-          onShare={() => {/* implementar compartir */}}
-          inChat={true}
-        />
-      </motion.div>
+      <RecipeMessage 
+        recipe={message.recipe}
+        message={message.content}
+        onViewRecipe={(recipe) => navigate(`/recipes/${recipe.id}`)}
+        onShareRecipe={() => {/* implementar compartir */}}
+      />
     );
   }
 

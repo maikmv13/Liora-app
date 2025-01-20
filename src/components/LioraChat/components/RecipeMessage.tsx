@@ -1,7 +1,6 @@
 import React from 'react';
 import { Bot } from 'lucide-react';
 import { motion } from 'framer-motion';
-import { RecipeCard } from './RecipeCard';
 import type { Recipe } from '../../../types';
 
 interface RecipeMessageProps {
@@ -32,12 +31,24 @@ export function RecipeMessage({ recipe, message, onViewRecipe, onShareRecipe }: 
           </div>
         )}
 
-        <RecipeCard
-          recipe={recipe}
-          onView={() => onViewRecipe(recipe)}
-          onShare={() => onShareRecipe(recipe)}
-          inChat
-        />
+        <div className="bg-white border border-rose-100 rounded-xl p-4 shadow-sm">
+          <h3 className="text-lg font-semibold text-gray-900">{recipe.name}</h3>
+          <p className="text-gray-600 mt-1">{recipe.side_dish}</p>
+          <div className="flex gap-2 mt-3">
+            <button
+              onClick={() => onViewRecipe(recipe)}
+              className="px-4 py-2 bg-rose-500 text-white rounded-lg hover:bg-rose-600 transition-colors"
+            >
+              Ver Receta
+            </button>
+            <button
+              onClick={() => onShareRecipe(recipe)}
+              className="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors"
+            >
+              Compartir
+            </button>
+          </div>
+        </div>
       </div>
     </motion.div>
   );

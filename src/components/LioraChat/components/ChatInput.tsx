@@ -139,20 +139,6 @@ export function ChatInput({ value, onChange, onSubmit, loading, disabled }: Chat
           <Send size={20} />
         </motion.button>
       </div>
-
-      {/* Visual Feedback for Typing */}
-      <AnimatePresence>
-        {value && !loading && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="absolute left-4 -top-6 text-xs text-gray-500"
-          >
-            Escribiendo...
-          </motion.div>
-        )}
-      </AnimatePresence>
     </motion.div>
   );
 }

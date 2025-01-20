@@ -1,4 +1,3 @@
-import React from 'react';
 import { Recipe } from '../../types';
 import { ChefHat } from 'lucide-react';
 import { RecipeList } from './index';
@@ -45,7 +44,7 @@ export const RecipeContent = ({
     <RecipeList
       recipes={recipes}
       onRecipeSelect={onRecipeSelect}
-      favorites={favorites}
+      favorites={favorites.map(f => ({ recipe_id: f }))}
       onToggleFavorite={onToggleFavorite}
     />
   );
