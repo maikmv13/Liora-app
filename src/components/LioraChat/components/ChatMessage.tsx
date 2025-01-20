@@ -20,8 +20,10 @@ export function ChatMessage({ message, isTyping }: ChatMessageProps) {
       <RecipeMessage 
         recipe={message.recipe}
         message={message.content}
-        onViewRecipe={(recipe) => navigate(`/recipes/${recipe.id}`)}
+        favorites={[]}
+        onViewRecipe={(recipe) => navigate(`/recipe/${recipe.id}`)}
         onShareRecipe={() => {/* implementar compartir */}}
+        onToggleFavorite={() => {/* implementar toggle favorito */}}
       />
     );
   }
