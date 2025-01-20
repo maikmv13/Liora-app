@@ -38,7 +38,7 @@ export function Header({
   return (
     <div className="space-y-6">
       {/* Header principal */}
-      <div className="flex flex-col md:flex-row md:justify-between md:items-start gap-4">
+      <div className="flex flex-col md:flex-row md:justify-between md:items-center gap-4">
         <div className="flex items-center space-x-3">
           <div className="bg-rose-50 w-12 h-12 md:w-14 md:h-14 rounded-2xl flex items-center justify-center">
             <Calendar size={24} className="text-rose-500 md:w-7 md:h-7" />
@@ -51,80 +51,49 @@ export function Header({
           </div>
         </div>
 
-        {/* Botones - Desktop */}
-        <div className="hidden md:flex flex-wrap gap-3">
+        {/* Botones compactos - Desktop y Mobile */}
+        <div className="flex gap-2 w-full md:w-auto">
           <button 
             onClick={onGenerateMenu}
             disabled={isGenerating}
-            className={`flex items-center justify-center space-x-2 px-4 py-2.5 bg-gradient-to-r from-orange-400 via-pink-500 to-rose-500 text-white rounded-xl hover:from-orange-500 hover:via-pink-600 hover:to-rose-600 transition-colors shadow-sm ${
-              isGenerating ? 'opacity-50 cursor-not-allowed' : ''
-            }`}
-          >
-            {isGenerating ? (
-              <>
-                <Loader2 size={20} className="animate-spin" />
-                <span>Generando...</span>
-              </>
-            ) : (
-              <>
-                <Wand2 size={20} />
-                <span>Generar Menú</span>
-              </>
-            )}
-          </button>
-          <button 
-            onClick={onExport}
-            className="flex items-center justify-center space-x-2 px-4 py-2.5 bg-white/90 backdrop-blur-sm text-rose-500 rounded-xl hover:bg-white/90 transition-colors border border-rose-100 shadow-sm"
-          >
-            <Share2 size={20} />
-            <span>Compartir</span>
-          </button>
-          <button 
-            onClick={scrollToHistory}
-            className="flex items-center justify-center space-x-2 px-4 py-2.5 bg-white/90 backdrop-blur-sm text-rose-500 rounded-xl hover:bg-white/90 transition-colors border border-rose-100 shadow-sm"
-          >
-            <History size={20} />
-            <span>Historial</span>
-          </button>
-        </div>
-
-        {/* Botones - Mobile */}
-        <div className="flex md:hidden flex-col w-full gap-2">
-          <button 
-            onClick={onGenerateMenu}
-            disabled={isGenerating}
-            className={`flex items-center justify-center space-x-2 py-3 bg-gradient-to-r from-orange-400 via-pink-500 to-rose-500 text-white rounded-xl hover:from-orange-500 hover:via-pink-600 hover:to-rose-600 transition-colors shadow-sm ${
-              isGenerating ? 'opacity-50 cursor-not-allowed' : ''
-            }`}
+            className={`
+              flex items-center justify-center space-x-2 px-4 py-2.5 
+              bg-gradient-to-r from-orange-400 via-pink-500 to-rose-500 
+              text-white rounded-xl shadow-sm flex-1 md:flex-none
+              ${isGenerating 
+                ? 'opacity-50 cursor-not-allowed' 
+                : 'hover:from-orange-500 hover:via-pink-600 hover:to-rose-600'
+              }
+            `}
           >
             {isGenerating ? (
               <>
                 <Loader2 size={18} className="animate-spin" />
-                <span>Generando...</span>
+                <span className="text-sm md:text-base">Generando...</span>
               </>
             ) : (
               <>
                 <Wand2 size={18} />
-                <span>Generar Menú</span>
+                <span className="text-sm md:text-base">Generar</span>
               </>
             )}
           </button>
-          <div className="grid grid-cols-2 gap-2">
-            <button 
-              onClick={scrollToHistory}
-              className="flex items-center justify-center space-x-2 py-2.5 bg-white/90 backdrop-blur-sm text-rose-500 rounded-xl hover:bg-white/90 transition-colors border border-rose-100 shadow-sm text-sm"
-            >
-              <History size={16} />
-              <span>Historial</span>
-            </button>
-            <button 
-              onClick={onExport}
-              className="flex items-center justify-center space-x-2 py-2.5 bg-white/90 backdrop-blur-sm text-rose-500 rounded-xl hover:bg-white/90 transition-colors border border-rose-100 shadow-sm text-sm"
-            >
-              <Share2 size={16} />
-              <span>Compartir</span>
-            </button>
-          </div>
+
+          <button 
+            onClick={scrollToHistory}
+            className="flex items-center justify-center space-x-2 px-4 py-2.5 bg-white/90 backdrop-blur-sm text-rose-500 rounded-xl border border-rose-100 shadow-sm flex-1 md:flex-none hover:bg-white"
+          >
+            <History size={18} />
+            <span className="text-sm md:text-base">Historial</span>
+          </button>
+
+          <button 
+            onClick={onExport}
+            className="flex items-center justify-center space-x-2 px-4 py-2.5 bg-white/90 backdrop-blur-sm text-rose-500 rounded-xl border border-rose-100 shadow-sm flex-1 md:flex-none hover:bg-white"
+          >
+            <Share2 size={18} />
+            <span className="text-sm md:text-base">Compartir</span>
+          </button>
         </div>
       </div>
 

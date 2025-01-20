@@ -4,20 +4,32 @@ import { RecipeCard } from './RecipeCard';
 import { ChefHat, Heart, Sparkles, ArrowRight } from 'lucide-react';
 import { RecipeFilters } from './RecipeFilters';
 import { useNavigate } from 'react-router-dom';
+import { LoadingFallback } from '../LoadingFallback';
 
 interface RecipeListProps {
   recipes: Recipe[];
   onRecipeSelect: (recipe: Recipe) => void;
   favorites: { recipe_id: string }[];
   onToggleFavorite: (recipe: Recipe) => void;
+  loading?: boolean;
 }
 
-export function RecipeList({ recipes, onRecipeSelect, favorites, onToggleFavorite }: RecipeListProps) {
+export function RecipeList({ 
+  recipes, 
+  onRecipeSelect, 
+  favorites, 
+  onToggleFavorite,
+  loading 
+}: RecipeListProps) {
   const [selectedCategory, setSelectedCategory] = useState('Todas');
   const [selectedMealType, setSelectedMealType] = useState<'all' | MealType>('all');
   const [sortBy, setSortBy] = useState<'popular' | 'calories' | 'time' | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
   const navigate = useNavigate();
+
+  if (loading) {
+    return <LoadingFallback />;
+  }
 
   const filteredRecipes = recipes.filter(recipe => {
     const matchesCategory = selectedCategory === 'Todas' || recipe.category === selectedCategory;

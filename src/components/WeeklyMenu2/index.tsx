@@ -14,6 +14,7 @@ import { supabase } from '../../lib/supabase';
 import { weekDays } from './utils';
 import { RecipeSelectorSidebar } from './RecipeSelectorSidebar';
 import { Navigate } from 'react-router-dom';
+import { MenuSkeleton } from './MenuSkeleton';
 
 export function WeeklyMenu2() {
   const [selectedDay, setSelectedDay] = useState<string>('Lunes');
@@ -259,11 +260,7 @@ export function WeeklyMenu2() {
 
   // Loading state
   if (isLoading) {
-    return (
-      <div className="flex items-center justify-center min-h-[400px]">
-        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-rose-500"></div>
-      </div>
-    );
+    return <MenuSkeleton />;
   }
 
   // Si no hay usuario o showOnboarding es true, mostrar onboarding
@@ -328,17 +325,19 @@ export function WeeklyMenu2() {
         {/* Main content */}
         <div className="relative mb-6">
           {menuLoading ? (
-            <div className="flex items-center justify-center min-h-[400px]">
-              <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-rose-500"></div>
+            <div className="mt-4 md:mt-6">
+              <MenuSkeleton />
             </div>
           ) : (
             <>
               {/* Today's Menu */}
-              <TodayCard
-                menuItems={menu}
-                onViewRecipe={setSelectedRecipe}
-                activeMenu={null}
-              />
+              <div className="mt-4 md:mt-6">
+                <TodayCard
+                  menuItems={menu}
+                  onViewRecipe={setSelectedRecipe}
+                  activeMenu={null}
+                />
+              </div>
 
               {/* Weekly Menu View */}
               <div className="mt-6">

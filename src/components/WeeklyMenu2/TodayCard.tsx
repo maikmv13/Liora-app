@@ -20,10 +20,10 @@ export function TodayCard({ menuItems, onViewRecipe, activeMenu }: TodayCardProp
   const navigate = useNavigate();
   
   const today = new Intl.DateTimeFormat('es-ES', { 
-    weekday: 'long',
-    day: 'numeric',
-    month: 'long' 
-  }).format(new Date());
+    weekday: 'long'
+  }).format(new Date())
+    .toLowerCase() // convertir a minúsculas para comparar
+    .normalize("NFD").replace(/[\u0300-\u036f]/g, ""); // remover acentos
 
   const todayFormatted = new Date().toISOString().split('T')[0];
 
@@ -112,10 +112,15 @@ export function TodayCard({ menuItems, onViewRecipe, activeMenu }: TodayCardProp
     }
   };
 
-  const totalCalorias = menuItems.reduce((total, item) => {
-    const calories = parseInt(item.recipe.calories?.replace(/\D/g, '') || '0');
-    return total + calories;
-  }, 0);
+  const totalCalorias = menuItems
+    .filter(item => item.day.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "") === today) // filtrar solo comidas de hoy
+    .reduce((total, item) => {
+      if (!item.recipe.calories) return total;
+      
+      // Extraer solo los números de la cadena de calorías
+      const calories = parseInt(item.recipe.calories.replace(/[^\d]/g, '')) || 0;
+      return total + calories;
+    }, 0);
 
   const mealTypes = ['desayuno', 'comida', 'snack', 'cena'];
 
