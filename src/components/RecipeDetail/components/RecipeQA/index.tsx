@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion, AnimatePresence, PanInfo } from 'framer-motion';
 import { Bot, X, ChevronUp, Sparkles, MessageCircle, HelpCircle } from 'lucide-react';
 import type { Recipe } from '../../../../types';
 import { useAI } from '../../../../hooks/useAI';
@@ -12,14 +12,37 @@ interface RecipeQAProps {
   recipe: Recipe;
 }
 
+const variants = {
+  expanded: {
+    height: 'calc(100vh - 7rem)',
+    scale: 1,
+    transition: {
+      type: "spring",
+      damping: 30,
+      stiffness: 200
+    }
+  },
+  collapsed: {
+    height: '12rem',
+    scale: 1,
+    transition: {
+      type: "spring",
+      damping: 30,
+      stiffness: 200
+    }
+  }
+};
+
 export function RecipeQA({ recipe }: RecipeQAProps) {
   const [isExpanded, setIsExpanded] = useState(false);
+  const [isVisible, setIsVisible] = useState(true);
   const [input, setInput] = useState('');
   const [quickQuestions, setQuickQuestions] = useState<string[]>([]);
   const [isGenerating, setIsGenerating] = useState(true);
   const [activeTab, setActiveTab] = useState<'chat' | 'questions'>('questions');
   const { messages, loading, sendMessage, generateRecipeQuestions } = useAI(recipe);
   const chatContainerRef = React.useRef<HTMLDivElement>(null);
+  const [isDragging, setIsDragging] = useState(false);
 
   // Generate quick questions on mount
   useEffect(() => {
@@ -64,50 +87,54 @@ export function RecipeQA({ recipe }: RecipeQAProps) {
     await sendMessage(question);
   };
 
+  const handleDragStart = () => {
+    setIsDragging(true);
+  };
+
+  const handleDragEnd = (event: MouseEvent | TouchEvent | PointerEvent, info: PanInfo) => {
+    setIsDragging(false);
+    const DRAG_THRESHOLD = 50;
+    if (info.offset.y > DRAG_THRESHOLD) {
+      if (!isExpanded) {
+        setIsVisible(false);
+      } else {
+        setIsExpanded(false);
+      }
+    } else if (info.offset.y < -DRAG_THRESHOLD && !isExpanded) {
+      setIsExpanded(true);
+    }
+  };
+
   return (
     <>
       {/* Main Drawer */}
       <div 
-        className="fixed inset-x-0 bottom-[3.25rem] z-40"
+        className={`fixed inset-x-0 bottom-[3.25rem] z-40 transition-transform duration-300 ${
+          !isVisible ? 'translate-y-full' : 'translate-y-0'
+        }`}
         data-qa-container
         data-expanded={isExpanded}
       >
         <AnimatePresence>
           <motion.div
+            variants={variants}
             initial={false}
-            animate={isExpanded ? {
-              height: 'calc(100vh - 7rem)',
-              scale: 1
-            } : {
-              height: '7.5rem',
-              scale: [1, 0.97, 1, 0.98, 1]
-            }}
-            style={{
-              transformOrigin: 'bottom'
-            }}
-            transition={isExpanded ? {
-              type: "spring",
-              damping: 30,
-              stiffness: 200
-            } : {
-              scale: {
-                duration: 0.5,
-                repeat: Infinity,
-                repeatDelay: 3,
-                times: [0, 0.2, 0.4, 0.6, 1],
-                ease: "easeInOut"
-              },
-              height: {
-                type: "spring",
-                damping: 30,
-                stiffness: 200
-              }
-            }}
-            className="bg-white/70 backdrop-blur-sm rounded-t-2xl shadow-lg border border-rose-100 overflow-hidden"
+            animate={isExpanded ? 'expanded' : 'collapsed'}
+            drag="y"
+            dragConstraints={{ top: 0, bottom: 0 }}
+            dragElastic={0.2}
+            onDragStart={handleDragStart}
+            onDragEnd={handleDragEnd}
+            className={`
+              bg-rose-50/70 backdrop-blur-sm rounded-t-2xl 
+              border-x border-t border-rose-100 overflow-hidden touch-pan-y
+              shadow-[0_-8px_25px_-6px_rgba(0,0,0,0.1)]
+              ${isDragging ? 'cursor-grabbing' : 'cursor-grab'}
+            `}
           >
             {/* Header */}
             <div className="sticky top-0 z-10">
-              <div className="bg-gradient-to-r from-rose-500 to-rose-400 px-4 py-2.5 rounded-t-2xl">
+              <div className="bg-gradient-to-r from-rose-500 to-rose-400 px-4 py-2.5 rounded-t-2xl shadow-[0_4px_20px_-4px_rgba(0,0,0,0.0)]">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center space-x-3">
                     <div className="relative">
@@ -149,26 +176,24 @@ export function RecipeQA({ recipe }: RecipeQAProps) {
                     )}
                     <button
                       onClick={() => setIsExpanded(!isExpanded)}
-                      className="p-1.5 hover:bg-white/10 rounded-lg transition-colors"
+                      className="p-1.5 hover:bg-white/10 rounded-lg transition-colors group"
                       data-expand-button
                     >
                       <ChevronUp 
                         size={18} 
                         className={`text-white transform transition-transform ${
                           isExpanded ? 'rotate-180' : ''
-                        }`}
+                        } group-hover:scale-110`}
                       />
                     </button>
-                    {isExpanded && (
-                      <button
-                        onClick={() => setIsExpanded(false)}
-                        className="p-1.5 hover:bg-white/10 rounded-lg transition-colors"
-                      >
-                        <X size={18} className="text-white" />
-                      </button>
-                    )}
                   </div>
                 </div>
+              </div>
+
+              {/* Indicador de arrastre */}
+              <div className={`absolute top-0 left-1/2 transform -translate-x-1/2 transition-opacity duration-200
+                ${isDragging ? 'opacity-100' : 'opacity-50'}`}>
+                <div className="h-1 w-12 bg-white rounded-full mt-1" />
               </div>
 
               {/* Tabs - Only show when expanded */}
@@ -202,13 +227,13 @@ export function RecipeQA({ recipe }: RecipeQAProps) {
             </div>
 
             {/* Content */}
-            <div className="h-full flex flex-col">
+            <div className="h-full flex flex-col bg-gradient-to-b from-rose-100/90 via-rose-50/80 to-rose-50/70">
               {isExpanded ? (
                 <div className="flex-1 overflow-y-auto">
                   {activeTab === 'chat' ? (
                     <div 
                       ref={chatContainerRef}
-                      className="flex-1 p-4 space-y-4 pb-16"
+                      className="flex-1 p-4 space-y-4 pb-24"
                     >
                       {messages.map((message) => (
                         <ChatMessage 
@@ -236,13 +261,28 @@ export function RecipeQA({ recipe }: RecipeQAProps) {
                   )}
                 </div>
               ) : (
-                <div className="p-3">
-                  <QuickQuestions
-                    questions={quickQuestions}
-                    isLoading={isGenerating}
-                    onQuestionClick={handleQuestionClick}
-                    isExpanded={false}
-                  />
+                <div className="flex flex-col h-full">
+                  <div className="flex-none p-3">
+                    <QuickQuestions
+                      questions={quickQuestions}
+                      isLoading={isGenerating}
+                      onQuestionClick={handleQuestionClick}
+                      isExpanded={false}
+                    />
+                  </div>
+                  {messages.length > 0 && (
+                    <div className="flex-1 overflow-y-auto px-4 pb-20">
+                      <div className="space-y-3">
+                        {messages.slice(-2).map((message) => (
+                          <ChatMessage 
+                            key={message.id}
+                            message={message}
+                            compact={true}
+                          />
+                        ))}
+                      </div>
+                    </div>
+                  )}
                 </div>
               )}
             </div>
@@ -251,14 +291,17 @@ export function RecipeQA({ recipe }: RecipeQAProps) {
       </div>
 
       {/* Fixed Input at Bottom */}
-      <div className="fixed bottom-0 left-0 right-0 px-3 py-2 bg-white/95 backdrop-blur-sm border-t border-rose-100 z-50">
-        <ChatInput
-          value={input}
-          onChange={setInput}
-          onSubmit={handleSendMessage}
-          loading={loading}
-          recipe={recipe}
-        />
+      <div className="fixed bottom-0 left-0 right-0 px-4 py-2 bg-white/95 backdrop-blur-sm border-t border-rose-100 z-50">
+        <div onClick={() => setIsVisible(true)}>
+          <ChatInput
+            value={input}
+            onChange={setInput}
+            onSubmit={handleSendMessage}
+            loading={loading}
+            recipe={recipe}
+            isDrawerVisible={isVisible}
+          />
+        </div>
       </div>
     </>
   );

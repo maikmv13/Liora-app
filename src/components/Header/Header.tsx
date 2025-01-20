@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Sparkles, Search, Menu as MenuIcon, X, User, Leaf } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-import { MobileMenu } from './MobileMenu';
+import { MobileMenu } from '../MobileMenu';
 
 interface HeaderProps {
   searchTerm: string;

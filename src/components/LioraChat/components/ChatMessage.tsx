@@ -8,10 +8,10 @@ import { RecipeMessage } from './RecipeMessage';
 
 interface ChatMessageProps {
   message: Message;
-  isTyping?: boolean;
+  compact?: boolean;
 }
 
-export function ChatMessage({ message, isTyping }: ChatMessageProps) {
+export function ChatMessage({ message, compact = false }: ChatMessageProps) {
   const navigate = useNavigate();
 
   // Si el mensaje contiene una receta, mostrar RecipeMessage
@@ -29,13 +29,10 @@ export function ChatMessage({ message, isTyping }: ChatMessageProps) {
   }
 
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      className={`flex items-start space-x-2 ${
-        message.role === 'assistant' ? 'justify-start' : 'justify-end'
-      }`}
-    >
+    <div className={`
+      flex items-start gap-3
+      ${compact ? 'text-sm' : 'text-base'}
+    `}>
       {message.role === 'assistant' && (
         <div className="relative flex-shrink-0">
           <div className="bg-rose-500/10 backdrop-blur-sm p-2 rounded-lg">
@@ -111,6 +108,6 @@ export function ChatMessage({ message, isTyping }: ChatMessageProps) {
           </div>
         </div>
       )}
-    </motion.div>
+    </div>
   );
 }
