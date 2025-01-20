@@ -82,7 +82,7 @@ export function Onboarding({ onComplete, onLogin }: OnboardingProps) {
       {/* Content */}
       <div className="relative h-full overflow-y-auto">
         <motion.div 
-          className="h-full"
+          className="min-h-full flex flex-col"
           drag="x"
           dragConstraints={{ left: 0, right: 0 }}
           dragElastic={0.3}
@@ -93,11 +93,11 @@ export function Onboarding({ onComplete, onLogin }: OnboardingProps) {
             {SCREENS.map(({ id, Component }, index) => (
               <motion.div
                 key={id}
-                className={`${
-                  index === currentScreen ? 'opacity-100 visible' : 'opacity-0 invisible absolute inset-0'
-                } ${
-                  id === 'login' ? 'h-auto' : 'h-full flex items-center'
-                }`}
+                className={`
+                  ${index === currentScreen ? 'opacity-100 visible' : 'opacity-0 invisible absolute inset-0'}
+                  min-h-screen w-full flex flex-col
+                  ${id === 'login' ? 'justify-start' : 'justify-center'}
+                `}
                 initial={{ opacity: 0, x: index > currentScreen ? 100 : -100 }}
                 animate={{ 
                   opacity: 1, 
@@ -116,14 +116,16 @@ export function Onboarding({ onComplete, onLogin }: OnboardingProps) {
                   }
                 }}
               >
-                <Component
-                  onNext={handleNext}
-                  onPrev={handlePrev}
-                  onComplete={onComplete}
-                  onLogin={onLogin}
-                  isLast={index === SCREENS.length - 1}
-                  isFirst={index === 0}
-                />
+                <div className="flex-1 flex flex-col">
+                  <Component
+                    onNext={handleNext}
+                    onPrev={handlePrev}
+                    onComplete={onComplete}
+                    onLogin={onLogin}
+                    isLast={index === SCREENS.length - 1}
+                    isFirst={index === 0}
+                  />
+                </div>
               </motion.div>
             ))}
           </AnimatePresence>
@@ -132,7 +134,7 @@ export function Onboarding({ onComplete, onLogin }: OnboardingProps) {
 
       {/* Progress Dots */}
       {currentScreen !== SCREENS.length - 1 && (
-        <div className="fixed bottom-24 md:bottom-8 left-0 right-0 flex flex-col md:flex-row items-center justify-center space-y-4 md:space-y-0 md:space-x-2 z-10">
+        <div className="fixed bottom-8 left-0 right-0 flex justify-center z-10">
           <div className="flex space-x-2">
             {SCREENS.map((_, i) => (
               <motion.button

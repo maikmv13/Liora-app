@@ -1,49 +1,50 @@
 import React, { useState, useEffect } from 'react';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import { Bot, Sparkles } from 'lucide-react';
 import { ScreenProps } from './types';
 import { FallingEmojis } from '../../LioraChat/components/FallingEmojis';
 import { ChatMessage } from '../../LioraChat/components/ChatMessage';
 
-// Initial welcome message
-const welcomeMessage = {
-  id: 'welcome-1',
-  role: 'assistant' as const,
-  content: `¡Hola! 👋 Soy Liora, tu asistente nutricional personal.`,
-  timestamp: new Date().toISOString()
-};
-
-// Follow-up message
-const followUpMessage = {
-  id: 'welcome-2',
-  role: 'assistant' as const,
-  content: `¿Comenzamos este viaje juntos hacia una vida más saludable? 🌱✨`,
-  timestamp: new Date(Date.now() + 1000).toISOString()
-};
+const messages = [
+  {
+    id: 'welcome-1',
+    role: 'assistant' as const,
+    content: `¡Hola! 👋 Soy Liora, tu asistente nutricional personal.`,
+    timestamp: new Date().toISOString()
+  },
+  {
+    id: 'welcome-2',
+    role: 'assistant' as const,
+    content: `¿Comenzamos este viaje juntos hacia una vida más saludable? 🌱✨`,
+    timestamp: new Date(Date.now() + 1000).toISOString()
+  }
+];
 
 export function WelcomeScreen({ onNext }: ScreenProps) {
-  const [messages, setMessages] = useState<typeof welcomeMessage[]>([welcomeMessage]);
+  const [visibleMessages, setVisibleMessages] = useState<typeof messages[0][]>([]);
   const [isTyping, setIsTyping] = useState(false);
-  const hasShownSecondMessage = React.useRef(false);
+  const [showButton, setShowButton] = useState(false);
 
   useEffect(() => {
-    const showSecondMessage = async () => {
-      if (hasShownSecondMessage.current) return;
-      hasShownSecondMessage.current = true;
-
-      // Pausa antes de mostrar el typing del segundo mensaje
+    const showMessages = async () => {
+      // Primer mensaje
+      setVisibleMessages([messages[0]]);
       await new Promise(resolve => setTimeout(resolve, 1000));
       
-      // Mostrar typing para el segundo mensaje
+      // Typing para segundo mensaje
       setIsTyping(true);
       await new Promise(resolve => setTimeout(resolve, 1000));
       
       // Mostrar segundo mensaje
-      setMessages(prev => [...prev, followUpMessage]);
       setIsTyping(false);
+      setVisibleMessages(messages);
+      
+      // Mostrar botón después de un momento
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      setShowButton(true);
     };
 
-    showSecondMessage();
+    showMessages();
   }, []);
 
   return (
@@ -67,7 +68,7 @@ export function WelcomeScreen({ onNext }: ScreenProps) {
 
       <FallingEmojis />
       
-      <div className="relative h-full flex flex-col items-center px-4 pt-8 md:pt-12 pb-24 md:pb-20 max-w-lg mx-auto z-10">
+      <div className="relative min-h-screen flex flex-col items-center px-4 pt-8 md:pt-12 pb-24 md:pb-20 max-w-lg mx-auto z-10">
         {/* Logo and Brand */}
         <motion.div
           initial={{ opacity: 0, scale: 0.5 }}
@@ -132,9 +133,9 @@ export function WelcomeScreen({ onNext }: ScreenProps) {
           </motion.div>
         </div>
 
-        {/* Welcome Messages - Centrados horizontalmente */}
-        <div className="w-full max-w-md mx-auto space-y-4">
-          {messages.map((message) => (
+        {/* Messages Container */}
+        <div className="w-full max-w-md mx-auto space-y-4 mb-24">
+          {visibleMessages.map((message) => (
             <motion.div
               key={message.id}
               initial={{ opacity: 0, y: 20 }}
@@ -169,29 +170,28 @@ export function WelcomeScreen({ onNext }: ScreenProps) {
         </div>
 
         {/* Start Button */}
-        <motion.button
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 3 }}
-          onClick={onNext}
-          className="fixed bottom-8 left-4 right-4 md:relative md:mt-8 md:w-full px-6 md:px-8 py-4 bg-gradient-to-r from-violet-500 via-fuchsia-500 to-rose-500 text-white rounded-xl font-medium shadow-lg hover:shadow-xl active:scale-95 transition-all duration-300 max-w-sm mx-auto"
-        >
-          <div className="flex items-center justify-center space-x-2">
-            <span>Comenzar mi viaje</span>
-            <motion.span
-              animate={{ 
-                x: [0, 4, 0],
-              }}
+        <AnimatePresence>
+          {showButton && (
+            <motion.div
+              initial={{ opacity: 0, y: 50 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: 50 }}
               transition={{ 
-                duration: 1.5,
-                repeat: Infinity,
-                ease: "easeInOut"
+                type: "spring",
+                stiffness: 300,
+                damping: 25
               }}
+              className="fixed bottom-8 left-4 right-4 md:left-auto md:right-auto md:w-full max-w-sm mx-auto"
             >
-              →
-            </motion.span>
-          </div>
-        </motion.button>
+              <button
+                onClick={onNext}
+                className="w-full px-8 py-4 bg-gradient-to-r from-rose-500 to-pink-500 text-white rounded-xl font-medium shadow-lg hover:shadow-xl active:scale-95 transition-all duration-300"
+              >
+                Comenzar viaje
+              </button>
+            </motion.div>
+          )}
+        </AnimatePresence>
       </div>
     </div>
   );

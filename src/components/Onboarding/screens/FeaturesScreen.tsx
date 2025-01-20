@@ -1,5 +1,5 @@
-import React from 'react';
-import { motion } from 'framer-motion';
+import React, { useState, useEffect } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { Calendar, Apple, Brain, Heart, Sparkles } from 'lucide-react';
 import { ScreenProps } from './types';
 
@@ -39,9 +39,20 @@ const features = [
 ];
 
 export function FeaturesScreen({ onNext }: ScreenProps) {
+  const [showButton, setShowButton] = useState(false);
+
+  useEffect(() => {
+    // Mostrar el botón después de que se muestren las características
+    const timer = setTimeout(() => {
+      setShowButton(true);
+    }, 1200); // Ajusta este tiempo según necesites
+
+    return () => clearTimeout(timer);
+  }, []);
+
   return (
-    <div className="min-h-screen">
-      <div className="px-4 py-8 md:py-12 max-w-lg mx-auto">
+    <div className="min-h-screen flex flex-col">
+      <div className="flex-1 px-4 py-8 md:py-12 max-w-lg mx-auto">
         {/* Enhanced Header */}
         <div className="text-center mb-12">
           <motion.div
@@ -83,25 +94,11 @@ export function FeaturesScreen({ onNext }: ScreenProps) {
             <p className="text-base md:text-lg text-gray-600 mt-2">
               Aprende a cómo vivir estable en una balanza!
             </p>
-            <motion.div
-              animate={{ 
-                scale: [1, 1.2, 1],
-                rotate: [0, 360]
-              }}
-              transition={{ 
-                duration: 3,
-                repeat: Infinity,
-                repeatType: "reverse"
-              }}
-              className="absolute -right-4 top-0"
-            >
-              <span className="text-xl">✨</span>
-            </motion.div>
           </motion.div>
         </div>
 
         {/* Features Grid */}
-        <div className="grid grid-cols-2 gap-3 md:gap-4 mb-24 md:mb-8">
+        <div className="grid grid-cols-2 gap-3 md:gap-4 mb-24">
           {features.map((feature, index) => (
             <motion.div
               key={feature.id}
@@ -129,18 +126,31 @@ export function FeaturesScreen({ onNext }: ScreenProps) {
             </motion.div>
           ))}
         </div>
-
-        {/* Continue Button */}
-        <motion.button
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.8 }}
-          onClick={onNext}
-          className="fixed bottom-8 left-4 right-4 md:relative md:w-full px-8 py-4 bg-gradient-to-r from-rose-500 to-pink-500 text-white rounded-xl font-medium shadow-lg hover:shadow-xl active:scale-95 transition-all duration-300 max-w-sm mx-auto"
-        >
-          Continuar
-        </motion.button>
       </div>
+
+      {/* Continue Button */}
+      <AnimatePresence>
+        {showButton && (
+          <motion.div
+            initial={{ opacity: 0, y: 50 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: 50 }}
+            transition={{ 
+              type: "spring",
+              stiffness: 300,
+              damping: 25
+            }}
+            className="fixed bottom-8 left-4 right-4 md:left-auto md:right-auto md:w-full max-w-sm mx-auto"
+          >
+            <button
+              onClick={onNext}
+              className="w-full px-8 py-4 bg-gradient-to-r from-rose-500 to-pink-500 text-white rounded-xl font-medium shadow-lg hover:shadow-xl active:scale-95 transition-all duration-300"
+            >
+              Continuar
+            </button>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }
