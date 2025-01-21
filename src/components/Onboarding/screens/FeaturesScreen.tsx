@@ -194,8 +194,8 @@ export function FeaturesScreen({ onNext }: ScreenProps) {
           </p>
         </div>
 
-        {/* Features Grid - Cards más grandes */}
-        <div className="grid grid-cols-2 gap-4 md:gap-6 mb-24">
+        {/* Features Grid - Cards más pequeñas */}
+        <div className="grid grid-cols-2 gap-3 md:gap-4 mb-20">
           {features.map((feature, index) => (
             <motion.button
               key={feature.id}
@@ -204,39 +204,37 @@ export function FeaturesScreen({ onNext }: ScreenProps) {
               transition={{ delay: 0.2 + index * 0.1 }}
               onClick={() => handleFeatureClick(feature.id)}
               className={`
-                bg-white/80 backdrop-blur-sm rounded-xl p-6 border
+                bg-white/80 backdrop-blur-sm rounded-xl p-4 border
                 shadow-sm transform transition-all duration-300 hover:scale-105 active:scale-95
-                cursor-pointer relative overflow-hidden group min-h-[180px]
+                cursor-pointer relative overflow-hidden group min-h-[140px]
                 ${checkedFeatures.has(feature.id) 
                   ? 'border-green-200 bg-green-50/50' 
                   : `border-${feature.color}-100`}
               `}
             >
-              {checkedFeatures.has(feature.id) && (
-                <div className="absolute top-2 right-2 bg-green-500 rounded-full p-1">
-                  <Check size={12} className="text-white" />
+              {/* Check icon */}
+              <motion.div
+                initial={{ scale: 0 }}
+                animate={{ scale: checkedFeatures.has(feature.id) ? 1 : 0 }}
+                className="absolute top-3 right-3 bg-green-500 text-white p-1 rounded-full"
+              >
+                <Check size={12} />
+              </motion.div>
+
+              {/* Feature content */}
+              <div className="flex flex-col h-full">
+                <div className={`p-2 rounded-lg bg-${feature.color}-50 w-fit`}>
+                  <feature.icon size={18} className={`text-${feature.color}-500`} />
                 </div>
-              )}
-              <div className="flex flex-col items-center text-center relative z-10">
-                <div className={`p-3 rounded-xl ${
-                  checkedFeatures.has(feature.id) 
-                    ? 'bg-green-100' 
-                    : `bg-${feature.color}-50`
-                } mb-3 group-hover:scale-110 transition-transform`}>
-                  <feature.icon 
-                    size={20} 
-                    className={checkedFeatures.has(feature.id) 
-                      ? 'text-green-500' 
-                      : `text-${feature.color}-500`
-                    } 
-                  />
+                <div className="mt-3">
+                  <div className="flex items-center space-x-2">
+                    <span className="text-base">{feature.emoji}</span>
+                    <h3 className="font-medium text-gray-900">{feature.title}</h3>
+                  </div>
+                  <p className="text-sm text-gray-500 mt-1 line-clamp-2">
+                    {feature.description}
+                  </p>
                 </div>
-                <h3 className="text-sm font-semibold text-gray-900 mb-1">
-                  {feature.title} {feature.emoji}
-                </h3>
-                <p className="text-xs text-gray-600 line-clamp-2">
-                  {feature.description}
-                </p>
               </div>
             </motion.button>
           ))}

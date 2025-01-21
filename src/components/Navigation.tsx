@@ -1,6 +1,6 @@
 import React from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { ChefHat, Calendar, ShoppingCart, Bot, Heart } from 'lucide-react';
+import { ChefHat, Calendar, ShoppingCart, Bot, Heart, Activity } from 'lucide-react';
 
 interface NavigationProps {
   activeTab: string;
@@ -17,7 +17,6 @@ export function Navigation({ activeTab, onTabChange, orientation = 'horizontal',
   const getActiveTab = () => {
     const path = location.pathname;
     
-    // Mapeo exacto de rutas a pestañas
     switch (path) {
       case '/recetas':
         return 'recetas';
@@ -29,11 +28,8 @@ export function Navigation({ activeTab, onTabChange, orientation = 'horizontal',
         return 'compra';
       case '/salud':
         return 'salud';
-      case '/salud':
-        return 'salud';
       case '/profile':
         return 'profile';
-      // Si la ruta es /recipe/[id], consideramos que estamos en la sección de recetas
       case path.match(/^\/recipe\//)?.input:
         return 'recetas';
       default:
@@ -51,7 +47,6 @@ export function Navigation({ activeTab, onTabChange, orientation = 'horizontal',
       'favoritos': '/favoritos',
       'menu': '/menu',
       'compra': '/compra',
-      'salud': '/salud',
       'salud': '/salud',
       'profile': '/profile'
     };
@@ -79,9 +74,9 @@ export function Navigation({ activeTab, onTabChange, orientation = 'horizontal',
     },
     {
       id: 'salud',
-      icon: Heart,
-      label: 'Salud',
-      description: 'Guía'
+      icon: Activity,
+      label: 'Objetivos',
+      description: 'Seguimiento'
     }
   ];
 

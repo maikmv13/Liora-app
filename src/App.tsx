@@ -13,12 +13,12 @@ import { useFavorites } from './hooks/useFavorites';
 import { MobileInstallButton } from './components/MobileInstallButton';
 import { ErrorBoundary } from './components/ErrorBoundary';
 import { ScrollToTop } from './components/ScrollToTop';
-import { ChefHat, Leaf, Sparkles } from 'lucide-react';
 import { FloatingChatButton } from './components/FloatingChatButton';
-import { HealthyPlateGuide } from './components/HealthyPlateGuide';
 import { Onboarding } from './components/Onboarding';
 import { RecipeDetail } from './components/RecipeDetail';
 import { LoadingFallback } from './components/LoadingFallback';
+import { HealthTracker } from './components/HealthTracker';
+import { HealthProvider } from './contexts/HealthContext';
 
 // Lazy load components
 const WeeklyMenu2 = lazy(() => import('./components/WeeklyMenu2'));
@@ -81,14 +81,12 @@ function AppContent() {
           return 'compra';
         case '/salud':
           return 'salud';
-        case '/salud':
-          return 'salud';
         case '/profile':
           return 'profile';
         case path.match(/^\/recipe\//)?.input:
           return 'recetas';
         default:
-          return 'recetas'; // default tab
+          return 'recetas';
       }
     };
 
@@ -163,9 +161,7 @@ function AppContent() {
       />
 
       <main className={`container mx-auto pb-24 md:pb-8 ${
-        location.pathname.startsWith('/recipe/') 
-          ? '' 
-          : 'px-4 pt-20'
+        location.pathname.startsWith('/recipe/') ? '' : 'px-4 pt-20'
       }`}>
         <Suspense fallback={<LoadingFallback />}>
           <Routes>
@@ -241,7 +237,11 @@ function AppContent() {
             />
             <Route 
               path="/salud" 
-              element={<HealthyPlateGuide />} 
+              element={
+                <HealthProvider>
+                  <HealthTracker />
+                </HealthProvider>
+              } 
             />
             <Route 
               path="/liora" 

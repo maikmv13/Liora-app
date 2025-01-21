@@ -1,7 +1,7 @@
 import React from 'react';
 import { 
   X, ChefHat, Calendar, ShoppingCart, Activity, User, 
-  LogIn, Settings, LogOut, Apple, Heart, Bot, CalendarDays, Leaf 
+  LogIn, Settings, LogOut, Apple, Heart, Bot, CalendarDays, Target 
 } from 'lucide-react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
@@ -34,8 +34,6 @@ export function MobileMenu({ isOpen, onClose, user, onLogin, onProfile, activeTa
         return 'menu';
       case '/compra':
         return 'compra';
-      case '/salud':
-        return 'salud';
       case '/salud':
         return 'salud';
       case '/profile':
@@ -87,19 +85,19 @@ export function MobileMenu({ isOpen, onClose, user, onLogin, onProfile, activeTa
     },
     {
       id: 'salud',
-      label: 'Vida Sana',
-      icon: <Leaf size={20} />,
+      label: 'Salud',
+      icon: <Activity size={20} />,
       onClick: () => navigate('/salud')
     }
   ];
 
   const additionalItems = [
     {
-      id: 'salud',
-      icon: Heart,
-      label: 'Salud',
+      id: 'objetivos',
+      icon: Target,
+      label: 'Objetivos',
       onClick: () => navigate('/salud'),
-      description: 'Guía nutricional'
+      description: 'Seguimiento de metas'
     },
     {
       id: 'profile',
