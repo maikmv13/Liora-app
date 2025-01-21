@@ -95,10 +95,10 @@ export function Register({ onClose, onRegisterSuccess, preSelectedUserType, onBa
         throw profileError;
       }
 
-      // Éxito
-      alert('Registro exitoso. Ya puedes iniciar sesión.');
+      // Éxito - llamar directamente a los callbacks sin mostrar alert
       onRegisterSuccess?.();
       onClose();
+
     } catch (err) {
       console.error('Error en el registro:', err);
       setError(err instanceof Error ? err.message : 'Error al registrar usuario');

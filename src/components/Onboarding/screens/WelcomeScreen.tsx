@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Bot, Sparkles } from 'lucide-react';
+import { Bot, Sparkles, ArrowRight } from 'lucide-react';
 import { ScreenProps } from './types';
 import { FallingEmojis } from '../../LioraChat/components/FallingEmojis';
 import { ChatMessage } from '../../LioraChat/components/ChatMessage';
@@ -181,13 +181,22 @@ export function WelcomeScreen({ onNext }: ScreenProps) {
                 stiffness: 300,
                 damping: 25
               }}
-              className="fixed bottom-8 left-4 right-4 md:left-auto md:right-auto md:w-full max-w-sm mx-auto"
+              className="fixed bottom-16 md:bottom-20 left-4 right-4 md:left-auto md:right-auto md:w-full max-w-sm mx-auto"
             >
               <button
                 onClick={onNext}
-                className="w-full px-8 py-4 bg-gradient-to-r from-rose-500 to-pink-500 text-white rounded-xl font-medium shadow-lg hover:shadow-xl active:scale-95 transition-all duration-300"
+                className="w-full px-8 py-5 bg-gradient-to-r from-rose-500 to-pink-500 text-white rounded-xl font-medium shadow-lg hover:shadow-xl active:scale-95 transition-all duration-300"
               >
-                Comenzar viaje
+                <span className="flex items-center justify-center">
+                  <span>Comenzar viaje</span>
+                  <motion.div
+                    className="ml-2"
+                    animate={{ x: [-4, 4, -4] }}
+                    transition={{ duration: 1.5, repeat: Infinity }}
+                  >
+                    <ArrowRight size={20} />
+                  </motion.div>
+                </span>
               </button>
             </motion.div>
           )}

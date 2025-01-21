@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
-import { Eye, EyeOff, Mail, Lock, ChevronLeft, User, UserCog, Loader2, Sparkles } from 'lucide-react';
+import { Eye, EyeOff, Mail, Lock, ChevronLeft, User, UserCog, Loader2, Sparkles, ArrowRight } from 'lucide-react';
 import { supabase } from '../../../lib/supabase';
 import { FallingEmojis } from '../../LioraChat/components/FallingEmojis';
 import { ScreenProps } from './types';
@@ -150,22 +150,46 @@ export function OnboardingLogin({ onNext, onLogin, isFirst }: ScreenProps) {
             </p>
           </motion.div>
 
-          <div className="w-full max-w-sm space-y-4">
+          <div className="w-full max-w-sm space-y-6">
             <motion.button
               initial={{ opacity: 0, x: -20 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ delay: 0.2 }}
               onClick={() => setUserType('user')}
-              className="w-full flex items-center space-x-4 p-4 rounded-xl border-2 transition-all duration-200 hover:scale-105 bg-gradient-to-br from-rose-50 to-orange-50 border-rose-200 hover:border-rose-300"
+              className="w-full group relative overflow-hidden"
             >
-              <div className="bg-white p-3 rounded-xl shadow-sm">
-                <User className="w-6 h-6 text-rose-500" />
-              </div>
-              <div className="text-left">
-                <h3 className="font-semibold text-gray-900">Usuario</h3>
-                <p className="text-sm text-gray-600">
-                  Accede a recetas y planes nutricionales
-                </p>
+              <div className="absolute inset-0 bg-gradient-to-br from-rose-500/20 to-orange-500/20 opacity-0 
+                group-hover:opacity-100 transition-all duration-500 rounded-2xl" />
+              
+              <div className="relative bg-white/80 backdrop-blur-sm border border-rose-100/50 p-6 rounded-2xl
+                shadow-lg shadow-rose-500/5 group-hover:shadow-rose-500/10 transition-all duration-300
+                group-hover:border-rose-200/50 group-hover:-translate-y-1">
+                <div className="flex flex-col items-center text-center space-y-4">
+                  <div className="p-3 bg-gradient-to-br from-rose-500 to-pink-500 rounded-xl
+                    shadow-lg shadow-rose-500/30 group-hover:shadow-rose-500/40 transition-all duration-300
+                    group-hover:scale-110">
+                    <User className="w-7 h-7 text-white" />
+                  </div>
+                  <div>
+                    <h3 className="text-lg font-bold bg-gradient-to-r from-rose-500 to-pink-500 
+                      text-transparent bg-clip-text mb-2">
+                      Usuario
+                    </h3>
+                    <p className="text-sm text-gray-600 leading-relaxed mb-3">
+                      Accede a recetas personalizadas y planifica tus comidas semanales de forma saludable
+                    </p>
+                    <div className="flex items-center justify-center text-rose-500 group-hover:text-rose-600 transition-colors">
+                      <span className="text-sm font-medium">Comenzar</span>
+                      <motion.div
+                        animate={{ x: [0, 4, 0] }}
+                        transition={{ duration: 1.5, repeat: Infinity }}
+                        className="ml-2"
+                      >
+                        <ArrowRight size={16} />
+                      </motion.div>
+                    </div>
+                  </div>
+                </div>
               </div>
             </motion.button>
 
@@ -174,16 +198,40 @@ export function OnboardingLogin({ onNext, onLogin, isFirst }: ScreenProps) {
               animate={{ opacity: 1, x: 0 }}
               transition={{ delay: 0.3 }}
               onClick={() => setUserType('nutritionist')}
-              className="w-full flex items-center space-x-4 p-4 rounded-xl border-2 transition-all duration-200 hover:scale-105 bg-gradient-to-br from-emerald-50 to-teal-50 border-emerald-200 hover:border-emerald-300"
+              className="w-full group relative overflow-hidden"
             >
-              <div className="bg-white p-3 rounded-xl shadow-sm">
-                <UserCog className="w-6 h-6 text-emerald-500" />
-              </div>
-              <div className="text-left">
-                <h3 className="font-semibold text-gray-900">Nutricionista</h3>
-                <p className="text-sm text-gray-600">
-                  Gestiona pacientes y crea planes
-                </p>
+              <div className="absolute inset-0 bg-gradient-to-br from-emerald-500/20 to-teal-500/20 opacity-0 
+                group-hover:opacity-100 transition-all duration-500 rounded-2xl" />
+              
+              <div className="relative bg-white/80 backdrop-blur-sm border border-emerald-100/50 p-6 rounded-2xl
+                shadow-lg shadow-emerald-500/5 group-hover:shadow-emerald-500/10 transition-all duration-300
+                group-hover:border-emerald-200/50 group-hover:-translate-y-1">
+                <div className="flex flex-col items-center text-center space-y-4">
+                  <div className="p-3 bg-gradient-to-br from-emerald-500 to-teal-500 rounded-xl
+                    shadow-lg shadow-emerald-500/30 group-hover:shadow-emerald-500/40 transition-all duration-300
+                    group-hover:scale-110">
+                    <UserCog className="w-7 h-7 text-white" />
+                  </div>
+                  <div>
+                    <h3 className="text-lg font-bold bg-gradient-to-r from-emerald-500 to-teal-500 
+                      text-transparent bg-clip-text mb-2">
+                      Nutricionista
+                    </h3>
+                    <p className="text-sm text-gray-600 leading-relaxed mb-3">
+                      Gestiona pacientes, crea planes nutricionales y monitorea su progreso
+                    </p>
+                    <div className="flex items-center justify-center text-emerald-500 group-hover:text-emerald-600 transition-colors">
+                      <span className="text-sm font-medium">Comenzar</span>
+                      <motion.div
+                        animate={{ x: [0, 4, 0] }}
+                        transition={{ duration: 1.5, repeat: Infinity }}
+                        className="ml-2"
+                      >
+                        <ArrowRight size={16} />
+                      </motion.div>
+                    </div>
+                  </div>
+                </div>
               </div>
             </motion.button>
           </div>

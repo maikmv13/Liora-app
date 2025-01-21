@@ -3,7 +3,7 @@ import {
   Clock, Users, ChefHat, X, Heart, Calendar, 
   Flame, Leaf, Cookie, Beef, Scale, Soup, UtensilsCrossed,
   Dumbbell, Apple, Wheat, CircleDot, Check, Eye,
-  Coffee, Sun, Moon
+  Coffee, Sun, Moon, ArrowRight
 } from 'lucide-react';
 import { MenuItem } from '../../types';
 import { supabase } from '../../lib/supabase';
@@ -13,9 +13,15 @@ interface TodayCardProps {
   menuItems: MenuItem[];
   onViewRecipe: (menuItem: MenuItem) => void;
   activeMenu: any;
+  onOpenOnboarding?: () => void;
 }
 
-export function TodayCard({ menuItems, onViewRecipe, activeMenu }: TodayCardProps) {
+export function TodayCard({ 
+  menuItems, 
+  onViewRecipe, 
+  activeMenu,
+  onOpenOnboarding 
+}: TodayCardProps) {
   const [completions, setCompletions] = useState<Record<string, any>>({});
   const navigate = useNavigate();
   
@@ -183,6 +189,81 @@ export function TodayCard({ menuItems, onViewRecipe, activeMenu }: TodayCardProp
         return 'bg-rose-50 border-rose-100 hover:bg-rose-100/50';
     }
   };
+
+  if (menuItems.length === 0) {
+    return (
+      <div className="bg-white/80 backdrop-blur-sm rounded-2xl border border-rose-100 overflow-hidden">
+        <div className="p-6 space-y-4">
+          <div className="flex items-start space-x-4">
+            <div className="bg-rose-50 p-3 rounded-xl flex-shrink-0">
+              <Calendar size={24} className="text-rose-500" />
+            </div>
+            <div>
+              <h3 className="text-lg font-semibold text-gray-900">
+                ¡Crea tu primer menú semanal!
+              </h3>
+              <p className="text-sm text-gray-500 mt-1">
+                Para generar tu menú personalizado, sigue estos pasos:
+              </p>
+            </div>
+          </div>
+
+          <div className="space-y-3">
+            <div className="flex items-start space-x-3">
+              <div className="w-6 h-6 rounded-full bg-rose-50 flex items-center justify-center flex-shrink-0 mt-0.5">
+                <span className="text-sm font-medium text-rose-500">1</span>
+              </div>
+              <div>
+                <p className="text-sm text-gray-600">
+                  Ve a la sección de <span className="font-medium text-gray-900">Recetas</span> y explora nuestro catálogo
+                </p>
+              </div>
+            </div>
+
+            <div className="flex items-start space-x-3">
+              <div className="w-6 h-6 rounded-full bg-rose-50 flex items-center justify-center flex-shrink-0 mt-0.5">
+                <span className="text-sm font-medium text-rose-500">2</span>
+              </div>
+              <div>
+                <p className="text-sm text-gray-600">
+                  Guarda como favoritas al menos <span className="font-medium text-gray-900">dos recetas por comida</span> (desayuno, comida, snack y cena)
+                </p>
+              </div>
+            </div>
+
+            <div className="flex items-start space-x-3">
+              <div className="w-6 h-6 rounded-full bg-rose-50 flex items-center justify-center flex-shrink-0 mt-0.5">
+                <span className="text-sm font-medium text-rose-500">3</span>
+              </div>
+              <div>
+                <p className="text-sm text-gray-600">
+                  Genera tu menú semanal personalizado basado en tus recetas favoritas
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <div className="pt-4 flex flex-col space-y-3">
+            <button
+              onClick={() => navigate('/recetas')}
+              className="w-full px-4 py-2.5 bg-rose-50 text-rose-600 rounded-xl hover:bg-rose-100 transition-colors flex items-center justify-center space-x-2"
+            >
+              <ChefHat size={18} />
+              <span>Explorar recetas</span>
+            </button>
+
+            <button
+              onClick={onOpenOnboarding}
+              className="w-full px-4 py-2.5 bg-gradient-to-r from-orange-400 via-pink-500 to-rose-500 text-white rounded-xl hover:opacity-90 transition-opacity flex items-center justify-center space-x-2"
+            >
+              <Calendar size={18} />
+              <span>Crear menú semanal</span>
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="bg-white/95 backdrop-blur-sm rounded-2xl border border-rose-100 shadow-lg overflow-hidden">

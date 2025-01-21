@@ -65,6 +65,37 @@ function AppContent() {
     }
   }, [activeMenuItems, menuLoading, user]);
 
+  // Actualizar activeTab basado en la ruta actual
+  useEffect(() => {
+    const getActiveTab = () => {
+      const path = location.pathname;
+      
+      switch (path) {
+        case '/recetas':
+          return 'recetas';
+        case '/favoritos':
+          return 'favoritos';
+        case '/menu':
+          return 'menu';
+        case '/compra':
+          return 'compra';
+        case '/salud':
+          return 'salud';
+        case '/salud':
+          return 'salud';
+        case '/profile':
+          return 'profile';
+        case path.match(/^\/recipe\//)?.input:
+          return 'recetas';
+        default:
+          return 'recetas'; // default tab
+      }
+    };
+
+    const newTab = getActiveTab();
+    setActiveTab(newTab);
+  }, [location.pathname]);
+
   const handleAddToMenu = (recipe: Recipe | null, day: string, meal: MealType) => {
     if (recipe) {
       setWeeklyMenu(prev => {

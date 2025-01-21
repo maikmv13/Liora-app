@@ -2,7 +2,7 @@ import React, { useRef, useEffect } from 'react';
 import { MenuItem, MealType, Recipe } from '../../types';
 import { ExtendedWeeklyMenuDB } from '../../services/weeklyMenu';
 import { DayCard } from './DayCard';
-import { ChevronLeft, ChevronRight } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Share2, Wand2, Loader2, History } from 'lucide-react';
 import { DAYS, WeekDay } from './constants';
 import { NextWeekCard } from './NextWeekCard';
 
@@ -16,7 +16,14 @@ interface MobileViewProps {
   onViewRecipe: (menuItem: MenuItem) => void;
   onAddToMenu: (recipe: Recipe | null, day: WeekDay, meal: MealType) => void;
   activeMenu: ExtendedWeeklyMenuDB | null;
+  onGenerateMenu: () => void;
+  onExport: () => void;
+  onToggleHistory: () => void;
+  isGenerating: boolean;
 }
+
+// Definir un tipo para los días incluyendo 'next'
+type DayWithNext = WeekDay | 'next';
 
 export function MobileView({ 
   selectedDay, 
@@ -27,7 +34,11 @@ export function MobileView({
   onRemoveMeal,
   onViewRecipe,
   onAddToMenu,
-  activeMenu
+  activeMenu,
+  onGenerateMenu,
+  onExport,
+  onToggleHistory,
+  isGenerating
 }: MobileViewProps) {
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const [canScrollLeft, setCanScrollLeft] = React.useState(false);
@@ -201,8 +212,8 @@ export function MobileView({
       </div>
 
       {/* Day Indicators */}
-      <div className="flex justify-center space-x-1 mt-4 md:hidden">
-        {weekDays.concat(['next']).map((day, index) => {
+      <div className="flex justify-center space-x-1 mt-4 mb-6 md:hidden">
+        {([...weekDays, 'next'] as DayWithNext[]).map((day, index) => {
           const isNextWeek = day === 'next';
           const isSelected = isNextWeek ? 
             Math.round(scrollContainerRef.current?.scrollLeft ?? 0) === (weekDays.length * (scrollContainerRef.current?.clientWidth ?? 0)) : 
@@ -241,6 +252,55 @@ export function MobileView({
             />
           );
         })}
+      </div>
+
+      {/* Action Buttons */}
+      <div className="grid grid-cols-12 gap-2 px-4 mt-6 md:hidden">
+        <button 
+          onClick={onGenerateMenu}
+          disabled={isGenerating}
+          className={`
+            col-span-6 flex items-center justify-center space-x-2 px-4 py-3
+            bg-gradient-to-r from-orange-400 via-pink-500 to-rose-500 
+            text-white rounded-xl shadow-sm
+            ${isGenerating 
+              ? 'opacity-50 cursor-not-allowed' 
+              : 'hover:from-orange-500 hover:via-pink-600 hover:to-rose-600'
+            }
+          `}
+        >
+          {isGenerating ? (
+            <>
+              <Loader2 size={18} className="animate-spin" />
+              <span>Generando...</span>
+            </>
+          ) : (
+            <>
+              <Wand2 size={18} />
+              <span>Regenerar menú</span>
+            </>
+          )}
+        </button>
+
+        <button 
+          onClick={onToggleHistory}
+          className="col-span-3 flex items-center justify-center space-x-2 px-4 py-3 
+            bg-white/90 backdrop-blur-sm text-rose-500 rounded-xl border border-rose-100 
+            shadow-sm hover:bg-white"
+        >
+          <History size={18} />
+          <span className="hidden">Historial</span>
+        </button>
+
+        <button 
+          onClick={onExport}
+          className="col-span-3 flex items-center justify-center space-x-2 px-4 py-3 
+            bg-white/90 backdrop-blur-sm text-rose-500 rounded-xl border border-rose-100 
+            shadow-sm hover:bg-white"
+        >
+          <Share2 size={18} />
+          <span className="hidden">Compartir</span>
+        </button>
       </div>
     </div>
   );

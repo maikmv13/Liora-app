@@ -30,7 +30,7 @@ export function WeeklyMenu2() {
   const [isLoading, setIsLoading] = useState(true);
   const [userId, setUserId] = useState<string | null>(null);
   const [showOnboarding, setShowOnboarding] = useState(false);
-  const [showOnboardingWizard, setShowOnboardingWizard] = useState(false);
+  const [isWizardOpen, setIsWizardOpen] = useState(false);
 
   // Verificar autenticación primero
   useEffect(() => {
@@ -167,7 +167,7 @@ export function WeeklyMenu2() {
       const hasEnoughFavorites = await checkFavoriteRecipes();
       
       if (!hasEnoughFavorites) {
-        setShowOnboardingWizard(true);
+        setIsWizardOpen(true);
         return;
       }
 
@@ -176,7 +176,7 @@ export function WeeklyMenu2() {
       } catch (error) {
         // Si el error es por falta de recetas, mostrar el wizard
         if (error instanceof Error && error.message.includes('No hay suficientes recetas')) {
-          setShowOnboardingWizard(true);
+          setIsWizardOpen(true);
         } else {
           throw error;
         }
@@ -258,6 +258,10 @@ export function WeeklyMenu2() {
     }
   };
 
+  const handleOpenWizard = () => {
+    setIsWizardOpen(true);
+  };
+
   // Loading state
   if (isLoading) {
     return <MenuSkeleton />;
@@ -301,10 +305,10 @@ export function WeeklyMenu2() {
 
       {/* Onboarding Wizard */}
       <OnboardingWizard
-        isOpen={showOnboardingWizard}
-        onClose={() => setShowOnboardingWizard(false)}
+        isOpen={isWizardOpen}
+        onClose={() => setIsWizardOpen(false)}
         onComplete={() => {
-          setShowOnboardingWizard(false);
+          setIsWizardOpen(false);
           handleGenerateMenu(recipes);
         }}
         onGenerateMenu={() => handleGenerateMenu(recipes)}
@@ -315,10 +319,6 @@ export function WeeklyMenu2() {
         {/* Header */}
         <Header
           className="mb-6"
-          onGenerateMenu={handleGenerateMenuClick}
-          onExport={() => handleExport(menu)}
-          onToggleHistory={() => setShowHistory(!showHistory)}
-          isGenerating={isGenerating}
           lastGenerated={lastGenerated}
         />
 
@@ -336,6 +336,7 @@ export function WeeklyMenu2() {
                   menuItems={menu}
                   onViewRecipe={setSelectedRecipe}
                   activeMenu={null}
+                  onOpenOnboarding={handleOpenWizard}
                 />
               </div>
 
@@ -354,7 +355,7 @@ export function WeeklyMenu2() {
                 </div>
                 <div className="md:hidden">
                   <MobileView
-                    selectedDay={selectedDay as 'Lunes' | 'Martes' | 'Miércoles' | 'Jueves' | 'Viernes' | 'Sábado' | 'Domingo'  }
+                    selectedDay={selectedDay as 'Lunes' | 'Martes' | 'Miércoles' | 'Jueves' | 'Viernes' | 'Sábado' | 'Domingo'}
                     weekDays={weekDays}
                     weeklyMenu={menu}
                     onDayChange={setSelectedDay}
@@ -363,6 +364,10 @@ export function WeeklyMenu2() {
                     onViewRecipe={setSelectedRecipe}
                     onAddToMenu={handleAddToMenu}
                     activeMenu={null}
+                    onGenerateMenu={handleGenerateMenuClick}
+                    onExport={() => handleExport(menu)}
+                    onToggleHistory={() => setShowHistory(!showHistory)}
+                    isGenerating={isGenerating}
                   />
                 </div>
               </div>

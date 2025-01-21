@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Sparkles, Search, Menu as MenuIcon, X, User, Leaf } from 'lucide-react';
+import { Sparkles, Search, Menu as MenuIcon, X, User, Leaf, Heart } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { MobileMenu } from '../MobileMenu';
 
@@ -38,6 +38,8 @@ export function Header({
         return 'Vida Sana';
       case 'profile':
         return 'Mi Perfil';
+      case 'favoritas':
+        return 'Favoritas';
       default:
         return '';
     }
@@ -70,6 +72,15 @@ export function Header({
                   className="p-2 hover:bg-white/10 rounded-lg transition-colors text-white"
                 >
                   <Search size={20} />
+                </button>
+              )}
+              {user && (
+                <button
+                  onClick={() => navigate('/favoritos')}
+                  className="p-2 hover:bg-white/10 rounded-lg transition-colors text-white"
+                  title="Recetas Favoritas"
+                >
+                  <Heart size={20} />
                 </button>
               )}
               {user ? (
@@ -111,6 +122,15 @@ export function Header({
             </div>
 
             <div className="flex items-center space-x-2">
+              {user && (
+                <button
+                  onClick={() => navigate('/favoritos')}
+                  className="p-2 bg-white/10 hover:bg-white/20 rounded-xl border border-white/20 transition-all duration-300"
+                  title="Recetas Favoritas"
+                >
+                  <Heart size={20} className="text-white" />
+                </button>
+              )}
               {user ? (
                 <button
                   onClick={() => navigate('/profile')}

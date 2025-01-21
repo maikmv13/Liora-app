@@ -53,9 +53,9 @@ export function Favorites({
           <Heart size={24} className="text-rose-500 md:w-7 md:h-7" />
         </div>
         <div>
-          <h2 className="text-2xl md:text-3xl font-bold text-gray-900">Recetas Favoritas</h2>
+          <h2 className="text-2xl md:text-3xl font-bold text-gray-900">¡Mis recetas guardadas!</h2>
           <p className="text-sm md:text-base text-gray-600 mt-1">
-            ❤️ {favorites.length} recetas guardadas
+            ❤️ {favorites.length} recetas favoritas con las que crearemos tus menús.
           </p>
         </div>
       </div>

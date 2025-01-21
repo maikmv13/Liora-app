@@ -10,23 +10,52 @@ interface NavigationProps {
 }
 
 export function Navigation({ activeTab, onTabChange, orientation = 'horizontal', user }: NavigationProps) {
-  const navigate = useNavigate();
   const location = useLocation();
+  const navigate = useNavigate();
 
-  // Ocultar navegación solo en Liora chat
-  if (location.pathname === '/liora') {
-    return null;
-  }
-
-  // Mapeo de rutas especiales a sus pestañas correspondientes
-  const routeTabMapping: { [key: string]: string } = {
-    '/favoritos': 'recetas',
-    // Añadir aquí más mapeos si son necesarios
+  // Función helper para obtener la pestaña activa
+  const getActiveTab = () => {
+    const path = location.pathname;
+    
+    // Mapeo exacto de rutas a pestañas
+    switch (path) {
+      case '/recetas':
+        return 'recetas';
+      case '/favoritos':
+        return 'favoritos';
+      case '/menu':
+        return 'menu';
+      case '/compra':
+        return 'compra';
+      case '/salud':
+        return 'salud';
+      case '/salud':
+        return 'salud';
+      case '/profile':
+        return 'profile';
+      // Si la ruta es /recipe/[id], consideramos que estamos en la sección de recetas
+      case path.match(/^\/recipe\//)?.input:
+        return 'recetas';
+      default:
+        return activeTab;
+    }
   };
+
+  const currentTab = getActiveTab();
 
   const handleTabChange = (id: string) => {
     onTabChange(id);
-    navigate(`/${id}`);
+    // Mapeo de pestañas a rutas
+    const routeMap: { [key: string]: string } = {
+      'recetas': '/recetas',
+      'favoritos': '/favoritos',
+      'menu': '/menu',
+      'compra': '/compra',
+      'salud': '/salud',
+      'salud': '/salud',
+      'profile': '/profile'
+    };
+    navigate(routeMap[id] || `/${id}`);
   };
 
   const navItems = [
@@ -64,7 +93,7 @@ export function Navigation({ activeTab, onTabChange, orientation = 'horizontal',
             key={id}
             onClick={() => handleTabChange(id)}
             className={`w-full flex items-center space-x-3 px-4 py-2.5 rounded-lg transition-colors ${
-              activeTab === id
+              currentTab === id
                 ? 'bg-white/10 text-white'
                 : 'text-white/80 hover:bg-white/10'
             }`}
@@ -86,21 +115,21 @@ export function Navigation({ activeTab, onTabChange, orientation = 'horizontal',
               key={id}
               onClick={() => handleTabChange(id)}
               className={`group flex-1 py-3 md:py-4 transition-all duration-200 relative ${
-                activeTab === id
+                currentTab === id
                   ? 'text-rose-500'
                   : 'text-gray-600 hover:text-rose-400'
               }`}
             >
               <div className="flex flex-col md:flex-row items-center md:justify-start md:px-4 md:space-x-2">
                 <div className={`p-2 rounded-xl transition-all duration-300 ${
-                  activeTab === id 
+                  currentTab === id 
                     ? 'bg-rose-50' 
                     : 'group-hover:bg-rose-50/50'
                 }`}>
                   <Icon 
                     size={20} 
                     className={`transition-all duration-300 ${
-                      activeTab === id 
+                      currentTab === id 
                         ? 'transform scale-110' 
                         : 'group-hover:scale-110'
                     }`} 
@@ -113,7 +142,7 @@ export function Navigation({ activeTab, onTabChange, orientation = 'horizontal',
                   </span>
                 </div>
               </div>
-              {activeTab === id && (
+              {currentTab === id && (
                 <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-gradient-to-r from-orange-400 via-pink-500 to-rose-500 md:top-0 md:bottom-auto" />
               )}
             </button>
