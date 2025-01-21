@@ -1,0 +1,21 @@
+User-agent: *
+Allow: /
+
+# Sitemap
+Sitemap: https://liora.netlify.app/sitemap.xml
+
+# Rutas principales
+Allow: /recetas
+Allow: /menu
+Allow: /compra
+Allow: /favoritos
+Allow: /salud
+Allow: /liora
+
+# Rutas dinámicas
+Allow: /recipe/*
+
+# Excluir rutas privadas o de autenticación
+Disallow: /api/
+Disallow: /admin/
+Disallow: /profile 

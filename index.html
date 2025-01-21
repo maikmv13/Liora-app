@@ -16,6 +16,18 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
     <meta name="apple-mobile-web-app-title" content="Liora" />
     
+    <!-- SEO y rastreo -->
+    <meta name="robots" content="index, follow">
+    <meta name="googlebot" content="index, follow">
+    <link rel="canonical" href="https://liora.netlify.app" />
+    
+    <!-- Precargar rutas principales -->
+    <link rel="prerender" href="https://liora.netlify.app/recetas">
+    <link rel="prerender" href="https://liora.netlify.app/menu">
+    
+    <!-- Sitemap -->
+    <link rel="sitemap" type="application/xml" href="/sitemap.xml">
+    
     <!-- Meta description -->
     <meta name="description" content="Encuentra el equilibrio en tu vida a través de la alimentación. Descubre recetas saludables, planifica tus menús y mantén un estilo de vida balanceado." />
     <meta name="keywords" content="recetas saludables, equilibrio, bienestar, planificación de menús, vida saludable, nutrición balanceada" />
@@ -26,7 +38,7 @@
     <meta property="og:title" content="Liora - Life in balance" />
     <meta property="og:description" content="Encuentra el equilibrio en tu vida a través de la alimentación. Descubre recetas saludables, planifica tus menús y mantén un estilo de vida balanceado." />
     <meta property="og:image" content="/icon.svg" />
-    <meta property="og:url" content="https://liora.app" />
+    <meta property="og:url" content="https://liora.netlify.app" />
     <meta property="og:site_name" content="Liora" />
     
     <!-- Twitter Card -->
@@ -96,6 +108,16 @@
   <body>
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
+    
+    <!-- Agregar enlaces ocultos para el rastreador -->
+    <div style="display: none" aria-hidden="true">
+      <a href="/recetas">Recetas</a>
+      <a href="/menu">Menú Semanal</a>
+      <a href="/compra">Lista de Compra</a>
+      <a href="/favoritos">Favoritos</a>
+      <a href="/salud">Guía de Alimentación Saludable</a>
+      <a href="/liora">Asistente Liora</a>
+    </div>
     
     <!-- No-JS fallback con los estilos del Header -->
     <noscript>
