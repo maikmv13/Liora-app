@@ -3,9 +3,20 @@ import { ChefHat, Heart, Scale, Activity, Calendar, Star, Clock } from 'lucide-r
 import { useActiveMenu } from '../../hooks/useActiveMenu';
 import { useFavorites } from '../../hooks/useFavorites';
 
+interface Favorite {
+  id: string;
+  name: string;
+  created_at?: string;
+}
+
 export function UserProfile() {
   const { menuItems } = useActiveMenu();
   const { favorites } = useFavorites();
+
+  const formatDate = (date: string | undefined) => {
+    if (!date) return '';
+    return new Date(date).toLocaleDateString();
+  };
 
   return (
     <div className="space-y-6">
@@ -64,14 +75,14 @@ export function UserProfile() {
       <div className="bg-white/90 backdrop-blur-sm rounded-2xl border border-rose-100/20 p-6">
         <h2 className="text-lg font-semibold text-gray-900 mb-4">Actividad Reciente</h2>
         <div className="space-y-4">
-          {favorites.slice(0, 5).map((favorite) => (
+          {favorites.slice(0, 5).map((favorite: Favorite) => (
             <div key={favorite.id} className="flex items-center justify-between p-3 bg-rose-50/50 rounded-xl">
               <div className="flex items-center space-x-3">
                 <Heart size={16} className="text-rose-500" />
                 <span className="text-sm text-gray-600">Añadiste {favorite.name} a favoritos</span>
               </div>
               <span className="text-xs text-gray-500">
-                {new Date(favorite.created_at || '').toLocaleDateString()}
+                {formatDate(favorite.created_at)}
               </span>
             </div>
           ))}

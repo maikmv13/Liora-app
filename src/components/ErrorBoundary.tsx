@@ -32,6 +32,7 @@ interface ErrorLog {
     platform: string;
   };
   severity: 'low' | 'medium' | 'high' | 'critical';
+  household_id?: string;
 }
 
 export class ErrorBoundary extends Component<Props, State> {
@@ -60,6 +61,11 @@ export class ErrorBoundary extends Component<Props, State> {
   private async logErrorToSupabase(error: Error, errorInfo: ErrorInfo) {
     try {
       const { data: { user } } = await supabase.auth.getUser();
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('household_id')
+        .eq('user_id', user?.id)
+        .single();
       
       const errorLog: ErrorLog = {
         error_message: error.message,
@@ -77,7 +83,8 @@ export class ErrorBoundary extends Component<Props, State> {
           language: navigator.language,
           platform: navigator.platform
         },
-        severity: this.determineErrorSeverity(error)
+        severity: this.determineErrorSeverity(error),
+        household_id: profile?.household_id,
       };
 
       const { error: supabaseError } = await supabase

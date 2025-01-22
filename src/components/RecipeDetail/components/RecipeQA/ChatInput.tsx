@@ -1,6 +1,7 @@
 import React from 'react';
 import { Send, Loader2, Bot, Sparkles } from 'lucide-react';
 import type { Recipe } from '../../../../types';
+import { motion } from 'framer-motion';
 
 interface ChatInputProps {
   value: string;
@@ -11,7 +12,14 @@ interface ChatInputProps {
   isDrawerVisible?: boolean;
 }
 
-export function ChatInput({ value, onChange, onSubmit, loading, recipe, isDrawerVisible = true }: ChatInputProps) {
+export function ChatInput({ 
+  value, 
+  onChange, 
+  onSubmit, 
+  loading, 
+  recipe, 
+  isDrawerVisible = true 
+}: ChatInputProps) {
   return (
     <div className={`
       flex items-center space-x-3 transition-all duration-300
@@ -19,10 +27,10 @@ export function ChatInput({ value, onChange, onSubmit, loading, recipe, isDrawer
     `}>
       {!isDrawerVisible && (
         <div className="relative flex-shrink-0">
-          <div className="bg-rose-100 p-2.5 rounded-xl">
-            <Bot size={22} className="text-rose-500" />
+          <div className="bg-violet-100 p-2.5 rounded-xl">
+            <Bot size={22} className="text-violet-500" />
           </div>
-          <div className="absolute -top-1 -right-1 bg-rose-500 rounded-full p-1">
+          <div className="absolute -top-1 -right-1 bg-violet-500 rounded-full p-1">
             <Sparkles size={8} className="text-white" />
           </div>
         </div>
@@ -35,10 +43,10 @@ export function ChatInput({ value, onChange, onSubmit, loading, recipe, isDrawer
           onChange={(e) => onChange(e.target.value)}
           placeholder={!isDrawerVisible ? "" : recipe ? `Pregunta sobre ${recipe.name}...` : "Haz una pregunta sobre la receta..."}
           className={`
-            w-full px-4 bg-gradient-to-r from-rose-50 to-white
-            rounded-xl border border-rose-100 
-            focus:ring-2 focus:ring-rose-500 focus:border-rose-500
-            placeholder:text-rose-300
+            w-full px-4 bg-gradient-to-r from-violet-50 to-white
+            rounded-xl border border-violet-100 
+            focus:ring-2 focus:ring-violet-500 focus:border-violet-500
+            placeholder:text-violet-300
             transition-all duration-300
             ${!isDrawerVisible ? 
               'h-14 text-base shadow-sm group-hover:shadow-md py-4' : 
@@ -49,26 +57,28 @@ export function ChatInput({ value, onChange, onSubmit, loading, recipe, isDrawer
         />
         {!isDrawerVisible && !value && (
           <div className="absolute inset-0 pointer-events-none flex items-center justify-center">
-            <span className="text-rose-400 text-sm font-medium">
+            <span className="text-violet-400 text-sm font-medium">
               {recipe ? `Pregunta sobre ${recipe.name}...` : "Haz clic para hacer preguntas sobre la receta"}
             </span>
           </div>
         )}
       </div>
 
-      <button
+      <motion.button
         onClick={(e) => {
           e.stopPropagation();
           onSubmit();
         }}
         disabled={loading || !value.trim()}
+        whileHover={{ scale: 1.05 }}
+        whileTap={{ scale: 0.95 }}
         className={`
           flex-shrink-0 flex items-center justify-center 
-          bg-gradient-to-r from-rose-500 to-rose-400
+          bg-gradient-to-r from-violet-500 to-fuchsia-500
           text-white rounded-xl 
-          hover:from-rose-600 hover:to-rose-500
-          active:from-rose-700 active:to-rose-600
-          disabled:from-rose-400 disabled:to-rose-300
+          hover:from-violet-600 hover:to-fuchsia-600
+          active:from-violet-700 active:to-fuchsia-700
+          disabled:from-violet-400 disabled:to-fuchsia-400
           disabled:opacity-70
           transition-all duration-300 
           disabled:cursor-not-allowed
@@ -81,7 +91,7 @@ export function ChatInput({ value, onChange, onSubmit, loading, recipe, isDrawer
         ) : (
           <Send size={!isDrawerVisible ? 22 : 18} />
         )}
-      </button>
+      </motion.button>
     </div>
   );
 }

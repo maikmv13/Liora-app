@@ -5,7 +5,7 @@ import { useActiveMenu } from './useActiveMenu';
 import { supabase } from '../lib/supabase';
 import { useRecipes } from './useRecipes';
 
-export function useShoppingList(userId?: string) {
+export function useShoppingList(userId?: string, isHousehold?: boolean) {
   const [shoppingList, setShoppingList] = useState<ShoppingItem[]>([]);
   const [loading, setLoading] = useState(true);
   const { menuItems, loading: menuLoading } = useActiveMenu(userId);
@@ -57,7 +57,7 @@ export function useShoppingList(userId?: string) {
           const { data: checkedItems } = await supabase
             .from('shopping_list_items')
             .select('*')
-            .eq('user_id', user.id);
+            .eq(isHousehold ? 'household_id' : 'user_id', userId);
 
           if (checkedItems) {
             // Actualizar la lista con los estados guardados
@@ -82,7 +82,7 @@ export function useShoppingList(userId?: string) {
     } finally {
       setLoading(false);
     }
-  }, [menuItems]);
+  }, [menuItems, userId, isHousehold]);
 
   useEffect(() => {
     if (!menuLoading) {
@@ -134,7 +134,7 @@ export function useShoppingList(userId?: string) {
         await supabase
           .from('shopping_list_items')
           .update({ checked: false })
-          .eq('user_id', user.id);
+          .eq(isHousehold ? 'household_id' : 'user_id', userId);
       }
 
       await generateList();

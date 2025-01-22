@@ -12,8 +12,9 @@ import { supabase } from '../../../lib/supabase';
 
 export function useMenuActions(
   forUserId: string | undefined,
+  isHousehold: boolean,
   onAddToMenu: (recipe: Recipe | null, day: string, meal: MealType) => void,
-  setCurrentMenuId: (id: string | null) => void
+  onMenuGenerated: (menuId: string | null) => void
 ) {
   const [isGenerating, setIsGenerating] = useState(false);
   const [lastGenerated, setLastGenerated] = useState<string | null>(
@@ -25,7 +26,7 @@ export function useMenuActions(
       const { error } = await supabase
         .from('shopping_list_items')
         .delete()
-        .eq('user_id', userId);
+        .eq(isHousehold ? 'household_id' : 'user_id', userId);
 
       if (error) throw error;
     } catch (error) {
@@ -38,33 +39,9 @@ export function useMenuActions(
       const { data, error } = await supabase
         .from('favorites')
         .select(`
-          recipe:recipes!favorites_recipe_id_fkey (
-            id,
-            name,
-            category,
-            meal_type,
-            servings,
-            calories,
-            prep_time,
-            side_dish,
-            instructions,
-            image_url,
-            created_at,
-            updated_at,
-            recipe_ingredients (
-              id,
-              quantity,
-              unit,
-              ingredient_id,
-              ingredients (
-                id,
-                name,
-                category
-              )
-            )
-          )
+          recipe:recipes!favorites_recipe_id_fkey (*)
         `)
-        .eq('user_id', userId);
+        .eq(isHousehold ? 'household_id' : 'user_id', userId);
 
       if (error) throw error;
 
@@ -99,11 +76,11 @@ export function useMenuActions(
         await archiveMenu(currentMenu.id);
       }
 
-      // Generate new menu using only favorite recipes
-      const newMenu = await generateCompleteMenu(favoriteRecipes);
+      // Generate new menu
+      const newMenu = await generateCompleteMenu(favoriteRecipes, user.id, isHousehold);
       const savedMenu = await createWeeklyMenu(newMenu, forUserId);
       
-      setCurrentMenuId(savedMenu.id);
+      onMenuGenerated(savedMenu.id);
 
       newMenu.forEach(menuItem => {
         onAddToMenu(menuItem.recipe, menuItem.day, menuItem.meal);

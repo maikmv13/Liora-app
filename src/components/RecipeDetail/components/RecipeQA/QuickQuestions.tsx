@@ -9,7 +9,12 @@ interface QuickQuestionsProps {
   isExpanded?: boolean;
 }
 
-export function QuickQuestions({ questions, isLoading, onQuestionClick, isExpanded = false }: QuickQuestionsProps) {
+export function QuickQuestions({ 
+  questions, 
+  isLoading, 
+  onQuestionClick, 
+  isExpanded = false 
+}: QuickQuestionsProps) {
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const [scrollProgress, setScrollProgress] = useState(0);
 
@@ -30,16 +35,16 @@ export function QuickQuestions({ questions, isLoading, onQuestionClick, isExpand
   return (
     <div>
       {isLoading ? (
-        <div className="flex items-center justify-center space-x-2 text-rose-500/80 py-6">
+        <div className="flex items-center justify-center space-x-2 text-violet-500/80 py-6">
           <Loader2 size={22} className="animate-spin" />
           <span className="text-sm font-medium">Generando preguntas...</span>
         </div>
       ) : (
         <div className="relative">
           {!isExpanded && (
-            <div className="absolute -top-1 left-0 right-0 h-1 bg-gradient-to-r from-rose-100/50 via-rose-200/50 to-rose-100/50 rounded-full overflow-hidden">
+            <div className="absolute -top-1 left-0 right-0 h-1 bg-gradient-to-r from-violet-100/50 via-fuchsia-200/50 to-violet-100/50 rounded-full overflow-hidden">
               <div 
-                className="absolute top-0 bottom-0 bg-gradient-to-r from-rose-400 to-rose-500 rounded-full transition-all duration-150"
+                className="absolute top-0 bottom-0 bg-gradient-to-r from-violet-400 to-fuchsia-500 rounded-full transition-all duration-150"
                 style={{
                   width: '30%',
                   left: `${Math.min(Math.max(scrollProgress, 0), 70)}%`
@@ -64,11 +69,11 @@ export function QuickQuestions({ questions, isLoading, onQuestionClick, isExpand
                 onClick={() => onQuestionClick(question)}
                 className={`
                   group relative flex items-start gap-3 
-                  bg-gradient-to-r from-rose-50 to-white
-                  hover:from-rose-100 hover:to-rose-50
-                  active:from-rose-200 active:to-rose-100
-                  text-rose-900 rounded-xl transition-all duration-200
-                  border border-rose-100/50 hover:border-rose-200/50
+                  bg-gradient-to-r from-violet-50 to-white
+                  hover:from-violet-100 hover:to-violet-50
+                  active:from-violet-200 active:to-violet-100
+                  text-violet-900 rounded-xl transition-all duration-200
+                  border border-violet-100/50 hover:border-violet-200/50
                   shadow-sm hover:shadow-md
                   ${isExpanded 
                     ? 'p-4 w-full' 
@@ -76,7 +81,7 @@ export function QuickQuestions({ questions, isLoading, onQuestionClick, isExpand
                 `}
               >
                 <div className="relative flex-shrink-0 mt-0.5">
-                  <div className="w-1.5 h-1.5 rounded-full bg-rose-400" />
+                  <div className="w-1.5 h-1.5 rounded-full bg-violet-400" />
                   <motion.div
                     animate={{ scale: [1, 1.2, 1] }}
                     transition={{ 
@@ -86,7 +91,7 @@ export function QuickQuestions({ questions, isLoading, onQuestionClick, isExpand
                     }}
                     className="absolute -top-0.5 -right-0.5"
                   >
-                    <Sparkles size={6} className="text-rose-500" />
+                    <Sparkles size={6} className="text-violet-500" />
                   </motion.div>
                 </div>
                 <span className={`text-left text-sm font-medium ${isExpanded ? 'flex-1' : 'line-clamp-2'}`}>
@@ -94,7 +99,7 @@ export function QuickQuestions({ questions, isLoading, onQuestionClick, isExpand
                 </span>
                 <ChevronRight 
                   size={16} 
-                  className="flex-shrink-0 mt-0.5 text-rose-400 group-hover:text-rose-500 
+                  className="flex-shrink-0 mt-0.5 text-violet-400 group-hover:text-violet-500 
                     transition-transform group-hover:translate-x-0.5" 
                 />
               </motion.button>

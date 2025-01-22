@@ -7,6 +7,13 @@ interface JoinHouseholdModalProps {
   onJoin: () => void;
 }
 
+// Primero definimos el tipo para households
+interface HouseholdRow {
+  id: string;
+  created_by: string;
+  created_at: string;
+}
+
 export function JoinHouseholdModal({ onClose, onJoin }: JoinHouseholdModalProps) {
   const [householdId, setHouseholdId] = useState('');
   const [loading, setLoading] = useState(false);
@@ -21,7 +28,7 @@ export function JoinHouseholdModal({ onClose, onJoin }: JoinHouseholdModalProps)
       // Verificar que el hogar existe
       const { data: household, error: householdError } = await supabase
         .from('households')
-        .select('id')
+        .select<'households', HouseholdRow>('id')
         .eq('id', householdId)
         .single();
 

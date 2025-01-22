@@ -52,6 +52,7 @@ export function useMenuState(
         setSelectedMealInfo(null);
       } catch (error) {
         console.error('Error selecting recipe:', error);
+        throw new Error('No se pudo actualizar el menú. Por favor, intenta de nuevo.');
       }
     }
   };

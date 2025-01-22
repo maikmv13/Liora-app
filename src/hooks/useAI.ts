@@ -4,6 +4,7 @@ import { openai } from '../services/ai';
 import type { Message, AIContext, ContextCategory } from '../types/ai';
 import type { Recipe } from '../types';
 import { searchRecipes } from '../services/recipes';
+import { useActiveProfile } from '../hooks/useActiveProfile';
 
 // Actualizamos los tipos para incluir todos los casos
 type QueryIntent = {
@@ -109,6 +110,7 @@ function extractEntities(content: string) {
 }
 
 export function useAI(recipe?: Recipe) {
+  const { id, isHousehold } = useActiveProfile();
   const [messages, setMessages] = useState<Message[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<Error | null>(null);
@@ -118,18 +120,10 @@ export function useAI(recipe?: Recipe) {
   useEffect(() => {
     const loadChatHistory = async () => {
       try {
-        const { data: { user } } = await supabase.auth.getUser();
-        if (!user) return;
-
-        const { data, error } = await supabase
+        const { data } = await supabase
           .from('chat_history')
           .select('*')
-          .eq('user_id', user.id)
-          .eq('session_id', sessionId)
-          .order('created_at', { ascending: true })
-          .limit(50);
-
-        if (error) throw error;
+          .eq(isHousehold ? 'household_id' : 'user_id', id);
 
         if (data) {
           setMessages(data.map(msg => ({
@@ -147,7 +141,7 @@ export function useAI(recipe?: Recipe) {
     };
 
     loadChatHistory();
-  }, [sessionId]);
+  }, [id, isHousehold]);
 
   const generateRecipeQuestions = async (recipe: Recipe) => {
     try {
@@ -291,22 +285,16 @@ export function useAI(recipe?: Recipe) {
 
   const clearMessages = useCallback(async () => {
     try {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) return;
-
-      setMessages([]);
-
-      await supabase
+      const { data } = await supabase
         .from('chat_history')
         .delete()
-        .eq('user_id', user.id)
-        .eq('session_id', sessionId);
+        .eq(isHousehold ? 'household_id' : 'user_id', id);
 
     } catch (error) {
       console.error('Error clearing messages:', error);
       setError(error as Error);
     }
-  }, [sessionId]);
+  }, [id, isHousehold]);
 
   const askAboutStep = async (stepNumber: number, instructions: string | null) => {
     try {

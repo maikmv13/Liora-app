@@ -7,6 +7,7 @@ import { HabitTracker } from './HabitTracker';
 import { MeditationTracker } from './MeditationTracker';
 import { HealthProvider } from '../../contexts/HealthContext';
 import { Heart, Scale, Droplets, Dumbbell, CheckSquare, Flower2 } from 'lucide-react';
+import { useActiveMenu } from '../../hooks/useActiveMenu';
 
 const TABS = [
   { id: 'health', label: 'Salud', icon: Heart, color: 'violet', gradient: 'from-violet-400 to-fuchsia-500' },

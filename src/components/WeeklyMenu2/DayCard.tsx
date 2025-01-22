@@ -5,6 +5,8 @@ import { MealCell } from './MealCell';
 import { Calendar, Sparkles } from 'lucide-react';
 import { WeekDay } from './constants';
 import { useNavigate } from 'react-router-dom';
+import { useActiveProfile } from '../../hooks/useActiveProfile';
+import { supabase } from "../../lib/supabase";
 
 interface DayCardProps {
   day: WeekDay;
@@ -29,6 +31,7 @@ export function DayCard({
 }: DayCardProps) {
   const [hoveredMeal, setHoveredMeal] = React.useState<MealType | null>(null);
   const navigate = useNavigate();
+  const { id, isHousehold } = useActiveProfile();
 
   // Obtener el día actual y el siguiente
   const today = new Date();
@@ -77,6 +80,23 @@ export function DayCard({
   }, [day, isToday]);
 
   const mealTypes: MealType[] = ['desayuno', 'comida', 'snack', 'cena'];
+
+  const handleRecipeSelect = async (recipe: Recipe | null) => {
+    try {
+      const { error } = await supabase
+        .from('weekly_menus')
+        .update({
+          [`${day}_${meal}_id`]: recipe?.id || null
+        })
+        .eq(isHousehold ? 'household_id' : 'user_id', id);
+
+      if (error) throw error;
+      
+      // ... resto del código
+    } catch (error) {
+      console.error('Error updating menu:', error);
+    }
+  };
 
   return (
     <div 

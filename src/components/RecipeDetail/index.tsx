@@ -46,7 +46,7 @@ export function RecipeDetail({ recipes, onToggleFavorite, favorites }: RecipeDet
   }
 
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen bg-gradient-to-br from-rose-50/50 to-orange-50/50">
       <HeroImage 
         recipe={recipe}
         onBack={() => navigate(-1)}
@@ -54,10 +54,8 @@ export function RecipeDetail({ recipes, onToggleFavorite, favorites }: RecipeDet
         isFavorite={isFavorite}
       />
 
-      <div className="w-full">
-        <div className="bg-gradient-to-b from-rose-50/80 to-rose-50/80">
-          <QuickInfo recipe={recipe} />
-        </div>
+      <div className="max-w-5xl mx-auto px-4 py-6 space-y-6">
+        <QuickInfo recipe={recipe} />
 
         <NutritionalInfo 
           recipe={recipe}
@@ -67,21 +65,9 @@ export function RecipeDetail({ recipes, onToggleFavorite, favorites }: RecipeDet
           )}
         />
 
-        <Ingredients
-          recipe={recipe}
-          isExpanded={expandedSection === 'ingredients'}
-          onToggle={() => setExpandedSection(
-            expandedSection === 'ingredients' ? null : 'ingredients'
-          )}
-        />
+        <Ingredients recipe={recipe} />
 
-        <Instructions
-          recipe={recipe}
-          isExpanded={expandedSection === 'instructions'}
-          onToggle={() => setExpandedSection(
-            expandedSection === 'instructions' ? null : 'instructions'
-          )}
-        />
+        <Instructions recipe={recipe} />
       </div>
 
       <RecipeQA recipe={recipe} />

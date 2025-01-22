@@ -19,6 +19,7 @@ export type Database = {
           recipe_id: string
           tags: string[] | null
           user_id: string
+          household_id?: string
         }
         Insert: {
           created_at?: string | null
@@ -29,6 +30,7 @@ export type Database = {
           recipe_id: string
           tags?: string[] | null
           user_id: string
+          household_id?: string
         }
         Update: {
           created_at?: string | null
@@ -39,6 +41,7 @@ export type Database = {
           recipe_id?: string
           tags?: string[] | null
           user_id?: string
+          household_id?: string
         }
         Relationships: [
           {
@@ -252,6 +255,7 @@ export type Database = {
           sunday_lunch: string | null;
           sunday_snack: string | null;
           sunday_dinner: string | null;
+          household_id?: string;
         };
         Insert: {
           id?: string;
@@ -289,6 +293,7 @@ export type Database = {
           sunday_lunch?: string | null;
           sunday_snack?: string | null;
           sunday_dinner?: string | null;
+          household_id?: string;
         };
         Update: {
           id?: string;
@@ -326,6 +331,7 @@ export type Database = {
           sunday_lunch?: string | null;
           sunday_snack?: string | null;
           sunday_dinner?: string | null;
+          household_id?: string;
         };
         Relationships: [];
       }
@@ -368,6 +374,65 @@ export type Database = {
             referencedRelation: "users"
             referencedColumns: ["id"]
           }
+        ]
+      }
+      households: {
+        Row: {
+          id: string;
+          created_by: string;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          created_by: string;
+          created_at?: string;
+        };
+        Update: {
+          id?: string;
+          created_by?: string;
+          created_at?: string;
+        };
+      }
+      shopping_list_items: {
+        Row: {
+          id: string;
+          recipe_id: string;
+          quantity: number;
+          unit: Database["public"]["Enums"]["unit_type"];
+          user_id: string;
+          household_id?: string;
+        };
+        Insert: {
+          id?: string;
+          recipe_id: string;
+          quantity: number;
+          unit: Database["public"]["Enums"]["unit_type"];
+          user_id: string;
+          household_id?: string;
+        };
+        Update: {
+          id?: string;
+          recipe_id?: string;
+          quantity?: number;
+          unit?: Database["public"]["Enums"]["unit_type"];
+          user_id?: string;
+          household_id?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "shopping_list_items_recipe_id_fkey"
+            columns: ["recipe_id"]
+            isOneToOne: false
+            referencedRelation: "recipes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "shopping_list_items_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
         ]
       }
     }

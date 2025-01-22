@@ -1,10 +1,11 @@
 import React, { useState } from 'react';
 import { Recipe, MealType } from '../../types';
 import { RecipeCard } from './RecipeCard';
-import { ChefHat, Heart, Sparkles, ArrowRight } from 'lucide-react';
+import { ChefHat, Heart, Sparkles, ArrowRight, Eye, EyeOff } from 'lucide-react';
 import { RecipeFilters } from './RecipeFilters';
 import { useNavigate } from 'react-router-dom';
 import { LoadingFallback } from '../LoadingFallback';
+import { motion, AnimatePresence } from 'framer-motion';
 
 interface RecipeListProps {
   recipes: Recipe[];
@@ -25,6 +26,7 @@ export function RecipeList({
   const [selectedMealType, setSelectedMealType] = useState<'all' | MealType>('all');
   const [sortBy, setSortBy] = useState<'popular' | 'calories' | 'time' | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
+  const [hideFavorites, setHideFavorites] = useState(true);
   const navigate = useNavigate();
 
   if (loading) {
@@ -36,7 +38,8 @@ export function RecipeList({
     const matchesMealType = selectedMealType === 'all' || recipe.meal_type === selectedMealType;
     const matchesSearch = recipe.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          recipe.category.toLowerCase().includes(searchTerm.toLowerCase());
-    return matchesCategory && matchesMealType && matchesSearch;
+    const matchesFavorites = !hideFavorites || !favorites.some(f => f.recipe_id === recipe.id);
+    return matchesCategory && matchesMealType && matchesSearch && matchesFavorites;
   });
 
   const sortedRecipes = [...filteredRecipes].sort((a, b) => {
@@ -85,29 +88,73 @@ export function RecipeList({
       </button>
 
       {/* Filters */}
-      <RecipeFilters
-        selectedCategory={selectedCategory}
-        selectedMealType={selectedMealType}
-        sortBy={sortBy}
-        searchTerm={searchTerm}
-        onCategoryChange={setSelectedCategory}
-        onMealTypeChange={setSelectedMealType}
-        onSortChange={setSortBy}
-        onSearchChange={setSearchTerm}
-      />
+      <div className="flex flex-col md:flex-row gap-4">
+        <div className="flex-1">
+          <RecipeFilters
+            selectedCategory={selectedCategory}
+            selectedMealType={selectedMealType}
+            sortBy={sortBy}
+            searchTerm={searchTerm}
+            onCategoryChange={setSelectedCategory}
+            onMealTypeChange={setSelectedMealType}
+            onSortChange={setSortBy}
+            onSearchChange={setSearchTerm}
+          />
+        </div>
+        
+        {/* Hide Favorites Toggle */}
+        <button
+          onClick={() => setHideFavorites(!hideFavorites)}
+          className={`
+            flex items-center justify-center space-x-2 px-4 py-2 rounded-xl
+            transition-all duration-300 border
+            ${hideFavorites 
+              ? 'bg-rose-50 text-rose-600 border-rose-200 hover:bg-rose-100'
+              : 'bg-gray-50 text-gray-600 border-gray-200 hover:bg-gray-100'
+            }
+          `}
+        >
+          {hideFavorites ? (
+            <>
+              <EyeOff size={18} />
+              <span>Mostrar favoritos</span>
+            </>
+          ) : (
+            <>
+              <Eye size={18} />
+              <span>Ocultar favoritos</span>
+            </>
+          )}
+        </button>
+      </div>
 
       {/* Recipe Grid */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
-        {sortedRecipes.map((recipe) => (
-          <RecipeCard 
-            key={recipe.id}
-            recipe={recipe}
-            favorites={favorites.map(f => f.recipe_id)}
-            onClick={() => onRecipeSelect(recipe)}
-            onToggleFavorite={() => onToggleFavorite(recipe)}
-          />
-        ))}
-      </div>
+      <motion.div 
+        className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6"
+        layout
+      >
+        <AnimatePresence mode="popLayout">
+          {sortedRecipes.map((recipe) => (
+            <motion.div
+              key={recipe.id}
+              layout
+              initial={{ scale: 0.8, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.8, opacity: 0 }}
+              transition={{
+                layout: { type: "spring", bounce: 0.4, duration: 0.6 }
+              }}
+            >
+              <RecipeCard 
+                recipe={recipe}
+                favorites={favorites.map(f => f.recipe_id)}
+                onClick={() => onRecipeSelect(recipe)}
+                onToggleFavorite={() => onToggleFavorite(recipe)}
+              />
+            </motion.div>
+          ))}
+        </AnimatePresence>
+      </motion.div>
 
       {/* Empty State */}
       {sortedRecipes.length === 0 && (

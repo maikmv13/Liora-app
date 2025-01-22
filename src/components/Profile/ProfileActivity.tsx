@@ -2,7 +2,7 @@ import React from 'react';
 import { Activity, Heart, Scale, ShoppingCart } from 'lucide-react';
 
 interface ActivityItem {
-  icon: typeof Heart | typeof Scale | typeof ShoppingCart;
+  icon: React.ElementType;
   text: string;
   time: string;
 }

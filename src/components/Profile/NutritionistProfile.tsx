@@ -9,6 +9,7 @@ import { useActiveMenu } from '../../hooks/useActiveMenu';
 import { useFavorites } from '../../hooks/useFavorites';
 import { supabase } from '../../lib/supabase';
 import { PatientDetailsModal } from './PatientDetailsModal';
+import { useActiveProfile } from '../../hooks/useActiveProfile';
 
 interface Patient {
   id: string;
@@ -38,6 +39,9 @@ export function NutritionistProfile() {
   const { menuItems } = useActiveMenu();
   const { favorites } = useFavorites();
   const navigate = useNavigate();
+  const { id, isHousehold } = useActiveProfile();
+  const { menuItems: activeMenuItems } = useActiveMenu(id, isHousehold);
+  const { favorites: activeFavorites } = useFavorites(isHousehold);
 
   useEffect(() => {
     fetchPatients();
@@ -178,7 +182,7 @@ export function NutritionistProfile() {
             </div>
             <div>
               <p className="text-sm text-gray-500">Menús Activos</p>
-              <p className="text-2xl font-bold text-gray-900">{menuItems.length}</p>
+              <p className="text-2xl font-bold text-gray-900">{activeMenuItems.length}</p>
             </div>
           </div>
         </div>
@@ -190,7 +194,7 @@ export function NutritionistProfile() {
             </div>
             <div>
               <p className="text-sm text-gray-500">Recetas</p>
-              <p className="text-2xl font-bold text-gray-900">{favorites.length}</p>
+              <p className="text-2xl font-bold text-gray-900">{activeFavorites.length}</p>
             </div>
           </div>
         </div>

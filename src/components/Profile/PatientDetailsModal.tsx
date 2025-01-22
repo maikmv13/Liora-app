@@ -1,6 +1,7 @@
 import React from 'react';
 import { X, User, Calendar, Clock, Mail, Activity } from 'lucide-react';
 import { useActiveMenu } from '../../hooks/useActiveMenu';
+import { useActiveProfile } from '../../hooks/useActiveProfile';
 
 interface PatientDetailsModalProps {
   patient: {
@@ -15,6 +16,7 @@ interface PatientDetailsModalProps {
 }
 
 export function PatientDetailsModal({ patient, onClose }: PatientDetailsModalProps) {
+  const { id, isHousehold } = useActiveProfile();
   const { menuItems } = useActiveMenu(patient.user_id);
 
   return (

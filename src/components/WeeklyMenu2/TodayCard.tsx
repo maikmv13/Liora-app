@@ -8,6 +8,7 @@ import {
 import { MenuItem } from '../../types';
 import { supabase } from '../../lib/supabase';
 import { useNavigate } from 'react-router-dom';
+import { useActiveProfile } from '../../hooks/useActiveProfile';
 
 interface TodayCardProps {
   menuItems: MenuItem[];
@@ -24,6 +25,7 @@ export function TodayCard({
 }: TodayCardProps) {
   const [completions, setCompletions] = useState<Record<string, any>>({});
   const navigate = useNavigate();
+  const { id, isHousehold } = useActiveProfile();
   
   const today = new Intl.DateTimeFormat('es-ES', { 
     weekday: 'long'
@@ -187,6 +189,24 @@ export function TodayCard({
         return 'bg-indigo-50 border-indigo-100 hover:bg-indigo-100/50';
       default:
         return 'bg-rose-50 border-rose-100 hover:bg-rose-100/50';
+    }
+  };
+
+  const handleComplete = async (recipeId: string) => {
+    try {
+      const { error } = await supabase
+        .from('recipe_completions')
+        .insert({
+          recipe_id: recipeId,
+          [isHousehold ? 'household_id' : 'user_id']: id,
+          completed_at: new Date().toISOString()
+        });
+
+      if (error) throw error;
+      
+      // ... resto del código
+    } catch (error) {
+      console.error('Error marking recipe as complete:', error);
     }
   };
 

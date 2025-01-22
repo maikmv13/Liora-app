@@ -1,4 +1,5 @@
 import { Recipe, MenuItem, MealType } from '../types';
+import { supabase } from '../lib/supabase';
 
 interface MenuRules {
   allowedCategories: string[];
@@ -37,13 +38,13 @@ const mealRules: Record<MealType, MenuRules> = {
     }
   },
   desayuno: {
-    allowedCategories: ['Desayuno'],  // Solo permitir categoría Desayuno
+    allowedCategories: ['Desayuno'],
     restrictedCategories: {
       'Fast Food': { startDay: 7 }
     }
   },
   snack: {
-    allowedCategories: ['Snack'],  // Solo permitir categoría Snack
+    allowedCategories: ['Snack'],
     restrictedCategories: {
       'Fast Food': { startDay: 7 }
     }
@@ -108,106 +109,54 @@ function isValidSelection(
   return true;
 }
 
-export async function generateCompleteMenu(recipes: Recipe[]): Promise<MenuItem[]> {
+export async function generateCompleteMenu(
+  recipes: Recipe[],
+  userId: string,
+  isHousehold: boolean
+): Promise<MenuItem[]> {
   if (!recipes || recipes.length === 0) {
-    throw new Error('No hay recetas disponibles para generar el menú');
+    throw new Error('Necesitas añadir algunas recetas a tus favoritos antes de generar un menú.');
   }
 
-  const weekDays = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domingo'];
-  const mealTypes: MealType[] = ['desayuno', 'comida', 'snack', 'cena'];
-  const newMenu: MenuItem[] = [];
-  const selectedRecipeIds = new Set<string>();
-  const stats: MenuStats = {
-    weeklyLimitCount: {},
-    categoryCount: {},
-    consecutiveCategories: {},
-    healthyCategoriesUsed: new Set(),
-    proteinMealsToday: 0
-  };
-
   try {
-    // Group recipes by meal type and category
-    const recipesByMealType = recipes.reduce((acc, recipe) => {
-      const mealType = recipe.meal_type || 'comida';
-      if (!acc[mealType]) {
-        acc[mealType] = [];
-      }
-      acc[mealType].push(recipe);
-      return acc;
-    }, {} as Record<MealType, Recipe[]>);
+    // Verificar si el household existe si es necesario
+    let householdId = null;
+    if (isHousehold) {
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('household_id')
+        .eq('user_id', userId)
+        .single();
 
-    // Add recipes to compatible meal types based on category
-    for (const recipe of recipes) {
-      // Para desayunos y snacks, solo añadir si coincide la categoría exacta
-      if (recipe.category === 'Desayuno') {
-        if (!recipesByMealType['desayuno']) {
-          recipesByMealType['desayuno'] = [];
-        }
-        recipesByMealType['desayuno'].push(recipe);
-      } else if (recipe.category === 'Snack') {
-        if (!recipesByMealType['snack']) {
-          recipesByMealType['snack'] = [];
-        }
-        recipesByMealType['snack'].push(recipe);
-      } else {
-        // Para otras comidas, mantener la lógica original
-        for (const [mealType, rules] of Object.entries(mealRules)) {
-          if (mealType !== 'desayuno' && mealType !== 'snack' && 
-              rules.allowedCategories.includes(recipe.category)) {
-            if (!recipesByMealType[mealType as MealType]) {
-              recipesByMealType[mealType as MealType] = [];
-            }
-            if (!recipesByMealType[mealType as MealType].includes(recipe)) {
-              recipesByMealType[mealType as MealType].push(recipe);
-            }
-          }
-        }
+      if (!profile?.household_id) {
+        throw new Error('No se encontró un household válido');
       }
+      
+      householdId = profile.household_id;
     }
 
-    // Generate menu for each day and meal type
-    for (const [dayIndex, day] of weekDays.entries()) {
+    // Obtener favoritos según el contexto (household o personal)
+    const { data: favorites, error: favoritesError } = await supabase
+      .from('favorites')
+      .select(`
+        recipes!favorites_recipe_id_fkey (*)
+      `)
+      .eq(isHousehold ? 'household_id' : 'user_id', isHousehold ? householdId : userId);
+
+    if (favoritesError) throw favoritesError;
+
+    const favoriteRecipes = favorites?.map(f => f.recipes) || [];
+    const weekDays = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domingo'];
+    const mealTypes: MealType[] = ['desayuno', 'comida', 'snack', 'cena'];
+    const newMenu: MenuItem[] = [];
+
+    // Generar menú simple sin restricciones
+    for (const day of weekDays) {
       for (const meal of mealTypes) {
-        const availableRecipes = recipesByMealType[meal] || [];
+        // Seleccionar una receta aleatoria
+        const selectedRecipe = favoriteRecipes[Math.floor(Math.random() * favoriteRecipes.length)];
         
-        if (availableRecipes.length === 0) {
-          throw new Error(`No hay suficientes recetas para ${meal}. Añade más recetas de las siguientes categorías: ${mealRules[meal].allowedCategories.join(', ')}`);
-        }
-
-        // Filter valid recipes
-        const validRecipes = availableRecipes.filter(recipe => 
-          !selectedRecipeIds.has(recipe.id) &&
-          isValidSelection(
-            recipe,
-            meal,
-            dayIndex,
-            stats,
-            newMenu,
-            newMenu[newMenu.length - 1]?.recipe.category
-          )
-        );
-
-        // Select recipe
-        let selectedRecipe: Recipe | null = null;
-        if (validRecipes.length > 0) {
-          selectedRecipe = validRecipes[Math.floor(Math.random() * validRecipes.length)];
-        } else {
-          // If no valid recipes, try to reuse a recipe that hasn't been used recently
-          const reusableRecipes = availableRecipes.filter(recipe => 
-            !newMenu.slice(-3).some(item => item.recipe.id === recipe.id)
-          );
-          selectedRecipe = reusableRecipes[Math.floor(Math.random() * reusableRecipes.length)] || availableRecipes[0];
-        }
-
         if (selectedRecipe) {
-          selectedRecipeIds.add(selectedRecipe.id);
-          
-          // Update statistics
-          if (selectedRecipe.category) {
-            stats.weeklyLimitCount[selectedRecipe.category] = 
-              (stats.weeklyLimitCount[selectedRecipe.category] || 0) + 1;
-          }
-
           newMenu.push({
             day,
             meal,
@@ -221,12 +170,16 @@ export async function generateCompleteMenu(recipes: Recipe[]): Promise<MenuItem[
     }
 
     if (newMenu.length === 0) {
-      throw new Error('No se pudo generar el menú. No hay suficientes recetas disponibles.');
+      throw new Error('No hay suficientes recetas favoritas para generar un menú completo. ¡Añade más recetas a tus favoritos!');
     }
 
     return newMenu;
+
   } catch (error) {
     console.error('Error generando el menú:', error);
-    throw error;
+    if (error instanceof Error) {
+      throw error;
+    }
+    throw new Error('Hubo un problema al generar el menú. Por favor, intenta de nuevo.');
   }
 }

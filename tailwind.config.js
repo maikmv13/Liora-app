@@ -18,12 +18,18 @@ export default {
         'slide-cart': {
           '0%': { transform: 'translateX(-200%)' },
           '100%': { transform: 'translateX(0)' }
+        },
+        explode: {
+          '0%': { transform: 'scale(1)', opacity: '1' },
+          '50%': { transform: 'scale(1.2)', opacity: '0.5' },
+          '100%': { transform: 'scale(0)', opacity: '0' }
         }
       },
       animation: {
         'slide-in': 'slide-in 0.3s ease-out',
         shimmer: 'shimmer 3s ease-in-out infinite',
-        'slide-cart': 'slide-cart 1s ease-in-out'
+        'slide-cart': 'slide-cart 1s ease-in-out',
+        explode: 'explode 0.5s ease-out forwards'
       }
     },
   },

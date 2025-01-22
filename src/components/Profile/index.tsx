@@ -1,17 +1,15 @@
 import React, { useState, useEffect } from 'react';
-import { 
-  User, Settings, History, Heart, Bell, LogOut, ChevronRight, Sun, 
-  Activity, Calendar, ChefHat
-} from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '../../lib/supabase';
 import { NutritionistProfile } from './NutritionistProfile';
 import { UserProfile } from './UserProfile';
 import { ProfileHeader } from './ProfileHeader';
 import { ProfileStats } from './ProfileStats';
-import { ProfileActivity } from './ProfileActivity';
-import { ProfileAchievements } from './ProfileAchievements';
 import { HouseholdSection } from './HouseholdSection';
+import { EditProfileModal } from './EditProfileModal';
+import { useActiveProfile } from '../../hooks/useActiveProfile';
+import { useActiveMenu } from '../../hooks/useActiveMenu';
+import { useFavorites } from '../../hooks/useFavorites';
 
 interface ProfileData {
   full_name: string;
@@ -27,8 +25,12 @@ interface ProfileData {
 }
 
 export function Profile() {
+  const { id, isHousehold } = useActiveProfile();
+  const { menuItems } = useActiveMenu(id, isHousehold);
+  const { favorites } = useFavorites(isHousehold);
   const [profile, setProfile] = useState<ProfileData | null>(null);
   const [loading, setLoading] = useState(true);
+  const [showEditModal, setShowEditModal] = useState(false);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -88,38 +90,11 @@ export function Profile() {
     );
   }
 
-  // Stats for the user
   const stats = {
-    recipes: 24,
-    favorites: 12,
-    shoppingLists: 8,
-    weightEntries: 30
+    recipes: favorites.length,
+    favorites: favorites.length,
+    shoppingLists: menuItems.length
   };
-
-  // Sample achievements
-  const achievements = [
-    {
-      id: 1,
-      title: 'Chef Principiante',
-      description: 'Completa tu primera receta',
-      icon: Activity,
-      achieved: true
-    },
-    {
-      id: 2,
-      title: 'Planificador Experto',
-      description: 'Crea 5 menús semanales',
-      icon: Calendar,
-      achieved: true
-    },
-    {
-      id: 3,
-      title: 'Saludable',
-      description: 'Registra tu peso durante 30 días',
-      icon: Activity,
-      achieved: false
-    }
-  ];
 
   if (profile.user_type === 'nutritionist') {
     return <NutritionistProfile />;
@@ -133,7 +108,7 @@ export function Profile() {
         email={profile.email}
         createdAt={profile.created_at}
         onLogout={handleLogout}
-        onEditProfile={() => {/* TODO: Implement edit profile */}}
+        onEditProfile={() => setShowEditModal(true)}
       />
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -144,11 +119,16 @@ export function Profile() {
           onUpdate={loadProfile}
         />
       </div>
-      
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <ProfileActivity />
-        <ProfileAchievements achievements={achievements} />
-      </div>
+
+      <EditProfileModal
+        isOpen={showEditModal}
+        onClose={() => setShowEditModal(false)}
+        currentProfile={{
+          full_name: profile.full_name,
+          email: profile.email
+        }}
+        onUpdate={loadProfile}
+      />
     </div>
   );
 }

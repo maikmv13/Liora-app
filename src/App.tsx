@@ -121,6 +121,8 @@ function AppContent() {
       }
     } catch (error) {
       console.error('Error toggling favorite:', error);
+      // Aquí podrías mostrar un mensaje de error al usuario
+      // Por ejemplo, usando un toast o un mensaje en la UI
     }
   };
 
