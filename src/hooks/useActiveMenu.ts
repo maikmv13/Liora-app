@@ -8,11 +8,15 @@ export function useActiveMenu(userId: string | undefined, isHousehold: boolean) 
   const [error, setError] = useState<Error | null>(null);
 
   useEffect(() => {
-    if (!userId) return;
+    if (!userId) {
+      console.log('No userId provided to useActiveMenu');
+      setLoading(false);
+      return;
+    }
 
     const fetchMenu = async () => {
       try {
-        console.log('Fetching menu for user:', userId);
+        console.log('Fetching menu for:', { userId, isHousehold });
         
         // 1. Obtener el menú más reciente
         const { data: menuData, error: menuError } = await supabase
@@ -50,16 +54,20 @@ export function useActiveMenu(userId: string | undefined, isHousehold: boolean) 
             sunday_dinner_id,
             sunday_snack_id
           `)
-          .eq(isHousehold ? 'household_id' : 'user_id', userId)
+          .eq('user_id', userId)
           .order('created_at', { ascending: false })
           .limit(1)
           .single();
 
-        if (menuError) throw menuError;
+        if (menuError) {
+          console.error('Error fetching menu:', menuError);
+          throw menuError;
+        }
 
         if (!menuData) {
           console.log('No menu found for user:', userId);
           setMenuItems([]);
+          setLoading(false);
           return;
         }
 
@@ -70,7 +78,6 @@ export function useActiveMenu(userId: string | undefined, isHousehold: boolean) 
           .filter(([key, value]) => 
             key.endsWith('_id') && 
             key !== 'user_id' && 
-            key !== 'household_id' &&
             value !== null
           )
           .map(([_, value]) => value);
@@ -78,6 +85,7 @@ export function useActiveMenu(userId: string | undefined, isHousehold: boolean) 
         if (recipeIds.length === 0) {
           console.log('No recipes in menu');
           setMenuItems([]);
+          setLoading(false);
           return;
         }
 
@@ -89,27 +97,20 @@ export function useActiveMenu(userId: string | undefined, isHousehold: boolean) 
           .select('*')
           .in('id', recipeIds);
 
-        if (recipesError) throw recipesError;
-
-        if (!recipesData) {
-          console.log('No recipes found');
-          setMenuItems([]);
-          return;
+        if (recipesError) {
+          console.error('Error fetching recipes:', recipesError);
+          throw recipesError;
         }
 
-        // 4. Crear mapa de recetas
-        const recipesMap = recipesData.reduce<Record<string, Recipe>>((acc, recipe) => {
-          acc[recipe.id] = recipe;
-          return acc;
-        }, {});
+        console.log('Fetched recipes:', recipesData);
 
-        // 5. Transformar el menú en items
-        const items = transformWeeklyMenuToMenuItems(menuData, recipesMap);
+        // 4. Transformar en MenuItems
+        const items = transformWeeklyMenuToMenuItems(menuData, recipesData || []);
         console.log('Transformed menu items:', items);
 
         setMenuItems(items);
       } catch (e) {
-        console.error('Error fetching menu:', e);
+        console.error('Error in fetchMenu:', e);
         setError(e as Error);
       } finally {
         setLoading(false);
@@ -128,7 +129,7 @@ export function useActiveMenu(userId: string | undefined, isHousehold: boolean) 
 
 function transformWeeklyMenuToMenuItems(
   weeklyMenu: Record<string, any>,
-  recipesMap: Record<string, Recipe>
+  recipes: Recipe[]
 ): MenuItem[] {
   const menuItems: MenuItem[] = [];
   const days = [
@@ -147,11 +148,11 @@ function transformWeeklyMenuToMenuItems(
       const recipeKey = `${dbDay}_${meal}_id`;
       const recipeId = weeklyMenu[recipeKey];
       
-      if (recipeId && recipesMap[recipeId]) {
+      if (recipeId && recipes.find(r => r.id === recipeId)) {
         menuItems.push({
           day: displayDay,
           meal: translateMeal(meal),
-          recipe: recipesMap[recipeId]
+          recipe: recipes.find(r => r.id === recipeId)
         });
       }
     });

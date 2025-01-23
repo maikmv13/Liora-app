@@ -1,14 +1,16 @@
 import { useState } from 'react';
 import { useShoppingList } from '../../../hooks/useShoppingList';
+import { useActiveProfile } from '../../../hooks/useActiveProfile';
 
 export function useShoppingListState() {
+  const { id: userId, isHousehold } = useActiveProfile();
+  const { refreshList } = useShoppingList(userId, isHousehold);
   const [showCompleted, setShowCompleted] = useState(true);
   const [expandedCategories, setExpandedCategories] = useState<string[]>([]);
   const [viewMode, setViewMode] = useState<'weekly' | 'daily'>('weekly');
   const [selectedDay, setSelectedDay] = useState<string>('Lunes');
   const [servings, setServings] = useState(2);
   const [refreshing, setRefreshing] = useState(false);
-  const { refreshList } = useShoppingList();
 
   const handleRefresh = async () => {
     setRefreshing(true);

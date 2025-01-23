@@ -5,29 +5,38 @@ import { useActiveMenu } from './useActiveMenu';
 import { supabase } from '../lib/supabase';
 import { useRecipes } from './useRecipes';
 
-export function useShoppingList(userId?: string, isHousehold?: boolean) {
+export function useShoppingList(userId?: string, isHousehold = false) {
   const [shoppingList, setShoppingList] = useState<ShoppingItem[]>([]);
   const [loading, setLoading] = useState(true);
-  const { menuItems, loading: menuLoading } = useActiveMenu(userId);
+  const { menuItems, loading: menuLoading } = useActiveMenu(userId, isHousehold);
   const { recipes, refetch: refetchRecipes } = useRecipes();
 
   const generateList = useCallback(async () => {
     try {
+      console.log('Starting generateList with:', { userId, isHousehold, menuItems });
+      
       if (menuItems.length > 0) {
         // Obtener recetas con ingredientes
         const menuItemsWithIngredients = await Promise.all(
           menuItems.map(async (item) => {
+            console.log('Processing menu item:', item);
+            
             if (!item.recipe.recipe_ingredients || item.recipe.recipe_ingredients.length === 0) {
-              const { data: recipeData, error } = await supabase
+              console.log('Fetching recipe ingredients for:', item.recipe.id);
+              
+              const { data: recipeData, error: recipeError } = await supabase
                 .from('recipes')
                 .select(`
-                  *,
-                  recipe_ingredients (
+                  id,
+                  name,
+                  servings,
+                  meal_type,
+                  category,
+                  recipe_ingredients(
                     id,
                     quantity,
                     unit,
-                    ingredient_id,
-                    ingredients (
+                    ingredients(
                       id,
                       name,
                       category
@@ -37,43 +46,82 @@ export function useShoppingList(userId?: string, isHousehold?: boolean) {
                 .eq('id', item.recipe.id)
                 .single();
 
-              if (!error && recipeData) {
+              if (recipeError) {
+                console.error('Error fetching recipe ingredients:', recipeError);
+                return item;
+              }
+
+              if (recipeData) {
+                console.log('Found recipe with ingredients:', recipeData);
                 return {
                   ...item,
                   recipe: recipeData
                 };
               }
+            } else {
+              console.log('Recipe already has ingredients:', item.recipe.recipe_ingredients);
             }
             return item;
           })
         );
 
+        console.log('Menu items with ingredients:', menuItemsWithIngredients);
+
         // Generar lista de compra
         const newShoppingList = generateShoppingList(menuItemsWithIngredients);
+        console.log('Generated shopping list:', newShoppingList);
         
         // Obtener estado de los items
         const { data: { user } } = await supabase.auth.getUser();
         if (user) {
-          const { data: checkedItems } = await supabase
+          console.log('Fetching checked items for user:', user.id);
+          
+          const { data: checkedItems, error: checkedError } = await supabase
             .from('shopping_list_items')
-            .select('*')
-            .eq(isHousehold ? 'household_id' : 'user_id', userId);
+            .select(`
+              id,
+              user_id,
+              menu_id,
+              item_name,
+              category,
+              quantity,
+              unit,
+              checked,
+              days,
+              created_at,
+              updated_at,
+              linked_household_id
+            `)
+            .eq(isHousehold ? 'linked_household_id' : 'user_id', isHousehold ? userId : user.id);
+
+          if (checkedError) {
+            console.error('Error fetching checked items:', checkedError);
+          }
+
+          console.log('Found checked items:', checkedItems);
 
           if (checkedItems) {
             // Actualizar la lista con los estados guardados
             const updatedList = newShoppingList.map(item => {
-              const checkedItem = checkedItems.find(ci => ci.item_name === item.name);
+              const checkedItem = checkedItems.find(ci => 
+                ci.item_name.toLowerCase() === item.name.toLowerCase()
+              );
+              console.log('Mapping item:', { item, checkedItem });
               return {
                 ...item,
-                checked: checkedItem?.checked || false
+                checked: checkedItem?.checked || false,
+                purchasedQuantity: checkedItem?.quantity
               };
             });
+            console.log('Final shopping list:', updatedList);
             setShoppingList(updatedList);
           } else {
+            console.log('No checked items found, using new list:', newShoppingList);
             setShoppingList(newShoppingList);
           }
         }
       } else {
+        console.log('No menu items found, setting empty shopping list');
         setShoppingList([]);
       }
     } catch (error) {
@@ -85,6 +133,7 @@ export function useShoppingList(userId?: string, isHousehold?: boolean) {
   }, [menuItems, userId, isHousehold]);
 
   useEffect(() => {
+    console.log('useEffect triggered:', { menuLoading, menuItems });
     if (!menuLoading) {
       generateList();
     }
@@ -92,7 +141,7 @@ export function useShoppingList(userId?: string, isHousehold?: boolean) {
 
   const toggleItem = async (name: string, day?: string) => {
     try {
-      const item = shoppingList.find(i => i.name === name);
+      const item = shoppingList.find(i => i.name.toLowerCase() === name.toLowerCase());
       if (!item) return;
 
       const { data: { user } } = await supabase.auth.getUser();
@@ -101,19 +150,29 @@ export function useShoppingList(userId?: string, isHousehold?: boolean) {
       const newChecked = !item.checked;
 
       // Actualizar en base de datos
-      await supabase
+      const { error } = await supabase
         .from('shopping_list_items')
         .upsert({
           user_id: user.id,
+          linked_household_id: isHousehold ? userId : null,
+          menu_id: item.menu?.id,
           item_name: name,
+          category: item.category,
+          quantity: item.quantity,
+          unit: item.unit,
           checked: newChecked,
-          days: item.days,
+          days: item.days ? item.days.join(',') : '',
           updated_at: new Date().toISOString()
         });
 
+      if (error) {
+        console.error('Error updating shopping list item:', error);
+        return;
+      }
+
       // Actualizar estado local
       setShoppingList(prev => prev.map(i => {
-        if (i.name === name) {
+        if (i.name.toLowerCase() === name.toLowerCase()) {
           return { ...i, checked: newChecked };
         }
         return i;
@@ -134,7 +193,7 @@ export function useShoppingList(userId?: string, isHousehold?: boolean) {
         await supabase
           .from('shopping_list_items')
           .update({ checked: false })
-          .eq(isHousehold ? 'household_id' : 'user_id', userId);
+          .eq(isHousehold ? 'linked_household_id' : 'user_id', userId);
       }
 
       await generateList();

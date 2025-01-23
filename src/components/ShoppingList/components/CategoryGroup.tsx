@@ -5,19 +5,19 @@ import { ShoppingItemRow } from './ShoppingItemRow';
 import { getCategoryIcon } from '../utils/categoryIcons';
 
 interface CategoryGroupProps {
-  categoria: string;
-  items: ShoppingItem[];
-  isExpanded: boolean;
-  onToggleExpand: () => void;
-  onToggleItem: (nombre: string) => void;
-  viewMode: 'weekly' | 'daily';
+  readonly category: string;
+  readonly items: ShoppingItem[];
+  readonly expanded: boolean;
+  readonly onToggleExpand: () => void;
+  readonly onToggleItem: (name: string, day?: string) => void;
+  readonly viewMode: 'weekly' | 'daily';
   selectedDay?: string;
 }
 
 export function CategoryGroup({ 
-  categoria, 
+  category, 
   items, 
-  isExpanded, 
+  expanded, 
   onToggleExpand,
   onToggleItem,
   viewMode,
@@ -25,13 +25,13 @@ export function CategoryGroup({
 }: CategoryGroupProps) {
   const completedCount = items.filter(item => item.checked).length;
   const isAllCompleted = completedCount === items.length;
-  const CategoryIcon = getCategoryIcon(categoria);
+  const CategoryIcon = getCategoryIcon(category);
 
   const handleToggleAll = (e: React.MouseEvent) => {
     e.stopPropagation();
     items.forEach(item => {
       if (isAllCompleted || !item.checked) {
-        onToggleItem(item.name);
+        onToggleItem(item.name, item.days.join('-'));
       }
     });
   };
@@ -71,7 +71,7 @@ export function CategoryGroup({
               font-medium text-sm md:text-base
               ${isAllCompleted ? 'text-emerald-800' : 'text-gray-900'}
             `}>
-              {categoria}
+              {category}
             </h3>
             <p className="text-xs text-gray-500">
               {completedCount} de {items.length} items
@@ -103,21 +103,21 @@ export function CategoryGroup({
               p-1.5 rounded-lg transition-colors
               ${isAllCompleted ? 'text-emerald-600' : 'text-rose-400'}
             `}
-            aria-label={isExpanded ? 'Contraer categoría' : 'Expandir categoría'}
+            aria-label={expanded ? 'Contraer categoría' : 'Expandir categoría'}
           >
-            {isExpanded ? <ChevronUp size={20} /> : <ChevronDown size={20} />}
+            {expanded ? <ChevronUp size={20} /> : <ChevronDown size={20} />}
           </button>
         </div>
       </div>
 
       {/* Items List */}
-      {isExpanded && (
+      {expanded && (
         <div className="divide-y divide-rose-100/20">
           {items.map((item) => (
             <ShoppingItemRow
               key={`${item.name}-${item.days.join('-')}`}
               item={item}
-              onToggle={() => onToggleItem(item.name)}
+              onToggle={() => onToggleItem(item.name, item.days.join('-'))}
               isGroupCompleted={isAllCompleted}
               viewMode={viewMode}
               selectedDay={selectedDay}

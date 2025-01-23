@@ -7,6 +7,8 @@ import { EmptyState } from './components/EmptyState';
 import { weekDays } from '../WeeklyMenu2/utils';
 import { useShoppingListState } from './hooks/useShoppingListState';
 import { filterAndSortItems, generateExportContent } from './utils/listUtils';
+import { useActiveProfile } from '../../hooks/useActiveProfile';
+import { useShoppingList } from '../../hooks/useShoppingList';
 
 interface ShoppingListProps {
   readonly items: ShoppingItem[];
@@ -14,6 +16,9 @@ interface ShoppingListProps {
 }
 
 export function ShoppingList({ items, onToggleItem }: ShoppingListProps) {
+  const { id: userId, isHousehold } = useActiveProfile();
+  const { shoppingList, loading, toggleItem } = useShoppingList(userId, isHousehold);
+
   const {
     showCompleted,
     setShowCompleted,
@@ -28,7 +33,7 @@ export function ShoppingList({ items, onToggleItem }: ShoppingListProps) {
   } = useShoppingListState();
 
   const { itemsByCategory, sortedCategories, filteredItems } = filterAndSortItems(
-    items,
+    shoppingList,
     viewMode,
     selectedDay,
     servings,
@@ -79,14 +84,10 @@ export function ShoppingList({ items, onToggleItem }: ShoppingListProps) {
       {/* Header */}
       <div className="flex flex-col md:flex-row md:justify-between md:items-start gap-4">
         <div className="flex items-center space-x-3">
-          <div className="bg-rose-50 w-12 h-12 md:w-14 md:h-14 rounded-2xl flex items-center justify-center">
-            <ShoppingCart size={24} className="text-rose-500 md:w-7 md:h-7" />
-          </div>
+          <ShoppingCart className="text-rose-500" />
           <div>
-            <h2 className="text-2xl md:text-3xl font-bold text-gray-900">Lista de Compra</h2>
-            <p className="text-sm md:text-base text-gray-600 mt-1">
-              🛒 Ingredientes necesarios para tu menú
-            </p>
+            <h1 className="text-xl font-medium text-gray-900">Lista de Compra</h1>
+            <p className="text-sm text-gray-500">Ingredientes necesarios para tu menú</p>
           </div>
         </div>
         <div className="flex flex-wrap gap-2 md:gap-3">
@@ -110,7 +111,9 @@ export function ShoppingList({ items, onToggleItem }: ShoppingListProps) {
       {/* Controls */}
       <div className="flex flex-col md:flex-row gap-3 md:gap-4">
         <div className="flex-1">
-          <Progress total={totalCount} completed={completedCount} />
+          {!loading && filteredItems.length > 0 && (
+            <Progress total={filteredItems.length} completed={completedCount} />
+          )}
         </div>
         <div className="flex flex-wrap gap-2 md:gap-3">
           <div className="flex items-center space-x-2 px-3 md:px-4 py-2 md:py-2.5 bg-white/90 backdrop-blur-sm rounded-xl border border-rose-100">
@@ -170,31 +173,25 @@ export function ShoppingList({ items, onToggleItem }: ShoppingListProps) {
       )}
 
       {/* Shopping list */}
-      <div className="space-y-3 md:space-y-4">
-        {sortedCategories.map(categoria => {
-          const items = itemsByCategory[categoria];
-          const visibleItems = showCompleted 
-            ? items 
-            : items.filter(item => !item.checked);
-
-          if (visibleItems.length === 0) return null;
-
-          return (
+      {loading ? (
+        <div>Cargando...</div>
+      ) : filteredItems.length > 0 ? (
+        <div className="space-y-4">
+          {sortedCategories.map(category => (
             <CategoryGroup
-              key={categoria}
-              categoria={categoria}
-              items={visibleItems}
-              isExpanded={expandedCategories.includes(categoria)}
-              onToggleExpand={() => toggleCategory(categoria)}
-              onToggleItem={handleToggleItem}
+              key={category}
+              category={category}
+              items={itemsByCategory[category]}
+              expanded={expandedCategories.includes(category)}
+              onToggleExpand={() => toggleCategory(category)}
+              onToggleItem={toggleItem}
               viewMode={viewMode}
             />
-          );
-        })}
-      </div>
-
-      {/* Empty state */}
-      {items.length === 0 && <EmptyState />}
+          ))}
+        </div>
+      ) : (
+        <EmptyState />
+      )}
     </div>
   );
 }
