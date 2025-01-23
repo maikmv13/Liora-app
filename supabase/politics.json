@@ -301,16 +301,6 @@
     },
     {
       "table_schema": "public",
-      "table_name": "profiles",
-      "policy_name": "Enable read own profile",
-      "command": "SELECT",
-      "permissive": "PERMISSIVE",
-      "roles": "{authenticated}",
-      "condition": "(auth.uid() = user_id)",
-      "with_check": null
-    },
-    {
-      "table_schema": "public",
       "table_name": "favorites",
       "policy_name": "Usuarios pueden crear favoritos para sí mismos o su household",
       "command": "INSERT",
@@ -327,36 +317,6 @@
       "permissive": "PERMISSIVE",
       "roles": "{authenticated}",
       "condition": "((auth.uid() = user_id) OR (linked_household_id IN ( SELECT profiles.linked_household_id AS household_id\n   FROM profiles\n  WHERE (profiles.user_id = auth.uid()))))",
-      "with_check": null
-    },
-    {
-      "table_schema": "public",
-      "table_name": "profiles",
-      "policy_name": "Enable update own profile",
-      "command": "UPDATE",
-      "permissive": "PERMISSIVE",
-      "roles": "{authenticated}",
-      "condition": "(auth.uid() = user_id)",
-      "with_check": "(auth.uid() = user_id)"
-    },
-    {
-      "table_schema": "public",
-      "table_name": "profiles",
-      "policy_name": "Enable insert own profile",
-      "command": "INSERT",
-      "permissive": "PERMISSIVE",
-      "roles": "{authenticated}",
-      "condition": null,
-      "with_check": "(auth.uid() = user_id)"
-    },
-    {
-      "table_schema": "public",
-      "table_name": "profiles",
-      "policy_name": "Enable delete own profile",
-      "command": "DELETE",
-      "permissive": "PERMISSIVE",
-      "roles": "{authenticated}",
-      "condition": "(auth.uid() = user_id)",
       "with_check": null
     },
     {
@@ -557,6 +517,46 @@
       "permissive": "PERMISSIVE",
       "roles": "{authenticated}",
       "condition": "((auth.uid() = user_id) OR (linked_household_id IN ( SELECT p.linked_household_id\n   FROM profiles p\n  WHERE (p.user_id = auth.uid()))))",
+      "with_check": null
+    },
+    {
+      "table_schema": "public",
+      "table_name": "profiles",
+      "policy_name": "Enable read own profile",
+      "command": "SELECT",
+      "permissive": "PERMISSIVE",
+      "roles": "{authenticated}",
+      "condition": "(auth.uid() = user_id)",
+      "with_check": null
+    },
+    {
+      "table_schema": "public",
+      "table_name": "profiles",
+      "policy_name": "Enable update own profile",
+      "command": "UPDATE",
+      "permissive": "PERMISSIVE",
+      "roles": "{authenticated}",
+      "condition": "(auth.uid() = user_id)",
+      "with_check": "(auth.uid() = user_id)"
+    },
+    {
+      "table_schema": "public",
+      "table_name": "profiles",
+      "policy_name": "Enable insert own profile",
+      "command": "INSERT",
+      "permissive": "PERMISSIVE",
+      "roles": "{authenticated}",
+      "condition": null,
+      "with_check": "((auth.uid() = user_id) OR (EXISTS ( SELECT 1\n   FROM auth.users\n  WHERE ((users.id = profiles.user_id) AND (users.created_at >= (now() - '00:05:00'::interval))))))"
+    },
+    {
+      "table_schema": "public",
+      "table_name": "profiles",
+      "policy_name": "Enable delete own profile",
+      "command": "DELETE",
+      "permissive": "PERMISSIVE",
+      "roles": "{authenticated}",
+      "condition": "(auth.uid() = user_id)",
       "with_check": null
     }
   ]

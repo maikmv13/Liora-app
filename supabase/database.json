@@ -1,9 +1,9 @@
 [
   {
     "table_schema": "public",
-    "constraint_name": "profiles_household_id_fkey",
+    "constraint_name": "profiles_linked_household_id_fkey",
     "table_name": "profiles",
-    "column_name": "household_id",
+    "column_name": "linked_household_id",
     "foreign_table_schema": "public",
     "foreign_table_name": "households",
     "foreign_column_name": "id"
@@ -30,7 +30,7 @@
     "table_schema": "public",
     "constraint_name": "favorites_household_id_fkey",
     "table_name": "favorites",
-    "column_name": "household_id",
+    "column_name": "linked_household_id",
     "foreign_table_schema": "public",
     "foreign_table_name": "households",
     "foreign_column_name": "id"
@@ -57,7 +57,7 @@
     "table_schema": "public",
     "constraint_name": "recipe_completions_household_id_fkey",
     "table_name": "recipe_completions",
-    "column_name": "household_id",
+    "column_name": "linked_household_id",
     "foreign_table_schema": "public",
     "foreign_table_name": "households",
     "foreign_column_name": "id"
@@ -84,7 +84,7 @@
     "table_schema": "public",
     "constraint_name": "shopping_list_items_household_id_fkey",
     "table_name": "shopping_list_items",
-    "column_name": "household_id",
+    "column_name": "linked_household_id",
     "foreign_table_schema": "public",
     "foreign_table_name": "households",
     "foreign_column_name": "id"
@@ -138,7 +138,7 @@
     "table_schema": "public",
     "constraint_name": "weekly_menus_household_id_fkey",
     "table_name": "weekly_menus",
-    "column_name": "household_id",
+    "column_name": "linked_household_id",
     "foreign_table_schema": "public",
     "foreign_table_name": "households",
     "foreign_column_name": "id"

@@ -22,11 +22,10 @@ export function useActiveProfile() {
           return;
         }
 
-        const { data, error: profileError } = await supabase
+        const { data: profile, error: profileError } = await supabase
           .from('profiles')
           .select('id, user_id, full_name, user_type')
           .eq('user_id', session.user.id)
-          .limit(1)
           .single();
 
         if (profileError) {
@@ -35,8 +34,9 @@ export function useActiveProfile() {
         }
 
         if (!ignore) {
-          setProfile(data);
+          setProfile(profile);
         }
+
       } catch (e) {
         console.error('Error loading profile:', e);
         if (!ignore) {

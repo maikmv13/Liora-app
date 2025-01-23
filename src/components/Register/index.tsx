@@ -62,7 +62,7 @@ export function Register({ onClose, onRegisterSuccess, preSelectedUserType, onBa
         throw new Error('Por favor, completa los campos de especialización y número de licencia');
       }
 
-      // 1. Registrar usuario
+      // 1. Registrar usuario en Auth
       const { data: authData, error: signUpError } = await supabase.auth.signUp({
         email: formData.email,
         password: formData.password,
@@ -77,25 +77,32 @@ export function Register({ onClose, onRegisterSuccess, preSelectedUserType, onBa
       if (signUpError) throw signUpError;
       if (!authData.user) throw new Error('No se pudo crear el usuario');
 
-      // 2. Crear perfil con email
-      const { error: profileError } = await supabase
+      // 2. Crear el perfil con campos mínimos requeridos
+      const profileData = {
+        user_id: authData.user.id,
+        full_name: formData.fullName,
+        user_type: userType
+      };
+
+      console.log('Intentando crear perfil con:', profileData);
+      const { data, error: profileError } = await supabase
         .from('profiles')
-        .insert({
-          user_id: authData.user.id,
-          full_name: formData.fullName,
-          user_type: userType,
-          email: formData.email,
-          specialization: userType === 'nutritionist' ? formData.specialization : null,
-          license_number: userType === 'nutritionist' ? formData.licenseNumber : null
-        });
+        .insert(profileData)
+        .select()
+        .single();
 
       if (profileError) {
-        // Si hay error al crear el perfil, intentar eliminar el usuario auth
+        console.error('Error detallado al crear perfil:', {
+          error: profileError,
+          code: profileError.code,
+          message: profileError.message,
+          details: profileError.details
+        });
         await supabase.auth.admin.deleteUser(authData.user.id);
-        throw profileError;
+        throw new Error('Error al crear el perfil: ' + profileError.message);
       }
 
-      // Éxito - llamar directamente a los callbacks sin mostrar alert
+      // 3. Todo exitoso
       onRegisterSuccess?.();
       onClose();
 

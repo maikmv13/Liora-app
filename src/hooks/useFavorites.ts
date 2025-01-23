@@ -7,7 +7,7 @@ export function useFavorites(isHouseholdView?: boolean) {
   const [favorites, setFavorites] = useState<FavoriteRecipe[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
-  const { id: userId, isHousehold, profile } = useActiveProfile();
+  const { id: userId, profile } = useActiveProfile();
 
   const fetchFavorites = async () => {
     try {
@@ -27,7 +27,7 @@ export function useFavorites(isHouseholdView?: boolean) {
           tags,
           recipe_id,
           user_id,
-          household_id,
+          linked_household_id,
           recipes:recipe_id (*),
           profiles:user_id (
             id,
@@ -37,8 +37,8 @@ export function useFavorites(isHouseholdView?: boolean) {
         `);
 
       // Si estamos en vista household y el usuario pertenece a un household
-      if (isHouseholdView && profile?.household_id) {
-        query = query.eq('household_id', profile.household_id);
+      if (isHouseholdView && profile?.linked_household_id) {
+        query = query.eq('linked_household_id', profile.linked_household_id);
       } else {
         // Vista personal - solo mostrar favoritos del usuario
         query = query.eq('user_id', userId);
@@ -57,7 +57,7 @@ export function useFavorites(isHouseholdView?: boolean) {
         rating: fav.rating,
         tags: fav.tags,
         user_id: fav.user_id,
-        household_id: fav.household_id,
+        linked_household_id: fav.linked_household_id,
         member_name: fav.profiles?.full_name
       })) || [];
 
@@ -85,8 +85,8 @@ export function useFavorites(isHouseholdView?: boolean) {
           event: '*',
           schema: 'public',
           table: 'favorites',
-          filter: isHouseholdView && profile?.household_id
-            ? `household_id=eq.${profile.household_id}`
+          filter: isHouseholdView && profile?.linked_household_id
+            ? `linked_household_id=eq.${profile.linked_household_id}`
             : `user_id=eq.${userId}`
         },
         () => fetchFavorites()
@@ -96,7 +96,7 @@ export function useFavorites(isHouseholdView?: boolean) {
     return () => {
       subscription.unsubscribe();
     };
-  }, [userId, isHouseholdView, profile?.household_id]);
+  }, [userId, isHouseholdView, profile?.linked_household_id]);
 
   const addFavorite = async (recipe: FavoriteRecipe) => {
     try {
@@ -105,7 +105,7 @@ export function useFavorites(isHouseholdView?: boolean) {
       const favoriteData = {
         user_id: userId,
         recipe_id: recipe.id,
-        household_id: isHouseholdView ? profile?.household_id : null,
+        linked_household_id: isHouseholdView ? profile?.linked_household_id : null,
         created_at: new Date().toISOString()
       };
 
@@ -121,7 +121,7 @@ export function useFavorites(isHouseholdView?: boolean) {
         ...recipe,
         favorite_id: data.id,
         created_at: data.created_at,
-        household_id: data.household_id
+        linked_household_id: data.linked_household_id
       };
 
       setFavorites(prev => [...prev, transformedFavorite]);

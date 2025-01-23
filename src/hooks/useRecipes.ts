@@ -14,13 +14,36 @@ export function useRecipes() {
       try {
         const { data, error } = await supabase
           .from('recipes')
-          .select('id, name, description, meal_type, category')
+          .select(`
+            id,
+            name,
+            instructions,
+            meal_type,
+            category,
+            image_url,
+            prep_time,
+            servings,
+            calories,
+            carbohydrates,
+            proteins,
+            fats
+          `)
           .order('name');
 
         if (error) throw error;
 
         if (!ignore) {
-          setRecipes(data || []);
+          // Transformar los datos para incluir la descripción desde las instrucciones
+          const transformedRecipes = data?.map(recipe => ({
+            ...recipe,
+            description: Array.isArray(recipe.instructions) 
+              ? recipe.instructions[0] 
+              : typeof recipe.instructions === 'object' 
+                ? recipe.instructions.description || ''
+                : ''
+          })) || [];
+
+          setRecipes(transformedRecipes);
         }
       } catch (e) {
         console.error('Error fetching recipes:', e);
