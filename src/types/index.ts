@@ -10,8 +10,10 @@ export interface Profile {
   user_id: string;
   full_name: string;
   user_type: string;
-  created_at?: string;
-  updated_at?: string;
+  linked_household_id: string | null;
+  created_at: string;
+  updated_at: string;
+  email?: string;
 }
 
 export interface WeeklyMenu {

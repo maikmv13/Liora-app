@@ -22,46 +22,22 @@ interface ProfileData {
   id: string;
   user_id: string;
   household_id: string | null;
+  linked_household_id: string | null;
 }
 
 export function Profile() {
-  const { id, isHousehold } = useActiveProfile();
+  const { id, isHousehold, profile } = useActiveProfile();
   const { menuItems } = useActiveMenu(id, isHousehold);
   const { favorites } = useFavorites(isHousehold);
-  const [profile, setProfile] = useState<ProfileData | null>(null);
   const [loading, setLoading] = useState(true);
   const [showEditModal, setShowEditModal] = useState(false);
   const navigate = useNavigate();
 
   useEffect(() => {
-    loadProfile();
-  }, []);
-
-  const loadProfile = async () => {
-    try {
-      const { data: { user } } = await supabase.auth.getUser();
-      
-      if (user) {
-        const { data: profileData, error } = await supabase
-          .from('profiles')
-          .select('*')
-          .eq('user_id', user.id)
-          .single();
-
-        if (error) throw error;
-
-        setProfile({
-          ...profileData,
-          email: user.email || '',
-          user_type: profileData.user_type as 'user' | 'nutritionist'
-        });
-      }
-    } catch (error) {
-      console.error('Error loading profile:', error);
-    } finally {
+    if (profile) {
       setLoading(false);
     }
-  };
+  }, [profile]);
 
   const handleLogout = async () => {
     try {
@@ -72,20 +48,10 @@ export function Profile() {
     }
   };
 
-  if (loading) {
+  if (loading || !profile) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-orange-50 to-rose-50 flex items-center justify-center">
         <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-emerald-500"></div>
-      </div>
-    );
-  }
-
-  if (!profile) {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-orange-50 to-rose-50 flex items-center justify-center">
-        <div className="text-center">
-          <p className="text-gray-600">No se encontró el perfil</p>
-        </div>
       </div>
     );
   }
@@ -104,8 +70,8 @@ export function Profile() {
     <div className="space-y-6">
       <ProfileHeader
         fullName={profile.full_name}
-        userType={profile.user_type}
-        email={profile.email}
+        userType={profile.user_type as 'user' | 'nutritionist'}
+        email={profile.email || ''}
         createdAt={profile.created_at}
         onLogout={handleLogout}
         onEditProfile={() => setShowEditModal(true)}
@@ -115,8 +81,8 @@ export function Profile() {
         <ProfileStats stats={stats} />
         <HouseholdSection 
           userId={profile.user_id}
-          householdId={profile.household_id}
-          onUpdate={loadProfile}
+          householdId={profile.linked_household_id}
+          onUpdate={() => window.location.reload()}
         />
       </div>
 
@@ -125,9 +91,9 @@ export function Profile() {
         onClose={() => setShowEditModal(false)}
         currentProfile={{
           full_name: profile.full_name,
-          email: profile.email
+          email: profile.email || ''
         }}
-        onUpdate={loadProfile}
+        onUpdate={() => window.location.reload()}
       />
     </div>
   );

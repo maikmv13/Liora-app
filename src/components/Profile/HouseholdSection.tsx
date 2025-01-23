@@ -18,6 +18,12 @@ export function HouseholdSection({ userId, householdId, onUpdate }: HouseholdSec
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [members, setMembers] = useState<any[]>([]);
+  const [householdDetails, setHouseholdDetails] = useState<{ id: string; created_at: string } | null>(null);
+
+  // Agregar log para ver los props
+  React.useEffect(() => {
+    console.log('HouseholdSection props:', { userId, householdId });
+  }, [userId, householdId]);
 
   // Cargar miembros del hogar
   React.useEffect(() => {
@@ -26,12 +32,23 @@ export function HouseholdSection({ userId, householdId, onUpdate }: HouseholdSec
     }
   }, [householdId]);
 
+  // Cargar detalles del household cuando cambie householdId
+  React.useEffect(() => {
+    console.log('Loading household details for:', householdId);
+    if (householdId) {
+      loadHouseholdDetails();
+    } else {
+      console.log('No household ID provided');
+      setHouseholdDetails(null);
+    }
+  }, [householdId]);
+
   const loadHouseholdMembers = async () => {
     try {
       const { data, error } = await supabase
         .from('profiles')
         .select('id, full_name, email')
-        .eq('household_id', householdId);
+        .eq('linked_household_id', householdId);
 
       if (error) throw error;
       setMembers(data || []);
@@ -40,11 +57,34 @@ export function HouseholdSection({ userId, householdId, onUpdate }: HouseholdSec
     }
   };
 
+  const loadHouseholdDetails = async () => {
+    try {
+      console.log('Fetching household details for ID:', householdId);
+      const { data, error } = await supabase
+        .from('households')
+        .select('id, created_at')
+        .eq('id', householdId)
+        .single();
+
+      if (error) {
+        console.error('Error fetching household:', error);
+        throw error;
+      }
+      
+      console.log('Household details loaded:', data);
+      setHouseholdDetails(data);
+    } catch (error) {
+      console.error('Error loading household details:', error);
+      setHouseholdDetails(null);
+    }
+  };
+
   const createHousehold = async () => {
     try {
       setLoading(true);
       setError(null);
 
+      // 1. Crear el household
       const { data: household, error: householdError } = await supabase
         .from('households')
         .insert({ created_by: userId })
@@ -53,12 +93,22 @@ export function HouseholdSection({ userId, householdId, onUpdate }: HouseholdSec
 
       if (householdError) throw householdError;
 
+      // 2. Actualizar el perfil
       const { error: profileError } = await supabase
         .from('profiles')
-        .update({ household_id: household.id })
+        .update({ linked_household_id: household.id })
         .eq('user_id', userId);
 
       if (profileError) throw profileError;
+
+      // 3. Cargar los detalles inmediatamente
+      setHouseholdDetails(household);
+      
+      // 4. Actualizar el estado local
+      if (household.id) {
+        await loadHouseholdMembers();
+        await loadHouseholdDetails();
+      }
 
       onUpdate();
     } catch (error) {
@@ -76,7 +126,7 @@ export function HouseholdSection({ userId, householdId, onUpdate }: HouseholdSec
 
       const { error } = await supabase
         .from('profiles')
-        .update({ household_id: null })
+        .update({ linked_household_id: null })
         .eq('user_id', userId);
 
       if (error) throw error;
@@ -98,7 +148,7 @@ export function HouseholdSection({ userId, householdId, onUpdate }: HouseholdSec
       // Verificar si el usuario existe
       const { data: existingUser, error: userError } = await supabase
         .from('profiles')
-        .select('id, household_id, email')
+        .select('id, linked_household_id, email')
         .eq('email', inviteEmail)
         .single();
 
@@ -106,7 +156,7 @@ export function HouseholdSection({ userId, householdId, onUpdate }: HouseholdSec
         throw new Error('Usuario no encontrado');
       }
 
-      if (existingUser.household_id) {
+      if (existingUser.linked_household_id) {
         throw new Error('El usuario ya pertenece a otro hogar');
       }
 
@@ -133,8 +183,8 @@ export function HouseholdSection({ userId, householdId, onUpdate }: HouseholdSec
   };
 
   const copyHouseholdId = () => {
-    if (householdId) {
-      navigator.clipboard.writeText(householdId);
+    if (householdDetails?.id) {
+      navigator.clipboard.writeText(householdDetails.id);
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
     }
@@ -194,16 +244,25 @@ export function HouseholdSection({ userId, householdId, onUpdate }: HouseholdSec
           </div>
         ) : (
           <div className="space-y-4">
-            {/* ID del hogar */}
+            {/* ID del hogar con estado de carga */}
             <div className="flex items-center justify-between p-3 bg-gradient-to-r from-gray-50 to-rose-50/30 rounded-xl border border-gray-100">
               <div className="flex items-center space-x-2">
                 <Home size={18} className="text-gray-500" />
-                <span className="text-sm text-gray-600">ID: {householdId}</span>
+                <span className="text-sm text-gray-600">
+                  {loading ? (
+                    'Creando hogar...'
+                  ) : householdDetails?.id ? (
+                    `ID: ${householdDetails.id}`
+                  ) : (
+                    'Cargando ID...'
+                  )}
+                </span>
               </div>
               <button
                 onClick={copyHouseholdId}
                 className="p-2 hover:bg-white rounded-lg transition-colors"
                 title="Copiar ID"
+                disabled={loading || !householdDetails?.id}
               >
                 {copied ? (
                   <Check size={18} className="text-green-500" />
@@ -212,6 +271,24 @@ export function HouseholdSection({ userId, householdId, onUpdate }: HouseholdSec
                 )}
               </button>
             </div>
+
+            {/* Mostrar mensaje de éxito cuando se crea */}
+            {householdDetails?.id && (
+              <motion.div
+                initial={{ opacity: 0, y: -10 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="text-sm text-green-600 bg-green-50 p-2 rounded-lg"
+              >
+                ¡Hogar creado exitosamente!
+              </motion.div>
+            )}
+
+            {/* Fecha de creación */}
+            {householdDetails && (
+              <div className="text-sm text-gray-500 px-1">
+                Creado el: {new Date(householdDetails.created_at).toLocaleDateString()}
+              </div>
+            )}
 
             {/* Lista de miembros */}
             <div className="space-y-2">

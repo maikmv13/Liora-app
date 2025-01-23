@@ -24,7 +24,7 @@ export function useActiveProfile() {
 
         const { data: profile, error: profileError } = await supabase
           .from('profiles')
-          .select('id, user_id, full_name, user_type')
+          .select('id, user_id, full_name, user_type, linked_household_id, created_at, updated_at')
           .eq('user_id', session.user.id)
           .single();
 
@@ -32,6 +32,8 @@ export function useActiveProfile() {
           console.error('Error fetching profile:', profileError);
           throw profileError;
         }
+
+        console.log('Profile loaded:', profile);
 
         if (!ignore) {
           setProfile(profile);
