@@ -27,6 +27,25 @@ const ShoppingList = lazy(() => import('./components/ShoppingList'));
 const RecipeContent = lazy(() => import('./components/RecipeList/RecipeContext'));
 const LioraChat = lazy(() => import('./components/LioraChat'));
 
+// Actualizar la interfaz de RecipeContentProps
+interface RecipeContentProps {
+  loading: boolean;
+  error: Error | null;
+  recipes: Recipe[];
+  onRecipeSelect: () => void;
+  favorites: string[];
+  onToggleFavorite: (recipe: Recipe) => Promise<void>;
+  loadingFallback: () => JSX.Element;
+}
+
+// Actualizar la interfaz de FavoriteRecipe
+interface FavoriteRecipe extends Recipe {
+  last_cooked: string;
+  notes: string;
+  rating: number;
+  tags: string[];
+}
+
 // Componente que contiene el contenido de la app
 function AppContent() {
   const location = useLocation();
@@ -35,8 +54,8 @@ function AppContent() {
   const [weeklyMenu, setWeeklyMenu] = useState<MenuItem[]>([]);
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
-  const { menuItems: activeMenuItems, loading: menuLoading } = useActiveMenu(user?.id);
-  const { shoppingList, toggleItem } = useShoppingList(user?.id);
+  const { menuItems: activeMenuItems, loading: menuLoading } = useActiveMenu();
+  const { shoppingList, toggleItem } = useShoppingList();
   const { recipes, loading: recipesLoading } = useRecipes();
   const { 
     favorites, 
@@ -115,14 +134,22 @@ function AppContent() {
       const isFavorite = favorites.some(fav => fav.id === recipe.id);
       
       if (isFavorite) {
-        await removeFavorite(recipe);
+        const favoriteRecipe = favorites.find(f => f.id === recipe.id);
+        if (favoriteRecipe) {
+          await removeFavorite(favoriteRecipe);
+        }
       } else {
-        await addFavorite(recipe);
+        const newFavorite: FavoriteRecipe = {
+          ...recipe,
+          last_cooked: '',
+          notes: '',
+          rating: 0,
+          tags: []
+        };
+        await addFavorite(newFavorite);
       }
     } catch (error) {
       console.error('Error toggling favorite:', error);
-      // Aquí podrías mostrar un mensaje de error al usuario
-      // Por ejemplo, usando un toast o un mensaje en la UI
     }
   };
 
@@ -177,7 +204,7 @@ function AppContent() {
                   onRecipeSelect={() => {}}
                   favorites={favorites.map(f => f.id)}
                   onToggleFavorite={handleToggleFavorite}
-                  LoadingFallback={LoadingFallback}
+                  loadingFallback={LoadingFallback}
                 />
               } 
             />

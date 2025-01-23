@@ -14,51 +14,29 @@ export function useRecipes() {
       try {
         const { data, error } = await supabase
           .from('recipes')
-          .select('*')
+          .select('id, name, description, meal_type, category')
           .order('name');
 
         if (error) throw error;
 
         if (!ignore) {
-          console.log('Transforming recipes once');
           setRecipes(data || []);
-          setLoading(false);
         }
       } catch (e) {
         console.error('Error fetching recipes:', e);
         if (!ignore) {
           setError(e as Error);
+        }
+      } finally {
+        if (!ignore) {
           setLoading(false);
         }
       }
     }
 
     fetchRecipes();
-
-    // Configuramos la suscripción a cambios
-    const channel = supabase.channel('recipes_changes');
-    
-    const subscription = channel
-      .on(
-        'postgres_changes',
-        {
-          event: '*',
-          schema: 'public',
-          table: 'recipes'
-        },
-        () => {
-          if (!ignore) {
-            fetchRecipes();
-          }
-        }
-      )
-      .subscribe();
-
-    return () => {
-      ignore = true;
-      subscription.unsubscribe();
-    };
-  }, []); // Sin dependencias ya que no usamos variables externas
+    return () => { ignore = true; };
+  }, []);
 
   return { recipes, loading, error };
 }

@@ -1,13 +1,6 @@
 import { useEffect, useState } from 'react';
 import { supabase } from '../lib/supabase';
-
-interface Profile {
-  id: string;
-  user_id: string;
-  household_id: string | null;
-  full_name: string;
-  user_type: string;
-}
+import type { Profile } from '../types';
 
 export function useActiveProfile() {
   const [profile, setProfile] = useState<Profile | null>(null);
@@ -17,34 +10,44 @@ export function useActiveProfile() {
   useEffect(() => {
     let ignore = false;
 
-    async function getProfile() {
+    const getProfile = async () => {
       try {
-        const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+        const { data: { session } } = await supabase.auth.getSession();
         
-        if (sessionError) throw sessionError;
         if (!session?.user) {
-          setProfile(null);
+          if (!ignore) {
+            setProfile(null);
+            setLoading(false);
+          }
           return;
         }
 
-        const { data, error } = await supabase
+        const { data, error: profileError } = await supabase
           .from('profiles')
-          .select('*')
+          .select('id, user_id, full_name, user_type')
           .eq('user_id', session.user.id)
+          .limit(1)
           .single();
 
-        if (error) throw error;
+        if (profileError) {
+          console.error('Error fetching profile:', profileError);
+          throw profileError;
+        }
 
         if (!ignore) {
           setProfile(data);
         }
       } catch (e) {
         console.error('Error loading profile:', e);
-        if (!ignore) setError(e as Error);
+        if (!ignore) {
+          setError(e as Error);
+        }
       } finally {
-        if (!ignore) setLoading(false);
+        if (!ignore) {
+          setLoading(false);
+        }
       }
-    }
+    };
 
     getProfile();
 
@@ -57,19 +60,17 @@ export function useActiveProfile() {
     if (profile) {
       console.log('Active profile updated:', {
         id: profile.user_id,
-        isHousehold: Boolean(profile.household_id),
+        isHousehold: false,
         profile
       });
     }
   }, [profile]);
-
-  const isHousehold = Boolean(profile?.household_id);
 
   return {
     id: profile?.user_id,
     profile,
     loading,
     error,
-    isHousehold
+    isHousehold: false
   };
 }

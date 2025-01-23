@@ -5,10 +5,47 @@ export type MealType = 'desayuno' | 'comida' | 'cena' | 'snack';
 export type UnitType = Database['public']['Enums']['unit_type'];
 export type IngredientCategory = Database['public']['Enums']['ingredient_category'];
 
+export interface Profile {
+  id: string;
+  user_id: string;
+  full_name: string;
+  user_type: string;
+  created_at?: string;
+  updated_at?: string;
+}
+
+export interface WeeklyMenu {
+  id: string;
+  user_id: string;
+  linked_household_id: string | null;
+  created_by: string;
+  created_at: string;
+  [key: string]: any; // Para los campos dinámicos de recetas
+}
+
 export interface MenuItem {
   day: string;
-  meal: MealType;
+  meal: string;
   recipe: Recipe;
+}
+
+export interface Recipe {
+  id: string;
+  name: string;
+  description: string;
+  // ... otros campos de receta
+}
+
+export interface Favorite {
+  id: string;
+  user_id: string;
+  recipe_id: string;
+  linked_household_id: string | null;
+  created_at: string;
+  notes?: string;
+  rating?: number;
+  last_cooked?: string;
+  tags?: string[];
 }
 
 export interface ShoppingItem {
