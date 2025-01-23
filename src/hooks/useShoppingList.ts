@@ -149,6 +149,9 @@ export function useShoppingList(userId?: string, isHousehold = false) {
 
       const newChecked = !item.checked;
 
+      // Formatear los días como array de PostgreSQL
+      const daysArray = item.days ? `{${item.days.join(',')}}` : null;
+
       // Actualizar en base de datos
       const { error } = await supabase
         .from('shopping_list_items')
@@ -161,7 +164,7 @@ export function useShoppingList(userId?: string, isHousehold = false) {
           quantity: item.quantity,
           unit: item.unit,
           checked: newChecked,
-          days: item.days ? item.days.join(',') : '',
+          days: daysArray, // Usar el array formateado
           updated_at: new Date().toISOString()
         });
 
