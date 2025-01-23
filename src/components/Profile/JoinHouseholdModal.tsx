@@ -28,7 +28,7 @@ export function JoinHouseholdModal({ onClose, onJoin }: JoinHouseholdModalProps)
       // Verificar que el hogar existe
       const { data: household, error: householdError } = await supabase
         .from('households')
-        .select<'households', HouseholdRow>('id')
+        .select('id')
         .eq('id', householdId)
         .single();
 
@@ -43,7 +43,7 @@ export function JoinHouseholdModal({ onClose, onJoin }: JoinHouseholdModalProps)
       // Actualizar el perfil del usuario
       const { error: updateError } = await supabase
         .from('profiles')
-        .update({ household_id: householdId })
+        .update({ linked_household_id: householdId })
         .eq('user_id', user.id);
 
       if (updateError) throw updateError;
