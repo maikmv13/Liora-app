@@ -40,6 +40,19 @@ export function JoinHouseholdModal({ onClose, onJoin }: JoinHouseholdModalProps)
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error('Usuario no autenticado');
 
+      // Verificar si el usuario ya está en un hogar
+      const { data: currentProfile, error: profileError } = await supabase
+        .from('profiles')
+        .select('linked_household_id')
+        .eq('user_id', user.id)
+        .single();
+
+      if (profileError) throw profileError;
+
+      if (currentProfile?.linked_household_id === householdId) {
+        throw new Error('Ya perteneces a este hogar');
+      }
+
       // Actualizar el perfil del usuario
       const { error: updateError } = await supabase
         .from('profiles')
@@ -48,8 +61,12 @@ export function JoinHouseholdModal({ onClose, onJoin }: JoinHouseholdModalProps)
 
       if (updateError) throw updateError;
 
-      onJoin();
-      onClose();
+      // Esperar un momento antes de cerrar para asegurar que la actualización se complete
+      setTimeout(() => {
+        onJoin();
+        onClose();
+      }, 1000);
+
     } catch (error) {
       console.error('Error joining household:', error);
       setError(error instanceof Error ? error.message : 'Error al unirse al hogar');

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Home, Users, Copy, Check, Plus, X, Mail, UserPlus, UserMinus, Settings } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 import { JoinHouseholdModal } from './JoinHouseholdModal';
@@ -10,14 +10,21 @@ interface HouseholdSectionProps {
   onUpdate: () => void;
 }
 
+interface HouseholdMember {
+  id: string;
+  full_name: string;
+  user_id: string;
+  email: string;
+}
+
 export function HouseholdSection({ userId, householdId, onUpdate }: HouseholdSectionProps) {
   const [showInvite, setShowInvite] = useState(false);
   const [showJoin, setShowJoin] = useState(false);
   const [inviteEmail, setInviteEmail] = useState('');
   const [copied, setCopied] = useState(false);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [members, setMembers] = useState<any[]>([]);
+  const [members, setMembers] = useState<HouseholdMember[]>([]);
   const [householdDetails, setHouseholdDetails] = useState<{ id: string; created_at: string } | null>(null);
 
   // Agregar log para ver los props
@@ -28,7 +35,7 @@ export function HouseholdSection({ userId, householdId, onUpdate }: HouseholdSec
   // Cargar miembros del hogar
   React.useEffect(() => {
     if (householdId) {
-      loadHouseholdMembers();
+      fetchHouseholdMembers();
     }
   }, [householdId]);
 
@@ -43,19 +50,97 @@ export function HouseholdSection({ userId, householdId, onUpdate }: HouseholdSec
     }
   }, [householdId]);
 
-  const loadHouseholdMembers = async () => {
+  const fetchHouseholdMembers = async () => {
     try {
-      const { data, error } = await supabase
+      if (!householdId) {
+        console.log('No hay householdId, no se pueden obtener miembros');
+        return;
+      }
+
+      console.log('Obteniendo miembros para household:', householdId);
+
+      // Hacemos la consulta más simple y directa
+      const { data: householdMembers, error } = await supabase
         .from('profiles')
-        .select('id, full_name, email')
+        .select('*')
         .eq('linked_household_id', householdId);
 
-      if (error) throw error;
-      setMembers(data || []);
+      if (error) {
+        console.error('Error en la consulta:', error);
+        throw error;
+      }
+
+      console.log('Query realizada:', `SELECT * FROM profiles WHERE linked_household_id = '${householdId}'`);
+      console.log('Miembros obtenidos (raw):', householdMembers);
+
+      if (!householdMembers || householdMembers.length === 0) {
+        console.log('No se encontraron miembros para el household:', householdId);
+      }
+
+      // Verificamos cada miembro
+      const validMembers = householdMembers?.map(member => {
+        console.log('Verificando miembro:', {
+          id: member.id,
+          user_id: member.user_id,
+          household: member.linked_household_id,
+          expectedHousehold: householdId,
+          matches: member.linked_household_id === householdId
+        });
+        return member;
+      }).filter(member => member.linked_household_id === householdId) || [];
+
+      console.log('Miembros válidos finales:', validMembers);
+      setMembers(validMembers);
+
     } catch (error) {
-      console.error('Error loading household members:', error);
+      console.error('Error detallado al obtener miembros:', error);
+    } finally {
+      setLoading(false);
     }
   };
+
+  // Modificamos la suscripción para ser más precisa
+  useEffect(() => {
+    if (!householdId) return;
+
+    console.log('Iniciando suscripción para household:', householdId);
+    
+    // Cargar miembros iniciales
+    fetchHouseholdMembers();
+
+    // Suscribirse a cambios
+    const channel = supabase
+      .channel(`profiles_changes_${householdId}`)
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'profiles'
+          // Removemos el filtro para ver todos los cambios
+        },
+        (payload) => {
+          console.log('Cambio detectado en profiles:', payload);
+          // Verificamos si el cambio afecta a nuestro household
+          const record = payload.new as { linked_household_id: string } | null;
+          console.log('Nuevo estado del registro:', record);
+          
+          if (record?.linked_household_id === householdId || 
+              (payload.old as { linked_household_id: string })?.linked_household_id === householdId) {
+            console.log('Cambio relevante detectado, actualizando miembros...');
+            fetchHouseholdMembers();
+          }
+        }
+      )
+      .subscribe((status) => {
+        console.log('Estado de la suscripción:', status);
+      });
+
+    return () => {
+      console.log('Limpiando suscripción');
+      channel.unsubscribe();
+    };
+  }, [householdId]);
 
   const loadHouseholdDetails = async () => {
     try {
@@ -106,7 +191,7 @@ export function HouseholdSection({ userId, householdId, onUpdate }: HouseholdSec
       
       // 4. Actualizar el estado local
       if (household.id) {
-        await loadHouseholdMembers();
+        await fetchHouseholdMembers();
         await loadHouseholdDetails();
       }
 
@@ -291,27 +376,41 @@ export function HouseholdSection({ userId, householdId, onUpdate }: HouseholdSec
             )}
 
             {/* Lista de miembros */}
-            <div className="space-y-2">
-              <h4 className="font-medium text-gray-900 px-1">Miembros del hogar</h4>
-              <div className="space-y-2">
-                <AnimatePresence>
-                  {members.map((member) => (
-                    <motion.div
-                      key={member.id}
-                      initial={{ opacity: 0, y: 20 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      exit={{ opacity: 0, y: -20 }}
-                      className="flex items-center justify-between p-3 bg-white rounded-xl border border-gray-100 hover:border-rose-200 transition-all duration-200"
-                    >
-                      <div>
-                        <p className="font-medium text-gray-900">{member.full_name}</p>
-                        <p className="text-sm text-gray-500">{member.email}</p>
+            {loading ? (
+              <div className="text-gray-500">Cargando miembros...</div>
+            ) : members.length > 0 ? (
+              <div className="mt-4 space-y-2">
+                <div className="text-sm font-medium text-gray-700 mb-2">
+                  Miembros ({members.length}):
+                </div>
+                {members.map(member => (
+                  <div 
+                    key={member.id} 
+                    className="flex items-center justify-between p-2 bg-white/50 rounded-lg"
+                  >
+                    <div className="flex items-center space-x-2">
+                      <div className="w-8 h-8 bg-rose-100 rounded-full flex items-center justify-center">
+                        <span className="text-rose-500 text-sm">
+                          {member.full_name?.[0]?.toUpperCase() || '?'}
+                        </span>
                       </div>
-                    </motion.div>
-                  ))}
-                </AnimatePresence>
+                      <div>
+                        <div className="text-sm font-medium text-gray-900">
+                          {member.full_name}
+                        </div>
+                        <div className="text-xs text-gray-500">
+                          {member.user_id === userId ? '(Tú)' : member.email}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                ))}
               </div>
-            </div>
+            ) : (
+              <div className="text-sm text-gray-500 mt-4">
+                No hay miembros en este hogar
+              </div>
+            )}
 
             {/* Invitar miembro */}
             <AnimatePresence>

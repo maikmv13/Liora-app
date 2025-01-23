@@ -67,7 +67,7 @@ export function MobileChat() {
       <FallingEmojis />
       <MobileChatHeader />
       
-      <div className="flex-1 overflow-y-auto pt-4 pb-5 px-0 space-y-4 custom-scrollbar">
+      <div className="flex-1 overflow-y-auto pt-4 pb-2 px-0 space-y-4 custom-scrollbar">
         <WelcomeMessage 
           welcomeIndex={welcomeIndex} 
           isMobile 

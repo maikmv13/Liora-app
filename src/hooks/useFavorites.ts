@@ -27,18 +27,21 @@ export function useFavorites(isHouseholdView?: boolean) {
           tags,
           recipe_id,
           user_id,
-          linked_household_id,
           recipes:recipe_id (*),
           profiles:user_id (
             id,
             full_name,
-            user_type
+            user_type,
+            linked_household_id
           )
         `);
 
       // Si estamos en vista household y el usuario pertenece a un household
       if (isHouseholdView && profile?.linked_household_id) {
-        query = query.eq('linked_household_id', profile.linked_household_id);
+        // Usar join en lugar de subconsulta
+        query = query
+          .select('*, profiles!inner(*)')
+          .eq('profiles.linked_household_id', profile.linked_household_id);
       } else {
         // Vista personal - solo mostrar favoritos del usuario
         query = query.eq('user_id', userId);
@@ -57,7 +60,6 @@ export function useFavorites(isHouseholdView?: boolean) {
         rating: fav.rating,
         tags: fav.tags,
         user_id: fav.user_id,
-        linked_household_id: fav.linked_household_id,
         member_name: fav.profiles?.full_name
       })) || [];
 
@@ -86,7 +88,7 @@ export function useFavorites(isHouseholdView?: boolean) {
           schema: 'public',
           table: 'favorites',
           filter: isHouseholdView && profile?.linked_household_id
-            ? `linked_household_id=eq.${profile.linked_household_id}`
+            ? `profiles.linked_household_id=eq.${profile.linked_household_id}`
             : `user_id=eq.${userId}`
         },
         () => fetchFavorites()
@@ -105,7 +107,6 @@ export function useFavorites(isHouseholdView?: boolean) {
       const favoriteData = {
         user_id: userId,
         recipe_id: recipe.id,
-        linked_household_id: isHouseholdView ? profile?.linked_household_id : null,
         created_at: new Date().toISOString()
       };
 
@@ -121,7 +122,7 @@ export function useFavorites(isHouseholdView?: boolean) {
         ...recipe,
         favorite_id: data.id,
         created_at: data.created_at,
-        linked_household_id: data.linked_household_id
+        user_id: data.user_id
       };
 
       setFavorites(prev => [...prev, transformedFavorite]);
@@ -149,14 +150,12 @@ export function useFavorites(isHouseholdView?: boolean) {
         .eq('id', recipe.favorite_id);
 
       if (error) {
-        // Si hay error, recargar los favoritos
         await fetchFavorites();
         throw error;
       }
 
     } catch (e) {
       console.error('Error removing favorite:', e);
-      // En caso de error, recargar los favoritos
       await fetchFavorites();
       throw e;
     }

@@ -72,7 +72,7 @@ export function MobileChatInput({ value, onChange, onSubmit, loading, disabled }
       {/* Quick Suggestions */}
       <AnimatePresence>
         {quickSuggestionsVisible && showSuggestions && (
-          <div className="fixed inset-x-0 bottom-[72px] z-[60]">
+          <div className="fixed inset-x-0 bottom-[56px] z-[60]">
             <QuickSuggestions
               inputValue={value}
               onSuggestionSelect={handleSuggestionSelect}
@@ -85,7 +85,7 @@ export function MobileChatInput({ value, onChange, onSubmit, loading, disabled }
       <motion.div 
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        className="fixed bottom-0 left-0 right-0 border-t border-gray-200 bg-white/95 backdrop-blur-sm p-4 shadow-lg z-50"
+        className="fixed bottom-0 left-0 right-0 border-t border-gray-200 bg-white/95 backdrop-blur-sm p-2 shadow-lg z-50"
       >
         {/* Emoji Picker */}
         <AnimatePresence>

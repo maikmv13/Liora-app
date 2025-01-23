@@ -1,0 +1,542 @@
+[
+    {
+      "?column?": null
+    },
+    {
+      "?column?": "CREATE TRIGGER RI_ConstraintTrigger_a_46241 BEFORE INSERT ON households FOR EACH ROW EXECUTE FUNCTION \"RI_FKey_noaction_del\"();"
+    },
+    {
+      "?column?": "CREATE TRIGGER RI_ConstraintTrigger_a_46242 BEFORE DELETE ON households FOR EACH ROW EXECUTE FUNCTION \"RI_FKey_noaction_upd\"();"
+    },
+    {
+      "?column?": null
+    },
+    {
+      "?column?": "CREATE TRIGGER RI_ConstraintTrigger_c_46244 BEFORE DELETE ON weekly_menus FOR EACH ROW EXECUTE FUNCTION \"RI_FKey_check_upd\"();"
+    },
+    {
+      "?column?": "CREATE TRIGGER RI_ConstraintTrigger_a_46247 BEFORE INSERT ON households FOR EACH ROW EXECUTE FUNCTION \"RI_FKey_noaction_del\"();"
+    },
+    {
+      "?column?": "CREATE TRIGGER RI_ConstraintTrigger_a_46248 BEFORE DELETE ON households FOR EACH ROW EXECUTE FUNCTION \"RI_FKey_noaction_upd\"();"
+    },
+    {
+      "?column?": null
+    },
+    {
+      "?column?": "CREATE TRIGGER RI_ConstraintTrigger_c_46250 BEFORE DELETE ON favorites FOR EACH ROW EXECUTE FUNCTION \"RI_FKey_check_upd\"();"
+    },
+    {
+      "?column?": "CREATE TRIGGER RI_ConstraintTrigger_a_46253 BEFORE INSERT ON households FOR EACH ROW EXECUTE FUNCTION \"RI_FKey_noaction_del\"();"
+    },
+    {
+      "?column?": "CREATE TRIGGER RI_ConstraintTrigger_a_46254 BEFORE DELETE ON households FOR EACH ROW EXECUTE FUNCTION \"RI_FKey_noaction_upd\"();"
+    },
+    {
+      "?column?": null
+    },
+    {
+      "?column?": "CREATE TRIGGER RI_ConstraintTrigger_c_46256 BEFORE DELETE ON shopping_list_items FOR EACH ROW EXECUTE FUNCTION \"RI_FKey_check_upd\"();"
+    },
+    {
+      "?column?": null
+    },
+    {
+      "?column?": "CREATE TRIGGER RI_ConstraintTrigger_c_38882 BEFORE DELETE ON households FOR EACH ROW EXECUTE FUNCTION \"RI_FKey_check_upd\"();"
+    },
+    {
+      "?column?": "CREATE TRIGGER update_households_updated_at BEFORE DELETE ON households FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();"
+    },
+    {
+      "?column?": "CREATE TRIGGER RI_ConstraintTrigger_a_29783 BEFORE INSERT ON recipes FOR EACH ROW EXECUTE FUNCTION \"RI_FKey_cascade_del\"();"
+    },
+    {
+      "?column?": "CREATE TRIGGER RI_ConstraintTrigger_a_29784 BEFORE DELETE ON recipes FOR EACH ROW EXECUTE FUNCTION \"RI_FKey_noaction_upd\"();"
+    },
+    {
+      "?column?": null
+    },
+    {
+      "?column?": "CREATE TRIGGER RI_ConstraintTrigger_c_29786 BEFORE DELETE ON recipe_ingredients FOR EACH ROW EXECUTE FUNCTION \"RI_FKey_check_upd\"();"
+    },
+    {
+      "?column?": "CREATE TRIGGER RI_ConstraintTrigger_a_29788 BEFORE INSERT ON ingredients FOR EACH ROW EXECUTE FUNCTION \"RI_FKey_cascade_del\"();"
+    },
+    {
+      "?column?": "CREATE TRIGGER RI_ConstraintTrigger_a_29789 BEFORE DELETE ON ingredients FOR EACH ROW EXECUTE FUNCTION \"RI_FKey_noaction_upd\"();"
+    },
+    {
+      "?column?": null
+    },
+    {
+      "?column?": "CREATE TRIGGER RI_ConstraintTrigger_c_29791 BEFORE DELETE ON recipe_ingredients FOR EACH ROW EXECUTE FUNCTION \"RI_FKey_check_upd\"();"
+    },
+    {
+      "?column?": "CREATE TRIGGER update_recipes_updated_at BEFORE DELETE ON recipes FOR EACH ROW EXECUTE FUNCTION handle_updated_at();"
+    },
+    {
+      "?column?": "CREATE TRIGGER RI_ConstraintTrigger_a_46351 BEFORE INSERT ON profiles FOR EACH ROW EXECUTE FUNCTION \"RI_FKey_noaction_del\"();"
+    },
+    {
+      "?column?": "CREATE TRIGGER RI_ConstraintTrigger_a_46352 BEFORE DELETE ON profiles FOR EACH ROW EXECUTE FUNCTION \"RI_FKey_noaction_upd\"();"
+    },
+    {
+      "?column?": null
+    },
+    {
+      "?column?": "CREATE TRIGGER RI_ConstraintTrigger_c_46354 BEFORE DELETE ON favorites FOR EACH ROW EXECUTE FUNCTION \"RI_FKey_check_upd\"();"
+    },
+    {
+      "?column?": "CREATE TRIGGER update_weekly_menus_updated_at BEFORE DELETE ON weekly_menus FOR EACH ROW EXECUTE FUNCTION handle_updated_at();"
+    },
+    {
+      "?column?": "CREATE TRIGGER sync_household_menu_trigger BEFORE DELETE ON weekly_menus FOR EACH ROW EXECUTE FUNCTION sync_household_menu();"
+    },
+    {
+      "?column?": "CREATE TRIGGER update_profiles_updated_at BEFORE DELETE ON profiles FOR EACH ROW EXECUTE FUNCTION handle_updated_at();"
+    },
+    {
+      "?column?": "CREATE TRIGGER RI_ConstraintTrigger_a_46461 BEFORE INSERT ON households FOR EACH ROW EXECUTE FUNCTION \"RI_FKey_noaction_del\"();"
+    },
+    {
+      "?column?": "CREATE TRIGGER RI_ConstraintTrigger_a_46462 BEFORE DELETE ON households FOR EACH ROW EXECUTE FUNCTION \"RI_FKey_noaction_upd\"();"
+    },
+    {
+      "?column?": null
+    },
+    {
+      "?column?": "CREATE TRIGGER RI_ConstraintTrigger_c_46464 BEFORE DELETE ON recipe_completions FOR EACH ROW EXECUTE FUNCTION \"RI_FKey_check_upd\"();"
+    },
+    {
+      "?column?": null
+    },
+    {
+      "?column?": "CREATE TRIGGER RI_ConstraintTrigger_c_41530 BEFORE DELETE ON chat_history FOR EACH ROW EXECUTE FUNCTION \"RI_FKey_check_upd\"();"
+    },
+    {
+      "?column?": "CREATE TRIGGER set_updated_at BEFORE DELETE ON chat_history FOR EACH ROW EXECUTE FUNCTION set_updated_at();"
+    },
+    {
+      "?column?": "CREATE TRIGGER RI_ConstraintTrigger_a_52979 BEFORE INSERT ON households FOR EACH ROW EXECUTE FUNCTION \"RI_FKey_setnull_del\"();"
+    },
+    {
+      "?column?": "CREATE TRIGGER RI_ConstraintTrigger_a_52980 BEFORE DELETE ON households FOR EACH ROW EXECUTE FUNCTION \"RI_FKey_noaction_upd\"();"
+    },
+    {
+      "?column?": null
+    },
+    {
+      "?column?": "CREATE TRIGGER RI_ConstraintTrigger_c_52982 BEFORE DELETE ON profiles FOR EACH ROW EXECUTE FUNCTION \"RI_FKey_check_upd\"();"
+    },
+    {
+      "?column?": null
+    },
+    {
+      "?column?": "CREATE TRIGGER RI_ConstraintTrigger_c_34571 BEFORE DELETE ON recipe_completions FOR EACH ROW EXECUTE FUNCTION \"RI_FKey_check_upd\"();"
+    },
+    {
+      "?column?": "CREATE TRIGGER RI_ConstraintTrigger_a_34578 BEFORE INSERT ON weekly_menus FOR EACH ROW EXECUTE FUNCTION \"RI_FKey_cascade_del\"();"
+    },
+    {
+      "?column?": "CREATE TRIGGER RI_ConstraintTrigger_a_34579 BEFORE DELETE ON weekly_menus FOR EACH ROW EXECUTE FUNCTION \"RI_FKey_noaction_upd\"();"
+    },
+    {
+      "?column?": null
+    },
+    {
+      "?column?": "CREATE TRIGGER RI_ConstraintTrigger_c_34581 BEFORE DELETE ON recipe_completions FOR EACH ROW EXECUTE FUNCTION \"RI_FKey_check_upd\"();"
+    },
+    {
+      "?column?": "CREATE TRIGGER update_recipe_completion_modified_at BEFORE DELETE ON recipe_completions FOR EACH ROW EXECUTE FUNCTION update_recipe_completion_modified_at();"
+    },
+    {
+      "?column?": null
+    },
+    {
+      "?column?": "CREATE TRIGGER RI_ConstraintTrigger_c_34718 BEFORE DELETE ON shopping_list_items FOR EACH ROW EXECUTE FUNCTION \"RI_FKey_check_upd\"();"
+    },
+    {
+      "?column?": "CREATE TRIGGER RI_ConstraintTrigger_a_34720 BEFORE INSERT ON weekly_menus FOR EACH ROW EXECUTE FUNCTION \"RI_FKey_cascade_del\"();"
+    },
+    {
+      "?column?": "CREATE TRIGGER RI_ConstraintTrigger_a_34721 BEFORE DELETE ON weekly_menus FOR EACH ROW EXECUTE FUNCTION \"RI_FKey_noaction_upd\"();"
+    },
+    {
+      "?column?": null
+    },
+    {
+      "?column?": "CREATE TRIGGER RI_ConstraintTrigger_c_34723 BEFORE DELETE ON shopping_list_items FOR EACH ROW EXECUTE FUNCTION \"RI_FKey_check_upd\"();"
+    },
+    {
+      "?column?": "CREATE TRIGGER update_shopping_list_items_updated_at BEFORE DELETE ON shopping_list_items FOR EACH ROW EXECUTE FUNCTION update_shopping_list_items_updated_at();"
+    },
+    {
+      "?column?": "CREATE TRIGGER validate_recipe_completion_trigger BEFORE DELETE ON recipe_completions FOR EACH ROW EXECUTE FUNCTION validate_recipe_completion();"
+    },
+    {
+      "?column?": "CREATE TRIGGER RI_ConstraintTrigger_a_34810 BEFORE INSERT ON recipes FOR EACH ROW EXECUTE FUNCTION \"RI_FKey_cascade_del\"();"
+    },
+    {
+      "?column?": "CREATE TRIGGER RI_ConstraintTrigger_a_34811 BEFORE DELETE ON recipes FOR EACH ROW EXECUTE FUNCTION \"RI_FKey_noaction_upd\"();"
+    },
+    {
+      "?column?": null
+    },
+    {
+      "?column?": "CREATE TRIGGER RI_ConstraintTrigger_c_34813 BEFORE DELETE ON favorites FOR EACH ROW EXECUTE FUNCTION \"RI_FKey_check_upd\"();"
+    },
+    {
+      "?column?": "CREATE TRIGGER validate_favorite_recipe_trigger BEFORE DELETE ON favorites FOR EACH ROW EXECUTE FUNCTION validate_favorite_recipe();"
+    },
+    {
+      "?column?": "CREATE TRIGGER ensure_shopping_item_category_trigger BEFORE DELETE ON shopping_list_items FOR EACH ROW EXECUTE FUNCTION ensure_shopping_item_category();"
+    },
+    {
+      "?column?": "CREATE TRIGGER ensure_shopping_item_unit_trigger BEFORE DELETE ON shopping_list_items FOR EACH ROW EXECUTE FUNCTION ensure_shopping_item_unit();"
+    },
+    {
+      "?column?": "CREATE TRIGGER check_recipe_exists_trigger BEFORE DELETE ON favorites FOR EACH ROW EXECUTE FUNCTION check_recipe_exists();"
+    },
+    {
+      "?column?": "CREATE TRIGGER RI_ConstraintTrigger_a_38691 BEFORE INSERT ON recipes FOR EACH ROW EXECUTE FUNCTION \"RI_FKey_cascade_del\"();"
+    },
+    {
+      "?column?": "CREATE TRIGGER RI_ConstraintTrigger_a_38692 BEFORE DELETE ON recipes FOR EACH ROW EXECUTE FUNCTION \"RI_FKey_noaction_upd\"();"
+    },
+    {
+      "?column?": null
+    },
+    {
+      "?column?": "CREATE TRIGGER RI_ConstraintTrigger_c_38694 BEFORE DELETE ON weekly_menus FOR EACH ROW EXECUTE FUNCTION \"RI_FKey_check_upd\"();"
+    },
+    {
+      "?column?": "CREATE TRIGGER RI_ConstraintTrigger_a_38696 BEFORE INSERT ON recipes FOR EACH ROW EXECUTE FUNCTION \"RI_FKey_cascade_del\"();"
+    },
+    {
+      "?column?": "CREATE TRIGGER RI_ConstraintTrigger_a_38697 BEFORE DELETE ON recipes FOR EACH ROW EXECUTE FUNCTION \"RI_FKey_noaction_upd\"();"
+    },
+    {
+      "?column?": null
+    },
+    {
+      "?column?": "CREATE TRIGGER RI_ConstraintTrigger_c_38699 BEFORE DELETE ON weekly_menus FOR EACH ROW EXECUTE FUNCTION \"RI_FKey_check_upd\"();"
+    },
+    {
+      "?column?": "CREATE TRIGGER RI_ConstraintTrigger_a_38701 BEFORE INSERT ON recipes FOR EACH ROW EXECUTE FUNCTION \"RI_FKey_cascade_del\"();"
+    },
+    {
+      "?column?": "CREATE TRIGGER RI_ConstraintTrigger_a_38702 BEFORE DELETE ON recipes FOR EACH ROW EXECUTE FUNCTION \"RI_FKey_noaction_upd\"();"
+    },
+    {
+      "?column?": null
+    },
+    {
+      "?column?": "CREATE TRIGGER RI_ConstraintTrigger_c_38704 BEFORE DELETE ON weekly_menus FOR EACH ROW EXECUTE FUNCTION \"RI_FKey_check_upd\"();"
+    },
+    {
+      "?column?": "CREATE TRIGGER RI_ConstraintTrigger_a_38706 BEFORE INSERT ON recipes FOR EACH ROW EXECUTE FUNCTION \"RI_FKey_cascade_del\"();"
+    },
+    {
+      "?column?": "CREATE TRIGGER RI_ConstraintTrigger_a_38707 BEFORE DELETE ON recipes FOR EACH ROW EXECUTE FUNCTION \"RI_FKey_noaction_upd\"();"
+    },
+    {
+      "?column?": null
+    },
+    {
+      "?column?": "CREATE TRIGGER RI_ConstraintTrigger_c_38709 BEFORE DELETE ON weekly_menus FOR EACH ROW EXECUTE FUNCTION \"RI_FKey_check_upd\"();"
+    },
+    {
+      "?column?": "CREATE TRIGGER RI_ConstraintTrigger_a_38711 BEFORE INSERT ON recipes FOR EACH ROW EXECUTE FUNCTION \"RI_FKey_cascade_del\"();"
+    },
+    {
+      "?column?": "CREATE TRIGGER RI_ConstraintTrigger_a_38712 BEFORE DELETE ON recipes FOR EACH ROW EXECUTE FUNCTION \"RI_FKey_noaction_upd\"();"
+    },
+    {
+      "?column?": null
+    },
+    {
+      "?column?": "CREATE TRIGGER RI_ConstraintTrigger_c_38714 BEFORE DELETE ON weekly_menus FOR EACH ROW EXECUTE FUNCTION \"RI_FKey_check_upd\"();"
+    },
+    {
+      "?column?": "CREATE TRIGGER RI_ConstraintTrigger_a_38716 BEFORE INSERT ON recipes FOR EACH ROW EXECUTE FUNCTION \"RI_FKey_cascade_del\"();"
+    },
+    {
+      "?column?": "CREATE TRIGGER RI_ConstraintTrigger_a_38717 BEFORE DELETE ON recipes FOR EACH ROW EXECUTE FUNCTION \"RI_FKey_noaction_upd\"();"
+    },
+    {
+      "?column?": null
+    },
+    {
+      "?column?": "CREATE TRIGGER RI_ConstraintTrigger_c_38719 BEFORE DELETE ON weekly_menus FOR EACH ROW EXECUTE FUNCTION \"RI_FKey_check_upd\"();"
+    },
+    {
+      "?column?": "CREATE TRIGGER RI_ConstraintTrigger_a_38721 BEFORE INSERT ON recipes FOR EACH ROW EXECUTE FUNCTION \"RI_FKey_cascade_del\"();"
+    },
+    {
+      "?column?": "CREATE TRIGGER RI_ConstraintTrigger_a_38722 BEFORE DELETE ON recipes FOR EACH ROW EXECUTE FUNCTION \"RI_FKey_noaction_upd\"();"
+    },
+    {
+      "?column?": null
+    },
+    {
+      "?column?": "CREATE TRIGGER RI_ConstraintTrigger_c_38724 BEFORE DELETE ON weekly_menus FOR EACH ROW EXECUTE FUNCTION \"RI_FKey_check_upd\"();"
+    },
+    {
+      "?column?": "CREATE TRIGGER RI_ConstraintTrigger_a_38726 BEFORE INSERT ON recipes FOR EACH ROW EXECUTE FUNCTION \"RI_FKey_cascade_del\"();"
+    },
+    {
+      "?column?": "CREATE TRIGGER RI_ConstraintTrigger_a_38727 BEFORE DELETE ON recipes FOR EACH ROW EXECUTE FUNCTION \"RI_FKey_noaction_upd\"();"
+    },
+    {
+      "?column?": null
+    },
+    {
+      "?column?": "CREATE TRIGGER RI_ConstraintTrigger_c_38729 BEFORE DELETE ON weekly_menus FOR EACH ROW EXECUTE FUNCTION \"RI_FKey_check_upd\"();"
+    },
+    {
+      "?column?": "CREATE TRIGGER RI_ConstraintTrigger_a_38731 BEFORE INSERT ON recipes FOR EACH ROW EXECUTE FUNCTION \"RI_FKey_cascade_del\"();"
+    },
+    {
+      "?column?": "CREATE TRIGGER RI_ConstraintTrigger_a_38732 BEFORE DELETE ON recipes FOR EACH ROW EXECUTE FUNCTION \"RI_FKey_noaction_upd\"();"
+    },
+    {
+      "?column?": null
+    },
+    {
+      "?column?": "CREATE TRIGGER RI_ConstraintTrigger_c_38734 BEFORE DELETE ON weekly_menus FOR EACH ROW EXECUTE FUNCTION \"RI_FKey_check_upd\"();"
+    },
+    {
+      "?column?": "CREATE TRIGGER RI_ConstraintTrigger_a_38736 BEFORE INSERT ON recipes FOR EACH ROW EXECUTE FUNCTION \"RI_FKey_cascade_del\"();"
+    },
+    {
+      "?column?": "CREATE TRIGGER RI_ConstraintTrigger_a_38737 BEFORE DELETE ON recipes FOR EACH ROW EXECUTE FUNCTION \"RI_FKey_noaction_upd\"();"
+    },
+    {
+      "?column?": null
+    },
+    {
+      "?column?": "CREATE TRIGGER RI_ConstraintTrigger_c_38739 BEFORE DELETE ON weekly_menus FOR EACH ROW EXECUTE FUNCTION \"RI_FKey_check_upd\"();"
+    },
+    {
+      "?column?": "CREATE TRIGGER RI_ConstraintTrigger_a_38741 BEFORE INSERT ON recipes FOR EACH ROW EXECUTE FUNCTION \"RI_FKey_cascade_del\"();"
+    },
+    {
+      "?column?": "CREATE TRIGGER RI_ConstraintTrigger_a_38742 BEFORE DELETE ON recipes FOR EACH ROW EXECUTE FUNCTION \"RI_FKey_noaction_upd\"();"
+    },
+    {
+      "?column?": null
+    },
+    {
+      "?column?": "CREATE TRIGGER RI_ConstraintTrigger_c_38744 BEFORE DELETE ON weekly_menus FOR EACH ROW EXECUTE FUNCTION \"RI_FKey_check_upd\"();"
+    },
+    {
+      "?column?": "CREATE TRIGGER RI_ConstraintTrigger_a_38746 BEFORE INSERT ON recipes FOR EACH ROW EXECUTE FUNCTION \"RI_FKey_cascade_del\"();"
+    },
+    {
+      "?column?": "CREATE TRIGGER RI_ConstraintTrigger_a_38747 BEFORE DELETE ON recipes FOR EACH ROW EXECUTE FUNCTION \"RI_FKey_noaction_upd\"();"
+    },
+    {
+      "?column?": null
+    },
+    {
+      "?column?": "CREATE TRIGGER RI_ConstraintTrigger_c_38749 BEFORE DELETE ON weekly_menus FOR EACH ROW EXECUTE FUNCTION \"RI_FKey_check_upd\"();"
+    },
+    {
+      "?column?": "CREATE TRIGGER RI_ConstraintTrigger_a_38751 BEFORE INSERT ON recipes FOR EACH ROW EXECUTE FUNCTION \"RI_FKey_cascade_del\"();"
+    },
+    {
+      "?column?": "CREATE TRIGGER RI_ConstraintTrigger_a_38752 BEFORE DELETE ON recipes FOR EACH ROW EXECUTE FUNCTION \"RI_FKey_noaction_upd\"();"
+    },
+    {
+      "?column?": null
+    },
+    {
+      "?column?": "CREATE TRIGGER RI_ConstraintTrigger_c_38754 BEFORE DELETE ON weekly_menus FOR EACH ROW EXECUTE FUNCTION \"RI_FKey_check_upd\"();"
+    },
+    {
+      "?column?": "CREATE TRIGGER RI_ConstraintTrigger_a_38756 BEFORE INSERT ON recipes FOR EACH ROW EXECUTE FUNCTION \"RI_FKey_cascade_del\"();"
+    },
+    {
+      "?column?": "CREATE TRIGGER RI_ConstraintTrigger_a_38757 BEFORE DELETE ON recipes FOR EACH ROW EXECUTE FUNCTION \"RI_FKey_noaction_upd\"();"
+    },
+    {
+      "?column?": null
+    },
+    {
+      "?column?": "CREATE TRIGGER RI_ConstraintTrigger_c_38759 BEFORE DELETE ON weekly_menus FOR EACH ROW EXECUTE FUNCTION \"RI_FKey_check_upd\"();"
+    },
+    {
+      "?column?": "CREATE TRIGGER RI_ConstraintTrigger_a_38761 BEFORE INSERT ON recipes FOR EACH ROW EXECUTE FUNCTION \"RI_FKey_cascade_del\"();"
+    },
+    {
+      "?column?": "CREATE TRIGGER RI_ConstraintTrigger_a_38762 BEFORE DELETE ON recipes FOR EACH ROW EXECUTE FUNCTION \"RI_FKey_noaction_upd\"();"
+    },
+    {
+      "?column?": null
+    },
+    {
+      "?column?": "CREATE TRIGGER RI_ConstraintTrigger_c_38764 BEFORE DELETE ON weekly_menus FOR EACH ROW EXECUTE FUNCTION \"RI_FKey_check_upd\"();"
+    },
+    {
+      "?column?": "CREATE TRIGGER RI_ConstraintTrigger_a_38766 BEFORE INSERT ON recipes FOR EACH ROW EXECUTE FUNCTION \"RI_FKey_cascade_del\"();"
+    },
+    {
+      "?column?": "CREATE TRIGGER RI_ConstraintTrigger_a_38767 BEFORE DELETE ON recipes FOR EACH ROW EXECUTE FUNCTION \"RI_FKey_noaction_upd\"();"
+    },
+    {
+      "?column?": null
+    },
+    {
+      "?column?": "CREATE TRIGGER RI_ConstraintTrigger_c_38769 BEFORE DELETE ON weekly_menus FOR EACH ROW EXECUTE FUNCTION \"RI_FKey_check_upd\"();"
+    },
+    {
+      "?column?": "CREATE TRIGGER RI_ConstraintTrigger_a_38771 BEFORE INSERT ON recipes FOR EACH ROW EXECUTE FUNCTION \"RI_FKey_cascade_del\"();"
+    },
+    {
+      "?column?": "CREATE TRIGGER RI_ConstraintTrigger_a_38772 BEFORE DELETE ON recipes FOR EACH ROW EXECUTE FUNCTION \"RI_FKey_noaction_upd\"();"
+    },
+    {
+      "?column?": null
+    },
+    {
+      "?column?": "CREATE TRIGGER RI_ConstraintTrigger_c_38774 BEFORE DELETE ON weekly_menus FOR EACH ROW EXECUTE FUNCTION \"RI_FKey_check_upd\"();"
+    },
+    {
+      "?column?": "CREATE TRIGGER RI_ConstraintTrigger_a_38776 BEFORE INSERT ON recipes FOR EACH ROW EXECUTE FUNCTION \"RI_FKey_cascade_del\"();"
+    },
+    {
+      "?column?": "CREATE TRIGGER RI_ConstraintTrigger_a_38777 BEFORE DELETE ON recipes FOR EACH ROW EXECUTE FUNCTION \"RI_FKey_noaction_upd\"();"
+    },
+    {
+      "?column?": null
+    },
+    {
+      "?column?": "CREATE TRIGGER RI_ConstraintTrigger_c_38779 BEFORE DELETE ON weekly_menus FOR EACH ROW EXECUTE FUNCTION \"RI_FKey_check_upd\"();"
+    },
+    {
+      "?column?": "CREATE TRIGGER RI_ConstraintTrigger_a_38781 BEFORE INSERT ON recipes FOR EACH ROW EXECUTE FUNCTION \"RI_FKey_cascade_del\"();"
+    },
+    {
+      "?column?": "CREATE TRIGGER RI_ConstraintTrigger_a_38782 BEFORE DELETE ON recipes FOR EACH ROW EXECUTE FUNCTION \"RI_FKey_noaction_upd\"();"
+    },
+    {
+      "?column?": null
+    },
+    {
+      "?column?": "CREATE TRIGGER RI_ConstraintTrigger_c_38784 BEFORE DELETE ON weekly_menus FOR EACH ROW EXECUTE FUNCTION \"RI_FKey_check_upd\"();"
+    },
+    {
+      "?column?": "CREATE TRIGGER RI_ConstraintTrigger_a_38786 BEFORE INSERT ON recipes FOR EACH ROW EXECUTE FUNCTION \"RI_FKey_cascade_del\"();"
+    },
+    {
+      "?column?": "CREATE TRIGGER RI_ConstraintTrigger_a_38787 BEFORE DELETE ON recipes FOR EACH ROW EXECUTE FUNCTION \"RI_FKey_noaction_upd\"();"
+    },
+    {
+      "?column?": null
+    },
+    {
+      "?column?": "CREATE TRIGGER RI_ConstraintTrigger_c_38789 BEFORE DELETE ON weekly_menus FOR EACH ROW EXECUTE FUNCTION \"RI_FKey_check_upd\"();"
+    },
+    {
+      "?column?": "CREATE TRIGGER RI_ConstraintTrigger_a_38791 BEFORE INSERT ON recipes FOR EACH ROW EXECUTE FUNCTION \"RI_FKey_cascade_del\"();"
+    },
+    {
+      "?column?": "CREATE TRIGGER RI_ConstraintTrigger_a_38792 BEFORE DELETE ON recipes FOR EACH ROW EXECUTE FUNCTION \"RI_FKey_noaction_upd\"();"
+    },
+    {
+      "?column?": null
+    },
+    {
+      "?column?": "CREATE TRIGGER RI_ConstraintTrigger_c_38794 BEFORE DELETE ON weekly_menus FOR EACH ROW EXECUTE FUNCTION \"RI_FKey_check_upd\"();"
+    },
+    {
+      "?column?": "CREATE TRIGGER RI_ConstraintTrigger_a_38796 BEFORE INSERT ON recipes FOR EACH ROW EXECUTE FUNCTION \"RI_FKey_cascade_del\"();"
+    },
+    {
+      "?column?": "CREATE TRIGGER RI_ConstraintTrigger_a_38797 BEFORE DELETE ON recipes FOR EACH ROW EXECUTE FUNCTION \"RI_FKey_noaction_upd\"();"
+    },
+    {
+      "?column?": null
+    },
+    {
+      "?column?": "CREATE TRIGGER RI_ConstraintTrigger_c_38799 BEFORE DELETE ON weekly_menus FOR EACH ROW EXECUTE FUNCTION \"RI_FKey_check_upd\"();"
+    },
+    {
+      "?column?": "CREATE TRIGGER RI_ConstraintTrigger_a_38801 BEFORE INSERT ON recipes FOR EACH ROW EXECUTE FUNCTION \"RI_FKey_cascade_del\"();"
+    },
+    {
+      "?column?": "CREATE TRIGGER RI_ConstraintTrigger_a_38802 BEFORE DELETE ON recipes FOR EACH ROW EXECUTE FUNCTION \"RI_FKey_noaction_upd\"();"
+    },
+    {
+      "?column?": null
+    },
+    {
+      "?column?": "CREATE TRIGGER RI_ConstraintTrigger_c_38804 BEFORE DELETE ON weekly_menus FOR EACH ROW EXECUTE FUNCTION \"RI_FKey_check_upd\"();"
+    },
+    {
+      "?column?": "CREATE TRIGGER RI_ConstraintTrigger_a_38806 BEFORE INSERT ON recipes FOR EACH ROW EXECUTE FUNCTION \"RI_FKey_cascade_del\"();"
+    },
+    {
+      "?column?": "CREATE TRIGGER RI_ConstraintTrigger_a_38807 BEFORE DELETE ON recipes FOR EACH ROW EXECUTE FUNCTION \"RI_FKey_noaction_upd\"();"
+    },
+    {
+      "?column?": null
+    },
+    {
+      "?column?": "CREATE TRIGGER RI_ConstraintTrigger_c_38809 BEFORE DELETE ON weekly_menus FOR EACH ROW EXECUTE FUNCTION \"RI_FKey_check_upd\"();"
+    },
+    {
+      "?column?": "CREATE TRIGGER RI_ConstraintTrigger_a_38811 BEFORE INSERT ON recipes FOR EACH ROW EXECUTE FUNCTION \"RI_FKey_cascade_del\"();"
+    },
+    {
+      "?column?": "CREATE TRIGGER RI_ConstraintTrigger_a_38812 BEFORE DELETE ON recipes FOR EACH ROW EXECUTE FUNCTION \"RI_FKey_noaction_upd\"();"
+    },
+    {
+      "?column?": null
+    },
+    {
+      "?column?": "CREATE TRIGGER RI_ConstraintTrigger_c_38814 BEFORE DELETE ON weekly_menus FOR EACH ROW EXECUTE FUNCTION \"RI_FKey_check_upd\"();"
+    },
+    {
+      "?column?": "CREATE TRIGGER RI_ConstraintTrigger_a_38816 BEFORE INSERT ON recipes FOR EACH ROW EXECUTE FUNCTION \"RI_FKey_cascade_del\"();"
+    },
+    {
+      "?column?": "CREATE TRIGGER RI_ConstraintTrigger_a_38817 BEFORE DELETE ON recipes FOR EACH ROW EXECUTE FUNCTION \"RI_FKey_noaction_upd\"();"
+    },
+    {
+      "?column?": null
+    },
+    {
+      "?column?": "CREATE TRIGGER RI_ConstraintTrigger_c_38819 BEFORE DELETE ON weekly_menus FOR EACH ROW EXECUTE FUNCTION \"RI_FKey_check_upd\"();"
+    },
+    {
+      "?column?": "CREATE TRIGGER RI_ConstraintTrigger_a_38821 BEFORE INSERT ON recipes FOR EACH ROW EXECUTE FUNCTION \"RI_FKey_cascade_del\"();"
+    },
+    {
+      "?column?": "CREATE TRIGGER RI_ConstraintTrigger_a_38822 BEFORE DELETE ON recipes FOR EACH ROW EXECUTE FUNCTION \"RI_FKey_noaction_upd\"();"
+    },
+    {
+      "?column?": null
+    },
+    {
+      "?column?": "CREATE TRIGGER RI_ConstraintTrigger_c_38824 BEFORE DELETE ON weekly_menus FOR EACH ROW EXECUTE FUNCTION \"RI_FKey_check_upd\"();"
+    },
+    {
+      "?column?": "CREATE TRIGGER RI_ConstraintTrigger_a_38826 BEFORE INSERT ON recipes FOR EACH ROW EXECUTE FUNCTION \"RI_FKey_cascade_del\"();"
+    },
+    {
+      "?column?": "CREATE TRIGGER RI_ConstraintTrigger_a_38827 BEFORE DELETE ON recipes FOR EACH ROW EXECUTE FUNCTION \"RI_FKey_noaction_upd\"();"
+    },
+    {
+      "?column?": null
+    },
+    {
+      "?column?": "CREATE TRIGGER RI_ConstraintTrigger_c_38829 BEFORE DELETE ON weekly_menus FOR EACH ROW EXECUTE FUNCTION \"RI_FKey_check_upd\"();"
+    },
+    {
+      "?column?": null
+    },
+    {
+      "?column?": "CREATE TRIGGER RI_ConstraintTrigger_c_41626 BEFORE DELETE ON error_logs FOR EACH ROW EXECUTE FUNCTION \"RI_FKey_check_upd\"();"
+    }
+  ]
