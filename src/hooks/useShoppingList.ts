@@ -76,7 +76,8 @@ export function useShoppingList(userId?: string, isHousehold = false) {
         if (user) {
           console.log('Fetching checked items for user:', user.id);
           
-          const { data: checkedItems, error: checkedError } = await supabase
+          // Construir la query base
+          let query = supabase
             .from('shopping_list_items')
             .select(`
               id,
@@ -89,10 +90,17 @@ export function useShoppingList(userId?: string, isHousehold = false) {
               checked,
               days,
               created_at,
-              updated_at,
-              linked_household_id
+              updated_at
             `)
-            .eq(isHousehold ? 'linked_household_id' : 'user_id', isHousehold ? userId : user.id);
+            .eq('user_id', user.id);
+
+          // Solo añadir el filtro de menu_id si existe
+          const menuId = menuItems[0]?.menu_id;
+          if (menuId) {
+            query = query.eq('menu_id', menuId);
+          }
+
+          const { data: checkedItems, error: checkedError } = await query;
 
           if (checkedError) {
             console.error('Error fetching checked items:', checkedError);
@@ -148,25 +156,29 @@ export function useShoppingList(userId?: string, isHousehold = false) {
       if (!user) return;
 
       const newChecked = !item.checked;
-
-      // Formatear los días como array de PostgreSQL
       const daysArray = item.days ? `{${item.days.join(',')}}` : null;
+      const menuId = menuItems[0]?.menu_id;
 
-      // Actualizar en base de datos
+      // Preparar los datos base
+      const itemData = {
+        user_id: user.id,
+        item_name: name,
+        category: item.category,
+        quantity: item.quantity,
+        unit: item.unit,
+        checked: newChecked,
+        days: daysArray,
+        updated_at: new Date().toISOString()
+      };
+
+      // Añadir menu_id solo si existe
+      if (menuId) {
+        Object.assign(itemData, { menu_id: menuId });
+      }
+
       const { error } = await supabase
         .from('shopping_list_items')
-        .upsert({
-          user_id: user.id,
-          linked_household_id: isHousehold ? userId : null,
-          menu_id: item.menu?.id,
-          item_name: name,
-          category: item.category,
-          quantity: item.quantity,
-          unit: item.unit,
-          checked: newChecked,
-          days: daysArray, // Usar el array formateado
-          updated_at: new Date().toISOString()
-        });
+        .upsert(itemData);
 
       if (error) {
         console.error('Error updating shopping list item:', error);
@@ -192,11 +204,17 @@ export function useShoppingList(userId?: string, isHousehold = false) {
       
       const { data: { user } } = await supabase.auth.getUser();
       if (user) {
-        // Limpiar estados
-        await supabase
+        let query = supabase
           .from('shopping_list_items')
           .update({ checked: false })
-          .eq(isHousehold ? 'linked_household_id' : 'user_id', userId);
+          .eq('user_id', user.id);
+
+        const menuId = menuItems[0]?.menu_id;
+        if (menuId) {
+          query = query.eq('menu_id', menuId);
+        }
+
+        await query;
       }
 
       await generateList();

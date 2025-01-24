@@ -55,15 +55,6 @@
   },
   {
     "table_schema": "public",
-    "constraint_name": "shopping_list_items_household_id_fkey",
-    "table_name": "shopping_list_items",
-    "column_name": "linked_household_id",
-    "foreign_table_schema": "public",
-    "foreign_table_name": "households",
-    "foreign_column_name": "id"
-  },
-  {
-    "table_schema": "public",
     "constraint_name": "shopping_list_items_menu_id_fkey",
     "table_name": "shopping_list_items",
     "column_name": "menu_id",

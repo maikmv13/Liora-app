@@ -122,11 +122,17 @@
   {
     "table_schema": "public",
     "table_name": "shopping_list_items",
-    "policy_name": "Users can view shopping items from same household",
-    "command": "SELECT",
+    "policy_name": "Users can access shopping list",
+    "command": "ALL",
     "permissive": "PERMISSIVE",
-    "roles": "{authenticated}",
-    "condition": "((auth.uid() = user_id) OR (EXISTS ( SELECT 1\n   FROM profiles p1,\n    profiles p2\n  WHERE ((p1.user_id = auth.uid()) AND (p2.user_id = shopping_list_items.user_id) AND (p1.linked_household_id = p2.linked_household_id) AND (p1.linked_household_id IS NOT NULL)))))",
+    "roles": "{public}",
+    "condition": "((auth.uid() = user_id) OR (EXISTS ( 
+      SELECT 1 
+      FROM weekly_menus wm 
+      JOIN profiles p ON p.linked_household_id = wm.linked_household_id 
+      WHERE shopping_list_items.menu_id = wm.id 
+      AND p.user_id = auth.uid()
+    )))",
     "with_check": null
   },
   {
@@ -311,16 +317,6 @@
   },
   {
     "table_schema": "public",
-    "table_name": "shopping_list_items",
-    "policy_name": "Users can update shopping items from same household",
-    "command": "UPDATE",
-    "permissive": "PERMISSIVE",
-    "roles": "{authenticated}",
-    "condition": "((auth.uid() = user_id) OR (EXISTS ( SELECT 1\n   FROM profiles p1,\n    profiles p2\n  WHERE ((p1.user_id = auth.uid()) AND (p2.user_id = shopping_list_items.user_id) AND (p1.linked_household_id = p2.linked_household_id) AND (p1.linked_household_id IS NOT NULL)))))",
-    "with_check": "((auth.uid() = user_id) OR (EXISTS ( SELECT 1\n   FROM profiles p1,\n    profiles p2\n  WHERE ((p1.user_id = auth.uid()) AND (p2.user_id = shopping_list_items.user_id) AND (p1.linked_household_id = p2.linked_household_id) AND (p1.linked_household_id IS NOT NULL)))))"
-  },
-  {
-    "table_schema": "public",
     "table_name": "error_logs",
     "policy_name": "Enable read for admins via profiles",
     "command": "SELECT",
@@ -397,16 +393,6 @@
     "permissive": "PERMISSIVE",
     "roles": "{authenticated}",
     "condition": "(EXISTS ( SELECT 1\n   FROM profiles p\n  WHERE ((p.linked_household_id = households.id) AND (p.user_id = auth.uid()))))",
-    "with_check": null
-  },
-  {
-    "table_schema": "public",
-    "table_name": "shopping_list_items",
-    "policy_name": "Users can access their own or household shopping list",
-    "command": "ALL",
-    "permissive": "PERMISSIVE",
-    "roles": "{public}",
-    "condition": "((auth.uid() = user_id) OR (auth.uid() IN ( SELECT p.user_id\n   FROM profiles p\n  WHERE (p.linked_household_id = shopping_list_items.linked_household_id))))",
     "with_check": null
   },
   {
