@@ -1,9 +1,7 @@
-import React, { useRef, useEffect, useCallback } from 'react';
+import React, { useRef } from 'react';
 import { Send, Sparkles, Image, Smile } from 'lucide-react';
-import { motion, AnimatePresence } from 'framer-motion';
 import data from '@emoji-mart/data';
 import Picker from '@emoji-mart/react';
-import debounce from 'lodash/debounce';
 
 interface ChatInputProps {
   value: string;

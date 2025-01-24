@@ -12,7 +12,6 @@ import { useActiveMenu } from '../../hooks/useActiveMenu';
 import { supabase } from '../../lib/supabase';
 import { weekDays } from './utils';
 import { RecipeSelectorSidebar } from './RecipeSelectorSidebar';
-import { Navigate } from 'react-router-dom';
 import { MenuSkeleton } from './MenuSkeleton';
 import { useActiveProfile } from '../../hooks/useActiveProfile';
 import { MenuErrorNotification } from './MenuErrorNotification';

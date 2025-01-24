@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { useMediaQuery } from '../../hooks/useMediaQuery';
 import { DesktopChat } from './components/DesktopChat';
 import { MobileChat } from './components/MobileChat';

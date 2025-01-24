@@ -81,7 +81,7 @@ export function DayCard({
 
   const mealTypes: MealType[] = ['desayuno', 'comida', 'snack', 'cena'];
 
-  const handleRecipeSelect = async (recipe: Recipe | null) => {
+  const handleRecipeSelect = async (recipe: Recipe | null, meal: MealType) => {
     try {
       const { error } = await supabase
         .from('weekly_menus')
