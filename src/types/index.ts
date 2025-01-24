@@ -31,11 +31,31 @@ export interface MenuItem {
   recipe: Recipe;
 }
 
+export interface Ingredient {
+  id: string;
+  name: string;
+  category: IngredientCategory;
+}
+
+export interface RecipeIngredient {
+  id: string;
+  recipe_id: string;
+  ingredient_id: string;
+  quantity: number;
+  unit: UnitType;
+  ingredient: Ingredient;
+}
+
 export interface Recipe {
   id: string;
   name: string;
-  description: string;
-  // ... otros campos de receta
+  description?: string;
+  servings: number;
+  prep_time?: number;
+  cook_time?: number;
+  meal_type?: string;
+  category?: string;
+  recipe_ingredients?: RecipeIngredient[];
 }
 
 export interface Favorite {
@@ -68,19 +88,6 @@ export interface RecipeCardProps {
   };
   onClick: () => void;
   onToggleFavorite: () => void;
-}
-
-export interface RecipeIngredient {
-  id: string;
-  ingredient_id: string;
-  recipe_id: string;
-  quantity: number;
-  unit: string;
-  ingredients?: {
-    id: string;
-    name: string;
-    category: string;
-  };
 }
 
 export * from './recipe';

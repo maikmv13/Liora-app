@@ -90,10 +90,10 @@ export function RecipeQA({ recipe }: RecipeQAProps) {
       initial={false}
       animate={isExpanded ? 'expanded' : 'collapsed'}
       variants={variants}
-      className="fixed inset-x-0 bottom-[3.25rem] z-40 bg-gradient-to-br from-violet-500/5 via-fuchsia-500/5 to-rose-500/5 backdrop-blur-md border-t border-x border-rose-200/30 rounded-t-3xl shadow-[0_-8px_25px_-6px_rgba(0,0,0,0.1)] overflow-hidden"
+      className="fixed inset-x-0 bottom-0 z-40 bg-gradient-to-br from-violet-500/5 via-fuchsia-500/5 to-rose-500/5 backdrop-blur-md border-t border-x border-rose-200/30 rounded-t-3xl shadow-[0_-8px_25px_-6px_rgba(0,0,0,0.1)] overflow-hidden"
     >
       {/* Header */}
-      <div className="sticky top-0 z-10">
+      <div className="sticky top-0 z10">
         <div className="bg-gradient-to-r from-violet-500 to-fuchsia-500 px-4 py-3 rounded-t-3xl">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-3">

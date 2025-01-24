@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { ChefHat } from 'lucide-react';
 import type { Recipe } from '../../types';
@@ -8,6 +8,7 @@ import { NutritionalInfo } from './components/NutritionalInfo';
 import { Ingredients } from './components/Ingredients';
 import { Instructions } from './components/Instructions';
 import { RecipeQA } from './components/RecipeQA';
+import { supabase } from '../../lib/supabase';
 
 interface RecipeDetailProps {
   recipes: Recipe[];
@@ -18,14 +19,55 @@ interface RecipeDetailProps {
 export function RecipeDetail({ recipes, onToggleFavorite, favorites }: RecipeDetailProps) {
   const { id } = useParams();
   const navigate = useNavigate();
-  const recipe = recipes.find(r => r.id === id);
+  const [recipe, setRecipe] = useState<Recipe | null>(null);
+  const [loading, setLoading] = useState(true);
   const isFavorite = favorites.some(f => f.id === id);
   const [expandedSection, setExpandedSection] = useState<'ingredients' | 'instructions' | 'nutrition' | null>('ingredients');
 
-  // Añadimos logs para debug
-  console.log('=== Debug RecipeDetail ===');
-  console.log('Found recipe:', recipe);
-  console.log('Recipe ingredients before passing:', recipe?.recipe_ingredients);
+  useEffect(() => {
+    const fetchRecipeDetails = async () => {
+      if (!id) return;
+
+      try {
+        const { data: recipeData, error } = await supabase
+          .from('recipes')
+          .select(`
+            *,
+            recipe_ingredients(
+              id,
+              quantity,
+              unit,
+              ingredient:ingredients(
+                id,
+                name,
+                category
+              )
+            )
+          `)
+          .eq('id', id)
+          .single();
+
+        if (error) {
+          console.error('Error fetching recipe:', error);
+          return;
+        }
+
+        if (recipeData) {
+          setRecipe(recipeData);
+        }
+      } catch (error) {
+        console.error('Error:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchRecipeDetails();
+  }, [id]);
+
+  if (loading) {
+    return <div>Cargando...</div>;
+  }
 
   if (!recipe) {
     return (
@@ -70,7 +112,9 @@ export function RecipeDetail({ recipes, onToggleFavorite, favorites }: RecipeDet
         <Instructions recipe={recipe} />
       </div>
 
-      <RecipeQA recipe={recipe} />
+      <div className="pb-0">
+        <RecipeQA recipe={recipe} />
+      </div>
     </div>
   );
 }

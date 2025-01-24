@@ -1,12 +1,16 @@
 import React, { useState } from 'react';
 import { Soup, Check } from 'lucide-react';
-import type { Recipe, RecipeIngredient } from '../../../types';
+import type { Recipe, RecipeIngredient, Ingredient } from '../../../types';
 import { getUnitPlural } from '../../../utils/getUnitPlural';
 import { useAI } from '../../../hooks/useAI';
 
-type IngredientsProps = Readonly<{
+interface IngredientsProps {
   recipe: Recipe;
-}>;
+}
+
+interface GroupedIngredients {
+  [category: string]: RecipeIngredient[];
+}
 
 export function Ingredients({ recipe }: IngredientsProps) {
   const [checkedIngredients, setCheckedIngredients] = useState<Set<string>>(new Set());
@@ -19,19 +23,19 @@ export function Ingredients({ recipe }: IngredientsProps) {
   }
 
   // Agrupar ingredientes por categoría
-  const groupedIngredients = recipe.recipe_ingredients.reduce((acc, ri) => {
-    if (!ri.ingredients) {
-      console.log('Missing ingredients for:', ri);
+  const groupedIngredients = recipe.recipe_ingredients.reduce<GroupedIngredients>((acc, ri) => {
+    if (!ri.ingredient) {
+      console.log('Missing ingredient for:', ri);
       return acc;
     }
     
-    const category = ri.ingredients.category || 'Otros';
+    const category = ri.ingredient.category || 'Otros';
     if (!acc[category]) {
       acc[category] = [];
     }
     acc[category].push(ri);
     return acc;
-  }, {} as Record<string, RecipeIngredient[]>);
+  }, {});
 
   const handleToggleIngredient = (ingredientId: string) => {
     setCheckedIngredients(prev => {
@@ -102,7 +106,7 @@ export function Ingredients({ recipe }: IngredientsProps) {
                         <span className={`font-medium ${
                           isChecked ? 'line-through text-emerald-700' : 'text-gray-700'
                         }`}>
-                          {ri.ingredients?.name}
+                          {ri.ingredient.name}
                         </span>
                       </div>
                       <span className={`text-sm ${

@@ -101,7 +101,7 @@ export function RecipeQADrawer({ recipe }: RecipeQADrawerProps) {
 
   return (
     <motion.div
-      className="fixed bottom-16 left-0 right-0 z-40"
+      className="fixed bottom-0 left-0 right-0 z-40"
       style={{ y, height, background }}
       drag="y"
       dragConstraints={{ top: -maxHeight, bottom: 0 }}

@@ -13,6 +13,11 @@ export function Navigation({ activeTab, onTabChange, orientation = 'horizontal',
   const location = useLocation();
   const navigate = useNavigate();
 
+  // Si estamos en una página de receta individual, no mostramos la navegación
+  if (location.pathname.startsWith('/recipe/')) {
+    return null;
+  }
+
   // Función helper para obtener la pestaña activa
   const getActiveTab = () => {
     const path = location.pathname;

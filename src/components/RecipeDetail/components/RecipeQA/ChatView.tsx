@@ -60,8 +60,7 @@ export function ChatView({ recipe, messages, loading, onClose, onSendMessage }: 
       {/* Messages Container */}
       <div 
         ref={chatContainerRef}
-        className="flex-1 overflow-y-auto p-4 space-y-4 bg-white/80"
-        style={{ paddingBottom: 'calc(4rem + env(safe-area-inset-bottom))' }}
+        className="flex-1 overflow-y-auto p-4 pb-32 space-y-4 bg-white/80"
       >
         {messages.map((message) => (
           <ChatMessage key={message.id} message={message} />
