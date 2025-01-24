@@ -96,7 +96,7 @@ export function Favorites({
     let recipesToRender = viewMode === 'personal' ? personalFavorites : householdFavorites;
 
     // Filtrar las recetas que han sido eliminadas
-    recipesToRender = recipesToRender.filter(recipe => recipe.favorite_id);
+    recipesToRender = recipesToRender.filter(recipe => recipe.id);
 
     if (!recipesToRender?.length) {
       return (

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Calendar, Apple, Brain, Heart, Sparkles, ArrowRight, Check } from 'lucide-react';
+import { Calendar, Apple, Brain, Heart, Sparkles, ArrowRight, Check, LucideIcon } from 'lucide-react';
 import { ScreenProps } from './types';
 
 interface Feature {
