@@ -1,5 +1,5 @@
 import React, { useRef, useEffect } from 'react';
-import { Bot, X, Sparkles } from 'lucide-react';
+import { Bot, X, Sparkles, Loader2 } from 'lucide-react';
 import { ChatMessage } from '../../../../components/LioraChat/components/ChatMessage';
 import { ChatInput } from '../../../../components/LioraChat/components/ChatInput';
 import type { Recipe } from '../../../../types';
@@ -16,11 +16,19 @@ interface ChatViewProps {
 export function ChatView({ recipe, messages, loading, onClose, onSendMessage }: ChatViewProps) {
   const [input, setInput] = React.useState('');
   const chatContainerRef = useRef<HTMLDivElement>(null);
+  const isFirstLoad = useRef(true);
 
   // Auto-scroll to bottom when new messages arrive
   useEffect(() => {
     if (chatContainerRef.current) {
-      chatContainerRef.current.scrollTop = chatContainerRef.current.scrollHeight;
+      if (isFirstLoad.current) {
+        // Scroll instantáneo en la primera carga
+        chatContainerRef.current.scrollTop = chatContainerRef.current.scrollHeight;
+        isFirstLoad.current = false;
+      } else {
+        // Scroll suave para mensajes nuevos
+        chatContainerRef.current.scrollTop = chatContainerRef.current.scrollHeight;
+      }
     }
   }, [messages]);
 

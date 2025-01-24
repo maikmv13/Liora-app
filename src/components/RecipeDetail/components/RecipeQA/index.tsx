@@ -185,7 +185,7 @@ export function RecipeQA({ recipe }: RecipeQAProps) {
             {activeTab === 'chat' ? (
               <div 
                 ref={chatContainerRef}
-                className="flex-1 p-4 space-y-4 pb-24"
+                className="flex-1 p-4 space-y-4 pb-52"
               >
                 {messages.map((message) => (
                   <ChatMessage 
