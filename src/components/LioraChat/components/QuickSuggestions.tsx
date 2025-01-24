@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ChevronRight, Bot, Brain, Apple, Calendar, Heart, ShoppingCart } from 'lucide-react';
+import { ChevronRight, Bot, Brain, Apple, Calendar, Heart, ShoppingCart, Sparkles } from 'lucide-react';
 import type { ContextCategory } from '../../../types/ai';
 
 interface QuickSuggestionsProps {
@@ -122,61 +122,69 @@ export function QuickSuggestions({ inputValue, onSuggestionSelect, isVisible }: 
   if (!isVisible || suggestions.length === 0) return null;
 
   return (
-    <div className="absolute bottom-full left-0 right-0 mb-2 px-4 z-50">
+    <div className="absolute bottom-full left-0 right-0 mb-2 px-4">
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         exit={{ opacity: 0, y: 20 }}
         className="bg-white rounded-xl shadow-lg border border-rose-100/20 overflow-hidden max-w-lg mx-auto"
       >
-        {/* Category Indicators */}
-        <div className="px-4 py-2 border-b border-gray-100 flex items-center space-x-2 overflow-x-auto scrollbar-hide">
-          <Bot size={16} className="text-rose-400 flex-shrink-0" />
-          <span className="text-xs text-gray-500 whitespace-nowrap">Sugerencias:</span>
-          <div className="flex items-center space-x-2">
-            {relevantCategories.map(categoryId => {
-              const category = CATEGORIES.find(c => c.id === categoryId);
-              if (!category) return null;
-
-              return (
-                <span
-                  key={categoryId}
-                  className={`
-                    inline-flex items-center space-x-1 px-2 py-1 rounded-lg text-xs
-                    ${category.bgColor} ${category.color} whitespace-nowrap
-                  `}
-                >
-                  <category.icon size={12} />
-                  <span>{category.label}</span>
-                </span>
-              );
-            })}
-          </div>
+        {/* Barra de progreso */}
+        <div className="absolute -top-1 left-0 right-0 h-1 bg-gradient-to-r from-rose-100/50 via-fuchsia-200/50 to-rose-100/50 rounded-full overflow-hidden">
+          <div 
+            className="absolute top-0 bottom-0 bg-gradient-to-r from-rose-400 to-fuchsia-500 rounded-full transition-all duration-150"
+            style={{
+              width: '30%',
+              left: '0%'
+            }}
+          />
         </div>
 
-        {/* Suggestions List */}
-        <div className="p-2">
-          <AnimatePresence mode="sync">
-            {suggestions.map((suggestion, index) => (
-              <motion.button
-                key={suggestion}
-                initial={{ opacity: 0, x: -20 }}
-                animate={{ opacity: 1, x: 0 }}
-                exit={{ opacity: 0, x: 20 }}
-                transition={{ delay: index * 0.05 }}
-                onClick={() => onSuggestionSelect(suggestion)}
-                className="w-full flex items-center justify-between p-2 rounded-lg hover:bg-rose-50 text-left group transition-colors"
-              >
-                <span className="text-sm text-gray-600 group-hover:text-rose-600">
-                  {suggestion}
-                </span>
-                <ChevronRight 
-                  size={16} 
-                  className="text-gray-400 group-hover:text-rose-500 transition-colors" 
-                />
-              </motion.button>
-            ))}
-          </AnimatePresence>
+        <div 
+          className="flex overflow-x-auto snap-x snap-mandatory gap-2.5 p-3 pt-4 scrollbar-hide"
+        >
+          {suggestions.map((suggestion, index) => (
+            <motion.button
+              key={suggestion}
+              initial={{ opacity: 0, x: -20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ delay: index * 0.1 }}
+              onClick={() => onSuggestionSelect(suggestion)}
+              className={`
+                group relative flex items-start gap-3 
+                bg-gradient-to-r from-rose-50 to-white
+                hover:from-rose-100 hover:to-rose-50
+                active:from-rose-200 active:to-rose-100
+                text-rose-900 rounded-xl transition-all duration-200
+                border border-rose-100/50 hover:border-rose-200/50
+                shadow-sm hover:shadow-md
+                p-3.5 flex-shrink-0 snap-start w-[280px] h-[4.5rem]
+              `}
+            >
+              <div className="relative flex-shrink-0 mt-0.5">
+                <div className="w-1.5 h-1.5 rounded-full bg-rose-400" />
+                <motion.div
+                  animate={{ scale: [1, 1.2, 1] }}
+                  transition={{ 
+                    duration: 2,
+                    repeat: Infinity,
+                    repeatType: "reverse"
+                  }}
+                  className="absolute -top-0.5 -right-0.5"
+                >
+                  <Sparkles size={6} className="text-rose-500" />
+                </motion.div>
+              </div>
+              <span className="text-left text-sm font-medium line-clamp-2">
+                {suggestion}
+              </span>
+              <ChevronRight 
+                size={16} 
+                className="flex-shrink-0 mt-0.5 text-rose-400 group-hover:text-rose-500 
+                  transition-transform group-hover:translate-x-0.5" 
+              />
+            </motion.button>
+          ))}
         </div>
       </motion.div>
     </div>
