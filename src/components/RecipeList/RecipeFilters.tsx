@@ -13,6 +13,7 @@ interface RecipeFiltersProps {
   onMealTypeChange: (mealType: 'all' | MealType) => void;
   onSortChange: (sort: 'popular' | 'calories' | 'time' | null) => void;
   onSearchChange: (search: string) => void;
+  recipes: any[]; // Assuming the type of recipes
 }
 
 export function RecipeFilters({
@@ -23,7 +24,8 @@ export function RecipeFilters({
   onCategoryChange,
   onMealTypeChange,
   onSortChange,
-  onSearchChange
+  onSearchChange,
+  recipes
 }: RecipeFiltersProps) {
   const mealTypesRef = useRef<HTMLDivElement>(null);
   const categoriesRef = useRef<HTMLDivElement>(null);
@@ -163,6 +165,45 @@ export function RecipeFilters({
     }
   };
 
+  // Obtener categorías disponibles basadas en el tipo de comida seleccionado
+  const availableCategories = React.useMemo(() => {
+    if (selectedMealType === 'all') {
+      return categories; // Mostrar todas las categorías
+    }
+
+    // Filtrar recetas por tipo de comida
+    const filteredRecipes = recipes.filter(recipe => 
+      recipe.meal_type === selectedMealType
+    );
+
+    // Obtener categorías únicas de las recetas filtradas
+    const uniqueCategories = [...new Set(
+      filteredRecipes.map(recipe => recipe.category)
+    )];
+
+    // Mantener solo las categorías que existen en nuestro array de categorías predefinidas
+    return categories.filter(cat => 
+      uniqueCategories.includes(cat.id)
+    );
+  }, [selectedMealType, recipes]);
+
+  // Seleccionar automáticamente la primera categoría disponible cuando cambia el meal type
+  React.useEffect(() => {
+    if (availableCategories.length > 0) {
+      const currentCategoryExists = availableCategories.some(cat => cat.id === selectedCategory);
+      if (!currentCategoryExists) {
+        // Si la categoría actual no está disponible, seleccionar la primera o "Todas"
+        onCategoryChange(availableCategories[0]?.id || 'Todas');
+      }
+    }
+  }, [selectedMealType, availableCategories, selectedCategory, onCategoryChange]);
+
+  // Manejador modificado para el cambio de meal type
+  const handleMealTypeChange = (mealType: 'all' | MealType) => {
+    onMealTypeChange(mealType);
+    // La categoría se actualizará automáticamente gracias al useEffect
+  };
+
   return (
     <div className="space-y-4">
       {/* Search Bar */}
@@ -189,7 +230,7 @@ export function RecipeFilters({
             <motion.button
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
-              onClick={() => onMealTypeChange('all')}
+              onClick={() => handleMealTypeChange('all')}
               className={`flex-none px-3 py-2 rounded-lg text-sm font-medium transition-all duration-200 whitespace-nowrap ${
                 selectedMealType === 'all'
                   ? 'bg-rose-100/80 text-rose-600 shadow-sm border border-rose-200/50'
@@ -206,7 +247,7 @@ export function RecipeFilters({
                 key={id}
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
-                onClick={() => onMealTypeChange(id)}
+                onClick={() => handleMealTypeChange(id)}
                 className={`flex-none px-3 py-2 rounded-lg text-sm font-medium transition-all duration-200 whitespace-nowrap ${
                   getMealTypeColors(id, selectedMealType === id)
                 }`}
@@ -228,7 +269,7 @@ export function RecipeFilters({
             className="flex gap-1.5 overflow-x-auto scrollbar-hide pl-1 pr-4"
             style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
           >
-            {categories.map(({ id, label, emoji }) => (
+            {availableCategories.map(({ id, label, emoji }) => (
               <motion.button
                 key={id}
                 whileHover={{ scale: 1.05 }}

@@ -99,6 +99,7 @@ export function RecipeList({
             onMealTypeChange={setSelectedMealType}
             onSortChange={setSortBy}
             onSearchChange={setSearchTerm}
+            recipes={recipes}
           />
         </div>
         
