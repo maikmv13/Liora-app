@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion, AnimatePresence, useMotionValue, useTransform } from 'framer-motion';
 import { Bot, X, ChevronUp, Sparkles, MessageCircle, HelpCircle } from 'lucide-react';
 import type { Recipe } from '../../../../types';
 import { useAI } from '../../../../hooks/useAI';
@@ -7,6 +7,7 @@ import { ChatInput } from './ChatInput';
 import { QuickQuestions } from './QuickQuestions';
 import { ChatMessage } from '../../../LioraChat/components/ChatMessage';
 import { Loader2 } from 'lucide-react';
+import { PanInfo } from 'framer-motion';
 
 interface RecipeQAProps {
   recipe: Recipe;
@@ -15,7 +16,8 @@ interface RecipeQAProps {
 const variants = {
   expanded: {
     height: 'calc(100vh - 7rem)',
-    scale: 1,
+    y: 0,
+    opacity: 1,
     transition: {
       type: "spring",
       damping: 30,
@@ -24,7 +26,8 @@ const variants = {
   },
   collapsed: {
     height: '12rem',
-    scale: 1,
+    y: 0,
+    opacity: 0.95,
     transition: {
       type: "spring",
       damping: 30,
@@ -41,6 +44,22 @@ export function RecipeQA({ recipe }: RecipeQAProps) {
   const [activeTab, setActiveTab] = useState<'chat' | 'questions'>('questions');
   const { messages, loading, sendMessage, generateRecipeQuestions } = useAI(recipe);
   const chatContainerRef = React.useRef<HTMLDivElement>(null);
+
+  // Valores para el control del arrastre
+  const dragY = useMotionValue(0);
+  const dragProgress = useTransform(
+    dragY,
+    [0, -window.innerHeight * 0.3],
+    [0, 1]
+  );
+
+  const handleDragEnd = (event: any, info: PanInfo) => {
+    const shouldExpand = info.offset.y < -50 || info.velocity.y < -500;
+    setIsExpanded(shouldExpand);
+    
+    // Resetear la posición de arrastre
+    dragY.set(0);
+  };
 
   // Generate quick questions on mount
   useEffect(() => {
@@ -66,6 +85,19 @@ export function RecipeQA({ recipe }: RecipeQAProps) {
     }
   }, [messages, isExpanded]);
 
+  // Manejar el cambio de estado expandido/colapsado
+  useEffect(() => {
+    if (chatContainerRef.current) {
+      if (isExpanded) {
+        setTimeout(() => {
+          if (chatContainerRef.current) {
+            chatContainerRef.current.scrollTop = chatContainerRef.current.scrollHeight;
+          }
+        }, 300);
+      }
+    }
+  }, [isExpanded]);
+
   const handleSendMessage = async () => {
     if (!input.trim()) return;
     
@@ -90,10 +122,25 @@ export function RecipeQA({ recipe }: RecipeQAProps) {
       initial={false}
       animate={isExpanded ? 'expanded' : 'collapsed'}
       variants={variants}
+      drag="y"
+      dragConstraints={{ top: 0, bottom: 0 }}
+      dragElastic={0.2}
+      onDragEnd={handleDragEnd}
+      style={{ y: dragY }}
       className="fixed inset-x-0 bottom-0 z-40 bg-gradient-to-br from-violet-500/5 via-fuchsia-500/5 to-rose-500/5 backdrop-blur-md border-t border-x border-rose-200/30 rounded-t-3xl shadow-[0_-8px_25px_-6px_rgba(0,0,0,0.1)] overflow-hidden"
     >
-      {/* Header */}
-      <div className="sticky top-0 z10">
+      {/* Indicador de arrastre */}
+      <motion.div 
+        className="absolute top-0 left-0 right-0 flex justify-center"
+        style={{
+          opacity: useTransform(dragProgress, [0, 0.2], [1, 0])
+        }}
+      >
+        <div className="w-12 h-1 bg-gray-300 rounded-full my-2" />
+      </motion.div>
+
+      {/* Header con padding top para el indicador */}
+      <div className="sticky top-0 z-10 pt-4">
         <div className="bg-gradient-to-r from-violet-500 to-fuchsia-500 px-4 py-3 rounded-t-3xl">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-3">
@@ -179,7 +226,15 @@ export function RecipeQA({ recipe }: RecipeQAProps) {
       </div>
 
       {/* Content */}
-      <div className="h-full flex flex-col bg-gradient-to-b from-violet-50/50 via-fuchsia-50/50 to-rose-50/50">
+      <div 
+        className="h-full flex flex-col bg-gradient-to-b from-violet-50/50 via-fuchsia-50/50 to-rose-50/50"
+        onTouchStart={(e) => {
+          const element = chatContainerRef.current;
+          if (element && element.scrollTop > 0) {
+            e.stopPropagation();
+          }
+        }}
+      >
         {isExpanded ? (
           <div className="flex-1 overflow-y-auto">
             {activeTab === 'chat' ? (
@@ -239,7 +294,7 @@ export function RecipeQA({ recipe }: RecipeQAProps) {
         )}
       </div>
 
-      {/* Fixed Input at Bottom */}
+      {/* Input fijo en la parte inferior */}
       <div className="sticky bottom-0 left-0 right-0 px-4 py-3 bg-white/95 backdrop-blur-sm border-t border-rose-100">
         <ChatInput
           value={input}
