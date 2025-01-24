@@ -110,16 +110,16 @@ export function OnboardingLogin({ onNext, onLogin, isFirst }: ScreenProps) {
 
   if (!userType) {
     return (
-      <div className="min-h-screen flex flex-col p-4 pt-8 mt-12 md:mt-16">
+      <div className="min-h-screen flex flex-col p-4 pt-6 md:pt-8">
         <FallingEmojis />
         
         <div className="w-full max-w-sm mx-auto">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            className="text-center mb-5"
+            className="text-center mb-4 md:mb-6"
           >
-            <div className="relative w-20 h-20 mx-auto mb-4">
+            <div className="relative w-16 h-16 md:w-20 md:h-20 mx-auto mb-3 md:mb-4">
               <div className="absolute inset-0 bg-gradient-to-br from-rose-400 to-pink-500 rounded-2xl rotate-6" />
               <div className="absolute inset-0 bg-white rounded-2xl flex items-center justify-center">
                 <User className="w-10 h-10 text-rose-500" />
@@ -140,17 +140,17 @@ export function OnboardingLogin({ onNext, onLogin, isFirst }: ScreenProps) {
               </motion.div>
             </div>
 
-            <h2 className="text-3xl font-bold mb-2">
+            <h2 className="text-2xl md:text-3xl font-bold mb-2">
               <span className="bg-gradient-to-r from-rose-500 via-pink-500 to-purple-500 text-transparent bg-clip-text">
                 ¡Bienvenido! 👋
               </span>
             </h2>
-            <p className="text-gray-600">
+            <p className="text-sm md:text-base text-gray-600">
               Selecciona tu tipo de cuenta para continuar
             </p>
           </motion.div>
 
-          <div className="w-full max-w-sm space-y-6">
+          <div className="w-full max-w-sm space-y-3">
             <motion.button
               initial={{ opacity: 0, x: -20 }}
               animate={{ opacity: 1, x: 0 }}
@@ -159,36 +159,33 @@ export function OnboardingLogin({ onNext, onLogin, isFirst }: ScreenProps) {
               className="w-full group relative overflow-hidden"
             >
               <div className="absolute inset-0 bg-gradient-to-br from-rose-500/20 to-orange-500/20 opacity-0 
-                group-hover:opacity-100 transition-all duration-500 rounded-2xl" />
+                group-hover:opacity-100 transition-all duration-500 rounded-xl" />
               
-              <div className="relative bg-white/80 backdrop-blur-sm border border-rose-100/50 p-6 rounded-2xl
+              <div className="relative bg-white/80 backdrop-blur-sm border border-rose-100/50 p-4 rounded-xl
                 shadow-lg shadow-rose-500/5 group-hover:shadow-rose-500/10 transition-all duration-300
                 group-hover:border-rose-200/50 group-hover:-translate-y-1">
-                <div className="flex flex-col items-center text-center space-y-4">
-                  <div className="p-3 bg-gradient-to-br from-rose-500 to-pink-500 rounded-xl
+                <div className="flex items-center space-x-3">
+                  <div className="p-2.5 bg-gradient-to-br from-rose-500 to-pink-500 rounded-lg
                     shadow-lg shadow-rose-500/30 group-hover:shadow-rose-500/40 transition-all duration-300
                     group-hover:scale-110">
-                    <User className="w-7 h-7 text-white" />
+                    <User className="w-5 h-5 text-white" />
                   </div>
-                  <div>
-                    <h3 className="text-lg font-bold bg-gradient-to-r from-rose-500 to-pink-500 
-                      text-transparent bg-clip-text mb-2">
+                  <div className="flex-1">
+                    <h3 className="text-base font-bold bg-gradient-to-r from-rose-500 to-pink-500 
+                      text-transparent bg-clip-text">
                       Usuario
                     </h3>
-                    <p className="text-sm text-gray-600 leading-relaxed mb-3">
-                      Accede a recetas personalizadas y planifica tus comidas semanales de forma saludable
+                    <p className="text-xs text-gray-600 line-clamp-2 mt-0.5">
+                      Accede a recetas personalizadas y planifica tus comidas
                     </p>
-                    <div className="flex items-center justify-center text-rose-500 group-hover:text-rose-600 transition-colors">
-                      <span className="text-sm font-medium">Comenzar</span>
-                      <motion.div
-                        animate={{ x: [0, 4, 0] }}
-                        transition={{ duration: 1.5, repeat: Infinity }}
-                        className="ml-2"
-                      >
-                        <ArrowRight size={16} />
-                      </motion.div>
-                    </div>
                   </div>
+                  <motion.div
+                    animate={{ x: [0, 4, 0] }}
+                    transition={{ duration: 1.5, repeat: Infinity }}
+                    className="text-rose-500 group-hover:text-rose-600 transition-colors"
+                  >
+                    <ArrowRight size={16} />
+                  </motion.div>
                 </div>
               </div>
             </motion.button>
@@ -201,36 +198,33 @@ export function OnboardingLogin({ onNext, onLogin, isFirst }: ScreenProps) {
               className="w-full group relative overflow-hidden"
             >
               <div className="absolute inset-0 bg-gradient-to-br from-emerald-500/20 to-teal-500/20 opacity-0 
-                group-hover:opacity-100 transition-all duration-500 rounded-2xl" />
+                group-hover:opacity-100 transition-all duration-500 rounded-xl" />
               
-              <div className="relative bg-white/80 backdrop-blur-sm border border-emerald-100/50 p-6 rounded-2xl
+              <div className="relative bg-white/80 backdrop-blur-sm border border-emerald-100/50 p-4 rounded-xl
                 shadow-lg shadow-emerald-500/5 group-hover:shadow-emerald-500/10 transition-all duration-300
                 group-hover:border-emerald-200/50 group-hover:-translate-y-1">
-                <div className="flex flex-col items-center text-center space-y-4">
-                  <div className="p-3 bg-gradient-to-br from-emerald-500 to-teal-500 rounded-xl
+                <div className="flex items-center space-x-3">
+                  <div className="p-2.5 bg-gradient-to-br from-emerald-500 to-teal-500 rounded-lg
                     shadow-lg shadow-emerald-500/30 group-hover:shadow-emerald-500/40 transition-all duration-300
                     group-hover:scale-110">
-                    <UserCog className="w-7 h-7 text-white" />
+                    <UserCog className="w-5 h-5 text-white" />
                   </div>
-                  <div>
-                    <h3 className="text-lg font-bold bg-gradient-to-r from-emerald-500 to-teal-500 
-                      text-transparent bg-clip-text mb-2">
+                  <div className="flex-1">
+                    <h3 className="text-base font-bold bg-gradient-to-r from-emerald-500 to-teal-500 
+                      text-transparent bg-clip-text">
                       Nutricionista
                     </h3>
-                    <p className="text-sm text-gray-600 leading-relaxed mb-3">
-                      Gestiona pacientes, crea planes nutricionales y monitorea su progreso
+                    <p className="text-xs text-gray-600 line-clamp-2 mt-0.5">
+                      Gestiona pacientes y crea planes nutricionales
                     </p>
-                    <div className="flex items-center justify-center text-emerald-500 group-hover:text-emerald-600 transition-colors">
-                      <span className="text-sm font-medium">Comenzar</span>
-                      <motion.div
-                        animate={{ x: [0, 4, 0] }}
-                        transition={{ duration: 1.5, repeat: Infinity }}
-                        className="ml-2"
-                      >
-                        <ArrowRight size={16} />
-                      </motion.div>
-                    </div>
                   </div>
+                  <motion.div
+                    animate={{ x: [0, 4, 0] }}
+                    transition={{ duration: 1.5, repeat: Infinity }}
+                    className="text-emerald-500 group-hover:text-emerald-600 transition-colors"
+                  >
+                    <ArrowRight size={16} />
+                  </motion.div>
                 </div>
               </div>
             </motion.button>

@@ -134,14 +134,14 @@ export function FeaturesScreen({ onNext }: ScreenProps) {
     <div className="min-h-screen flex flex-col">
       <FallingConfetti isActive={showConfetti} />
       
-      <div className="flex-1 px-4 py-8 md:py-12 max-w-lg mx-auto">
-        {/* Enhanced Header */}
-        <div className="text-center mb-12">
+      <div className="flex-1 px-4 py-6 md:py-8 max-w-lg mx-auto w-full overflow-y-auto">
+        {/* Enhanced Header - Más compacto */}
+        <div className="text-center mb-6 md:mb-8">
           <motion.div
             initial={{ scale: 0 }}
             animate={{ scale: 1 }}
             transition={{ type: "spring", stiffness: 260, damping: 20 }}
-            className="relative w-20 h-20 mx-auto mb-6"
+            className="relative w-16 h-16 md:w-20 md:h-20 mx-auto mb-4"
           >
             <div className="absolute inset-0 bg-gradient-to-br from-rose-400 to-pink-500 rounded-2xl rotate-6" />
             <div className="absolute inset-0 bg-white rounded-2xl flex items-center justify-center">
@@ -168,19 +168,19 @@ export function FeaturesScreen({ onNext }: ScreenProps) {
             animate={{ opacity: 1, y: 0 }}
             className="relative"
           >
-            <h2 className="text-3xl md:text-4xl font-bold mb-2">
+            <h2 className="text-2xl md:text-3xl font-bold mb-2">
               <span className="bg-gradient-to-r from-rose-500 via-pink-500 to-purple-500 text-transparent bg-clip-text">
                 Descubre Liora ✨
               </span>
             </h2>
-            <p className="text-base md:text-lg text-gray-600 mt-2">
+            <p className="text-sm md:text-base text-gray-600">
               Aprende a cómo vivir estable en una balanza!
             </p>
           </motion.div>
         </div>
 
-        {/* Progress Bar */}
-        <div className="px-4 mb-6">
+        {/* Progress Bar - Más compacto */}
+        <div className="px-4 mb-4">
           <div className="h-1.5 bg-gray-100 rounded-full overflow-hidden">
             <motion.div
               className="h-full bg-gradient-to-r from-rose-500 to-pink-500"
@@ -194,19 +194,19 @@ export function FeaturesScreen({ onNext }: ScreenProps) {
           </p>
         </div>
 
-        {/* Features Grid - Cards más pequeñas */}
-        <div className="grid grid-cols-2 gap-3 md:gap-4 mb-20">
+        {/* Features Grid - Más compacto y scrolleable */}
+        <div className="grid grid-cols-2 gap-3 md:gap-4 overflow-y-auto pb-24">
           {features.map((feature, index) => (
             <motion.button
               key={feature.id}
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.2 + index * 0.1 }}
+              transition={{ delay: 0.1 + index * 0.1 }}
               onClick={() => handleFeatureClick(feature.id)}
               className={`
-                bg-white/80 backdrop-blur-sm rounded-xl p-4 border
+                bg-white/80 backdrop-blur-sm rounded-xl p-3 md:p-4 border
                 shadow-sm transform transition-all duration-300 hover:scale-105 active:scale-95
-                cursor-pointer relative overflow-hidden group min-h-[140px]
+                cursor-pointer relative overflow-hidden group min-h-[120px] md:min-h-[140px]
                 ${checkedFeatures.has(feature.id) 
                   ? 'border-green-200 bg-green-50/50' 
                   : `border-${feature.color}-100`}
