@@ -24,11 +24,11 @@ export function HealthTracker() {
   const [activeTab, setActiveTab] = useState<TabId>('health');
 
   return (
-    <div className="min-h-screen bg-gray-50 p-4 md:p-6">
+    <div className="min-h-screen">
       <div className="max-w-6xl mx-auto space-y-6">
         {/* Navegación */}
-        <div className="bg-white/80 backdrop-blur-sm rounded-2xl p-4 shadow-sm">
-          <div className="flex space-x-2 overflow-x-auto scrollbar-hide">
+        <div className="bg-white/80 backdrop-blur-sm rounded-2xl shadow-sm">
+          <div className="flex space-x-2 overflow-x-auto scrollbar-hide p-6">
             {TABS.map(tab => {
               const Icon = tab.icon;
               const isActive = activeTab === tab.id;
@@ -37,11 +37,11 @@ export function HealthTracker() {
                 <button
                   key={tab.id}
                   onClick={() => setActiveTab(tab.id)}
-                  className={`group relative flex items-center space-x-2 px-4 py-3 rounded-xl transition-all duration-300 min-w-[120px] ${
-                    isActive
+                  className={`group relative flex items-center space-x-2 px-4 py-3 rounded-xl transition-all duration-300 min-w-[120px]
+                    ${isActive
                       ? `bg-gradient-to-r ${tab.gradient} text-white shadow-lg hover:shadow-xl transform hover:-translate-y-0.5`
                       : 'hover:bg-gray-50'
-                  }`}
+                    }`}
                 >
                   <div className={`relative z-10 flex items-center space-x-2 ${
                     isActive ? 'text-white' : `text-${tab.color}-500`
