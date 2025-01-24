@@ -3,7 +3,7 @@ import { Dumbbell, Plus, Activity, Calendar, Trophy, Target, ChevronRight, Clock
 import { ExerciseForm } from './ExerciseForm';
 import { ExerciseMilestones } from './ExerciseMilestones';
 import { ExerciseEntry } from './types';
-import { useHealth } from '../../../contexts/HealthContext';
+import { useHealth } from '../contexts/HealthContext';
 
 export function ExerciseTracker() {
   const { updateStreak, addXP } = useHealth();

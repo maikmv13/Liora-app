@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import { WillpowerNotification } from '../components/HealthTracker/Notifications/WillpowerNotification';
+import { WillpowerNotification } from '../Notifications/WillpowerNotification';
 
 export interface LeagueInfo {
   name: string;

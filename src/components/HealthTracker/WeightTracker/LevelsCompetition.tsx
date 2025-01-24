@@ -1,6 +1,6 @@
 import React from 'react';
 import { X, Crown, ChevronRight, Brain, Sparkles, Zap, Flame } from 'lucide-react';
-import { LEAGUES } from '../../../contexts/HealthContext';
+import { LEAGUES } from '../contexts/HealthContext';
 
 interface LevelsCompetitionProps {
   isOpen: boolean;

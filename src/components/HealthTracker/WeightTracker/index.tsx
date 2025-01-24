@@ -9,7 +9,7 @@ import { WeightMilestones } from './WeightMilestones';
 import { WeightGoalAchievedModal } from './WeightGoalAchievedModal';
 import { WeightOnboarding } from './WeightOnboarding';
 import { WeightStreak } from './WeightStreak';
-import { useHealth } from '../../../contexts/HealthContext';
+import { useHealth } from '../contexts/HealthContext';
 import type { WeightEntry, CompletedGoal, SubGoal } from './types';
 
 export function WeightTracker() {

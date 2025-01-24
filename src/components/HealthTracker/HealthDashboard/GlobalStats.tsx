@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Crown, ChevronRight, Trophy, Flame, Heart, Calendar, Star, Activity, Zap } from 'lucide-react';
-import { useHealth, WEEK_DAYS } from '../../../contexts/HealthContext';
+import { useHealth, WEEK_DAYS } from '../contexts/HealthContext';
 import { LevelsCompetition } from '../WeightTracker/LevelsCompetition';
 import { MonthlyCalendar } from '../WeightTracker/MonthlyCalendar';
 

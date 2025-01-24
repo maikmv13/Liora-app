@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Droplets, Plus, Minus, Trophy, Target, Calendar } from 'lucide-react';
 import { WaterMilestones } from './WaterTracker/WaterMilestones';
 import { WaterEntry } from './WaterTracker/types';
-import { useHealth } from '../../../contexts/HealthContext';
+import { useHealth } from '../contexts/HealthContext';
 
 interface WaterTrackerProps {
   onXPGain: (xp: number) => void;

@@ -1,6 +1,6 @@
 import React from 'react';
 import { Crown, Zap, ChevronRight } from 'lucide-react';
-import { LeagueInfo } from '../../../contexts/HealthContext';
+import { LeagueInfo } from '../contexts/HealthContext';
 
 interface LeagueBadgesProps {
   leagues: LeagueInfo[];

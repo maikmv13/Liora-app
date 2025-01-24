@@ -18,7 +18,7 @@ import { Onboarding } from './components/Onboarding';
 import { RecipeDetail } from './components/RecipeDetail';
 import { LoadingFallback } from './components/LoadingFallback';
 import { HealthTracker } from './components/HealthTracker';
-import { HealthProvider } from './contexts/HealthContext';
+import { HealthProvider } from './components/HealthTracker/contexts/HealthContext';
 
 // Lazy load components
 const WeeklyMenu2 = lazy(() => import('./components/WeeklyMenu2'));

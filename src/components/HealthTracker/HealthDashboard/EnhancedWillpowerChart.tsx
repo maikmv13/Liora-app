@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Brain, Trophy, Sparkles, Flame, Info } from 'lucide-react';
-import { useHealth } from '../../../contexts/HealthContext';
+import { useHealth } from '../contexts/HealthContext';
 import {
   Chart as ChartJS,
   CategoryScale,

@@ -5,7 +5,7 @@ import { WaterStats } from './WaterStats';
 import { WaterHistory } from './WaterHistory';
 import { WaterStreak } from './WaterStreak';
 import { WaterGoalModal } from './WaterGoalModal';
-import { useHealth } from '../../../contexts/HealthContext';
+import { useHealth } from '../contexts/HealthContext';
 import type { WaterEntry } from './types';
 import confetti from 'canvas-confetti';
 
