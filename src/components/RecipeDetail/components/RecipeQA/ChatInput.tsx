@@ -7,6 +7,7 @@ interface ChatInputProps {
   value: string;
   onChange: (value: string) => void;
   onSubmit: () => void;
+  onFocus?: () => void;
   loading?: boolean;
   recipe?: Recipe;
   isDrawerVisible?: boolean;
@@ -16,6 +17,7 @@ export function ChatInput({
   value, 
   onChange, 
   onSubmit, 
+  onFocus,
   loading, 
   recipe, 
   isDrawerVisible = true 
@@ -54,6 +56,7 @@ export function ChatInput({
             }
           `}
           onKeyPress={(e) => e.key === 'Enter' && onSubmit()}
+          onFocus={onFocus}
         />
         {!isDrawerVisible && !value && (
           <div className="absolute inset-0 pointer-events-none flex items-center justify-center">
