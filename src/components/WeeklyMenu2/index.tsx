@@ -16,6 +16,8 @@ import { MenuSkeleton } from './MenuSkeleton';
 import { useActiveProfile } from '../../hooks/useActiveProfile';
 import { MenuErrorNotification } from './MenuErrorNotification';
 import type { Recipe as DBRecipe } from '../../types/recipe';
+import { RecipeList } from '../RecipeList';
+import { ChefHat } from 'lucide-react';
 
 export function WeeklyMenu2() {
   const [selectedDay, setSelectedDay] = useState<string>('Lunes');
@@ -32,7 +34,7 @@ export function WeeklyMenu2() {
 
   const { id, isHousehold, profile } = useActiveProfile();
   const { menuItems: menu, loading: menuLoading } = useActiveMenu(id, isHousehold);
-  const { recipes } = useRecipes();
+  const { recipes, loading, error } = useRecipes();
 
   // Handle menu updates
   const handleAddToMenu = async (recipe: Recipe | null, day: string, meal: MealType) => {
@@ -168,6 +170,38 @@ export function WeeklyMenu2() {
     }
   };
 
+  const renderRecipeSelector = () => {
+    if (loading) {
+      return (
+        <div className="flex items-center justify-center p-8">
+          <div className="text-center">
+            <ChefHat size={32} className="mx-auto mb-4 text-rose-500 animate-bounce" />
+            <p className="text-gray-600">Cargando recetas...</p>
+          </div>
+        </div>
+      );
+    }
+
+    if (error) {
+      return (
+        <div className="text-center p-8">
+          <div className="bg-red-50 rounded-lg p-4 max-w-md mx-auto">
+            <p className="text-red-600">Error al cargar las recetas: {error.message}</p>
+          </div>
+        </div>
+      );
+    }
+
+    return (
+      <RecipeList
+        recipes={recipes}
+        onRecipeSelect={handleRecipeSelect}
+        favorites={favorites.map(f => ({ recipe_id: f }))}
+        onToggleFavorite={handleToggleFavorite}
+      />
+    );
+  };
+
   // Loading state
   if (isGeneratingMenu || menuLoading) {
     return <MenuSkeleton />;
@@ -183,16 +217,11 @@ export function WeeklyMenu2() {
       )}
 
       {/* Recipe Selector Sidebar */}
-      <RecipeSelectorSidebar
-        isOpen={showRecipeSelector}
-        onClose={() => {
-          setShowRecipeSelector(false);
-          setSelectedMealInfo(null);
-        }}
-        onSelectRecipe={handleRecipeSelect}
-        selectedDay={selectedMealInfo?.day || ''}
-        selectedMeal={selectedMealInfo?.meal || 'comida'}
-      />
+      {showRecipeSelector && (
+        <RecipeSelectorSidebar onClose={() => setShowRecipeSelector(false)}>
+          {renderRecipeSelector()}
+        </RecipeSelectorSidebar>
+      )}
 
       {/* Contenedor principal */}
       <div>

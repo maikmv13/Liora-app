@@ -40,3 +40,5 @@ export const MEAL_MAPPING: Record<MealType, string> = {
   'snack': 'snack',
   'cena': 'dinner'
 };
+
+export const MIN_FAVORITES_FOR_MENU = 15; // o el número que consideres apropiado

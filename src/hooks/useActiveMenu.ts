@@ -5,20 +5,23 @@ import { useRecipes } from './useRecipes';
 import { transformWeeklyMenuToMenuItems } from '../utils/menuTransforms';
 
 export function useActiveMenu(userId: string | undefined, isHousehold: boolean) {
-  const [menuItems, setMenuItems] = useState<MenuItem[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<Error | null>(null);
+  const [state, setState] = useState({
+    menuItems: [] as MenuItem[],
+    loading: true,
+    error: null as Error | null
+  });
   const { recipes } = useRecipes();
   const mounted = useRef(true);
+  const lastFetch = useRef<number>(0);
+  const CACHE_DURATION = 60 * 1000; // 1 minuto de caché
 
-  const fetchMenu = useCallback(async () => {
-    if (!userId || !recipes.length) {
-      if (mounted.current) {
-        setMenuItems([]);
-        setLoading(false);
-      }
-      return;
+  const fetchMenu = useCallback(async (force = false) => {
+    const now = Date.now();
+    if (!force && lastFetch.current && now - lastFetch.current < CACHE_DURATION) {
+      return; // Usar caché si no ha pasado el tiempo mínimo
     }
+
+    if (!userId || !recipes.length || !mounted.current) return;
 
     try {
       // 1. Obtener perfil
@@ -80,88 +83,66 @@ export function useActiveMenu(userId: string | undefined, isHousehold: boolean) 
       }
 
       if (!menu) {
-        if (mounted.current) {
-          setMenuItems([]);
-          setLoading(false);
-        }
+        setState(prev => ({ ...prev, menuItems: [], loading: false }));
         return;
       }
 
-      // 3. Obtener recetas del menú
-      const recipeIds = Object.entries(menu)
-        .filter(([key, value]) => 
-          key.endsWith('_id') && 
-          typeof value === 'string' && 
-          value.length > 0
-        )
-        .map(([_, value]) => value);
-
-      if (recipeIds.length === 0) {
-        if (mounted.current) {
-          setMenuItems([]);
-          setLoading(false);
-        }
-        return;
-      }
-
-      // Obtener las recetas en lotes de 100 para evitar URLs muy largas
-      const batchSize = 100;
-      const recipeBatches = [];
-      
-      for (let i = 0; i < recipeIds.length; i += batchSize) {
-        const batch = recipeIds.slice(i, i + batchSize);
-        const { data: recipes } = await supabase
-          .from('recipes')
-          .select('*')
-          .in('id', batch);
-        
-        if (recipes) {
-          recipeBatches.push(...recipes);
-        }
-      }
-
-      if (!mounted.current) return;
-
-      if (!recipeBatches.length) {
-        throw new Error('No se pudieron obtener las recetas del menú');
-      }
-
-      // 4. Procesar y transformar datos
-      const recipeMap = new Map(recipeBatches.map(recipe => [recipe.id, recipe]));
-      const transformedItems = transformWeeklyMenuToMenuItems(
-        menu,
-        Array.from(recipeMap.values())
-      );
+      // Transformar los datos del menú
+      const transformedItems = transformWeeklyMenuToMenuItems(menu, recipes);
 
       if (mounted.current) {
-        setMenuItems(transformedItems);
-        setError(null);
-        setLoading(false);
+        setState({
+          menuItems: transformedItems,
+          loading: false,
+          error: null
+        });
+        lastFetch.current = now;
       }
 
     } catch (error) {
       console.error('Error in fetchMenu:', error);
       if (mounted.current) {
-        setError(error as Error);
-        setMenuItems([]);
-        setLoading(false);
+        setState(prev => ({
+          ...prev,
+          error: error as Error,
+          loading: false
+        }));
       }
     }
   }, [userId, isHousehold, recipes]);
 
+  // Suscribirse a cambios en el menú
   useEffect(() => {
+    if (!userId) return;
+
     mounted.current = true;
     fetchMenu();
+
+    const channel = supabase
+      .channel('menu_changes')
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'weekly_menus',
+          filter: `user_id=eq.${userId}`
+        },
+        () => {
+          if (mounted.current) {
+            fetchMenu(true);
+          }
+        }
+      )
+      .subscribe();
+
     return () => {
       mounted.current = false;
+      channel.unsubscribe();
     };
-  }, [fetchMenu]);
+  }, [userId, fetchMenu]);
 
-  return {
-    menuItems,
-    loading,
-    error
-  };
+  return state;
 }
 
 function transformWeeklyMenuToMenuItems(

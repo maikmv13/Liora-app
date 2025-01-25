@@ -1,32 +1,26 @@
-import { useEffect, useState, useCallback, useRef } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { supabase } from '../lib/supabase';
 import type { Profile } from '../types';
 
 export function useActiveProfile() {
-  // Usar una función de inicialización para el estado inicial
   const [state, setState] = useState(() => {
     const cached = localStorage.getItem('userProfile');
-    const parsedProfile = cached ? JSON.parse(cached) : null;
     return {
-      profile: parsedProfile,
-      loading: !parsedProfile,
+      profile: cached ? JSON.parse(cached) : null,
+      loading: !cached,
       error: null as Error | null
     };
   });
 
   const mounted = useRef(true);
   const lastFetch = useRef<number>(0);
-  const CACHE_DURATION = 5 * 60 * 1000; // 5 minutos
+  const CACHE_DURATION = 30000; // 30 segundos
 
-  const getProfile = useCallback(async (force = false) => {
+  const fetchProfile = useCallback(async (force = false) => {
     const now = Date.now();
     if (!force && lastFetch.current && now - lastFetch.current < CACHE_DURATION) {
       return;
     }
-
-    if (!mounted.current) return;
-
-    setState(prev => ({ ...prev, loading: true }));
 
     try {
       const { data: { session } } = await supabase.auth.getSession();
@@ -43,92 +37,65 @@ export function useActiveProfile() {
         return;
       }
 
-      // Verificar cache
-      if (!force && 
-          state.profile && 
-          state.profile.user_id === session.user.id) {
-        if (mounted.current) {
-          setState(prev => ({ ...prev, loading: false }));
-        }
+      // Verificar caché solo si no es forzado
+      if (!force && state.profile?.user_id === session.user.id) {
         return;
       }
 
-      const { data: newProfile, error: profileError } = await supabase
+      const { data: profile, error: profileError } = await supabase
         .from('profiles')
-        .select('id, user_id, full_name, user_type, linked_household_id, created_at, updated_at')
+        .select('*')
         .eq('user_id', session.user.id)
         .single();
 
       if (profileError) throw profileError;
 
       if (mounted.current) {
-        localStorage.setItem('userProfile', JSON.stringify(newProfile));
+        localStorage.setItem('userProfile', JSON.stringify(profile));
         lastFetch.current = now;
         setState({
-          profile: newProfile,
+          profile,
           loading: false,
           error: null
         });
       }
 
-    } catch (e) {
-      console.error('Error loading profile:', e);
+    } catch (error) {
+      console.error('Error loading profile:', error);
       if (mounted.current) {
         setState(prev => ({
           ...prev,
-          error: e as Error,
+          error: error as Error,
           loading: false
         }));
       }
     }
-  }, [state.profile]);
+  }, []);
 
-  // Efecto inicial y suscripción a auth
   useEffect(() => {
     mounted.current = true;
+    fetchProfile(); // Carga inicial
 
-    // Cargar perfil inicial
-    getProfile();
-
-    // Suscribirse a cambios de auth
+    // Suscripciones
     const { data: { subscription } } = supabase.auth.onAuthStateChange(() => {
-      if (mounted.current) {
-        getProfile(true);
-      }
+      if (mounted.current) fetchProfile(true);
     });
-
-    return () => {
-      mounted.current = false;
-      subscription.unsubscribe();
-    };
-  }, [getProfile]);
-
-  // Suscripción a cambios en el perfil
-  useEffect(() => {
-    if (!state.profile?.user_id) return;
 
     const channel = supabase
       .channel('profile_changes')
       .on(
         'postgres_changes',
-        {
-          event: '*',
-          schema: 'public',
-          table: 'profiles',
-          filter: `user_id=eq.${state.profile.user_id}`
-        },
-        () => {
-          if (mounted.current) {
-            getProfile(true);
-          }
-        }
+        { event: '*', schema: 'public', table: 'profiles' },
+        () => { if (mounted.current) fetchProfile(true); }
       )
       .subscribe();
 
     return () => {
+      mounted.current = false;
+      subscription.unsubscribe();
       channel.unsubscribe();
     };
-  }, [state.profile?.user_id, getProfile]);
+  }, [fetchProfile]);
 
   return {
     id: state.profile?.user_id,
@@ -136,6 +103,6 @@ export function useActiveProfile() {
     loading: state.loading,
     error: state.error,
     isHousehold: false,
-    refreshProfile: useCallback(() => getProfile(true), [getProfile])
+    refreshProfile: useCallback(() => fetchProfile(true), [fetchProfile])
   };
 }

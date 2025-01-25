@@ -8,6 +8,9 @@ import { supabase } from '../../lib/supabase';
 import { useNavigate } from 'react-router-dom';
 import { useActiveProfile } from '../../hooks/useActiveProfile';
 import { useFavorites } from '../../hooks/useFavorites';
+import { useActiveMenu } from '../../hooks/useActiveMenu';
+import { MIN_FAVORITES_FOR_MENU } from './constants';
+import { MenuSkeleton } from './MenuSkeleton';
 
 interface TodayCardProps {
   menuItems: MenuItem[];
@@ -24,7 +27,9 @@ export function TodayCard({
 }: TodayCardProps) {
   const navigate = useNavigate();
   const { id, isHousehold } = useActiveProfile();
-  const { favorites } = useFavorites(isHousehold);
+  const { favorites, loading: favoritesLoading } = useFavorites(isHousehold);
+  const { menuItems: activeMenuItems, loading: menuLoading } = useActiveMenu(id, false);
+  const [expanded, setExpanded] = useState(false);
   
   const today = new Intl.DateTimeFormat('es-ES', { 
     weekday: 'long'
@@ -106,77 +111,52 @@ export function TodayCard({
     }
   };
 
-  if (menuItems.length === 0) {
+  // Unificar la lógica de carga
+  const isLoading = menuLoading || favoritesLoading || !favorites || !activeMenuItems;
+  const hasEnoughFavorites = favorites?.length >= MIN_FAVORITES_FOR_MENU;
+  const hasMenu = menuItems?.length > 0;
+
+  // Mostrar skeleton mientras cualquier dato está cargando
+  if (isLoading) {
+    return <MenuSkeleton />;
+  }
+
+  // Solo mostrar mensajes cuando tengamos todos los datos
+  if (!isLoading && !hasEnoughFavorites) {
     return (
-      <div className="bg-white/80 backdrop-blur-sm rounded-2xl border border-rose-100 overflow-hidden">
-        <div className="p-6 space-y-4">
-          <div className="flex items-start space-x-4">
-            <div className="bg-rose-50 p-3 rounded-xl flex-shrink-0">
-              <Calendar size={24} className="text-rose-500" />
-            </div>
-            <div>
-              <h3 className="text-lg font-semibold text-gray-900">
-                ¡Crea tu primer menú semanal!
-              </h3>
-              <p className="text-sm text-gray-500 mt-1">
-                Para generar tu menú personalizado, sigue estos pasos:
-              </p>
-            </div>
-          </div>
+      <div className="bg-white/95 backdrop-blur-sm rounded-2xl border border-rose-100 overflow-hidden p-6">
+        <h3 className="text-xl font-semibold text-gray-900 mb-2">
+          ¡Crea tu primer menú!
+        </h3>
+        <p className="text-gray-600 mb-4">
+          Necesitas al menos {MIN_FAVORITES_FOR_MENU} recetas favoritas para generar un menú.
+          Actualmente tienes {favorites.length}.
+        </p>
+        <button
+          onClick={() => navigate('/recipes')}
+          className="w-full px-4 py-2 bg-rose-500 text-white rounded-xl hover:bg-rose-600 transition-colors"
+        >
+          Ir a Recetas
+        </button>
+      </div>
+    );
+  }
 
-          <div className="space-y-3">
-            <div className="flex items-start space-x-3">
-              <div className="w-6 h-6 rounded-full bg-rose-50 flex items-center justify-center flex-shrink-0 mt-0.5">
-                <span className="text-sm font-medium text-rose-500">1</span>
-              </div>
-              <div>
-                <p className="text-sm text-gray-600">
-                  Ve a la sección de <span className="font-medium text-gray-900">Recetas</span> y explora nuestro catálogo
-                </p>
-              </div>
-            </div>
-
-            <div className="flex items-start space-x-3">
-              <div className="w-6 h-6 rounded-full bg-rose-50 flex items-center justify-center flex-shrink-0 mt-0.5">
-                <span className="text-sm font-medium text-rose-500">2</span>
-              </div>
-              <div>
-                <p className="text-sm text-gray-600">
-                  Guarda como favoritas al menos <span className="font-medium text-gray-900">dos recetas por comida</span> (desayuno, comida, snack y cena)
-                </p>
-              </div>
-            </div>
-
-            <div className="flex items-start space-x-3">
-              <div className="w-6 h-6 rounded-full bg-rose-50 flex items-center justify-center flex-shrink-0 mt-0.5">
-                <span className="text-sm font-medium text-rose-500">3</span>
-              </div>
-              <div>
-                <p className="text-sm text-gray-600">
-                  Genera tu menú semanal personalizado basado en tus recetas favoritas
-                </p>
-              </div>
-            </div>
-          </div>
-
-          <div className="pt-4 flex flex-col space-y-3">
-            <button
-              onClick={() => navigate('/recetas')}
-              className="w-full px-4 py-2.5 bg-rose-50 text-rose-600 rounded-xl hover:bg-rose-100 transition-colors flex items-center justify-center space-x-2"
-            >
-              <ChefHat size={18} />
-              <span>Explorar recetas</span>
-            </button>
-
-            <button
-              onClick={onOpenOnboarding}
-              className="w-full px-4 py-2.5 bg-gradient-to-r from-orange-400 via-pink-500 to-rose-500 text-white rounded-xl hover:opacity-90 transition-opacity flex items-center justify-center space-x-2"
-            >
-              <Calendar size={18} />
-              <span>Crear menú semanal</span>
-            </button>
-          </div>
-        </div>
+  if (!isLoading && hasEnoughFavorites && !hasMenu) {
+    return (
+      <div className="bg-white/95 backdrop-blur-sm rounded-2xl border border-rose-100 overflow-hidden p-6">
+        <h3 className="text-xl font-semibold text-gray-900 mb-2">
+          ¡Genera tu menú semanal!
+        </h3>
+        <p className="text-gray-600 mb-4">
+          Tienes suficientes recetas favoritas para generar un menú.
+        </p>
+        <button
+          onClick={() => navigate('/menu/generate')}
+          className="w-full px-4 py-2 bg-rose-500 text-white rounded-xl hover:bg-rose-600 transition-colors"
+        >
+          Generar Menú
+        </button>
       </div>
     );
   }

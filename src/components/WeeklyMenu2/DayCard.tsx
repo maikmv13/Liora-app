@@ -8,6 +8,10 @@ import { useNavigate } from 'react-router-dom';
 import { useActiveProfile } from '../../hooks/useActiveProfile';
 import { supabase } from "../../lib/supabase";
 import { useFavorites } from '../../hooks/useFavorites';
+import { Card, CardContent, Typography, Skeleton } from '@mui/material';
+import { useActiveMenu } from '../../hooks/useActiveMenu';
+import { MIN_FAVORITES_FOR_MENU } from './constants';
+import { MenuSkeleton } from './MenuSkeleton';
 
 interface DayCardProps {
   day: WeekDay;
@@ -33,7 +37,12 @@ export function DayCard({
   const [hoveredMeal, setHoveredMeal] = React.useState<MealType | null>(null);
   const navigate = useNavigate();
   const { id, isHousehold } = useActiveProfile();
-  const { favorites } = useFavorites(isHousehold);
+  const { favorites, loading: favoritesLoading } = useFavorites(isHousehold);
+  const { loading: menuLoading } = useActiveMenu(id, false);
+
+  // Unificar la lógica de carga
+  const isLoading = menuLoading || favoritesLoading || !favorites;
+  const hasEnoughFavorites = favorites?.length >= MIN_FAVORITES_FOR_MENU;
 
   // Obtener el día actual y el siguiente
   const today = new Date();
@@ -110,6 +119,16 @@ export function DayCard({
       console.error('Error toggling favorite:', error);
     }
   };
+
+  // Mostrar skeleton mientras cualquier dato está cargando
+  if (isLoading) {
+    return <MenuSkeleton />;
+  }
+
+  // No mostrar nada si no hay suficientes favoritos (solo después de cargar)
+  if (!isLoading && !hasEnoughFavorites) {
+    return null;
+  }
 
   return (
     <div 
