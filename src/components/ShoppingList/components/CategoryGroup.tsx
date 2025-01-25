@@ -3,6 +3,8 @@ import { ChevronDown, ChevronUp, Check } from 'lucide-react';
 import { ShoppingItem } from '../../../types';
 import { ShoppingItemRow } from './ShoppingItemRow';
 import { getCategoryIcon } from '../utils/categoryIcons';
+import { getUnitPlural } from '../../../utils/getUnitPlural';
+import { formatQuantityAndUnit } from '../utils/formatters';
 
 interface CategoryGroupProps {
   readonly category: string;
@@ -12,6 +14,14 @@ interface CategoryGroupProps {
   readonly onToggleItem: (name: string, day?: string) => void;
   readonly viewMode: 'weekly' | 'daily';
   selectedDay?: string;
+}
+
+// Función para capitalizar texto
+function capitalizeText(text: string): string {
+  return text
+    .split(' ')
+    .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+    .join(' ');
 }
 
 export function CategoryGroup({ 
@@ -71,7 +81,7 @@ export function CategoryGroup({
               font-medium text-sm md:text-base
               ${isAllCompleted ? 'text-emerald-800' : 'text-gray-900'}
             `}>
-              {category}
+              {capitalizeText(category)}
             </h3>
             <p className="text-xs text-gray-500">
               {completedCount} de {items.length} items
@@ -113,16 +123,26 @@ export function CategoryGroup({
       {/* Items List */}
       {expanded && (
         <div className="divide-y divide-rose-100/20">
-          {items.map((item) => (
-            <ShoppingItemRow
-              key={`${item.name}-${item.days.join('-')}`}
-              item={item}
-              onToggle={() => onToggleItem(item.name, item.days.join('-'))}
-              isGroupCompleted={isAllCompleted}
-              viewMode={viewMode}
-              selectedDay={selectedDay}
-            />
-          ))}
+          {items.map((item) => {
+            const formatted = formatQuantityAndUnit(item.quantity, item.unit);
+            
+            return (
+              <ShoppingItemRow
+                key={`${item.name}-${item.days.join('-')}`}
+                item={{
+                  ...item,
+                  name: capitalizeText(item.name),
+                  quantity: formatted.quantity,
+                  displayValue: formatted.displayValue,
+                  unit: getUnitPlural(formatted.unit, formatted.shouldBePlural)
+                }}
+                onToggle={() => onToggleItem(item.name, item.days.join('-'))}
+                isGroupCompleted={isAllCompleted}
+                viewMode={viewMode}
+                selectedDay={selectedDay}
+              />
+            );
+          })}
         </div>
       )}
     </div>
