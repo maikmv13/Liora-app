@@ -7,6 +7,7 @@ import { WeekDay } from './constants';
 import { useNavigate } from 'react-router-dom';
 import { useActiveProfile } from '../../hooks/useActiveProfile';
 import { supabase } from "../../lib/supabase";
+import { useFavorites } from '../../hooks/useFavorites';
 
 interface DayCardProps {
   day: WeekDay;
@@ -32,6 +33,7 @@ export function DayCard({
   const [hoveredMeal, setHoveredMeal] = React.useState<MealType | null>(null);
   const navigate = useNavigate();
   const { id, isHousehold } = useActiveProfile();
+  const { favorites } = useFavorites(isHousehold);
 
   // Obtener el día actual y el siguiente
   const today = new Date();
@@ -88,13 +90,24 @@ export function DayCard({
         .update({
           [`${day}_${meal}_id`]: recipe?.id || null
         })
-        .eq(isHousehold ? 'household_id' : 'user_id', id);
+        .eq(isHousehold ? 'linked_household_id' : 'user_id', id);
 
       if (error) throw error;
       
       // ... resto del código
     } catch (error) {
       console.error('Error updating menu:', error);
+    }
+  };
+
+  const handleFavoriteToggle = async (recipe: Recipe) => {
+    try {
+      if (recipe.user_id && recipe.user_id !== id) {
+        return;
+      }
+      // ... resto del código
+    } catch (error) {
+      console.error('Error toggling favorite:', error);
     }
   };
 

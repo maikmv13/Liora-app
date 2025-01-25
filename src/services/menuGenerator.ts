@@ -114,63 +114,110 @@ export async function generateCompleteMenu(
   userId: string,
   isHousehold: boolean
 ): Promise<MenuItem[]> {
-  if (!recipes || recipes.length === 0) {
-    throw new Error('Necesitas añadir algunas recetas a tus favoritos antes de generar un menú.');
-  }
-
   try {
-    // Verificar si el household existe si es necesario
+    // 1. Obtener el contexto (household o personal)
     let householdId = null;
     if (isHousehold) {
-      const { data: profile } = await supabase
+      const { data: profile, error: profileError } = await supabase
         .from('profiles')
-        .select('household_id')
+        .select('linked_household_id')
         .eq('user_id', userId)
         .single();
 
-      if (!profile?.household_id) {
+      if (profileError) throw profileError;
+      if (!profile?.linked_household_id) {
         throw new Error('No se encontró un household válido');
       }
-      
-      householdId = profile.household_id;
+      householdId = profile.linked_household_id;
     }
 
-    // Obtener favoritos según el contexto (household o personal)
+    // 2. Obtener recetas favoritas según el contexto
     const { data: favorites, error: favoritesError } = await supabase
       .from('favorites')
       .select(`
-        recipes!favorites_recipe_id_fkey (*)
+        recipe_id,
+        recipes:recipe_id (*)
       `)
-      .eq(isHousehold ? 'household_id' : 'user_id', isHousehold ? householdId : userId);
+      .eq(isHousehold ? 'linked_household_id' : 'user_id', isHousehold ? householdId : userId);
 
     if (favoritesError) throw favoritesError;
 
-    const favoriteRecipes = favorites?.map(f => f.recipes) || [];
+    // 3. Procesar recetas favoritas evitando duplicados
+    const uniqueFavorites = Array.from(
+      new Map(
+        favorites
+          ?.map(f => f.recipes)
+          .filter(Boolean)
+          .map(recipe => [recipe.id, recipe])
+      ).values()
+    );
+
+    if (uniqueFavorites.length === 0) {
+      throw new Error(
+        isHousehold 
+          ? 'No hay suficientes recetas favoritas en el hogar. ¡Añadan más recetas favoritas!'
+          : 'Necesitas añadir algunas recetas a tus favoritos antes de generar un menú.'
+      );
+    }
+
+    // 4. Generar el menú
     const weekDays = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domingo'];
     const mealTypes: MealType[] = ['desayuno', 'comida', 'snack', 'cena'];
     const newMenu: MenuItem[] = [];
+    const stats: MenuStats = {
+      weeklyLimitCount: {},
+      categoryCount: {},
+      consecutiveCategories: {},
+      healthyCategoriesUsed: new Set(),
+      proteinMealsToday: 0
+    };
 
-    // Generar menú simple sin restricciones
     for (const day of weekDays) {
       for (const meal of mealTypes) {
-        // Seleccionar una receta aleatoria
-        const selectedRecipe = favoriteRecipes[Math.floor(Math.random() * favoriteRecipes.length)];
-        
-        if (selectedRecipe) {
+        let validRecipes = uniqueFavorites.filter(recipe => 
+          isValidSelection(
+            recipe,
+            meal,
+            weekDays.indexOf(day),
+            stats,
+            newMenu,
+            newMenu[newMenu.length - 1]?.recipe.category || null
+          )
+        );
+
+        if (validRecipes.length === 0) {
+          validRecipes = uniqueFavorites.filter(r => r.meal_type === meal);
+        }
+
+        if (validRecipes.length > 0) {
+          const selectedRecipe = validRecipes[Math.floor(Math.random() * validRecipes.length)];
+          
+          // Actualizar estadísticas
+          if (selectedRecipe.category) {
+            stats.categoryCount[selectedRecipe.category] = 
+              (stats.categoryCount[selectedRecipe.category] || 0) + 1;
+            
+            if (['Carnes', 'Pescados'].includes(selectedRecipe.category)) {
+              stats.weeklyLimitCount[selectedRecipe.category] = 
+                (stats.weeklyLimitCount[selectedRecipe.category] || 0) + 1;
+            }
+          }
+
           newMenu.push({
             day,
             meal,
-            recipe: {
-              ...selectedRecipe,
-              meal_type: meal
-            }
+            recipe: selectedRecipe
           });
         }
       }
     }
 
     if (newMenu.length === 0) {
-      throw new Error('No hay suficientes recetas favoritas para generar un menú completo. ¡Añade más recetas a tus favoritos!');
+      throw new Error(
+        isHousehold
+          ? 'No se pudo generar un menú completo para el hogar. Revisen sus recetas favoritas.'
+          : 'No hay suficientes recetas para generar un menú completo. ¡Añade más recetas a tus favoritos!'
+      );
     }
 
     return newMenu;

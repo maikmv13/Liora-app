@@ -21,7 +21,6 @@ interface ProfileData {
   updated_at: string | null;
   id: string;
   user_id: string;
-  household_id: string | null;
   linked_household_id: string | null;
 }
 

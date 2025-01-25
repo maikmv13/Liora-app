@@ -60,3 +60,15 @@ export function getMealBackground(meal: string): string {
       return '';
   }
 }
+
+export const getFavoriteStatus = (
+  recipe: Recipe, 
+  favorites: FavoriteRecipe[], 
+  userId: string,
+  isHousehold: boolean
+) => {
+  return favorites.some(fav => 
+    fav.recipe_id === recipe.id && 
+    (fav.user_id === userId || isHousehold)
+  );
+};

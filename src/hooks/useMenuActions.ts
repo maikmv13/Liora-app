@@ -26,19 +26,17 @@ export function useMenuActions(
       setIsGenerating(true);
 
       // Verificar que hay suficientes recetas favoritas
-      const { data: favorites } = await retryOperation(() => 
-        supabase
-          .from('favorites')
-          .select('recipe_id, recipes!favorites_recipe_id_fkey (meal_type)')
-          .eq(isHousehold ? 'household_id' : 'user_id', userId)
-      );
+      const { data: favorites } = await supabase
+        .from('favorites')
+        .select('recipe_id, recipes!favorites_recipe_id_fkey (meal_type)')
+        .eq(isHousehold ? 'linked_household_id' : 'user_id', userId);
 
       if (!favorites || favorites.length === 0) {
-        throw new Error('Necesitas marcar algunas recetas como favoritas antes de generar un menú. Esto te permitirá tener un menú más personalizado y variado.');
+        throw new Error('Necesitas marcar algunas recetas como favoritas antes de generar un menú.');
       }
 
       // Verificar que hay suficientes recetas por tipo
-      const recipesByType = favorites.reduce((acc: Record<string, number>, fav) => {
+      const recipesByType = favorites.reduce<Record<string, number>>((acc, fav) => {
         const mealType = fav.recipes?.meal_type;
         if (mealType) {
           acc[mealType] = (acc[mealType] || 0) + 1;
@@ -62,33 +60,27 @@ export function useMenuActions(
       }
 
       // Get user's profile to check household
-      const { data: profile } = await retryOperation(() =>
-        supabase
-          .from('profiles')
-          .select('household_id')
-          .eq('user_id', userId)
-          .single()
-      );
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('linked_household_id')
+        .eq('user_id', userId)
+        .single();
 
-      const householdId = isHousehold ? profile?.household_id : null;
+      const householdId = isHousehold ? profile?.linked_household_id : null;
 
       // Reset shopping list
-      await retryOperation(() =>
-        supabase
-          .from('shopping_list_items')
-          .delete()
-          .eq(isHousehold ? 'household_id' : 'user_id', householdId || userId)
-      );
+      await supabase
+        .from('shopping_list_items')
+        .delete()
+        .eq(isHousehold ? 'linked_household_id' : 'user_id', householdId || userId);
 
       // Archive current menu if exists
-      const { data: currentMenu } = await retryOperation(() =>
-        supabase
-          .from('weekly_menus')
-          .select('id')
-          .eq(isHousehold ? 'household_id' : 'user_id', householdId || userId)
-          .eq('status', 'active')
-          .maybeSingle()
-      );
+      const { data: currentMenu } = await supabase
+        .from('weekly_menus')
+        .select('id')
+        .eq(isHousehold ? 'linked_household_id' : 'user_id', householdId || userId)
+        .eq('status', 'active')
+        .maybeSingle();
 
       if (currentMenu) {
         await archiveMenu(currentMenu.id);
@@ -109,7 +101,7 @@ export function useMenuActions(
 
       // Update UI with new menu items
       newMenu.forEach(menuItem => {
-        onAddToMenu(menuItem.recipe, menuItem.day, menuItem.meal);
+        onAddToMenu(menuItem.recipe as Recipe, menuItem.day, menuItem.meal);
       });
 
       const timestamp = new Date().toISOString();

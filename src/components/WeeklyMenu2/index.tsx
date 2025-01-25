@@ -15,6 +15,7 @@ import { RecipeSelectorSidebar } from './RecipeSelectorSidebar';
 import { MenuSkeleton } from './MenuSkeleton';
 import { useActiveProfile } from '../../hooks/useActiveProfile';
 import { MenuErrorNotification } from './MenuErrorNotification';
+import type { Recipe as DBRecipe } from '../../types/recipe';
 
 export function WeeklyMenu2() {
   const [selectedDay, setSelectedDay] = useState<string>('Lunes');
@@ -68,7 +69,7 @@ export function WeeklyMenu2() {
       const { data: activeMenu } = await supabase
         .from('weekly_menus')
         .select('id')
-        .eq(isHousehold ? 'household_id' : 'user_id', isHousehold ? profile?.household_id : id)
+        .eq(isHousehold ? 'linked_household_id' : 'user_id', isHousehold ? profile?.linked_household_id : id)
         .eq('status', 'active')
         .single();
 
@@ -109,7 +110,7 @@ export function WeeklyMenu2() {
   const handleGenerateMenuClick = async () => {
     try {
       setIsGeneratingMenu(true);
-      await handleGenerateMenu(recipes);
+      await handleGenerateMenu(recipes as unknown as Recipe[]);
     } catch (error) {
       console.error('Error al generar menú:', error);
       let errorMessage = 'No se pudo generar el menú.';
@@ -130,7 +131,7 @@ export function WeeklyMenu2() {
         await supabase
           .from('weekly_menus')
           .update({ status: 'archived' })
-          .eq(isHousehold ? 'household_id' : 'user_id', isHousehold ? profile?.household_id : id)
+          .eq(isHousehold ? 'linked_household_id' : 'user_id', isHousehold ? profile?.linked_household_id : id)
           .eq('status', 'active');
       }
 

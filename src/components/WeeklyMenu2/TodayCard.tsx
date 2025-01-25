@@ -7,6 +7,7 @@ import { MenuItem } from '../../types';
 import { supabase } from '../../lib/supabase';
 import { useNavigate } from 'react-router-dom';
 import { useActiveProfile } from '../../hooks/useActiveProfile';
+import { useFavorites } from '../../hooks/useFavorites';
 
 interface TodayCardProps {
   menuItems: MenuItem[];
@@ -23,6 +24,7 @@ export function TodayCard({
 }: TodayCardProps) {
   const navigate = useNavigate();
   const { id, isHousehold } = useActiveProfile();
+  const { favorites } = useFavorites(isHousehold);
   
   const today = new Intl.DateTimeFormat('es-ES', { 
     weekday: 'long'
@@ -91,6 +93,16 @@ export function TodayCard({
         return 'bg-indigo-50 border-indigo-100 hover:bg-indigo-100/50';
       default:
         return 'bg-rose-50 border-rose-100 hover:bg-rose-100/50';
+    }
+  };
+
+  const handleFavoriteClick = async (recipe: Recipe) => {
+    try {
+      if (recipe.user_id && recipe.user_id !== id) {
+        return;
+      }
+    } catch (error) {
+      console.error('Error toggling favorite:', error);
     }
   };
 

@@ -1,78 +1,141 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback, useRef } from 'react';
 import { supabase } from '../lib/supabase';
 import type { Profile } from '../types';
 
 export function useActiveProfile() {
-  const [profile, setProfile] = useState<Profile | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<Error | null>(null);
-
-  useEffect(() => {
-    let ignore = false;
-
-    const getProfile = async () => {
-      try {
-        const { data: { session } } = await supabase.auth.getSession();
-        
-        if (!session?.user) {
-          if (!ignore) {
-            setProfile(null);
-            setLoading(false);
-          }
-          return;
-        }
-
-        const { data: profile, error: profileError } = await supabase
-          .from('profiles')
-          .select('id, user_id, full_name, user_type, linked_household_id, created_at, updated_at')
-          .eq('user_id', session.user.id)
-          .single();
-
-        if (profileError) {
-          console.error('Error fetching profile:', profileError);
-          throw profileError;
-        }
-
-        console.log('Profile loaded:', profile);
-
-        if (!ignore) {
-          setProfile(profile);
-        }
-
-      } catch (e) {
-        console.error('Error loading profile:', e);
-        if (!ignore) {
-          setError(e as Error);
-        }
-      } finally {
-        if (!ignore) {
-          setLoading(false);
-        }
-      }
+  // Usar una función de inicialización para el estado inicial
+  const [state, setState] = useState(() => {
+    const cached = localStorage.getItem('userProfile');
+    const parsedProfile = cached ? JSON.parse(cached) : null;
+    return {
+      profile: parsedProfile,
+      loading: !parsedProfile,
+      error: null as Error | null
     };
+  });
 
+  const mounted = useRef(true);
+  const lastFetch = useRef<number>(0);
+  const CACHE_DURATION = 5 * 60 * 1000; // 5 minutos
+
+  const getProfile = useCallback(async (force = false) => {
+    const now = Date.now();
+    if (!force && lastFetch.current && now - lastFetch.current < CACHE_DURATION) {
+      return;
+    }
+
+    if (!mounted.current) return;
+
+    setState(prev => ({ ...prev, loading: true }));
+
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      
+      if (!session?.user) {
+        if (mounted.current) {
+          localStorage.removeItem('userProfile');
+          setState({
+            profile: null,
+            loading: false,
+            error: null
+          });
+        }
+        return;
+      }
+
+      // Verificar cache
+      if (!force && 
+          state.profile && 
+          state.profile.user_id === session.user.id) {
+        if (mounted.current) {
+          setState(prev => ({ ...prev, loading: false }));
+        }
+        return;
+      }
+
+      const { data: newProfile, error: profileError } = await supabase
+        .from('profiles')
+        .select('id, user_id, full_name, user_type, linked_household_id, created_at, updated_at')
+        .eq('user_id', session.user.id)
+        .single();
+
+      if (profileError) throw profileError;
+
+      if (mounted.current) {
+        localStorage.setItem('userProfile', JSON.stringify(newProfile));
+        lastFetch.current = now;
+        setState({
+          profile: newProfile,
+          loading: false,
+          error: null
+        });
+      }
+
+    } catch (e) {
+      console.error('Error loading profile:', e);
+      if (mounted.current) {
+        setState(prev => ({
+          ...prev,
+          error: e as Error,
+          loading: false
+        }));
+      }
+    }
+  }, [state.profile]);
+
+  // Efecto inicial y suscripción a auth
+  useEffect(() => {
+    mounted.current = true;
+
+    // Cargar perfil inicial
     getProfile();
 
-    return () => {
-      ignore = true;
-    };
-  }, []);
+    // Suscribirse a cambios de auth
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(() => {
+      if (mounted.current) {
+        getProfile(true);
+      }
+    });
 
+    return () => {
+      mounted.current = false;
+      subscription.unsubscribe();
+    };
+  }, [getProfile]);
+
+  // Suscripción a cambios en el perfil
   useEffect(() => {
-    if (profile) {
-      console.log('Active profile updated:', {
-        id: profile.user_id,
-        isHousehold: false,
-        profile
-      });
-    }
-  }, [profile]);
+    if (!state.profile?.user_id) return;
+
+    const channel = supabase
+      .channel('profile_changes')
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'profiles',
+          filter: `user_id=eq.${state.profile.user_id}`
+        },
+        () => {
+          if (mounted.current) {
+            getProfile(true);
+          }
+        }
+      )
+      .subscribe();
+
+    return () => {
+      channel.unsubscribe();
+    };
+  }, [state.profile?.user_id, getProfile]);
 
   return {
-    id: profile?.user_id,
-    profile,
-    loading,
-    error,
-    isHousehold: false
+    id: state.profile?.user_id,
+    profile: state.profile,
+    loading: state.loading,
+    error: state.error,
+    isHousehold: false,
+    refreshProfile: useCallback(() => getProfile(true), [getProfile])
   };
 }

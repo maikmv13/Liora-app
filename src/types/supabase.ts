@@ -19,7 +19,7 @@ export type Database = {
           recipe_id: string
           tags: string[] | null
           user_id: string
-          household_id?: string
+          linked_household_id?: string
         }
         Insert: {
           created_at?: string | null
@@ -30,7 +30,7 @@ export type Database = {
           recipe_id: string
           tags?: string[] | null
           user_id: string
-          household_id?: string
+          linked_household_id?: string
         }
         Update: {
           created_at?: string | null
@@ -41,7 +41,7 @@ export type Database = {
           recipe_id?: string
           tags?: string[] | null
           user_id?: string
-          household_id?: string
+          linked_household_id?: string
         }
         Relationships: [
           {
@@ -51,6 +51,12 @@ export type Database = {
             referencedRelation: "recipes"
             referencedColumns: ["name"]
           },
+          {
+            foreignKeyName: "favorites_linked_household_id_fkey"
+            columns: ["linked_household_id"]
+            referencedRelation: "households"
+            referencedColumns: ["id"]
+          }
         ]
       }
       ingredients: {
@@ -255,7 +261,7 @@ export type Database = {
           sunday_lunch: string | null;
           sunday_snack: string | null;
           sunday_dinner: string | null;
-          household_id?: string;
+          linked_household_id?: string;
         };
         Insert: {
           id?: string;
@@ -293,7 +299,7 @@ export type Database = {
           sunday_lunch?: string | null;
           sunday_snack?: string | null;
           sunday_dinner?: string | null;
-          household_id?: string;
+          linked_household_id?: string;
         };
         Update: {
           id?: string;
@@ -331,9 +337,16 @@ export type Database = {
           sunday_lunch?: string | null;
           sunday_snack?: string | null;
           sunday_dinner?: string | null;
-          household_id?: string;
+          linked_household_id?: string;
         };
-        Relationships: [];
+        Relationships: [
+          {
+            foreignKeyName: "weekly_menus_linked_household_id_fkey"
+            columns: ["linked_household_id"]
+            referencedRelation: "households"
+            referencedColumns: ["id"]
+          }
+        ]
       }
       chat_history: {
         Row: {

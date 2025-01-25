@@ -29,7 +29,7 @@ export async function createWeeklyMenu(
 
     // Asignar el ID correcto según el contexto
     if (isHousehold && householdId) {
-      menuData.household_id = householdId;
+      menuData.linked_household_id = householdId;
     } else {
       menuData.user_id = userId;
     }
@@ -49,7 +49,7 @@ export async function createWeeklyMenu(
     await supabase
       .from('weekly_menus')
       .update({ status: 'archived' })
-      .eq(isHousehold ? 'household_id' : 'user_id', isHousehold ? householdId : userId)
+      .eq(isHousehold ? 'linked_household_id' : 'user_id', isHousehold ? householdId : userId)
       .eq('status', 'active');
 
     // Crear nuevo menú
@@ -112,11 +112,11 @@ export async function getActiveMenu(
     // Obtener el perfil para verificar el household
     const { data: profile } = await supabase
       .from('profiles')
-      .select('household_id')
+      .select('linked_household_id')
       .eq('user_id', userId)
       .single();
 
-    const householdId = isHousehold ? profile?.household_id : null;
+    const householdId = isHousehold ? profile?.linked_household_id : null;
 
     // Obtener el menú activo usando el ID correcto
     const { data: menu, error: menuError } = await supabase
@@ -153,7 +153,7 @@ export async function getActiveMenu(
         sunday_dinner:sunday_dinner_id(*)
       `)
       .eq('status', 'active')
-      .eq(isHousehold ? 'household_id' : 'user_id', isHousehold ? householdId : userId)
+      .eq(isHousehold ? 'linked_household_id' : 'user_id', isHousehold ? householdId : userId)
       .single();
 
     if (menuError) throw menuError;
@@ -201,11 +201,11 @@ export async function getMenuHistory(
     // Obtener el perfil para verificar el household
     const { data: profile } = await supabase
       .from('profiles')
-      .select('household_id')
+      .select('linked_household_id')
       .eq('user_id', userId)
       .single();
 
-    const householdId = isHousehold ? profile?.household_id : null;
+    const householdId = isHousehold ? profile?.linked_household_id : null;
 
     // Obtener los menús archivados
     const { data: menus, error: menusError } = await supabase
@@ -241,7 +241,7 @@ export async function getMenuHistory(
         sunday_snack:sunday_snack_id(*),
         sunday_dinner:sunday_dinner_id(*)
       `)
-      .eq(isHousehold ? 'household_id' : 'user_id', isHousehold ? householdId : userId)
+      .eq(isHousehold ? 'linked_household_id' : 'user_id', isHousehold ? householdId : userId)
       .eq('status', 'archived')
       .order('created_at', { ascending: false });
 

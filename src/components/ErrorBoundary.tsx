@@ -63,14 +63,14 @@ export class ErrorBoundary extends Component<Props, State> {
       const { data: { user } } = await supabase.auth.getUser();
       const { data: profile } = await supabase
         .from('profiles')
-        .select('household_id')
+        .select('linked_household_id')
         .eq('user_id', user?.id)
         .single();
       
       const errorLog: ErrorLog = {
         error_message: error.message,
-        stack_trace: error.stack || '',
-        component_stack: errorInfo.componentStack,
+        stack_trace: error.stack || 'No stack trace available',
+        component_stack: errorInfo.componentStack || 'No component stack available',
         user_id: user?.id,
         browser_info: navigator.userAgent,
         created_at: new Date().toISOString(),
@@ -84,7 +84,7 @@ export class ErrorBoundary extends Component<Props, State> {
           platform: navigator.platform
         },
         severity: this.determineErrorSeverity(error),
-        household_id: profile?.household_id,
+        household_id: profile?.linked_household_id,
       };
 
       const { error: supabaseError } = await supabase

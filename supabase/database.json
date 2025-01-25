@@ -46,6 +46,15 @@
   },
   {
     "table_schema": "public",
+    "constraint_name": "chat_history_recipe_id_fkey",
+    "table_name": "chat_history",
+    "column_name": "recipe_id",
+    "foreign_table_schema": "public",
+    "foreign_table_name": "recipes",
+    "foreign_column_name": "id"
+  },
+  {
+    "table_schema": "public",
     "constraint_name": "shopping_list_items_menu_id_fkey",
     "table_name": "shopping_list_items",
     "column_name": "menu_id",
