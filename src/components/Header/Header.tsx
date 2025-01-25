@@ -51,7 +51,10 @@ export function Header({
       <header className="fixed top-0 inset-x-0 z-50 bg-gradient-to-r from-orange-400 via-pink-500 to-rose-500 hidden md:block">
         <div className="container mx-auto px-4">
           <div className="flex items-center justify-between h-16">
-            <div className="flex items-center space-x-3">
+            <div 
+              onClick={() => navigate('/recetas')}
+              className="flex items-center space-x-3 cursor-pointer hover:opacity-90 transition-opacity"
+            >
               <div className="bg-white/10 p-2 rounded-lg border border-white/20 group hover:bg-white/20 transition-all duration-300">
                 <Leaf size={24} className="text-white transform rotate-45 group-hover:scale-110 transition-transform" />
               </div>
@@ -107,7 +110,10 @@ export function Header({
       <header className="fixed top-0 inset-x-0 z-50 bg-gradient-to-r from-orange-400 via-pink-500 to-rose-500 md:hidden">
         <div className="container mx-auto px-4">
           <div className="flex items-center justify-between h-14">
-            <div className="flex items-center space-x-3">
+            <div 
+              onClick={() => navigate('/recetas')}
+              className="flex items-center space-x-3 cursor-pointer hover:opacity-90 transition-opacity"
+            >
               <div className="bg-white/10 p-2 rounded-lg border border-white/20">
                 <Leaf size={20} className="text-white transform rotate-45" />
               </div>
