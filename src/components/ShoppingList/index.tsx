@@ -9,6 +9,7 @@ import { useShoppingListState } from './hooks/useShoppingListState';
 import { filterAndSortItems, generateExportContent } from './utils/listUtils';
 import { useActiveProfile } from '../../hooks/useActiveProfile';
 import { useShoppingList } from '../../hooks/useShoppingList';
+import { ShoppingListSkeleton } from './components/ShoppingListSkeleton';
 
 interface ShoppingListProps {
   readonly items: ShoppingItem[];
@@ -78,6 +79,11 @@ export function ShoppingList({ items, onToggleItem }: ShoppingListProps) {
       onToggleItem(nombre);
     }
   };
+
+  // Loading state
+  if (loading) {
+    return <ShoppingListSkeleton />;
+  }
 
   return (
     <div className="space-y-6">
