@@ -141,6 +141,11 @@ export function useFavorites(isHouseholdView?: boolean) {
         throw new Error('No favorite ID provided');
       }
 
+      // Verificar que el usuario sea el dueño del favorito
+      if (recipe.user_id !== userId) {
+        throw new Error('No tienes permiso para eliminar este favorito');
+      }
+
       // Actualizar el estado inmediatamente para la UI
       setFavorites(prev => 
         prev.filter(f => f.favorite_id !== recipe.favorite_id)
@@ -149,10 +154,11 @@ export function useFavorites(isHouseholdView?: boolean) {
       const { error } = await supabase
         .from('favorites')
         .delete()
-        .eq('id', recipe.favorite_id);
+        .eq('id', recipe.favorite_id)
+        .eq('user_id', userId); // Asegurar que solo se elimine si el usuario es el dueño
 
       if (error) {
-        await fetchFavorites();
+        await fetchFavorites(); // Recargar en caso de error
         throw error;
       }
 

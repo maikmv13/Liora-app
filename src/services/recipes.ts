@@ -1,21 +1,26 @@
-import { supabase } from '../lib/supabaseClient';
+import { supabase } from '../lib/supabase';
 import type { Recipe, RecipeIngredient, MealCategory, MealType } from '../types';
 
 // Definir las categorías válidas
 const VALID_CATEGORIES: MealCategory[] = [
-  'Ensaladas',
-  'Sopas',
+  'Legumbres',
+  'Aves',
   'Carnes',
+  'Ensaladas',
+  'Fast Food',
+  'Pastas y Arroces',
   'Pescados',
-  'Postres',
+  'Sopas y Cremas',
   'Vegetariano',
-  'Pasta',
-  'Arroces'
+  'Desayuno',
+  'Huevos',
+  'Snack',
+  'Otros'
 ];
 
 const VALID_MEAL_TYPES: MealType[] = [
   'desayuno',
-  'almuerzo',
+  'comida',
   'cena',
   'snack'
 ];
@@ -49,10 +54,10 @@ export async function getRecipeIngredients(recipeName: string) {
 
     // Transform the nested data structure
     const ingredients = data.recipe_ingredients?.map(ri => ({
-      name: ri.ingredients?.name || '',
+      name: ri.ingredient?.name || '',
       quantity: ri.quantity,
       unit: ri.unit,
-      category: ri.ingredients?.category || ''
+      category: ri.ingredient?.category || ''
     })) || [];
 
     return {
@@ -162,7 +167,7 @@ export async function searchRecipes(query: string): Promise<Recipe[]> {
       `);
 
     // Añadir filtros
-    const filters = [];
+    const filters: string[] = [];
 
     // Búsqueda por nombre (usando todos los términos)
     searchTerms.forEach(term => {
@@ -217,8 +222,8 @@ export async function searchRecipes(query: string): Promise<Recipe[]> {
         if (recipe.meal_type.toLowerCase() === term) score += 4;
         
         // Coincidencia en ingredientes
-        recipe.recipe_ingredients?.forEach(ri => {
-          if (ri.ingredients?.name.toLowerCase().includes(term)) score += 2;
+        recipe.recipe_ingredients?.forEach((ri: RecipeIngredient) => {
+          if (ri.ingredient?.name.toLowerCase().includes(term)) score += 2;
         });
       });
       

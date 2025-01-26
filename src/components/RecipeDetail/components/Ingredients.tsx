@@ -32,8 +32,17 @@ function capitalizeText(text: string): string {
 export function Ingredients({ recipe }: IngredientsProps) {
   const [checkedIngredients, setCheckedIngredients] = useState<Set<string>>(new Set());
   const { askAboutStep } = useAI(recipe);
-  const [servings, setServings] = useState(recipe.servings || 1);
+  
+  // Obtener el valor guardado o usar 2 como default
+  const initialServings = Number(localStorage.getItem('preferred_servings')) || 2;
+  const [servings, setServings] = useState(initialServings);
   const multiplier = servings / (recipe.servings || 1);
+
+  // Guardar la preferencia del usuario cuando cambie
+  const handleServingsChange = (newServings: number) => {
+    setServings(newServings);
+    localStorage.setItem('preferred_servings', newServings.toString());
+  };
 
   // Validación temprana
   if (!recipe.recipe_ingredients || recipe.recipe_ingredients.length === 0) {
@@ -71,37 +80,40 @@ export function Ingredients({ recipe }: IngredientsProps) {
   return (
     <div className="bg-white/95 backdrop-blur-sm rounded-2xl shadow-lg border border-rose-100/20">
       <div className="p-6">
-        <div className="flex items-center space-x-3 mb-6">
-          <div className="bg-gradient-to-br from-rose-50 to-orange-50 p-3 rounded-xl shadow-sm border border-rose-100/50">
-            <Soup size={24} className="text-rose-500" />
+        <div className="flex flex-col space-y-4 mb-6">
+          <div className="flex items-center space-x-3">
+            <div className="bg-gradient-to-br from-rose-50 to-orange-50 p-3 rounded-xl shadow-sm border border-rose-100/50">
+              <Soup size={24} className="text-rose-500" />
+            </div>
+            <div className="flex-1">
+              <h2 className="font-semibold text-gray-900 text-lg">Ingredientes</h2>
+              <span className="text-sm text-gray-500">
+                {checkedIngredients.size} de {recipe.recipe_ingredients.length}
+              </span>
+            </div>
           </div>
-          <div className="flex-1">
-            <div className="flex flex-col space-y-2">
-              <div className="flex items-center justify-between">
-                <h2 className="font-semibold text-gray-900 text-lg">Ingredientes</h2>
-                <span className="text-sm text-gray-500">
-                  {checkedIngredients.size} de {recipe.recipe_ingredients.length}
-                </span>
-              </div>
-              <div className="h-1.5 w-full bg-gray-100 rounded-full overflow-hidden">
-                <div 
-                  className="h-full bg-gradient-to-r from-rose-400 to-orange-500 transition-all duration-300"
-                  style={{ width: `${(checkedIngredients.size / recipe.recipe_ingredients.length) * 100}%` }}
-                />
-              </div>
-              <div className="flex items-center justify-end">
-                <div className="flex items-center space-x-2 px-3 py-2 bg-white/90 backdrop-blur-sm rounded-xl border border-rose-100">
-                  <Users size={16} className="text-rose-500" />
-                  <select
-                    value={servings}
-                    onChange={(e) => setServings(Number(e.target.value))}
-                    className="bg-transparent text-gray-900 font-medium focus:outline-none text-sm"
-                  >
-                    {[1, 2, 3, 4, 5, 6, 7, 8].map(num => (
-                      <option key={num} value={num}>{num} personas</option>
-                    ))}
-                  </select>
-                </div>
+
+          <div className="h-1.5 w-full bg-gray-100 rounded-full overflow-hidden">
+            <div 
+              className="h-full bg-gradient-to-r from-rose-400 to-orange-500 transition-all duration-300"
+              style={{ width: `${(checkedIngredients.size / recipe.recipe_ingredients.length) * 100}%` }}
+            />
+          </div>
+
+          <div className="w-full">
+            <div className="flex items-center justify-between w-full px-4 py-3 bg-white/90 backdrop-blur-sm rounded-xl border border-rose-100">
+              <span className="text-sm text-gray-700 font-medium">Cantidades para</span>
+              <div className="flex items-center space-x-2">
+                <Users size={16} className="text-rose-500" />
+                <select
+                  value={servings}
+                  onChange={(e) => handleServingsChange(Number(e.target.value))}
+                  className="bg-transparent text-gray-900 font-medium focus:outline-none text-sm"
+                >
+                  {[1, 2, 3, 4, 5, 6, 7, 8].map(num => (
+                    <option key={num} value={num}>{num} personas</option>
+                  ))}
+                </select>
               </div>
             </div>
           </div>

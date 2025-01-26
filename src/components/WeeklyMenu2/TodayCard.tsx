@@ -27,8 +27,19 @@ export function TodayCard({
 }: TodayCardProps) {
   const navigate = useNavigate();
   const { id, isHousehold } = useActiveProfile();
-  const { favorites, loading: favoritesLoading } = useFavorites(isHousehold);
-  const { menuItems: activeMenuItems, loading: menuLoading } = useActiveMenu(id, false);
+  
+  // Obtener tanto favoritos personales como del household
+  const { 
+    favorites: personalFavorites, 
+    loading: personalLoading 
+  } = useFavorites(false);
+  
+  const { 
+    favorites: householdFavorites, 
+    loading: householdLoading 
+  } = useFavorites(true);
+  
+  const { menuItems: activeMenuItems, loading: menuLoading } = useActiveMenu(id, isHousehold);
   const [expanded, setExpanded] = useState(false);
   
   const today = new Intl.DateTimeFormat('es-ES', { 
@@ -112,25 +123,36 @@ export function TodayCard({
   };
 
   // Unificar la lógica de carga
-  const isLoading = menuLoading || favoritesLoading || !favorites || !activeMenuItems;
-  const hasEnoughFavorites = favorites?.length >= MIN_FAVORITES_FOR_MENU;
-  const hasMenu = menuItems?.length > 0;
+  const isLoading = menuLoading || personalLoading || householdLoading || 
+    !personalFavorites || !householdFavorites || !activeMenuItems;
+  
+  // Si hay menú activo, significa que el household ya tiene suficientes favoritos
+  const hasActiveMenu = menuItems?.length > 0;
+  
+  // Verificar si hay suficientes favoritos solo si no hay menú activo
+  const totalFavorites = isHousehold ? householdFavorites.length : personalFavorites.length;
+  const hasEnoughFavorites = hasActiveMenu || totalFavorites >= MIN_FAVORITES_FOR_MENU;
 
   // Mostrar skeleton mientras cualquier dato está cargando
   if (isLoading) {
     return <MenuSkeleton />;
   }
 
-  // Solo mostrar mensajes cuando tengamos todos los datos
-  if (!isLoading && !hasEnoughFavorites) {
+  // Solo mostrar mensaje de favoritos insuficientes si:
+  // 1. No hay menú activo Y
+  // 2. No hay suficientes favoritos Y
+  // 3. (No es household O no hay menú activo)
+  if (!hasActiveMenu && !hasEnoughFavorites && (!isHousehold || !hasActiveMenu)) {
     return (
       <div className="bg-white/95 backdrop-blur-sm rounded-2xl border border-rose-100 overflow-hidden p-6">
         <h3 className="text-xl font-semibold text-gray-900 mb-2">
           ¡Crea tu primer menú!
         </h3>
         <p className="text-gray-600 mb-4">
-          Necesitas al menos {MIN_FAVORITES_FOR_MENU} recetas favoritas para generar un menú.
-          Actualmente tienes {favorites.length}.
+          {isHousehold 
+            ? `Tu household necesita al menos ${MIN_FAVORITES_FOR_MENU} recetas favoritas para generar un menú. Actualmente tienen ${totalFavorites}.`
+            : `Necesitas al menos ${MIN_FAVORITES_FOR_MENU} recetas favoritas para generar un menú. Actualmente tienes ${totalFavorites}.`
+          }
         </p>
         <button
           onClick={() => navigate('/recipes')}
@@ -142,14 +164,18 @@ export function TodayCard({
     );
   }
 
-  if (!isLoading && hasEnoughFavorites && !hasMenu) {
+  // Solo mostrar mensaje de generar menú si no hay menú activo pero hay suficientes favoritos
+  if (!hasActiveMenu && hasEnoughFavorites) {
     return (
       <div className="bg-white/95 backdrop-blur-sm rounded-2xl border border-rose-100 overflow-hidden p-6">
         <h3 className="text-xl font-semibold text-gray-900 mb-2">
           ¡Genera tu menú semanal!
         </h3>
         <p className="text-gray-600 mb-4">
-          Tienes suficientes recetas favoritas para generar un menú.
+          {isHousehold 
+            ? 'Tu household tiene suficientes recetas favoritas para generar un menú.'
+            : 'Tienes suficientes recetas favoritas para generar un menú.'
+          }
         </p>
         <button
           onClick={() => navigate('/menu/generate')}
@@ -161,6 +187,7 @@ export function TodayCard({
     );
   }
 
+  // Si hay menú activo, mostrar el menú sin importar el número de favoritos
   return (
     <div className="bg-white/95 backdrop-blur-sm rounded-2xl border border-rose-100 shadow-lg overflow-hidden">
       {/* Header */}

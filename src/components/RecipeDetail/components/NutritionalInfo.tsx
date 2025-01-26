@@ -1,5 +1,5 @@
 import React from 'react';
-import { Scale, Flame, Cookie, Beef, Wheat, CircleDot, ChevronDown } from 'lucide-react';
+import { Scale, Flame, Cookie, Beef, Wheat, Egg, Droplets, ChevronDown } from 'lucide-react';
 import type { Recipe } from '../../../types';
 import { AnimatePresence, motion } from 'framer-motion';
 
@@ -12,11 +12,11 @@ interface NutritionalInfoProps {
 export function NutritionalInfo({ recipe, isExpanded, onToggle }: NutritionalInfoProps) {
   const nutritionalInfo = [
     { label: 'Calorías', value: recipe.calories || '0 kcal', icon: Flame, color: 'rose' },
-    { label: 'Proteínas', value: recipe.proteins || '0 g', icon: Cookie, color: 'emerald' },
+    { label: 'Proteínas', value: recipe.proteins || '0 g', icon: Egg, color: 'emerald' },
     { label: 'Carbohidratos', value: recipe.carbohydrates || '0 g', icon: Cookie, color: 'amber' },
     { label: 'Grasas', value: recipe.fats || '0 g', icon: Beef, color: 'blue' },
     { label: 'Fibra', value: recipe.fiber || '0 g', icon: Wheat, color: 'orange' },
-    { label: 'Sodio', value: recipe.sodium || '0 mg', icon: CircleDot, color: 'purple' }
+    { label: 'Sodio', value: recipe.sodium || '0 mg', icon: Droplets, color: 'purple' }
   ];
 
   return (
@@ -31,9 +31,7 @@ export function NutritionalInfo({ recipe, isExpanded, onToggle }: NutritionalInf
           </div>
           <div>
             <h2 className="font-medium text-gray-900">Información Nutricional</h2>
-            <p className="text-sm text-gray-500">
-              {recipe.calories || '0'} kcal • {recipe.proteins || '0'}g proteína
-            </p>
+            <p className="text-sm text-gray-500 text-left">Por persona</p>
           </div>
         </div>
         <ChevronDown 
