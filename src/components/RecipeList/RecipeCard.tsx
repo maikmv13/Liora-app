@@ -1,20 +1,25 @@
 import React, { useState } from 'react';
 import { Clock, Users, ChefHat, Flame, Heart } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-import type { Recipe } from '../../types';
+import type { Recipe, FavoriteRecipe } from '../../types';
 import { categoryColors } from '../../utils/categoryColors';
 import { motion, AnimatePresence } from 'framer-motion';
 import confetti from 'canvas-confetti';
 import { FavoriteAddedNotification } from './FavoriteAddedNotification';
 
 interface RecipeCardProps {
-  recipe: Recipe;
-  favorites: string[];  // Array de IDs de recetas favoritas
-  onClick?: () => void;
-  onToggleFavorite?: () => Promise<void>;
+  recipe: FavoriteRecipe;
+  favorites?: string[];
+  onToggleFavorite: () => void;
 }
 
 export function RecipeCard({ recipe, favorites, onToggleFavorite }: RecipeCardProps) {
+  // Asegurarnos de que tenemos todos los datos necesarios
+  if (!recipe?.id || !recipe?.name) {
+    console.warn('Recipe card received invalid data:', recipe);
+    return null;
+  }
+
   const [imageLoaded, setImageLoaded] = useState(false);
   const [imageError, setImageError] = useState(false);
   const [isAnimating, setIsAnimating] = useState(false);
@@ -22,7 +27,7 @@ export function RecipeCard({ recipe, favorites, onToggleFavorite }: RecipeCardPr
   const [showNotification, setShowNotification] = useState(false);
   const navigate = useNavigate();
   
-  const isFavorite = favorites?.includes(recipe.id);
+  const isFavorite = favorites?.includes(recipe.favorite_id || '');
   
   const colors = categoryColors[recipe.category as keyof typeof categoryColors] || {
     bg: 'bg-gray-50',
@@ -43,7 +48,7 @@ export function RecipeCard({ recipe, favorites, onToggleFavorite }: RecipeCardPr
 
       if (!isFavorite) {
         setShowNotification(true);
-        await onToggleFavorite?.();
+        await onToggleFavorite();
         confetti({
           particleCount: 50,
           spread: 60,
@@ -52,7 +57,7 @@ export function RecipeCard({ recipe, favorites, onToggleFavorite }: RecipeCardPr
         });
       } else {
         setIsRemoving(true);
-        await onToggleFavorite?.();
+        await onToggleFavorite();
       }
 
       setTimeout(() => {

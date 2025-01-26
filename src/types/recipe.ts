@@ -10,18 +10,30 @@ export interface RecipeIngredient extends Omit<DbRecipeIngredient, 'ingredients'
 }
 
 // Actualizamos la interfaz Recipe
-export interface Recipe extends DbRecipe {
+export interface Recipe {
+  id: string;
+  name: string;
+  description?: string;
+  image_url?: string;
+  servings: number;
+  prep_time?: string;  // Cambiado a string porque así está en la DB
+  cook_time?: string;  // Cambiado a string porque así está en la DB
+  meal_type?: string;
+  category?: string;
+  calories?: string;   // Cambiado a string porque así está en la DB
   recipe_ingredients?: RecipeIngredient[];
   isFavorite?: boolean;
-  cuisine_type?: CuisineType;
 }
 
 export interface FavoriteRecipe extends Recipe {
-  created_at: string | null;
-  last_cooked: string | null;
-  notes: string | null;
-  rating: number | null;
-  tags: string[] | null;
+  favorite_id?: string;
+  created_at?: string;
+  last_cooked?: string;
+  notes?: string;
+  rating?: number;
+  tags?: string[];
+  user_id?: string;
+  member_name?: string;
 }
 
 export type MealCategory = Database['public']['Enums']['meal_category'];

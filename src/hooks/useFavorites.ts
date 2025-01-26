@@ -25,10 +25,12 @@ export function useFavorites(isHouseholdView?: boolean) {
           notes,
           rating,
           tags,
-          recipe_id,
           user_id,
-          recipes:recipe_id (*),
-          profiles:user_id (
+          recipe_id,
+          recipes (
+            *
+          ),
+          profiles (
             id,
             full_name,
             user_type,
@@ -38,18 +40,16 @@ export function useFavorites(isHouseholdView?: boolean) {
 
       // Si estamos en vista household y el usuario pertenece a un household
       if (isHouseholdView && profile?.linked_household_id) {
-        // Usar join en lugar de subconsulta
-        query = query
-          .select('*, profiles!inner(*)')
-          .eq('profiles.linked_household_id', profile.linked_household_id);
+        query = query.eq('profiles.linked_household_id', profile.linked_household_id);
       } else {
-        // Vista personal - solo mostrar favoritos del usuario
         query = query.eq('user_id', userId);
       }
 
       const { data: favoritesData, error: favoritesError } = await query;
 
       if (favoritesError) throw favoritesError;
+
+      console.log('Raw favorites data:', favoritesData?.[0]);
 
       const transformedFavorites = favoritesData?.map(fav => ({
         ...fav.recipes,
@@ -60,9 +60,11 @@ export function useFavorites(isHouseholdView?: boolean) {
         rating: fav.rating,
         tags: fav.tags,
         user_id: fav.user_id,
-        member_name: fav.profiles?.full_name
+        member_name: fav.profiles?.full_name,
+        recipe_id: fav.recipe_id
       })) || [];
 
+      console.log('Transformed favorites:', transformedFavorites);
       setFavorites(transformedFavorites);
       setLoading(false);
       setError(null);
