@@ -59,42 +59,23 @@ export function HouseholdSection({ userId, householdId, onUpdate }: HouseholdSec
 
       console.log('Obteniendo miembros para household:', householdId);
 
-      // Hacemos la consulta más simple y directa
+      // Consulta directa sin joins innecesarios
       const { data: householdMembers, error } = await supabase
         .from('profiles')
-        .select('*')
-        .eq('linked_household_id', householdId);
+        .select('id, user_id, full_name, email, linked_household_id')
+        .eq('linked_household_id', householdId)
+        .order('full_name');
 
       if (error) {
         console.error('Error en la consulta:', error);
         throw error;
       }
 
-      console.log('Query realizada:', `SELECT * FROM profiles WHERE linked_household_id = '${householdId}'`);
-      console.log('Miembros obtenidos (raw):', householdMembers);
-
-      if (!householdMembers || householdMembers.length === 0) {
-        console.log('No se encontraron miembros para el household:', householdId);
-      }
-
-      // Verificamos cada miembro
-      const validMembers = householdMembers?.map(member => {
-        console.log('Verificando miembro:', {
-          id: member.id,
-          user_id: member.user_id,
-          household: member.linked_household_id,
-          expectedHousehold: householdId,
-          matches: member.linked_household_id === householdId
-        });
-        return member;
-      }).filter(member => member.linked_household_id === householdId) || [];
-
-      console.log('Miembros válidos finales:', validMembers);
-      setMembers(validMembers);
+      setMembers(householdMembers || []);
+      setLoading(false);
 
     } catch (error) {
       console.error('Error detallado al obtener miembros:', error);
-    } finally {
       setLoading(false);
     }
   };

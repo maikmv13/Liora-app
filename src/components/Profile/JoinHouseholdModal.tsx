@@ -49,8 +49,12 @@ export function JoinHouseholdModal({ onClose, onJoin }: JoinHouseholdModalProps)
 
       if (profileError) throw profileError;
 
-      if (currentProfile?.linked_household_id === householdId) {
-        throw new Error('Ya perteneces a este hogar');
+      if (currentProfile?.linked_household_id) {
+        if (currentProfile.linked_household_id === householdId) {
+          throw new Error('Ya perteneces a este hogar');
+        } else {
+          throw new Error('Ya perteneces a otro hogar. Debes salir primero.');
+        }
       }
 
       // Actualizar el perfil del usuario
@@ -61,16 +65,13 @@ export function JoinHouseholdModal({ onClose, onJoin }: JoinHouseholdModalProps)
 
       if (updateError) throw updateError;
 
-      // Esperar un momento antes de cerrar para asegurar que la actualización se complete
-      setTimeout(() => {
-        onJoin();
-        onClose();
-      }, 1000);
+      // Notificar éxito y cerrar
+      onJoin();
+      onClose();
 
     } catch (error) {
       console.error('Error joining household:', error);
       setError(error instanceof Error ? error.message : 'Error al unirse al hogar');
-    } finally {
       setLoading(false);
     }
   };
