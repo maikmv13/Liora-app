@@ -25,15 +25,47 @@ export function useMenuActions(
     try {
       setIsGenerating(true);
 
+      // Get user's profile to check household
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('linked_household_id')
+        .eq('user_id', userId)
+        .single();
+
       // Verificar que hay suficientes recetas favoritas
-      const { data: favorites } = await supabase
-        .from('favorites')
-        .select('recipe_id, recipes!favorites_recipe_id_fkey (meal_type)')
-        .eq(isHousehold ? 'linked_household_id' : 'user_id', userId);
+      let favorites;
+      if (isHousehold && profile?.linked_household_id) {
+        // Si es un household, obtener favoritos de todos los miembros
+        const { data: householdMembers } = await supabase
+          .from('profiles')
+          .select('user_id')
+          .eq('linked_household_id', profile.linked_household_id);
+
+        if (!householdMembers?.length) {
+          throw new Error('No se encontraron miembros del household');
+        }
+
+        const { data: householdFavorites } = await supabase
+          .from('favorites')
+          .select('recipe_id, recipes!favorites_recipe_id_fkey (meal_type)')
+          .in('user_id', householdMembers.map(member => member.user_id));
+
+        favorites = householdFavorites;
+      } else {
+        // Si es personal, obtener favoritos del usuario
+        const { data: personalFavorites } = await supabase
+          .from('favorites')
+          .select('recipe_id, recipes!favorites_recipe_id_fkey (meal_type)')
+          .eq('user_id', userId);
+
+        favorites = personalFavorites;
+      }
 
       if (!favorites || favorites.length === 0) {
         throw new Error('Necesitas marcar algunas recetas como favoritas antes de generar un menú.');
       }
+
+      console.log('Favoritos encontrados:', favorites);
 
       // Verificar que hay suficientes recetas por tipo
       const recipesByType = favorites.reduce<Record<string, number>>((acc, fav) => {
@@ -43,6 +75,8 @@ export function useMenuActions(
         }
         return acc;
       }, {});
+
+      console.log('Recetas por tipo:', recipesByType);
 
       const requiredPerType = 2;
       const missingTypes = [];
@@ -59,26 +93,19 @@ export function useMenuActions(
         );
       }
 
-      // Get user's profile to check household
-      const { data: profile } = await supabase
-        .from('profiles')
-        .select('linked_household_id')
-        .eq('user_id', userId)
-        .single();
-
       const householdId = isHousehold ? profile?.linked_household_id : null;
 
       // Reset shopping list
       await supabase
         .from('shopping_list_items')
         .delete()
-        .eq(isHousehold ? 'linked_household_id' : 'user_id', householdId || userId);
+        .eq('user_id', userId);
 
       // Archive current menu if exists
       const { data: currentMenu } = await supabase
         .from('weekly_menus')
         .select('id')
-        .eq(isHousehold ? 'linked_household_id' : 'user_id', householdId || userId)
+        .eq(isHousehold ? 'linked_household_id' : 'user_id', isHousehold ? householdId : userId)
         .eq('status', 'active')
         .maybeSingle();
 
@@ -91,17 +118,17 @@ export function useMenuActions(
       
       // Create new menu with correct ownership
       const savedMenu = await createWeeklyMenu(
-        newMenu, 
         userId,
-        isHousehold,
-        householdId
+        recipes,
+        isHousehold
       );
       
       setCurrentMenuId(savedMenu.id);
 
       // Update UI with new menu items
       newMenu.forEach(menuItem => {
-        onAddToMenu(menuItem.recipe as Recipe, menuItem.day, menuItem.meal);
+        const recipe = menuItem.recipe as unknown as Recipe;
+        onAddToMenu(recipe, menuItem.day, menuItem.meal as MealType);
       });
 
       const timestamp = new Date().toISOString();

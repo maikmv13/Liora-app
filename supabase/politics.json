@@ -361,22 +361,32 @@
     },
     {
       "table_schema": "public",
-      "table_name": "weekly_menus",
-      "policy_name": "Users can access their own or household menus",
-      "command": "ALL",
-      "permissive": "PERMISSIVE",
-      "roles": "{public}",
-      "condition": "((auth.uid() = user_id) OR (auth.uid() IN ( SELECT p.user_id\n   FROM profiles p\n  WHERE (p.linked_household_id = weekly_menus.linked_household_id))))",
-      "with_check": null
-    },
-    {
-      "table_schema": "public",
       "table_name": "profiles",
       "policy_name": "Enable basic profile read",
       "command": "SELECT",
       "permissive": "PERMISSIVE",
       "roles": "{authenticated}",
       "condition": "true",
+      "with_check": null
+    },
+    {
+      "table_schema": "public",
+      "table_name": "profiles",
+      "policy_name": "Enable update own profile",
+      "command": "UPDATE",
+      "permissive": "PERMISSIVE",
+      "roles": "{authenticated}",
+      "condition": "(auth.uid() = user_id)",
+      "with_check": "(auth.uid() = user_id)"
+    },
+    {
+      "table_schema": "public",
+      "table_name": "profiles",
+      "policy_name": "Enable delete own profile",
+      "command": "DELETE",
+      "permissive": "PERMISSIVE",
+      "roles": "{authenticated}",
+      "condition": "(auth.uid() = user_id)",
       "with_check": null
     },
     {
@@ -391,32 +401,32 @@
     },
     {
       "table_schema": "public",
-      "table_name": "profiles",
-      "policy_name": "Enable update own profile",
+      "table_name": "weekly_menus",
+      "policy_name": "Users can access their own or household menus",
+      "command": "ALL",
+      "permissive": "PERMISSIVE",
+      "roles": "{authenticated}",
+      "condition": "((auth.uid() = user_id) OR (EXISTS ( SELECT 1\n   FROM profiles p\n  WHERE ((p.user_id = auth.uid()) AND (p.linked_household_id IS NOT NULL) AND (p.linked_household_id = weekly_menus.linked_household_id)))))",
+      "with_check": null
+    },
+    {
+      "table_schema": "public",
+      "table_name": "weekly_menus",
+      "policy_name": "Users can create menus for their household",
+      "command": "INSERT",
+      "permissive": "PERMISSIVE",
+      "roles": "{authenticated}",
+      "condition": null,
+      "with_check": "((auth.uid() = user_id) OR (EXISTS ( SELECT 1\n   FROM profiles p\n  WHERE ((p.user_id = auth.uid()) AND (p.linked_household_id IS NOT NULL) AND (p.linked_household_id = weekly_menus.linked_household_id)))))"
+    },
+    {
+      "table_schema": "public",
+      "table_name": "weekly_menus",
+      "policy_name": "Users can update household menus",
       "command": "UPDATE",
       "permissive": "PERMISSIVE",
       "roles": "{authenticated}",
-      "condition": "auth.uid() = user_id",
-      "with_check": "auth.uid() = user_id"
-    },
-    {
-      "table_schema": "public",
-      "table_name": "profiles",
-      "policy_name": "Enable delete own profile",
-      "command": "DELETE",
-      "permissive": "PERMISSIVE",
-      "roles": "{authenticated}",
-      "condition": "auth.uid() = user_id",
-      "with_check": null
-    },
-    {
-      "table_schema": "public",
-      "table_name": "profiles",
-      "policy_name": "Enable read household members profiles",
-      "command": "SELECT",
-      "permissive": "PERMISSIVE",
-      "roles": "{authenticated}",
-      "condition": "EXISTS (SELECT 1 FROM profiles base_profile WHERE base_profile.user_id = auth.uid() AND base_profile.linked_household_id IS NOT NULL AND base_profile.linked_household_id = profiles.linked_household_id)",
-      "with_check": null
+      "condition": "((auth.uid() = user_id) OR (EXISTS ( SELECT 1\n   FROM profiles p\n  WHERE ((p.user_id = auth.uid()) AND (p.linked_household_id IS NOT NULL) AND (p.linked_household_id = weekly_menus.linked_household_id)))))",
+      "with_check": "((auth.uid() = user_id) OR (EXISTS ( SELECT 1\n   FROM profiles p\n  WHERE ((p.user_id = auth.uid()) AND (p.linked_household_id IS NOT NULL) AND (p.linked_household_id = weekly_menus.linked_household_id)))))"
     }
   ]

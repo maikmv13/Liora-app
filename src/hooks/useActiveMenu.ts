@@ -18,13 +18,13 @@ export function useActiveMenu(userId: string | undefined, isHousehold: boolean) 
   const fetchMenu = useCallback(async (force = false) => {
     const now = Date.now();
     if (!force && lastFetch.current && now - lastFetch.current < CACHE_DURATION) {
-      return; // Usar caché si no ha pasado el tiempo mínimo
+      return;
     }
 
     if (!userId || !recipes.length || !mounted.current) return;
 
     try {
-      // 1. Obtener perfil
+      // 1. Obtener perfil y verificar si pertenece a un household
       const { data: profile } = await supabase
         .from('profiles')
         .select('linked_household_id')
@@ -33,13 +33,14 @@ export function useActiveMenu(userId: string | undefined, isHousehold: boolean) 
 
       if (!mounted.current) return;
 
-      // 2. Obtener menú activo
-      const { data: menu, error: menuError } = await supabase
+      let menuQuery = supabase
         .from('weekly_menus')
         .select(`
           id,
           status,
           created_at,
+          user_id,
+          linked_household_id,
           monday_breakfast_id,
           monday_lunch_id,
           monday_dinner_id,
@@ -69,35 +70,51 @@ export function useActiveMenu(userId: string | undefined, isHousehold: boolean) 
           sunday_dinner_id,
           sunday_snack_id
         `)
-        .eq('status', 'active')
-        .eq(
-          isHousehold ? 'linked_household_id' : 'user_id',
-          isHousehold ? profile?.linked_household_id : userId
-        )
-        .maybeSingle();
+        .eq('status', 'active');
 
-      if (!mounted.current) return;
+      // Si el usuario pertenece a un household, buscamos primero el menú del household
+      if (profile?.linked_household_id) {
+        const { data: householdMenu, error: householdError } = await menuQuery
+          .eq('linked_household_id', profile.linked_household_id)
+          .maybeSingle();
 
-      if (menuError && menuError.code !== 'PGRST116') {
-        throw menuError;
+        if (!householdError && householdMenu) {
+          // Si encontramos un menú de household, lo usamos
+          const transformedItems = transformWeeklyMenuToMenuItems(householdMenu, recipes);
+          setState({
+            menuItems: transformedItems,
+            loading: false,
+            error: null
+          });
+          lastFetch.current = now;
+          return;
+        }
       }
 
-      if (!menu) {
-        setState(prev => ({ ...prev, menuItems: [], loading: false }));
-        return;
+      // Si no hay menú de household o el usuario no pertenece a uno, buscamos el menú personal
+      if (!profile?.linked_household_id) {
+        const { data: personalMenu, error: personalError } = await menuQuery
+          .eq('user_id', userId)
+          .maybeSingle();
+
+        if (!personalError && personalMenu) {
+          const transformedItems = transformWeeklyMenuToMenuItems(personalMenu, recipes);
+          setState({
+            menuItems: transformedItems,
+            loading: false,
+            error: null
+          });
+          lastFetch.current = now;
+          return;
+        }
       }
 
-      // Transformar los datos del menú
-      const transformedItems = transformWeeklyMenuToMenuItems(menu, recipes);
-
-      if (mounted.current) {
-        setState({
-          menuItems: transformedItems,
-          loading: false,
-          error: null
-        });
-        lastFetch.current = now;
-      }
+      // Si no encontramos ningún menú, devolvemos array vacío
+      setState({
+        menuItems: [],
+        loading: false,
+        error: null
+      });
 
     } catch (error) {
       console.error('Error in fetchMenu:', error);
@@ -109,9 +126,9 @@ export function useActiveMenu(userId: string | undefined, isHousehold: boolean) 
         }));
       }
     }
-  }, [userId, isHousehold, recipes]);
+  }, [userId, recipes]);
 
-  // Suscribirse a cambios en el menú
+  // Modificar la suscripción para escuchar cambios tanto en menús personales como de household
   useEffect(() => {
     if (!userId) return;
 

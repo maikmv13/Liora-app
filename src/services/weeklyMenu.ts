@@ -13,46 +13,122 @@ export interface ExtendedWeeklyMenuDB extends WeeklyMenu {
   recipes?: Recipe[];
 }
 
-export async function createWeeklyMenu(
-  menuItems: MenuItem[], 
-  userId: string,
-  isHousehold: boolean,
-  householdId: string | null = null
-): Promise<ExtendedWeeklyMenuDB> {
-  try {
-    // Preparar datos del menú
-    const menuData: Partial<WeeklyMenuInsert> = {
-      created_by: userId,
-      status: 'active',
-      start_date: new Date().toISOString(),
-    };
+// Función auxiliar para obtener una receta aleatoria por tipo de comida
+function getRandomRecipe(recipes: Recipe[], mealType: string): Recipe | null {
+  if (!Array.isArray(recipes)) return null;
+  
+  const filteredRecipes = recipes.filter(recipe => recipe.meal_type === mealType);
+  if (filteredRecipes.length === 0) return null;
+  
+  const randomIndex = Math.floor(Math.random() * filteredRecipes.length);
+  return filteredRecipes[randomIndex];
+}
 
-    // Asignar el ID correcto según el contexto
-    if (isHousehold && householdId) {
-      menuData.linked_household_id = householdId;
+async function getHouseholdFavoriteRecipes(householdId: string): Promise<Recipe[]> {
+  try {
+    // 1. Obtener todos los usuarios del household
+    const { data: householdMembers } = await supabase
+      .from('profiles')
+      .select('user_id')
+      .eq('linked_household_id', householdId);
+
+    if (!householdMembers?.length) return [];
+
+    // 2. Obtener los IDs de las recetas favoritas de todos los miembros
+    const { data: favorites } = await supabase
+      .from('favorites')
+      .select('recipe_id')
+      .in('user_id', householdMembers.map(member => member.user_id));
+
+    if (!favorites?.length) return [];
+
+    // 3. Obtener las recetas completas
+    const { data: recipes } = await supabase
+      .from('recipes')
+      .select('*')
+      .in('id', favorites.map(fav => fav.recipe_id));
+
+    return recipes || [];
+  } catch (error) {
+    console.error('Error getting household favorites:', error);
+    return [];
+  }
+}
+
+export async function createWeeklyMenu(
+  userId: string,
+  recipes: Recipe[],
+  isHousehold: boolean = false
+) {
+  try {
+    // 1. Obtener perfil y verificar household
+    const { data: profile } = await supabase
+      .from('profiles')
+      .select('linked_household_id')
+      .eq('user_id', userId)
+      .single();
+
+    // 2. Obtener las recetas correctas según el contexto
+    let menuRecipes: Recipe[] = [];
+    if (profile?.linked_household_id) {
+      // Si es un household, obtener favoritos de todos los miembros
+      menuRecipes = await getHouseholdFavoriteRecipes(profile.linked_household_id);
+      console.log('Recetas del household:', menuRecipes);
     } else {
-      menuData.user_id = userId;
+      // Si es personal, usar las recetas proporcionadas
+      menuRecipes = Array.isArray(recipes) ? recipes : [];
+      console.log('Recetas personales:', menuRecipes);
     }
 
-    // Mapear items del menú a campos de la base de datos
-    menuItems.forEach(item => {
-      const dayKey = Object.entries(DAY_MAPPING).find(([_, value]) => value === item.day)?.[0];
-      const mealKey = MEAL_MAPPING[item.meal];
-      
-      if (dayKey && mealKey) {
-        const fieldName = `${dayKey}_${mealKey}_id` as keyof WeeklyMenuInsert;
-        menuData[fieldName] = item.recipe.id;
-      }
+    if (!menuRecipes.length) {
+      throw new Error('No hay suficientes recetas favoritas para generar el menú');
+    }
+
+    // 3. Archivar menús existentes
+    if (profile?.linked_household_id) {
+      await supabase
+        .from('weekly_menus')
+        .update({ status: 'archived' })
+        .eq('status', 'active')
+        .eq('linked_household_id', profile.linked_household_id);
+    } else {
+      await supabase
+        .from('weekly_menus')
+        .update({ status: 'archived' })
+        .eq('status', 'active')
+        .eq('user_id', userId);
+    }
+
+    // 4. Crear el nuevo menú
+    const menuData = {
+      ...(profile?.linked_household_id 
+        ? { linked_household_id: profile.linked_household_id }
+        : { user_id: userId }
+      ),
+      status: 'active' as const,
+      created_at: new Date().toISOString(),
+    };
+
+    // Añadir las recetas al menú
+    const mealTypes = [
+      { type: 'desayuno', column: 'breakfast' },
+      { type: 'comida', column: 'lunch' },
+      { type: 'snack', column: 'snack' },
+      { type: 'cena', column: 'dinner' }
+    ];
+    const days = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];
+
+    days.forEach(day => {
+      mealTypes.forEach(({ type, column }) => {
+        const recipe = getRandomRecipe(menuRecipes, type);
+        if (recipe) {
+          menuData[`${day}_${column}_id` as keyof typeof menuData] = recipe.id;
+        }
+      });
     });
 
-    // Archivar menú activo existente
-    await supabase
-      .from('weekly_menus')
-      .update({ status: 'archived' })
-      .eq(isHousehold ? 'linked_household_id' : 'user_id', isHousehold ? householdId : userId)
-      .eq('status', 'active');
+    console.log('Menu data a insertar:', menuData);
 
-    // Crear nuevo menú
     const { data: newMenu, error } = await supabase
       .from('weekly_menus')
       .insert(menuData)
@@ -60,9 +136,8 @@ export async function createWeeklyMenu(
       .single();
 
     if (error) throw error;
-    if (!newMenu) throw new Error('Failed to create menu');
-
     return newMenu;
+
   } catch (error) {
     console.error('Error creating weekly menu:', error);
     throw error;

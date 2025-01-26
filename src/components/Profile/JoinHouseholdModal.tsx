@@ -57,15 +57,45 @@ export function JoinHouseholdModal({ onClose, onJoin }: JoinHouseholdModalProps)
         }
       }
 
-      // Actualizar el perfil del usuario
-      const { error: updateError } = await supabase
-        .from('profiles')
-        .update({ linked_household_id: householdId })
-        .eq('user_id', user.id);
+      // Cuando un usuario se une a un household
+      const joinHousehold = async (householdId: string) => {
+        try {
+          // Primero verificamos si ya existe un menú para este household
+          const { data: existingMenu } = await supabase
+            .from('weekly_menus')
+            .select('*')
+            .eq('linked_household_id', householdId)
+            .single();
 
-      if (updateError) throw updateError;
+          // Si no existe, creamos uno nuevo para el household
+          if (!existingMenu) {
+            await supabase
+              .from('weekly_menus')
+              .insert({
+                linked_household_id: householdId,
+                created_at: new Date().toISOString()
+              });
+          }
+
+          // Eliminamos el menú personal del usuario
+          await supabase
+            .from('weekly_menus')
+            .update({ status: 'archived' })
+            .eq('user_id', user.id)
+            .eq('status', 'active');
+
+          // Actualizamos el perfil del usuario
+          await supabase
+            .from('profiles')
+            .update({ linked_household_id: householdId })
+            .eq('user_id', user.id);
+        } catch (error) {
+          console.error('Error joining household:', error);
+        }
+      };
 
       // Notificar éxito y cerrar
+      await joinHousehold(householdId);
       onJoin();
       onClose();
 
