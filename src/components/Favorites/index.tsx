@@ -7,6 +7,7 @@ import { RecipeFilters } from '../RecipeList/RecipeFilters';
 import { useActiveProfile } from '../../hooks/useActiveProfile';
 import { MemberFavoritesList } from './MemberFavoritesList';
 import { useFavorites } from '../../hooks/useFavorites';
+import { RecipeGrid } from './RecipeGrid';
 
 interface FavoritesProps {
   favorites: FavoriteRecipe[];
@@ -16,19 +17,12 @@ interface FavoritesProps {
   onUpdateFavorite: (recipe: FavoriteRecipe) => Promise<void>;
 }
 
-export function Favorites({ 
-  favorites: propFavorites,
-  loading: propLoading,
-  error: propError,
-  onRemoveFavorite,
-  onUpdateFavorite
-}: FavoritesProps) {
-  const { isHousehold } = useActiveProfile();
-  const [selectedCategory, setSelectedCategory] = useState('Todas');
-  const [selectedMealType, setSelectedMealType] = useState<'all' | 'comida' | 'cena'>('all');
-  const [sortBy, setSortBy] = useState<'popular' | 'calories' | 'time' | null>(null);
-  const [searchTerm, setSearchTerm] = useState('');
-  const [viewMode, setViewMode] = useState<'personal' | 'household' | 'members'>('personal');
+export function Favorites() {
+  const { id: userId, profile } = useActiveProfile();
+  const isHousehold = Boolean(profile?.linked_household_id);
+  const [viewMode, setViewMode] = useState<'personal' | 'household' | 'members'>(
+    'personal'
+  );
 
   // Usar el hook useFavorites para cada vista
   const {
@@ -47,27 +41,14 @@ export function Favorites({
 
   useEffect(() => {
     console.log('Favorites props updated:', {
-      favorites: propFavorites,
+      favorites: personalFavorites,
       householdFavorites,
-      loading: propLoading,
-      error: propError,
+      loading: personalLoading,
+      error: personalError,
       isHousehold,
       viewMode
     });
-  }, [propFavorites, householdFavorites, propLoading, propError, isHousehold, viewMode]);
-
-  // Manejar la eliminación según el modo de vista
-  const handleRemoveFavorite = async (recipe: FavoriteRecipe) => {
-    try {
-      if (viewMode === 'personal') {
-        await removePersonalFavorite(recipe);
-      } else {
-        await removeHouseholdFavorite(recipe);
-      }
-    } catch (error) {
-      console.error('Error removing favorite:', error);
-    }
-  };
+  }, [personalFavorites, householdFavorites, personalLoading, personalError, isHousehold, viewMode]);
 
   if (personalLoading || householdLoading) {
     return <div className="text-center py-12">Cargando favoritos...</div>;
@@ -81,75 +62,6 @@ export function Favorites({
     );
   }
 
-  const renderFavorites = () => {
-    // Si estamos en la vista de miembros, renderizar MemberFavoritesList
-    if (viewMode === 'members') {
-      return (
-        <MemberFavoritesList
-          favorites={householdFavorites}
-          onUpdateFavorite={handleRemoveFavorite}
-        />
-      );
-    }
-
-    // Para las otras vistas (personal y household)
-    let recipesToRender = viewMode === 'personal' ? personalFavorites : householdFavorites;
-
-    // Filtrar las recetas que han sido eliminadas
-    recipesToRender = recipesToRender.filter(recipe => recipe.id);
-
-    if (!recipesToRender?.length) {
-      return (
-        <div className="text-center py-12 bg-white/80 backdrop-blur-sm rounded-2xl border border-rose-100/20">
-          <div className="bg-rose-50 w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-4">
-            <Heart size={32} className="text-rose-500" />
-          </div>
-          <p className="text-gray-900 font-medium">
-            {viewMode === 'household' 
-              ? 'No hay recetas favoritas en el household'
-              : 'No hay recetas favoritas personales'
-            }
-          </p>
-        </div>
-      );
-    }
-
-    const filteredRecipes = recipesToRender.filter(recipe => {
-      const matchesCategory = selectedCategory === 'Todas' || recipe.category === selectedCategory;
-      const matchesMealType = selectedMealType === 'all' || recipe.meal_type.toLowerCase() === selectedMealType;
-      const matchesSearch = recipe.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                           recipe.category.toLowerCase().includes(searchTerm.toLowerCase());
-      return matchesCategory && matchesMealType && matchesSearch;
-    });
-
-    const sortedRecipes = [...filteredRecipes].sort((a, b) => {
-      if (sortBy === 'calories') {
-        return parseInt(a.calories || '0') - parseInt(b.calories || '0');
-      }
-      if (sortBy === 'time') {
-        const getMinutes = (time: string) => parseInt(time) || 30;
-        return getMinutes(a.prep_time || '') - getMinutes(b.prep_time || '');
-      }
-      if (sortBy === 'popular') {
-        return (b.rating || 0) - (a.rating || 0);
-      }
-      return new Date(b.created_at || '').getTime() - new Date(a.created_at || '').getTime();
-    });
-
-    return (
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {sortedRecipes.map(recipe => (
-          <RecipeCard
-            key={`${recipe.id}-${recipe.favorite_id}`}
-            recipe={recipe}
-            favorites={recipesToRender.map(f => f.favorite_id)}
-            onToggleFavorite={() => handleRemoveFavorite(recipe)}
-          />
-        ))}
-      </div>
-    );
-  };
-
   return (
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 sm:gap-0">
@@ -161,11 +73,13 @@ export function Favorites({
             <h2 className="text-2xl md:text-3xl font-bold text-gray-900">
               {viewMode === 'household' 
                 ? 'Favoritos del Hogar'
-                : '¡Mis recetas guardadas!'
+                : viewMode === 'members'
+                  ? 'Favoritos por Miembro'
+                  : '¡Mis recetas guardadas!'
               }
             </h2>
             <p className="text-sm md:text-base text-gray-600 mt-1">
-              ❤️ {propFavorites.length} recetas favoritas
+              ❤️ {viewMode === 'personal' ? personalFavorites.length : householdFavorites.length} recetas favoritas
             </p>
           </div>
         </div>
@@ -187,7 +101,7 @@ export function Favorites({
               `}
             >
               <User size={18} />
-              <span className="font-medium">Personal</span>
+              <span className="font-medium">Mías</span>
             </motion.button>
 
             {/* Vista Hogar */}
@@ -223,26 +137,24 @@ export function Favorites({
               `}
             >
               <Users size={18} />
-              <span className="font-medium">Por Miembro</span>
+              <span className="font-medium">Miembros</span>
             </motion.button>
           </div>
         )}
       </div>
 
-      {viewMode !== 'members' && (
-        <RecipeFilters
-          selectedCategory={selectedCategory}
-          selectedMealType={selectedMealType}
-          sortBy={sortBy}
-          searchTerm={searchTerm}
-          onCategoryChange={setSelectedCategory}
-          onMealTypeChange={(mealType) => setSelectedMealType(mealType as 'comida' | 'cena' | 'all')}
-          onSortChange={setSortBy}
-          onSearchChange={setSearchTerm}
+      {/* Contenido según el modo */}
+      {viewMode === 'members' ? (
+        <MemberFavoritesList 
+          favorites={householdFavorites}
+          onUpdateFavorite={removeHouseholdFavorite}
+        />
+      ) : (
+        <RecipeGrid 
+          recipes={viewMode === 'personal' ? personalFavorites : householdFavorites}
+          onRemoveFavorite={viewMode === 'personal' ? removePersonalFavorite : removeHouseholdFavorite}
         />
       )}
-
-      {renderFavorites()}
     </div>
   );
 }

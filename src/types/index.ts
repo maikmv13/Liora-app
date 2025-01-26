@@ -58,6 +58,17 @@ export interface Recipe {
   recipe_ingredients?: RecipeIngredient[];
 }
 
+export interface FavoriteRecipe extends Recipe {
+  favorite_id?: string;
+  created_at?: string;
+  last_cooked?: string;
+  notes?: string;
+  rating?: number;
+  tags?: string[];
+  user_id?: string;
+  member_name?: string;
+}
+
 export interface Favorite {
   id: string;
   user_id: string;

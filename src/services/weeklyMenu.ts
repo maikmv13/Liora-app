@@ -152,7 +152,14 @@ export async function updateMenuRecipe(
 ): Promise<void> {
   try {
     const dayKey = Object.entries(DAY_MAPPING).find(([_, value]) => value === day)?.[0];
-    const mealKey = MEAL_MAPPING[meal];
+    // Mapear el tipo de comida a la columna correcta
+    const mealMapping = {
+      'desayuno': 'breakfast',
+      'comida': 'lunch',
+      'snack': 'snack',
+      'cena': 'dinner'
+    };
+    const mealKey = mealMapping[meal];
     
     if (!dayKey || !mealKey) {
       throw new Error('Invalid day or meal type');
@@ -160,13 +167,27 @@ export async function updateMenuRecipe(
 
     const fieldName = `${dayKey}_${mealKey}_id` as keyof WeeklyMenuUpdate;
     
+    // Primero obtenemos el menú para verificar si existe
+    const { data: menu } = await supabase
+      .from('weekly_menus')
+      .select('id, linked_household_id, user_id')
+      .eq('id', menuId)
+      .single();
+
+    if (!menu) {
+      throw new Error('No hay un menú activo');
+    }
+
+    // Actualizamos el menú
     const { error } = await supabase
       .from('weekly_menus')
       .update({ [fieldName]: recipeId })
-      .eq('id', menuId)
-      .select();
+      .eq('id', menuId);
 
-    if (error) throw error;
+    if (error) {
+      console.error('Error al actualizar el menú:', error);
+      throw error;
+    }
   } catch (error) {
     console.error('Error updating menu recipe:', error);
     throw error;

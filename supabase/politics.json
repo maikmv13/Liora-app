@@ -72,6 +72,16 @@
     {
       "table_schema": "public",
       "table_name": "weekly_menus",
+      "policy_name": "Users can access their own or household menus",
+      "command": "ALL",
+      "permissive": "PERMISSIVE",
+      "roles": "{authenticated}",
+      "condition": "(((auth.uid() = user_id) AND (status = 'active'::menu_status)) OR (EXISTS ( SELECT 1\n   FROM profiles p\n  WHERE ((p.user_id = auth.uid()) AND (p.linked_household_id IS NOT NULL) AND (p.linked_household_id = weekly_menus.linked_household_id)))))",
+      "with_check": "(((auth.uid() = user_id) AND (status = 'active'::menu_status)) OR (EXISTS ( SELECT 1\n   FROM profiles p\n  WHERE ((p.user_id = auth.uid()) AND (p.linked_household_id IS NOT NULL) AND (p.linked_household_id = weekly_menus.linked_household_id)))))"
+    },
+    {
+      "table_schema": "public",
+      "table_name": "weekly_menus",
       "policy_name": "authenticated_users_policy",
       "command": "ALL",
       "permissive": "PERMISSIVE",
@@ -397,16 +407,6 @@
       "permissive": "PERMISSIVE",
       "roles": "{public}",
       "condition": "((auth.uid() = user_id) OR (EXISTS ( SELECT 1\n   FROM (weekly_menus wm\n     JOIN profiles p ON ((p.linked_household_id = wm.linked_household_id)))\n  WHERE ((shopping_list_items.menu_id = wm.id) AND (p.user_id = auth.uid())))))",
-      "with_check": null
-    },
-    {
-      "table_schema": "public",
-      "table_name": "weekly_menus",
-      "policy_name": "Users can access their own or household menus",
-      "command": "ALL",
-      "permissive": "PERMISSIVE",
-      "roles": "{authenticated}",
-      "condition": "((auth.uid() = user_id) OR (EXISTS ( SELECT 1\n   FROM profiles p\n  WHERE ((p.user_id = auth.uid()) AND (p.linked_household_id IS NOT NULL) AND (p.linked_household_id = weekly_menus.linked_household_id)))))",
       "with_check": null
     },
     {
