@@ -1,5 +1,5 @@
 import React from 'react';
-import { Clock, Users, ChefHat, Flame } from 'lucide-react';
+import { Clock, ChefHat } from 'lucide-react';
 import type { Recipe } from '../../../types';
 
 interface QuickInfoProps {
@@ -9,9 +9,9 @@ interface QuickInfoProps {
 export function QuickInfo({ recipe }: QuickInfoProps) {
   return (
     <div className="bg-white/95 backdrop-blur-sm rounded-2xl shadow-lg border border-rose-100/20 p-3 md:p-6">
-      {/* Grid responsivo: 2 columnas en móvil, 4 en desktop */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-2 md:gap-4">
-        {/* Tiempo - Versión móvil más compacta */}
+      {/* Grid de 2 columnas */}
+      <div className="grid grid-cols-2 gap-2 md:gap-4">
+        {/* Tiempo */}
         <div className="bg-gradient-to-br from-amber-50 to-orange-50 rounded-xl p-2 md:p-4 border border-amber-100/50">
           <div className="flex items-center space-x-2">
             <div className="p-1.5 md:p-2 bg-white/50 rounded-lg">
@@ -26,22 +26,7 @@ export function QuickInfo({ recipe }: QuickInfoProps) {
           </div>
         </div>
 
-        {/* Raciones - Versión móvil más compacta */}
-        <div className="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-xl p-2 md:p-4 border border-blue-100/50">
-          <div className="flex items-center space-x-2">
-            <div className="p-1.5 md:p-2 bg-white/50 rounded-lg">
-              <Users size={16} className="text-blue-500" />
-            </div>
-            <div className="flex flex-col">
-              <span className="text-xs md:text-sm font-medium text-blue-700">Porciones</span>
-              <p className="text-sm md:text-lg font-semibold text-blue-900">
-                {recipe.servings}
-              </p>
-            </div>
-          </div>
-        </div>
-
-        {/* Dificultad - Versión móvil más compacta */}
+        {/* Dificultad */}
         <div className="bg-gradient-to-br from-emerald-50 to-teal-50 rounded-xl p-2 md:p-4 border border-emerald-100/50">
           <div className="flex items-center space-x-2">
             <div className="p-1.5 md:p-2 bg-white/50 rounded-lg">
@@ -55,26 +40,9 @@ export function QuickInfo({ recipe }: QuickInfoProps) {
             </div>
           </div>
         </div>
-
-        {/* Calorías - Versión móvil más compacta */}
-        {recipe.calories && (
-          <div className="bg-gradient-to-br from-rose-50 to-pink-50 rounded-xl p-2 md:p-4 border border-rose-100/50">
-            <div className="flex items-center space-x-2">
-              <div className="p-1.5 md:p-2 bg-white/50 rounded-lg">
-                <Flame size={16} className="text-rose-500" />
-              </div>
-              <div className="flex flex-col">
-                <span className="text-xs md:text-sm font-medium text-rose-700">Calorías</span>
-                <p className="text-sm md:text-lg font-semibold text-rose-900">
-                  {recipe.calories}
-                </p>
-              </div>
-            </div>
-          </div>
-        )}
       </div>
 
-      {/* Tags - Versión móvil más compacta */}
+      {/* Tags */}
       {recipe.tags && recipe.tags.length > 0 && (
         <div className="mt-3 md:mt-4 flex flex-wrap gap-1.5 md:gap-2">
           {recipe.tags.map((tag: string, index: number) => (

@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { ShoppingItem } from '../types';
 import { generateShoppingList } from '../services/shoppingList';
 import { useActiveMenu } from './useActiveMenu';
@@ -10,6 +10,7 @@ export function useShoppingList(userId?: string, isHousehold = false) {
   const [loading, setLoading] = useState(true);
   const { menuItems, loading: menuLoading } = useActiveMenu(userId, isHousehold);
   const { recipes } = useRecipes();
+  const channelRef = useRef<ReturnType<typeof supabase.channel> | null>(null);
 
   // Memoizar la función de generación de lista
   const generateList = useCallback(async () => {
@@ -63,11 +64,18 @@ export function useShoppingList(userId?: string, isHousehold = false) {
       // 4. Generar lista de compra
       const newShoppingList = generateShoppingList(menuItemsWithIngredients);
 
-      // 5. Obtener estado de los items en una sola consulta
+      // 5. Obtener estado de los items usando el menu_id
+      const menuId = menuItems[0]?.menu_id;
+      if (!menuId) {
+        console.warn('No menu ID found, using recipe list without states');
+        setShoppingList(newShoppingList);
+        return;
+      }
+
       const { data: checkedItems } = await supabase
         .from('shopping_list_items')
         .select('*')
-        .eq('user_id', userId);
+        .eq('menu_id', menuId);
 
       // 6. Crear mapa de items marcados para acceso rápido
       const checkedItemsMap = new Map(
@@ -88,9 +96,48 @@ export function useShoppingList(userId?: string, isHousehold = false) {
     } finally {
       setLoading(false);
     }
-  }, [userId, menuItems, isHousehold]);
+  }, [userId, menuItems]);
 
-  // Reducir las llamadas al efecto
+  // Separar la suscripción en su propio efecto
+  useEffect(() => {
+    if (!userId || !isHousehold || !menuItems[0]?.linked_household_id) return;
+
+    // Limpiar la suscripción anterior si existe
+    if (channelRef.current) {
+      supabase.removeChannel(channelRef.current);
+    }
+
+    // Crear nuevo canal
+    const householdId = menuItems[0].linked_household_id;
+    const channel = supabase
+      .channel(`shopping_list_${householdId}`)
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'shopping_list_items',
+          filter: `linked_household_id=eq.${householdId}`
+        },
+        (payload) => {
+          // Recargar la lista cuando haya cambios
+          generateList();
+        }
+      )
+      .subscribe();
+
+    channelRef.current = channel;
+
+    // Cleanup
+    return () => {
+      if (channelRef.current) {
+        supabase.removeChannel(channelRef.current);
+        channelRef.current = null;
+      }
+    };
+  }, [userId, isHousehold, menuItems]);
+
+  // Simplificar a un solo efecto para generar la lista
   useEffect(() => {
     if (!menuLoading) {
       generateList();
@@ -105,43 +152,62 @@ export function useShoppingList(userId?: string, isHousehold = false) {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) return;
 
+      const menuId = menuItems[0]?.menu_id;
+      if (!menuId) {
+        console.error('No menu ID found');
+        return;
+      }
+
       const newChecked = !item.checked;
       const daysArray = item.days ? `{${item.days.join(',')}}` : null;
-      const menuId = menuItems[0]?.menu_id;
 
-      // Preparar los datos base
+      // Primero intentamos encontrar el item existente
+      const { data: existingItem } = await supabase
+        .from('shopping_list_items')
+        .select('id')
+        .eq('menu_id', menuId)
+        .eq('item_name', name)
+        .single();
+
       const itemData = {
-        user_id: user.id,
+        menu_id: menuId,
         item_name: name,
         category: item.category,
         quantity: item.quantity,
         unit: item.unit,
         checked: newChecked,
         days: daysArray,
-        updated_at: new Date().toISOString()
+        updated_at: new Date().toISOString(),
+        user_id: user.id
       };
 
-      // Añadir menu_id solo si existe
-      if (menuId) {
-        Object.assign(itemData, { menu_id: menuId });
+      let error;
+      if (existingItem) {
+        // Si existe, actualizamos
+        ({ error } = await supabase
+          .from('shopping_list_items')
+          .update(itemData)
+          .eq('id', existingItem.id));
+      } else {
+        // Si no existe, insertamos
+        ({ error } = await supabase
+          .from('shopping_list_items')
+          .insert(itemData));
       }
-
-      const { error } = await supabase
-        .from('shopping_list_items')
-        .upsert(itemData);
 
       if (error) {
         console.error('Error updating shopping list item:', error);
         return;
       }
 
-      // Actualizar estado local
+      // Actualizar estado local inmediatamente
       setShoppingList(prev => prev.map(i => {
         if (i.name.toLowerCase() === name.toLowerCase()) {
           return { ...i, checked: newChecked };
         }
         return i;
       }));
+
     } catch (error) {
       console.error('Error toggling item:', error);
     }
@@ -150,22 +216,16 @@ export function useShoppingList(userId?: string, isHousehold = false) {
   const refreshList = async () => {
     setLoading(true);
     try {
-      await refetchRecipes();
-      
-      const { data: { user } } = await supabase.auth.getUser();
-      if (user) {
-        let query = supabase
-          .from('shopping_list_items')
-          .update({ checked: false })
-          .eq('user_id', user.id);
-
-        const menuId = menuItems[0]?.menu_id;
-        if (menuId) {
-          query = query.eq('menu_id', menuId);
-        }
-
-        await query;
+      const menuId = menuItems[0]?.menu_id;
+      if (!menuId) {
+        console.error('No menu ID found');
+        return;
       }
+
+      await supabase
+        .from('shopping_list_items')
+        .update({ checked: false })
+        .eq('menu_id', menuId);
 
       await generateList();
     } catch (error) {
