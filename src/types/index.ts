@@ -26,9 +26,11 @@ export interface WeeklyMenu {
 }
 
 export interface MenuItem {
+  menu_id: string;
+  linked_household_id?: string;
+  recipe: Recipe;
   day: string;
   meal: string;
-  recipe: Recipe;
 }
 
 export interface Ingredient {
@@ -91,6 +93,7 @@ export interface ShoppingItem {
   days: string[];
   purchasedQuantity?: number;
   dailyQuantities?: Record<string, number>;
+  linked_household_id?: string | null;
 }
 
 export interface RecipeCardProps {
