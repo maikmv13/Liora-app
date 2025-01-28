@@ -48,18 +48,6 @@ export interface RecipeIngredient {
   ingredient: Ingredient;
 }
 
-export interface Recipe {
-  id: string;
-  name: string;
-  description?: string;
-  servings: number;
-  prep_time?: number;
-  cook_time?: number;
-  meal_type?: string;
-  category?: string;
-  recipe_ingredients?: RecipeIngredient[];
-}
-
 export interface FavoriteRecipe extends Recipe {
   favorite_id?: string;
   created_at?: string;
@@ -104,5 +92,5 @@ export interface RecipeCardProps {
   onToggleFavorite: () => void;
 }
 
-export * from './recipe';
 export * from './profile';
+export type { Recipe } from './recipe';

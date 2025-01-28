@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import { ChevronRight, Bot, Brain, Apple, Calendar, Heart, ShoppingCart, Sparkles } from 'lucide-react';
+import { motion } from 'framer-motion';
+import { ChevronRight, Brain, Apple, Calendar, ShoppingCart, Sparkles } from 'lucide-react';
 import type { ContextCategory } from '../../../types/ai';
 
 interface QuickSuggestionsProps {

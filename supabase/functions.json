@@ -15,16 +15,19 @@
       "?column?": "CREATE TRIGGER RI_ConstraintTrigger_c_46244 BEFORE DELETE ON weekly_menus FOR EACH ROW EXECUTE FUNCTION \"RI_FKey_check_upd\"();"
     },
     {
-      "?column?": "CREATE TRIGGER RI_ConstraintTrigger_a_46253 BEFORE INSERT ON households FOR EACH ROW EXECUTE FUNCTION \"RI_FKey_noaction_del\"();"
+      "?column?": "CREATE TRIGGER RI_ConstraintTrigger_a_58545 BEFORE INSERT ON households FOR EACH ROW EXECUTE FUNCTION \"RI_FKey_noaction_del\"();"
     },
     {
-      "?column?": "CREATE TRIGGER RI_ConstraintTrigger_a_46254 BEFORE DELETE ON households FOR EACH ROW EXECUTE FUNCTION \"RI_FKey_noaction_upd\"();"
+      "?column?": "CREATE TRIGGER RI_ConstraintTrigger_a_58546 BEFORE DELETE ON households FOR EACH ROW EXECUTE FUNCTION \"RI_FKey_noaction_upd\"();"
     },
     {
       "?column?": null
     },
     {
-      "?column?": "CREATE TRIGGER RI_ConstraintTrigger_c_46256 BEFORE DELETE ON shopping_list_items FOR EACH ROW EXECUTE FUNCTION \"RI_FKey_check_upd\"();"
+      "?column?": "CREATE TRIGGER RI_ConstraintTrigger_c_58548 BEFORE DELETE ON shopping_list_items FOR EACH ROW EXECUTE FUNCTION \"RI_FKey_check_upd\"();"
+    },
+    {
+      "?column?": "CREATE TRIGGER manage_active_menus_trigger BEFORE DELETE ON weekly_menus FOR EACH ROW EXECUTE FUNCTION manage_active_menus();"
     },
     {
       "?column?": null
@@ -490,5 +493,17 @@
     },
     {
       "?column?": "CREATE TRIGGER RI_ConstraintTrigger_c_41626 BEFORE DELETE ON error_logs FOR EACH ROW EXECUTE FUNCTION \"RI_FKey_check_upd\"();"
+    },
+    {
+      "?column?": "CREATE TRIGGER RI_ConstraintTrigger_a_54839 BEFORE INSERT ON recipes FOR EACH ROW EXECUTE FUNCTION \"RI_FKey_noaction_del\"();"
+    },
+    {
+      "?column?": "CREATE TRIGGER RI_ConstraintTrigger_a_54840 BEFORE DELETE ON recipes FOR EACH ROW EXECUTE FUNCTION \"RI_FKey_noaction_upd\"();"
+    },
+    {
+      "?column?": null
+    },
+    {
+      "?column?": "CREATE TRIGGER RI_ConstraintTrigger_c_54842 BEFORE DELETE ON chat_history FOR EACH ROW EXECUTE FUNCTION \"RI_FKey_check_upd\"();"
     }
   ]

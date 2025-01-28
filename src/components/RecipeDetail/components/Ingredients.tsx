@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Soup, Check, Users } from 'lucide-react';
-import type { Recipe, RecipeIngredient, Ingredient } from '../../../types';
+import type { Recipe, RecipeIngredient } from '../../../types';
 import { getUnitPlural } from '../../../utils/getUnitPlural';
 import { useAI } from '../../../hooks/useAI';
 

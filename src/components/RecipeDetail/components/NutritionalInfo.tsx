@@ -1,4 +1,3 @@
-import React from 'react';
 import { Scale, Flame, Cookie, Beef, Wheat, Egg, Droplets, ChevronDown } from 'lucide-react';
 import type { Recipe } from '../../../types';
 import { AnimatePresence, motion } from 'framer-motion';

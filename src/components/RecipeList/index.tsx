@@ -37,7 +37,7 @@ export function RecipeList({
     const matchesCategory = selectedCategory === 'Todas' || recipe.category === selectedCategory;
     const matchesMealType = selectedMealType === 'all' || recipe.meal_type === selectedMealType;
     const matchesSearch = recipe.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         recipe.category.toLowerCase().includes(searchTerm.toLowerCase());
+                         recipe.category?.toLowerCase().includes(searchTerm.toLowerCase()) || false;
     const matchesFavorites = !hideFavorites || !favorites.some(f => f.recipe_id === recipe.id);
     return matchesCategory && matchesMealType && matchesSearch && matchesFavorites;
   });
@@ -50,7 +50,7 @@ export function RecipeList({
     }
     if (sortBy === 'time') {
       const getMinutes = (time: string | null) => time ? parseInt(time) : 0;
-      return getMinutes(a.prep_time) - getMinutes(b.prep_time);
+      return getMinutes(a.prep_time || '0') - getMinutes(b.prep_time || '0');
     }
     return 0;
   });

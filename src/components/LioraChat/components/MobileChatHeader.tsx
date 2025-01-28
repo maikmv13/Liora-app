@@ -1,4 +1,3 @@
-import React from 'react';
 import { ArrowLeft, Bot, Sparkles, Circle, Trash2 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';

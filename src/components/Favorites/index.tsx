@@ -2,12 +2,11 @@ import React, { useState, useEffect } from 'react';
 import { Heart, Users, User } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { FavoriteRecipe } from '../../types';
-import { RecipeCard } from '../RecipeList/RecipeCard';
-import { RecipeFilters } from '../RecipeList/RecipeFilters';
 import { useActiveProfile } from '../../hooks/useActiveProfile';
 import { MemberFavoritesList } from './MemberFavoritesList';
 import { useFavorites } from '../../hooks/useFavorites';
 import { RecipeGrid } from './RecipeGrid';
+import { LoadingFallback } from '../LoadingFallback';
 
 interface FavoritesProps {
   favorites: FavoriteRecipe[];
@@ -51,7 +50,7 @@ export function Favorites() {
   }, [personalFavorites, householdFavorites, personalLoading, personalError, isHousehold, viewMode]);
 
   if (personalLoading || householdLoading) {
-    return <div className="text-center py-12">Cargando favoritos...</div>;
+    return <LoadingFallback />;
   }
 
   if (personalError || householdError) {

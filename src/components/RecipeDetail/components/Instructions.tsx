@@ -1,7 +1,7 @@
-import React, { useState } from 'react';
-import { UtensilsCrossed, Check, ChevronDown, Lightbulb } from 'lucide-react';
+import { useState } from 'react';
+import { UtensilsCrossed, Check, Lightbulb } from 'lucide-react';
 import type { Recipe } from '../../../types';
-import { AnimatePresence, motion } from 'framer-motion';
+import { motion } from 'framer-motion';
 import { useAI } from '../../../hooks/useAI';
 
 type InstructionsProps = Readonly<{

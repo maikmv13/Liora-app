@@ -1,6 +1,5 @@
-import React, { useRef, useEffect, useState } from 'react';
+import React, { useRef, useState } from 'react';
 import { Send, Sparkles, Smile } from 'lucide-react';
-import { motion, AnimatePresence } from 'framer-motion';
 import data from '@emoji-mart/data';
 import Picker from '@emoji-mart/react';
 import { QuickSuggestions } from './QuickSuggestions';

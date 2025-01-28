@@ -261,16 +261,6 @@
     },
     {
       "table_schema": "public",
-      "table_name": "shopping_list_items",
-      "policy_name": "Users can access shopping list",
-      "command": "ALL",
-      "permissive": "PERMISSIVE",
-      "roles": "{public}",
-      "condition": "((auth.uid() = user_id) OR (linked_household_id IN ( SELECT profiles.linked_household_id\n   FROM profiles\n  WHERE ((profiles.user_id = auth.uid()) AND (profiles.linked_household_id IS NOT NULL)))))",
-      "with_check": null
-    },
-    {
-      "table_schema": "public",
       "table_name": "weekly_menus",
       "policy_name": "Enable read for users and nutritionists",
       "command": "SELECT",
@@ -317,6 +307,16 @@
       "permissive": "PERMISSIVE",
       "roles": "{public}",
       "condition": "((auth.uid() = user_id) OR (auth.uid() = created_by) OR (EXISTS ( SELECT 1\n   FROM profiles\n  WHERE ((profiles.user_id = auth.uid()) AND (profiles.user_type = 'nutritionist'::text)))))",
+      "with_check": null
+    },
+    {
+      "table_schema": "public",
+      "table_name": "shopping_list_items",
+      "policy_name": "Users can access shopping list",
+      "command": "ALL",
+      "permissive": "PERMISSIVE",
+      "roles": "{public}",
+      "condition": "((auth.uid() = user_id) OR ((user_id IS NULL) AND (linked_household_id IN ( SELECT profiles.linked_household_id\n   FROM profiles\n  WHERE ((profiles.user_id = auth.uid()) AND (profiles.linked_household_id IS NOT NULL))))))",
       "with_check": null
     },
     {
