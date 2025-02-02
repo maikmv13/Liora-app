@@ -105,31 +105,14 @@ function AppContent() {
 
   // Actualizar activeTab basado en la ruta actual
   useEffect(() => {
-    const getActiveTab = () => {
-      const path = location.pathname;
-      
-      switch (path) {
-        case '/recetas':
-          return 'recetas';
-        case '/favoritos':
-          return 'favoritos';
-        case '/menu':
-          return 'menu';
-        case '/compra':
-          return 'compra';
-        case '/salud':
-          return 'salud';
-        case '/profile':
-          return 'profile';
-        case path.match(/^\/recipe\//)?.input:
-          return 'recetas';
-        default:
-          return 'recetas';
-      }
-    };
-
-    const newTab = getActiveTab();
-    setActiveTab(newTab);
+    const path = location.pathname.slice(1); // Remove leading slash
+    if (path.startsWith('recipe/')) {
+      setActiveTab('recetas');
+    } else if (path === '') {
+      setActiveTab('recetas');
+    } else {
+      setActiveTab(path);
+    }
   }, [location.pathname]);
 
   // Touch and mouse events for lateral scroll
@@ -229,12 +212,12 @@ function AppContent() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-rose-50 to-orange-50 relative">
       <Header
-        searchTerm={searchTerm}
-        onSearchChange={setSearchTerm}
         activeTab={activeTab}
         onTabChange={setActiveTab}
-        onLogin={() => setOnboardingCompleted(false)}
+        searchTerm={searchTerm}
+        onSearch={setSearchTerm}
         user={user}
+        onLogin={() => setOnboardingCompleted(false)}
         onProfile={() => setActiveTab('profile')}
       />
 

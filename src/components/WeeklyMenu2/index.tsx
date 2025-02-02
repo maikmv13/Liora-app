@@ -4,7 +4,6 @@ import { ExtendedWeeklyMenuDB } from '../../services/weeklyMenu';
 import { TodayCard } from './TodayCard';
 import { MobileView } from './MobileView';
 import { DesktopView } from './DesktopView';
-import { Header } from './Header';
 import { MenuHistory } from './MenuHistory';
 import { useMenuActions } from '../../hooks/useMenuActions';
 import { useRecipes } from '../../hooks/useRecipes';
@@ -225,12 +224,6 @@ export function WeeklyMenu2() {
 
       {/* Contenedor principal */}
       <div>
-        {/* Header */}
-        <Header
-          className="mb-6"
-          lastGenerated={lastGenerated}
-        />
-
         {/* Main content */}
         <div className="relative mb-6">
           {menuLoading ? (

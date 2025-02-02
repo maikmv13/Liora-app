@@ -21,28 +21,28 @@ export function LeagueProgress({ currentLeague, currentLevel, totalXP, onShowLev
 
   return (
     <div className="bg-white/90 backdrop-blur-sm rounded-2xl shadow-xl p-6 md:p-8">
-      {/* Barra de progreso mejorada con efectos de energía */}
+      {/* Barra de progreso mejorada */}
       <div className="mb-6 md:mb-8">
         <div className="relative">
           {/* Aura de energía */}
-          <div className="absolute inset-0 bg-gradient-to-r from-violet-200/20 via-fuchsia-300/20 to-purple-200/20 rounded-full animate-pulse" />
+          <div className="absolute inset-0 bg-gradient-to-r from-violet-200/20 via-fuchsia-300/20 to-purple-200/20 rounded-full" />
           
           {/* Barra de progreso principal */}
           <div className="relative h-4 bg-gray-100 rounded-full overflow-hidden">
             <div
-              className="h-full bg-gradient-to-r from-violet-400 via-fuchsia-500 to-purple-500 transition-all duration-300"
+              className="h-full bg-gradient-to-r from-violet-400 via-fuchsia-500 to-purple-500"
               style={{ width: `${totalProgress}%` }}
             >
-              {/* Efectos visuales */}
-              <div className="absolute inset-0 bg-[linear-gradient(45deg,_rgba(255,255,255,0.2)_25%,_transparent_25%,_transparent_50%,_rgba(255,255,255,0.2)_50%,_rgba(255,255,255,0.2)_75%,_transparent_75%)] bg-[length:1rem_1rem] animate-[shimmer_1s_infinite_linear]" />
+              {/* Patrón estático */}
+              <div className="absolute inset-0 bg-[linear-gradient(45deg,_rgba(255,255,255,0.2)_25%,_transparent_25%,_transparent_50%,_rgba(255,255,255,0.2)_50%,_rgba(255,255,255,0.2)_75%,_transparent_75%)] bg-[length:1rem_1rem]" />
             </div>
 
-            {/* Orbe de poder */}
+            {/* Orbe de poder (estático) */}
             <div
-              className="absolute top-1/2 -translate-y-1/2 -translate-x-1/2 transition-all duration-300"
+              className="absolute top-1/2 -translate-y-1/2 -translate-x-1/2"
               style={{ left: `${totalProgress}%` }}
             >
-              <div className="w-6 h-6 rounded-full bg-gradient-to-br from-violet-400 to-fuchsia-500 border-2 border-white shadow-[0_0_15px_rgba(139,92,246,0.5)] animate-pulse" />
+              <div className="w-6 h-6 rounded-full bg-gradient-to-br from-violet-400 to-fuchsia-500 border-2 border-white shadow-[0_0_15px_rgba(139,92,246,0.5)]" />
             </div>
           </div>
         </div>

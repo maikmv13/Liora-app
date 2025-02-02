@@ -9,6 +9,11 @@ import { motion, AnimatePresence } from 'framer-motion';
 interface HeaderProps {
   activeTab: string;
   onTabChange: (tab: string) => void;
+  onSearch?: (term: string) => void;
+  searchTerm?: string;
+  user?: User | null;
+  onLogin?: () => void;
+  onProfile?: () => void;
 }
 
 const HEALTH_TABS = [
@@ -25,14 +30,20 @@ const ROUTE_STYLES = {
   'salud': { gradient: 'from-purple-400 to-violet-500' }
 };
 
-export function Header({ activeTab }: HeaderProps) {
+export function Header({ activeTab, onTabChange, onSearch, searchTerm, user, onLogin, onProfile }: HeaderProps) {
   const [showSearch, setShowSearch] = useState(false);
   const location = useLocation();
   const navigate = useNavigate();
 
   // Determinar si estamos en la sección de salud y qué subsección
   const isHealthSection = location.pathname === '/salud';
+  const isRecipeDetail = location.pathname.startsWith('/recipe/');
   const healthTab = location.hash.slice(1) || 'health';
+
+  // Función para manejar el regreso
+  const handleBack = () => {
+    navigate(-1); // Esto nos llevará a la página anterior
+  };
 
   // Obtener el estilo correcto basado en la ruta o pestaña de salud
   const getStyle = () => {
@@ -46,6 +57,25 @@ export function Header({ activeTab }: HeaderProps) {
   };
 
   const { gradient } = getStyle();
+
+  // Función para obtener el título basado en activeTab
+  const getTitle = () => {
+    if (isHealthSection) {
+      return HEALTH_TABS.find(tab => tab.id === healthTab)?.label;
+    }
+    
+    switch (activeTab) {
+      case 'menu':
+        return 'Menú';
+      case 'compra':
+        return 'Lista de Compra';
+      case 'favoritos':
+        return 'Favoritos';
+      case 'recetas':
+      default:
+        return 'Recetas';
+    }
+  };
 
   return (
     <header className="fixed top-0 inset-x-0 z-50">
@@ -63,9 +93,9 @@ export function Header({ activeTab }: HeaderProps) {
             <div className="flex items-center justify-between h-14">
               {/* Logo y Título */}
               <div className="flex items-center space-x-3">
-                {isHealthSection ? (
+                {isHealthSection || isRecipeDetail ? (
                   <button
-                    onClick={() => navigate('/recetas')}
+                    onClick={handleBack}
                     className="p-2 hover:bg-gray-100 rounded-xl transition-colors"
                   >
                     <ArrowLeft className="w-6 h-6 text-gray-600" />
@@ -85,7 +115,7 @@ export function Header({ activeTab }: HeaderProps) {
                     initial={{ opacity: 0, y: -10 }}
                     animate={{ opacity: 1, y: 0 }}
                   >
-                    {isHealthSection ? HEALTH_TABS.find(tab => tab.id === healthTab)?.label : 'Recetas'}
+                    {isRecipeDetail ? 'Receta' : getTitle()}
                   </motion.h1>
                   {isHealthSection && (
                     <motion.div 

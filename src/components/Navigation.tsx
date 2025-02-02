@@ -47,6 +47,17 @@ export function Navigation({ activeTab, onTabChange, onHealthTabChange }: Naviga
   const location = useLocation();
   const navigate = useNavigate();
 
+  // Determinar si estamos en la sección de salud y qué subsección
+  const isHealthSection = location.pathname === '/salud';
+  const healthTab = location.hash.slice(1) || 'health';
+
+  // Mover el useEffect aquí, antes de cualquier return
+  useEffect(() => {
+    if (isHealthSection && onHealthTabChange) {
+      onHealthTabChange(healthTab);
+    }
+  }, [healthTab, isHealthSection, onHealthTabChange]);
+
   // No mostrar en páginas de recetas individuales
   if (location.pathname.startsWith('/recipe/')) return null;
 
@@ -55,10 +66,6 @@ export function Navigation({ activeTab, onTabChange, onHealthTabChange }: Naviga
     navigate(`/${id}`);
     setIsOpen(false);
   };
-
-  // Determinar si estamos en la sección de salud y qué subsección
-  const isHealthSection = location.pathname === '/salud';
-  const healthTab = location.hash.slice(1) || 'health';
 
   // Obtener el icono y color correctos para el botón flotante
   const getCurrentIconAndColor = () => {
@@ -77,13 +84,6 @@ export function Navigation({ activeTab, onTabChange, onHealthTabChange }: Naviga
   };
 
   const { Icon, color } = getCurrentIconAndColor();
-
-  // Manejar cambios en el hash para actualizar el tab de salud
-  useEffect(() => {
-    if (isHealthSection && onHealthTabChange) {
-      onHealthTabChange(healthTab);
-    }
-  }, [healthTab, isHealthSection, onHealthTabChange]);
 
   return (
     <>

@@ -8,6 +8,34 @@ interface DashboardHeaderProps {
   onShowLevels: () => void;
 }
 
+const shimmerKeyframes = `
+  @keyframes shimmer {
+    0% {
+      transform: translateX(0%);
+    }
+    100% {
+      transform: translateX(50%);
+    }
+  }
+`;
+
+const glowKeyframes = `
+  @keyframes glow {
+    0%, 100% {
+      opacity: 0.6;
+    }
+    50% {
+      opacity: 0.8;
+    }
+  }
+`;
+
+if (typeof document !== 'undefined') {
+  const style = document.createElement('style');
+  style.textContent = shimmerKeyframes + glowKeyframes;
+  document.head.appendChild(style);
+}
+
 export function DashboardHeader({ onShowLevels }: DashboardHeaderProps) {
   const { getLevel, totalXP } = useHealth();
   const { league, level } = getLevel();
@@ -21,7 +49,7 @@ export function DashboardHeader({ onShowLevels }: DashboardHeaderProps) {
   const xpToNextLeague = nextLeague ? nextLeague.minXP - totalXP : 0;
 
   return (
-    <div className="relative overflow-hidden rounded-t-2xl">
+    <div className="relative overflow-hidden rounded-2xl rounded-b-3xl">
       {/* Background Image with Overlay */}
       <div className="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1519834785169-98be25ec3f84?auto=format&fit=crop&q=80')] bg-cover bg-top">
         <div className="absolute inset-0 bg-gradient-to-br from-violet-600/90 via-indigo-600/80 to-purple-800/90" />
@@ -59,7 +87,7 @@ export function DashboardHeader({ onShowLevels }: DashboardHeaderProps) {
             </motion.div>
             <div>
               <motion.h1 
-                className="text-3xl font-bold bg-gradient-to-r from-white via-white/90 to-white/80 text-transparent bg-clip-text"
+                className="text-2xl font-bold bg-gradient-to-r from-white via-white/90 to-white/80 text-transparent bg-clip-text"
                 initial={{ opacity: 0, y: -20 }}
                 animate={{ opacity: 1, y: 0 }}
               >
@@ -78,25 +106,39 @@ export function DashboardHeader({ onShowLevels }: DashboardHeaderProps) {
         {/* Progress Bar */}
         <div className="mb-6">
           <div className="relative">
-            {/* Aura de energía */}
-            <div className="absolute inset-0 bg-gradient-to-r from-violet-200/20 via-fuchsia-300/20 to-purple-200/20 rounded-full animate-pulse" />
+            {/* Aura de energía (con brillo sutil) */}
+            <div className="absolute inset-0 bg-gradient-to-r from-violet-200/20 via-fuchsia-300/20 to-purple-200/20 rounded-full" />
             
             {/* Barra de progreso principal */}
             <div className="relative h-4 bg-white/10 rounded-full overflow-hidden backdrop-blur-sm">
               <div
-                className="h-full bg-gradient-to-r from-violet-400 via-fuchsia-500 to-purple-500 transition-all duration-300"
+                className="h-full bg-gradient-to-r from-violet-400 via-fuchsia-500 to-purple-500"
                 style={{ width: `${totalProgress}%` }}
               >
-                {/* Efectos visuales */}
-                <div className="absolute inset-0 bg-[linear-gradient(45deg,_rgba(255,255,255,0.2)_25%,_transparent_25%,_transparent_50%,_rgba(255,255,255,0.2)_50%,_rgba(255,255,255,0.2)_75%,_transparent_75%)] bg-[length:1rem_1rem] animate-[shimmer_1s_infinite_linear]" />
+                {/* Patrón con movimiento continuo y lento */}
+                <div 
+                  className="absolute inset-0 bg-[linear-gradient(45deg,_rgba(255,255,255,0.2)_25%,_transparent_25%,_transparent_50%,_rgba(255,255,255,0.2)_50%,_rgba(255,255,255,0.2)_75%,_transparent_75%)] bg-[length:1rem_1rem]"
+                  style={{
+                    animation: 'shimmer 8s linear infinite',
+                    backgroundSize: '24px 24px'
+                  }}
+                />
               </div>
 
-              {/* Orbe de poder */}
+              {/* Orbe de poder (con brillo suave y continuo) */}
               <div
-                className="absolute top-1/2 -translate-y-1/2 -translate-x-1/2 transition-all duration-300"
+                className="absolute top-1/2 -translate-y-1/2 -translate-x-1/2"
                 style={{ left: `${totalProgress}%` }}
               >
-                <div className="w-6 h-6 rounded-full bg-gradient-to-br from-violet-400 to-fuchsia-500 border-2 border-white shadow-[0_0_15px_rgba(139,92,246,0.5)] animate-pulse" />
+                <div className="relative w-6 h-6 rounded-full bg-gradient-to-br from-violet-400 to-fuchsia-500 border-2 border-white shadow-[0_0_15px_rgba(139,92,246,0.3)]">
+                  {/* Brillo interno con animación continua */}
+                  <div 
+                    className="absolute inset-0 rounded-full bg-gradient-to-t from-white/0 via-white/10 to-white/20"
+                    style={{
+                      animation: 'glow 4s ease-in-out infinite'
+                    }}
+                  />
+                </div>
               </div>
             </div>
           </div>
