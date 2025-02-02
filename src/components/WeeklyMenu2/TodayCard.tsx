@@ -42,13 +42,18 @@ export function TodayCard({
   const { menuItems: activeMenuItems, loading: menuLoading } = useActiveMenu(id, isHousehold);
   const [expanded, setExpanded] = useState(false);
   
+  // Formatear el día y la fecha
   const today = new Intl.DateTimeFormat('es-ES', { 
     weekday: 'long'
   }).format(new Date())
-    .toLowerCase() // convertir a minúsculas para comparar
-    .normalize("NFD").replace(/[\u0300-\u036f]/g, ""); // remover acentos
+    .toLowerCase()
+    .normalize("NFD").replace(/[\u0300-\u036f]/g, "");
 
-  const todayFormatted = new Date().toISOString().split('T')[0];
+  const formattedDate = new Intl.DateTimeFormat('es-ES', {
+    day: 'numeric',
+    month: 'long',
+    year: 'numeric'
+  }).format(new Date());
 
   const mealTypes = ['desayuno', 'comida', 'snack', 'cena'];
 
@@ -100,15 +105,15 @@ export function TodayCard({
   const getMealColor = (meal: string): string => {
     switch (meal) {
       case 'desayuno':
-        return 'bg-amber-50 border-amber-100 hover:bg-amber-100/50';
+        return 'bg-amber-100/80 border-amber-200 hover:bg-amber-100';
       case 'comida':
-        return 'bg-orange-50 border-orange-100 hover:bg-orange-100/50';
+        return 'bg-orange-100/80 border-orange-200 hover:bg-orange-100';
       case 'snack':
-        return 'bg-emerald-50 border-emerald-100 hover:bg-emerald-100/50';
+        return 'bg-emerald-100/80 border-emerald-200 hover:bg-emerald-100';
       case 'cena':
-        return 'bg-indigo-50 border-indigo-100 hover:bg-indigo-100/50';
+        return 'bg-indigo-100/80 border-indigo-200 hover:bg-indigo-100';
       default:
-        return 'bg-rose-50 border-rose-100 hover:bg-rose-100/50';
+        return 'bg-rose-100/80 border-rose-200 hover:bg-rose-100';
     }
   };
 
@@ -189,21 +194,26 @@ export function TodayCard({
 
   // Si hay menú activo, mostrar el menú sin importar el número de favoritos
   return (
-    <div className="bg-white/95 backdrop-blur-sm rounded-2xl border border-rose-100 shadow-lg overflow-hidden">
-      {/* Header */}
-      <div className="flex items-center justify-between px-4 py-3 border-b border-rose-100 bg-gradient-to-r from-orange-50 to-rose-50">
-        <div className="flex items-center space-x-2">
-          <div className="bg-rose-100 p-1.5 rounded-lg">
-            <Calendar size={16} className="text-rose-500" />
+    <div className="bg-white/95 backdrop-blur-sm rounded-2xl border border-rose-200 shadow-lg overflow-hidden mt-2">
+      {/* Header Mejorado */}
+      <div className="px-6 py-4 border-b border-rose-200 bg-gradient-to-r from-orange-100 to-rose-100">
+        <div className="flex items-center space-x-4">
+          <div className="bg-white/80 p-3 rounded-xl shadow-sm border border-rose-200">
+            <Calendar size={24} className="text-rose-500" />
           </div>
           <div>
-            <h3 className="text-sm font-medium text-gray-900 capitalize">{today}</h3>
+            <h3 className="text-2xl font-bold text-gray-900 capitalize">
+              {today}
+            </h3>
+            <p className="text-sm font-medium text-gray-600">
+              {formattedDate}
+            </p>
           </div>
         </div>
       </div>
 
       {/* Meals Grid */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 divide-y sm:divide-y-0 sm:divide-x divide-rose-100">
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 divide-y sm:divide-y-0 sm:divide-x divide-rose-200">
         {mealTypes.map((mealType) => {
           const menuItem = menuItems.find(item => item.meal === mealType);
           

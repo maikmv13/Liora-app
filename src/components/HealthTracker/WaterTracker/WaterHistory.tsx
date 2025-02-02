@@ -1,5 +1,6 @@
 import React from 'react';
-import { X, Calendar, Search, Filter, ChevronDown, Droplets } from 'lucide-react';
+import { X, Calendar, Trophy, Flame } from 'lucide-react';
+import { WaterStats } from './WaterStats';
 import type { WaterEntry } from './types';
 
 interface WaterHistoryProps {
@@ -9,29 +10,24 @@ interface WaterHistoryProps {
 }
 
 export function WaterHistory({ entries, dailyGoal, onClose }: WaterHistoryProps) {
-  const [searchTerm, setSearchTerm] = React.useState('');
-  const [selectedMonth, setSelectedMonth] = React.useState('');
-
-  const months = [...new Set(entries.map(entry => 
-    new Date(entry.date).toLocaleDateString('es-ES', { month: 'long', year: 'numeric' })
-  ))];
-
-  const filteredEntries = entries.filter(entry => {
-    const matchesMonth = selectedMonth 
-      ? new Date(entry.date).toLocaleDateString('es-ES', { month: 'long', year: 'numeric' }) === selectedMonth 
-      : true;
-    const matchesSearch = entry.amount.toString().includes(searchTerm);
-    return matchesMonth && matchesSearch;
-  });
+  // Calcular estadísticas
+  const perfectDays = entries.filter(entry => entry.amount >= dailyGoal).length;
+  const currentStreak = entries.reduce((streak, entry) => {
+    return entry.amount >= dailyGoal ? streak + 1 : 0;
+  }, 0);
+  const bestStreak = entries.reduce((best, entry) => {
+    const streak = entries.filter(e => e.amount >= dailyGoal).length;
+    return Math.max(best, streak);
+  }, 0);
 
   return (
     <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-      <div className="bg-white rounded-2xl shadow-xl max-w-2xl w-full">
+      <div className="bg-white rounded-2xl shadow-xl max-w-md w-full">
         <div className="p-4 border-b border-gray-100">
-          <div className="flex justify-between items-center mb-4">
+          <div className="flex justify-between items-center">
             <div className="flex items-center space-x-2">
               <Calendar className="w-5 h-5 text-blue-500" />
-              <h3 className="font-semibold text-gray-900">Historial de hidratación</h3>
+              <h3 className="font-semibold text-gray-900">Historial de Hidratación</h3>
             </div>
             <button
               onClick={onClose}
@@ -40,88 +36,55 @@ export function WaterHistory({ entries, dailyGoal, onClose }: WaterHistoryProps)
               <X className="w-5 h-5 text-gray-500" />
             </button>
           </div>
+        </div>
 
-          <div className="flex flex-col md:flex-row gap-3">
-            <div className="relative flex-1">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
-              <input
-                type="text"
-                placeholder="Buscar por cantidad..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full pl-10 pr-4 py-2 rounded-lg border border-gray-200 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-              />
+        {/* Stats Grid */}
+        <div className="grid grid-cols-3 gap-4 p-4">
+          <div className="bg-blue-50 rounded-xl p-3">
+            <div className="flex items-center space-x-2 mb-1">
+              <Calendar className="w-4 h-4 text-blue-500" />
+              <span className="text-sm text-gray-600">Total</span>
             </div>
-            <select
-              value={selectedMonth}
-              onChange={(e) => setSelectedMonth(e.target.value)}
-              className="px-4 py-2 rounded-lg border border-gray-200 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+            <p className="text-xl font-bold text-gray-900">{entries.length}d</p>
+          </div>
+          <div className="bg-blue-50 rounded-xl p-3">
+            <div className="flex items-center space-x-2 mb-1">
+              <Flame className="w-4 h-4 text-blue-500" />
+              <span className="text-sm text-gray-600">Racha</span>
+            </div>
+            <p className="text-xl font-bold text-gray-900">{currentStreak}d</p>
+          </div>
+          <div className="bg-blue-50 rounded-xl p-3">
+            <div className="flex items-center space-x-2 mb-1">
+              <Trophy className="w-4 h-4 text-blue-500" />
+              <span className="text-sm text-gray-600">Mejor</span>
+            </div>
+            <p className="text-xl font-bold text-gray-900">{perfectDays}d</p>
+          </div>
+        </div>
+
+        {/* Historial */}
+        <div className="p-4 max-h-96 overflow-y-auto">
+          {entries.map((entry, index) => (
+            <div
+              key={entry.date}
+              className="flex items-center justify-between py-2 border-b border-gray-100 last:border-0"
             >
-              <option value="">Todos los meses</option>
-              {months.map(month => (
-                <option key={month} value={month}>{month}</option>
-              ))}
-            </select>
-          </div>
-        </div>
-
-        <div className="max-h-[60vh] overflow-y-auto">
-          <div className="divide-y divide-gray-100">
-            {filteredEntries.map((entry) => {
-              const date = new Date(entry.date);
-              const progress = (entry.amount / dailyGoal) * 100;
-
-              return (
-                <div key={entry.date} className="p-4 hover:bg-gray-50">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center space-x-4">
-                      <div className={`w-12 h-12 rounded-xl flex items-center justify-center ${
-                        progress >= 100
-                          ? 'bg-gradient-to-br from-emerald-400 to-teal-400'
-                          : progress >= 50
-                          ? 'bg-gradient-to-br from-blue-400 to-cyan-400'
-                          : 'bg-gradient-to-br from-gray-100 to-gray-200'
-                      }`}>
-                        <Droplets className={`w-6 h-6 ${
-                          progress >= 50 ? 'text-white' : 'text-gray-500'
-                        }`} />
-                      </div>
-                      <div>
-                        <div className="flex items-center space-x-2">
-                          <span className="text-lg font-semibold text-gray-900">
-                            {entry.amount} ml
-                          </span>
-                          <span className={`text-sm font-medium ${
-                            progress >= 100
-                              ? 'text-emerald-500'
-                              : progress >= 50
-                              ? 'text-blue-500'
-                              : 'text-gray-500'
-                          }`}>
-                            {Math.round(progress)}%
-                          </span>
-                        </div>
-                        <p className="text-sm text-gray-600">
-                          {date.toLocaleDateString('es-ES', {
-                            weekday: 'long',
-                            year: 'numeric',
-                            month: 'long',
-                            day: 'numeric'
-                          })}
-                        </p>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-        </div>
-
-        <div className="p-4 border-t border-gray-100 bg-gray-50">
-          <p className="text-sm text-gray-600">
-            {filteredEntries.length} registro{filteredEntries.length !== 1 ? 's' : ''} encontrado{filteredEntries.length !== 1 ? 's' : ''}
-          </p>
+              <div className="flex items-center space-x-3">
+                <div className={`w-2 h-2 rounded-full ${
+                  entry.amount >= dailyGoal ? 'bg-green-500' : 'bg-gray-300'
+                }`} />
+                <span className="text-gray-600">
+                  {new Date(entry.date).toLocaleDateString()}
+                </span>
+              </div>
+              <span className={`font-medium ${
+                entry.amount >= dailyGoal ? 'text-green-500' : 'text-gray-500'
+              }`}>
+                {entry.amount} ml
+              </span>
+            </div>
+          ))}
         </div>
       </div>
     </div>

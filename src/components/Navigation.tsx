@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { ChefHat, Calendar, ShoppingCart, Activity, Menu, X, ArrowLeft, Heart, Scale, Dumbbell, CheckSquare } from 'lucide-react';
+import { ChefHat, Calendar, ShoppingCart, Activity, Menu, X, ArrowLeft, Heart, Scale, Dumbbell, CheckSquare, Bot } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 interface NavigationProps {
@@ -13,6 +13,7 @@ const MENU_ITEMS = [
   { id: 'recetas', icon: ChefHat, label: 'Recetas', color: 'from-orange-400 to-rose-500' },
   { id: 'menu', icon: Calendar, label: 'Menú', color: 'from-rose-400 to-pink-500' },
   { id: 'compra', icon: ShoppingCart, label: 'Compra', color: 'from-pink-400 to-purple-500' },
+  { id: 'liora', icon: Bot, label: 'Liora AI', color: 'from-indigo-400 to-violet-500' },
   { id: 'salud', icon: Activity, label: 'Objetivos', color: 'from-purple-400 to-violet-500' }
 ];
 
@@ -32,12 +33,13 @@ const menuVariants = {
       duration: 0.2
     }
   },
-  open: (index: number) => ({
+  open: (i: number) => ({
     opacity: 1,
     y: 0,
     transition: {
+      delay: i * 0.1,
       duration: 0.3,
-      delay: index * 0.05
+      ease: "easeOut"
     }
   })
 };
@@ -73,7 +75,7 @@ export function Navigation({ activeTab, onTabChange, onHealthTabChange }: Naviga
       const currentHealthItem = HEALTH_SUBMENU.find(item => item.id === healthTab);
       return {
         Icon: currentHealthItem?.icon || Activity,
-        color: currentHealthItem?.color || MENU_ITEMS[3].color
+        color: currentHealthItem?.color || MENU_ITEMS[4].color
       };
     }
     const currentMenuItem = MENU_ITEMS.find(item => item.id === activeTab);
@@ -116,8 +118,20 @@ export function Navigation({ activeTab, onTabChange, onHealthTabChange }: Naviga
             `
           }}
         >
+          {/* Efecto de ping */}
+          <div className="absolute inset-0 rounded-2xl animate-ping bg-white/20" />
+          
+          {/* Brillo rotatorio */}
+          <div className="absolute inset-0 rounded-2xl bg-gradient-to-r from-white/20 via-transparent to-transparent animate-[spin_2s_linear_infinite]" />
+          
+          {/* Icono */}
           <div className={`relative z-10 bg-gradient-to-br ${color} rounded-xl p-2`}>
-            <Icon className="w-6 h-6 text-white" />
+            <motion.div
+              animate={{ rotate: isOpen ? 90 : 0 }}
+              transition={{ duration: 0.2 }}
+            >
+              <Icon className="w-6 h-6 text-white" />
+            </motion.div>
           </div>
           
           {/* Efecto de brillo en hover */}

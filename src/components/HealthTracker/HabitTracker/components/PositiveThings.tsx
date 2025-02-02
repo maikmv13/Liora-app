@@ -25,41 +25,43 @@ export function PositiveThings({ entries = ['', '', ''], onSave, disabled = fals
   return (
     <div className="relative overflow-hidden rounded-xl bg-white/10 backdrop-blur-md border border-white/20">
       {/* Header */}
-      <button
-        onClick={() => setIsExpanded(!isExpanded)}
-        className="w-full p-4 border-b border-white/10 flex items-center justify-between hover:bg-white/5 transition-colors"
-      >
-        <div className="flex items-center space-x-3">
-          <div className="p-2 bg-white/10 rounded-lg backdrop-blur-sm">
-            <Sparkles className="w-5 h-5 text-amber-300" />
+      <div className="relative">
+        <button
+          onClick={() => setIsExpanded(!isExpanded)}
+          className="w-full p-4 border-b border-white/10 flex items-center justify-between hover:bg-white/5 transition-colors"
+        >
+          <div className="flex items-center space-x-3">
+            <div className="p-2 bg-white/10 rounded-lg backdrop-blur-sm">
+              <Sparkles className="w-5 h-5 text-amber-300" />
+            </div>
+            <div className="text-left">
+              <h3 className="font-medium text-white">Tres Cosas Positivas</h3>
+              {hasEntries && (
+                <p className="text-xs text-amber-200 mt-0.5">
+                  {things.filter(t => t.trim().length > 0).length} registradas hoy
+                </p>
+              )}
+            </div>
           </div>
-          <div className="text-left">
-            <h3 className="font-medium text-white">Tres Cosas Positivas</h3>
-            {hasEntries && (
-              <p className="text-xs text-amber-200 mt-0.5">
-                {things.filter(t => t.trim().length > 0).length} registradas hoy
-              </p>
+          <div className="flex items-center space-x-3">
+            <button
+              type="button"
+              onClick={(e) => {
+                e.stopPropagation();
+                setShowInfo(true);
+              }}
+              className="p-2 hover:bg-white/10 rounded-lg transition-colors text-white/80 hover:text-white"
+            >
+              <Info className="w-5 h-5" />
+            </button>
+            {isExpanded ? (
+              <ChevronUp className="w-5 h-5 text-white/80" />
+            ) : (
+              <ChevronDown className="w-5 h-5 text-white/80" />
             )}
           </div>
-        </div>
-        <div className="flex items-center space-x-3">
-          <button
-            type="button"
-            onClick={(e) => {
-              e.stopPropagation();
-              setShowInfo(true);
-            }}
-            className="p-2 hover:bg-white/10 rounded-lg transition-colors text-white/80 hover:text-white"
-          >
-            <Info className="w-5 h-5" />
-          </button>
-          {isExpanded ? (
-            <ChevronUp className="w-5 h-5 text-white/80" />
-          ) : (
-            <ChevronDown className="w-5 h-5 text-white/80" />
-          )}
-        </div>
-      </button>
+        </button>
+      </div>
 
       {/* Expandable Content */}
       <AnimatePresence>

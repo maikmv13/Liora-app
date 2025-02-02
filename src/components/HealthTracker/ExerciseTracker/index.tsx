@@ -6,6 +6,7 @@ import { Activities } from './components/Activities';
 import { ExerciseEntry } from './types';
 import { useHealth } from '../contexts/HealthContext';
 import { motion, AnimatePresence } from 'framer-motion';
+import { WaterTracker } from '../WaterTracker';
 
 export function ExerciseTracker() {
   const { updateStreak, addXP } = useHealth();
@@ -195,6 +196,11 @@ export function ExerciseTracker() {
             streakDays={streakDays}
           />
         </div>
+      </div>
+
+      {/* Water Tracker Section */}
+      <div className="mt-8 pt-8 border-t border-gray-200">
+        <WaterTracker />
       </div>
 
       {/* Exercise Form Modal */}
