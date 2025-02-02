@@ -87,57 +87,8 @@ export function Navigation({ activeTab, onTabChange, onHealthTabChange }: Naviga
 
   return (
     <>
-      {/* Desktop Navigation */}
-      <nav className="hidden md:block sticky top-0 z-40 bg-white/95 backdrop-blur-md border-b border-rose-100 shadow-sm">
-        <div className="container mx-auto px-4">
-          <div className="flex items-center justify-between">
-            {MENU_ITEMS.map(({ id, icon: Icon, label, color }) => (
-              <motion.button
-                key={id}
-                onClick={() => handleTabChange(id)}
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-                className={`group relative py-4 px-6 transition-all duration-200 ${
-                  activeTab === id
-                    ? 'text-rose-500'
-                    : 'text-gray-600 hover:text-rose-400'
-                }`}
-              >
-                <div className="flex items-center space-x-3">
-                  <div className={`p-2 rounded-xl transition-all duration-300 ${
-                    activeTab === id 
-                      ? 'bg-rose-50' 
-                      : 'group-hover:bg-rose-50/50'
-                  }`}>
-                    <Icon 
-                      size={20} 
-                      className={`transition-all duration-300 ${
-                        activeTab === id 
-                          ? 'transform scale-110' 
-                          : 'group-hover:scale-110'
-                      }`} 
-                    />
-                  </div>
-                  <div className="flex flex-col items-start">
-                    <span className="font-medium">{label}</span>
-                  </div>
-                </div>
-
-                {activeTab === id && (
-                  <motion.div
-                    layoutId="activeIndicator"
-                    className={`absolute bottom-0 left-0 right-0 h-0.5 bg-gradient-to-r ${color}`}
-                    transition={{ type: "spring", bounce: 0.2, duration: 0.6 }}
-                  />
-                )}
-              </motion.button>
-            ))}
-          </div>
-        </div>
-      </nav>
-
       {/* Mobile Floating Navigation */}
-      <div className="fixed md:hidden bottom-6 right-6 z-50">
+      <div className="fixed bottom-6 right-6 z-50">
         <AnimatePresence>
           {isOpen && (
             <motion.div
@@ -149,6 +100,29 @@ export function Navigation({ activeTab, onTabChange, onHealthTabChange }: Naviga
             />
           )}
         </AnimatePresence>
+
+        {/* Menu Button */}
+        <motion.button
+          onClick={() => setIsOpen(!isOpen)}
+          className={`p-4 rounded-2xl bg-white/90 backdrop-blur-lg border border-white/30 relative overflow-hidden group`}
+          whileHover={{ scale: 1.05 }}
+          whileTap={{ scale: 0.95 }}
+          style={{
+            boxShadow: `
+              0 4px 6px -1px rgba(0, 0, 0, 0.1),
+              0 2px 4px -1px rgba(0, 0, 0, 0.06),
+              0 10px 15px -3px rgba(0, 0, 0, 0.1),
+              0 4px 6px -2px rgba(0, 0, 0, 0.05)
+            `
+          }}
+        >
+          <div className={`relative z-10 bg-gradient-to-br ${color} rounded-xl p-2`}>
+            <Icon className="w-6 h-6 text-white" />
+          </div>
+          
+          {/* Efecto de brillo en hover */}
+          <div className="absolute inset-0 bg-gradient-to-r from-white/0 via-white/10 to-white/0 opacity-0 group-hover:opacity-100 transition-opacity" />
+        </motion.button>
 
         {/* Menu Items */}
         <AnimatePresence>
@@ -204,27 +178,6 @@ export function Navigation({ activeTab, onTabChange, onHealthTabChange }: Naviga
             </div>
           )}
         </AnimatePresence>
-
-        {/* Menu Button */}
-        <motion.button
-          whileHover={{ scale: 1.05 }}
-          whileTap={{ scale: 0.95 }}
-          onClick={() => setIsOpen(!isOpen)}
-          className={`relative p-4 rounded-full bg-gradient-to-r ${color} text-white shadow-lg`}
-        >
-          <motion.div
-            animate={{ rotate: isOpen ? 90 : 0 }}
-            transition={{ duration: 0.2 }}
-          >
-            <Icon size={24} />
-          </motion.div>
-
-          {/* Pulse effect */}
-          <div className="absolute inset-0 rounded-full animate-ping bg-white/20" />
-          
-          {/* Rotating glow */}
-          <div className="absolute inset-0 rounded-full bg-gradient-to-r from-white/20 via-transparent to-transparent animate-[spin_2s_linear_infinite]" />
-        </motion.button>
       </div>
     </>
   );
