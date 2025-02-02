@@ -1,9 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { Dumbbell, Plus, Activity, Calendar, Trophy, Target, ChevronRight, Clock, Flame } from 'lucide-react';
-import { ExerciseForm } from './ExerciseForm';
-import { ExerciseMilestones } from './ExerciseMilestones';
+import { ExerciseForm } from './components/ExerciseForm';
+import { ExerciseMilestones } from './components/ExerciseMilestones';
+import { Activities } from './components/Activities';
 import { ExerciseEntry } from './types';
 import { useHealth } from '../contexts/HealthContext';
+import { motion, AnimatePresence } from 'framer-motion';
 
 export function ExerciseTracker() {
   const { updateStreak, addXP } = useHealth();
@@ -70,124 +72,140 @@ export function ExerciseTracker() {
 
   return (
     <div className="space-y-6">
-      {/* Título principal */}
-      <div className="flex items-center space-x-3">
-        <div className="bg-gradient-to-br from-emerald-100 to-teal-100 w-12 h-12 md:w-14 md:h-14 rounded-2xl flex items-center justify-center">
-          <Dumbbell className="w-6 h-6 md:w-7 md:h-7 text-emerald-500" />
-        </div>
-        <div>
-          <h2 className="text-2xl md:text-3xl font-bold text-gray-900">Ejercicio</h2>
-          <p className="text-sm md:text-base text-gray-600 mt-1">
-            Registro de actividad física
-          </p>
-        </div>
-      </div>
-
-      {/* Panel principal */}
-      <div className="bg-gradient-to-br from-emerald-50 to-teal-50 rounded-2xl p-6 border border-emerald-100">
-        <div className="flex items-center justify-between mb-6">
-          <div className="flex items-center space-x-3">
-            <div className="bg-white p-2.5 rounded-xl shadow-sm">
-              <Dumbbell className="w-6 h-6 text-emerald-500" />
-            </div>
-            <div>
-              <h3 className="font-semibold text-gray-900">Ejercicio Diario</h3>
-              <p className="text-sm text-gray-600">
-                Objetivo: {dailyGoal} minutos
-              </p>
-            </div>
-          </div>
-          <button
-            onClick={() => setShowAddForm(true)}
-            className="flex items-center space-x-2 px-4 py-2 bg-gradient-to-r from-emerald-400 to-teal-500 text-white rounded-xl hover:from-emerald-500 hover:to-teal-600 transition-colors shadow-md hover:shadow-lg"
-          >
-            <Plus className="w-5 h-5" />
-            <span>Añadir</span>
-          </button>
-        </div>
-
-        {/* Barra de progreso */}
-        <div className="relative h-8 bg-white rounded-full overflow-hidden mb-6">
-          <div
-            className="absolute inset-y-0 left-0 bg-gradient-to-r from-emerald-400 to-teal-400 transition-all duration-300"
-            style={{ width: `${progress}%` }}
-          >
-            <div className="absolute inset-0 bg-[linear-gradient(45deg,_rgba(255,255,255,0.15)_25%,_transparent_25%,_transparent_50%,_rgba(255,255,255,0.15)_50%,_rgba(255,255,255,0.15)_75%,_transparent_75%)] bg-[size:1rem_1rem] animate-[shimmer_1s_infinite_linear]"></div>
-          </div>
-          <div className="absolute inset-0 flex items-center justify-center">
-            <span className="text-sm font-medium text-gray-700">
-              {totalMinutesToday} / {dailyGoal} min
-            </span>
+      {/* Header Banner */}
+      <div className="relative overflow-hidden rounded-2xl">
+        {/* Background Image with Overlay */}
+        <div className="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1517836357463-d25dfeac3438?auto=format&fit=crop&q=80')] bg-cover bg-center">
+          <div className="absolute inset-0 bg-gradient-to-br from-emerald-600/90 via-green-600/80 to-teal-800/90" />
+          
+          {/* Subtle Pattern Overlay */}
+          <div className="absolute inset-0 opacity-5">
+            <div 
+              className="absolute inset-0" 
+              style={{
+                backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23fff' fill-opacity='1'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")`,
+                backgroundSize: '20px 20px'
+              }}
+            />
           </div>
         </div>
 
-        {/* Lista de ejercicios de hoy */}
-        <div className="space-y-3">
-          {todayExercises.map(exercise => (
-            <div key={exercise.id} className="bg-white p-4 rounded-xl">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center space-x-3">
-                  <div className={`p-2 rounded-lg bg-gradient-to-br ${
-                    exercise.type === 'cardio' ? 'from-rose-400 to-pink-500' :
-                    exercise.type === 'strength' ? 'from-blue-400 to-indigo-500' :
-                    exercise.type === 'flexibility' ? 'from-emerald-400 to-teal-500' :
-                    'from-amber-400 to-orange-500'
-                  }`}>
-                    <Activity className="w-5 h-5 text-white" />
-                  </div>
-                  <div>
-                    <h4 className="font-medium text-gray-900">{exercise.name}</h4>
-                    <div className="flex items-center space-x-2 mt-1">
-                      <div className="flex items-center space-x-1 text-sm text-gray-500">
-                        <Clock className="w-4 h-4" />
-                        <span>{exercise.duration} min</span>
-                      </div>
-                      {exercise.calories && (
-                        <div className="flex items-center space-x-1 text-sm text-gray-500">
-                          <Flame className="w-4 h-4" />
-                          <span>{exercise.calories} kcal</span>
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                </div>
-                <span className={`px-3 py-1 rounded-full text-xs font-medium ${
-                  exercise.intensity === 'low' ? 'bg-green-100 text-green-600' :
-                  exercise.intensity === 'medium' ? 'bg-yellow-100 text-yellow-600' :
-                  'bg-red-100 text-red-600'
-                }`}>
-                  {exercise.intensity === 'low' ? 'Baja' : 
-                   exercise.intensity === 'medium' ? 'Media' : 'Alta'}
-                </span>
+        {/* Content */}
+        <div className="relative p-6 md:p-8">
+          <div className="flex flex-col md:flex-row items-start md:items-center justify-between space-y-4 md:space-y-0">
+            {/* Title Section */}
+            <div className="flex items-center space-x-4">
+              <div className="p-3 bg-white/10 backdrop-blur-sm rounded-xl border border-white/20">
+                <Dumbbell className="w-6 h-6 md:w-8 md:h-8 text-emerald-300" />
+              </div>
+              <div>
+                <h1 className="text-2xl md:text-3xl font-bold text-white">
+                  Registro de Ejercicio
+                </h1>
+                <p className="text-emerald-200 mt-1 flex items-center space-x-2">
+                  <Activity className="w-4 h-4" />
+                  <span>Mantén un estilo de vida activo</span>
+                </p>
               </div>
             </div>
-          ))}
-          {todayExercises.length === 0 && (
-            <div className="text-center py-6 text-gray-500">
-              <Activity className="w-12 h-12 mx-auto mb-2 opacity-50" />
-              <p>No hay ejercicios registrados hoy</p>
-              <p className="text-sm mt-1">¡Comienza a moverte! 💪</p>
+
+            {/* Add Button */}
+            <motion.button
+              onClick={() => setShowAddForm(true)}
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
+              className="group flex items-center space-x-2 px-4 py-2.5 bg-white/10 hover:bg-white/20 backdrop-blur-sm border border-white/20 rounded-xl transition-all duration-300"
+            >
+              <div className="p-1.5 bg-white/20 rounded-lg transition-colors group-hover:bg-white/30">
+                <Plus className="w-4 h-4 text-white" />
+              </div>
+              <span className="font-medium text-white">
+                Registrar Ejercicio
+              </span>
+              <div className="absolute -top-1 -right-1 w-2 h-2 bg-emerald-400 rounded-full animate-ping" />
+            </motion.button>
+          </div>
+
+          {/* Progress Bar */}
+          <div className="mt-8">
+            <div className="flex items-center justify-between mb-2">
+              <div className="flex items-center space-x-2">
+                <Target className="w-4 h-4 text-emerald-300" />
+                <span className="text-sm font-medium text-white">Progreso diario</span>
+              </div>
+              <span className="text-sm text-emerald-200">
+                {totalMinutesToday} / {dailyGoal} min
+              </span>
             </div>
-          )}
+            <div className="relative h-3 bg-white/10 rounded-full overflow-hidden">
+              <motion.div
+                className="absolute inset-y-0 left-0 bg-gradient-to-r from-emerald-400 to-teal-500 transition-all duration-300"
+                style={{ width: `${progress}%` }}
+                initial={{ width: 0 }}
+                animate={{ width: `${progress}%` }}
+              >
+                <div className="absolute inset-0 bg-[linear-gradient(45deg,_rgba(255,255,255,0.2)_25%,_transparent_25%,_transparent_50%,_rgba(255,255,255,0.2)_50%,_rgba(255,255,255,0.2)_75%,_transparent_75%)] bg-[size:1rem_1rem] animate-[shimmer_1s_infinite_linear]" />
+              </motion.div>
+            </div>
+          </div>
+
+          {/* Quick Stats */}
+          <div className="grid grid-cols-3 gap-4 mt-6">
+            <div className="bg-white/10 backdrop-blur-sm rounded-xl p-3 border border-white/20">
+              <div className="flex items-center space-x-2">
+                <Clock className="w-4 h-4 text-emerald-300" />
+                <span className="text-sm text-white">Hoy</span>
+              </div>
+              <p className="text-2xl font-bold text-white mt-1">{totalMinutesToday}m</p>
+            </div>
+            <div className="bg-white/10 backdrop-blur-sm rounded-xl p-3 border border-white/20">
+              <div className="flex items-center space-x-2">
+                <Flame className="w-4 h-4 text-emerald-300" />
+                <span className="text-sm text-white">Racha</span>
+              </div>
+              <p className="text-2xl font-bold text-white mt-1">{streakDays}d</p>
+            </div>
+            <div className="bg-white/10 backdrop-blur-sm rounded-xl p-3 border border-white/20">
+              <div className="flex items-center space-x-2">
+                <Trophy className="w-4 h-4 text-emerald-300" />
+                <span className="text-sm text-white">Mejor</span>
+              </div>
+              <p className="text-2xl font-bold text-white mt-1">{perfectDays}d</p>
+            </div>
+          </div>
         </div>
       </div>
 
-      {/* Logros */}
-      <ExerciseMilestones
-        currentAmount={totalMinutesToday}
-        dailyGoal={dailyGoal}
-        totalDays={entries.length}
-        perfectDays={perfectDays}
-        streakDays={streakDays}
-      />
+      {/* Layout principal */}
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+        {/* Panel izquierdo */}
+        <div className="lg:col-span-8 space-y-6">
+          {/* Historial */}
+          <Activities entries={entries} />
+        </div>
 
-      {/* Modal de formulario */}
-      {showAddForm && (
-        <ExerciseForm
-          onSubmit={handleAddExercise}
-          onClose={() => setShowAddForm(false)}
-        />
-      )}
+        {/* Panel derecho */}
+        <div className="lg:col-span-4">
+          {/* Logros */}
+          <ExerciseMilestones
+            currentAmount={totalMinutesToday}
+            dailyGoal={dailyGoal}
+            totalDays={entries.length}
+            perfectDays={perfectDays}
+            streakDays={streakDays}
+          />
+        </div>
+      </div>
+
+      {/* Exercise Form Modal */}
+      <AnimatePresence>
+        {showAddForm && (
+          <ExerciseForm
+            onSubmit={handleAddExercise}
+            onClose={() => setShowAddForm(false)}
+          />
+        )}
+      </AnimatePresence>
     </div>
   );
 }

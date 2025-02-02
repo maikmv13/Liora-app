@@ -1,6 +1,6 @@
 import React from 'react';
 import { Trophy, Sparkles, Zap, ChevronRight, Brain, Flame } from 'lucide-react';
-import { LEAGUES } from '../contexts/HealthContext';
+import { LEAGUES } from '../../contexts/HealthContext';
 import { LeagueBadges } from './LeagueBadges';
 
 interface LeagueProgressProps {
