@@ -1,67 +1,81 @@
-import React, { useState } from 'react';
-import { CheckSquare, Plus, Settings, Calendar, ChevronDown, ListChecks, Clock } from 'lucide-react';
-import { HabitCard } from './HabitCard';
-import { MoodSelector } from './MoodSelector';
+import React, { useState, useEffect } from 'react';
+import { PlusCircle, History } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { HabitCreator } from './HabitCreator';
-import { PRESET_HABITS } from './HabitCreator/constants';
-import type { Habit, MoodEntry } from './types';
+import { HabitEditor } from './components/HabitEditor';
+import { HabitsBanner } from './components/HabitsBanner';
+import { DailyHabitCard } from './components/DailyHabitCard';
+import { AddEntryModal } from './components/AddEntryModal';
+import { TIME_SLOTS, TimeSlot } from './constants';
+import type { Habit, MoodEntry, DailyEntry } from './types';
 
 export function HabitTracker() {
-  const [expandedCategories, setExpandedCategories] = useState<Record<string, boolean>>({});
-  const [showMyHabits, setShowMyHabits] = useState(false);
-  const [showSettings, setShowSettings] = useState(false);
-  const [showCalendar, setShowCalendar] = useState(false);
   const [showAddHabit, setShowAddHabit] = useState(false);
+  const [editingHabit, setEditingHabit] = useState<Habit | null>(null);
+  const [editingEntry, setEditingEntry] = useState<string | null>(null);
+  const [showAddEntry, setShowAddEntry] = useState(false);
+  const [selectedDate, setSelectedDate] = useState<string>(new Date().toISOString());
   const [habits, setHabits] = useState<Habit[]>(() => {
     const saved = localStorage.getItem('habits');
     return saved ? JSON.parse(saved) : [];
   });
 
-  const [todayEntry] = useState({
-    date: new Date().toISOString(),
-    habits: habits.map(habit => ({
-      id: habit.id,
-      isCompleted: false
-    }))
+  const [dailyEntries, setDailyEntries] = useState<DailyEntry[]>(() => {
+    const saved = localStorage.getItem('habitEntries');
+    return saved ? JSON.parse(saved) : [];
   });
 
-  const [currentMood, setCurrentMood] = useState<MoodEntry | undefined>(() => {
-    const saved = localStorage.getItem('todayMood');
-    return saved ? JSON.parse(saved) : undefined;
-  });
+  useEffect(() => {
+    localStorage.setItem('habitEntries', JSON.stringify(dailyEntries));
+  }, [dailyEntries]);
 
-  const habitsByCategory = habits.reduce((acc, habit) => {
-    if (!acc[habit.category]) {
-      acc[habit.category] = [];
-    }
-    acc[habit.category].push(habit);
-    return acc;
-  }, {} as Record<keyof typeof PRESET_HABITS, Habit[]>);
-
-  const handleCompleteHabit = (date: string, habitId: string, completed: boolean) => {
-    const updatedHabits = habits.map(habit => 
-      habit.id === habitId ? { ...habit, isCompleted: completed } : habit
+  useEffect(() => {
+    const today = new Date().toDateString();
+    const hasToday = dailyEntries.some(entry => 
+      new Date(entry.date).toDateString() === today
     );
-    setHabits(updatedHabits);
-  };
 
-  const toggleCategory = (category: string) => {
-    setExpandedCategories(prev => ({
-      ...prev,
-      [category]: !prev[category]
-    }));
-  };
+    if (!hasToday) {
+      const newEntry: DailyEntry = {
+        date: new Date().toISOString(),
+        habits: habits.map(h => ({ id: h.id, isCompleted: false })),
+        mood: undefined
+      };
+      setDailyEntries(prev => [newEntry, ...prev]);
+    }
+  }, [habits]);
 
-  const handleMoodSelect = (mood: MoodEntry['mood'], intensity: MoodEntry['intensity']) => {
-    const newMood: MoodEntry = {
-      id: Date.now().toString(),
-      date: new Date().toISOString(),
-      mood,
-      intensity
-    };
-    setCurrentMood(newMood);
-    localStorage.setItem('todayMood', JSON.stringify(newMood));
-  };
+  const habitsByTimeSlot = habits.reduce((acc, habit) => {
+    const time = habit.time 
+      ? new Date(`2000-01-01T${habit.time}`).getHours() 
+      : 8; // Default to 8 AM if no time specified
+
+    let slot: TimeSlot;
+    if (time >= TIME_SLOTS.morning.range[0] && time <= TIME_SLOTS.morning.range[1]) {
+      slot = 'morning';
+    } else if (time >= TIME_SLOTS.afternoon.range[0] && time <= TIME_SLOTS.afternoon.range[1]) {
+      slot = 'afternoon';
+    } else {
+      slot = 'evening';
+    }
+
+    if (!acc[slot]) {
+      acc[slot] = [];
+    }
+
+    acc[slot].push(habit);
+
+    return acc;
+  }, {} as Record<TimeSlot, Habit[]>);
+
+  // Sort habits by time within each slot
+  Object.keys(habitsByTimeSlot).forEach(slot => {
+    habitsByTimeSlot[slot as TimeSlot].sort((a, b) => {
+      const timeA = a.time ? new Date(`2000-01-01T${a.time}`).getTime() : 0;
+      const timeB = b.time ? new Date(`2000-01-01T${b.time}`).getTime() : 0;
+      return timeA - timeB;
+    });
+  });
 
   const handleCreateHabit = (habitData: Omit<Habit, 'id' | 'isCompleted'>) => {
     const newHabit: Habit = {
@@ -70,191 +84,200 @@ export function HabitTracker() {
       isCompleted: false
     };
     setHabits(prev => [newHabit, ...prev]);
-    localStorage.setItem('habits', JSON.stringify([newHabit, ...habits]));
+    setShowAddHabit(false);
   };
 
-  // Format today's date in Spanish
-  const today = new Date().toLocaleDateString('es-ES', {
-    weekday: 'long',
-    year: 'numeric',
-    month: 'long',
-    day: 'numeric'
-  });
+  const handleCompleteHabit = (date: string, habitId: string, completed: boolean) => {
+    const entryDate = new Date(date).toDateString();
+    const existingEntryIndex = dailyEntries.findIndex(entry => 
+      new Date(entry.date).toDateString() === entryDate
+    );
+
+    if (existingEntryIndex >= 0) {
+      const updatedEntries = [...dailyEntries];
+      updatedEntries[existingEntryIndex] = {
+        ...updatedEntries[existingEntryIndex],
+        habits: updatedEntries[existingEntryIndex].habits.map(h =>
+          h.id === habitId ? { ...h, isCompleted: completed } : h
+        )
+      };
+      setDailyEntries(updatedEntries);
+    }
+  };
+
+  const handleMoodSelect = (date: string, mood: MoodEntry['mood'], intensity: MoodEntry['intensity']) => {
+    const newMood: MoodEntry = {
+      id: Date.now().toString(),
+      date,
+      mood,
+      intensity
+    };
+
+    const entryDate = new Date(date).toDateString();
+    const existingEntryIndex = dailyEntries.findIndex(entry => 
+      new Date(entry.date).toDateString() === entryDate
+    );
+
+    if (existingEntryIndex >= 0) {
+      const updatedEntries = [...dailyEntries];
+      updatedEntries[existingEntryIndex] = {
+        ...updatedEntries[existingEntryIndex],
+        mood: newMood
+      };
+      setDailyEntries(updatedEntries);
+    }
+  };
+
+  const handleUpdateHabit = (updatedHabit: Habit) => {
+    setHabits(prev => prev.map(h => 
+      h.id === updatedHabit.id ? updatedHabit : h
+    ));
+    setEditingHabit(null);
+  };
+
+  const handleDeleteHabit = (habitId: string) => {
+    setHabits(prev => prev.filter(h => h.id !== habitId));
+    setDailyEntries(prev => prev.map(entry => ({
+      ...entry,
+      habits: entry.habits.filter(h => h.id !== habitId)
+    })));
+  };
+
+  const handleCreateEntry = () => {
+    const entryDate = new Date(selectedDate).toDateString();
+    const existingEntry = dailyEntries.find(entry => 
+      new Date(entry.date).toDateString() === entryDate
+    );
+
+    if (existingEntry) {
+      alert('Ya existe una entrada para esta fecha');
+      return;
+    }
+
+    const newEntry: DailyEntry = {
+      date: selectedDate,
+      habits: habits.map(h => ({ id: h.id, isCompleted: false })),
+      mood: undefined
+    };
+
+    const updatedEntries = [...dailyEntries];
+    const insertIndex = updatedEntries.findIndex(
+      entry => new Date(entry.date) < new Date(selectedDate)
+    );
+    
+    if (insertIndex === -1) {
+      updatedEntries.push(newEntry);
+    } else {
+      updatedEntries.splice(insertIndex, 0, newEntry);
+    }
+
+    setDailyEntries(updatedEntries);
+    setShowAddEntry(false);
+
+    setTimeout(() => {
+      const entryElement = document.querySelector(`[data-entry-date="${selectedDate}"]`);
+      if (entryElement) {
+        entryElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }
+      setEditingEntry(selectedDate);
+    }, 500);
+  };
+
+  const sortedEntries = [...dailyEntries].sort((a, b) => 
+    new Date(b.date).getTime() - new Date(a.date).getTime()
+  );
 
   return (
     <div className="space-y-6">
-      {/* Título principal */}
-      <div className="flex items-center space-x-3">
-        <div className="bg-gradient-to-br from-amber-100 to-orange-100 w-12 h-12 md:w-14 md:h-14 rounded-2xl flex items-center justify-center">
-          <CheckSquare className="w-6 h-6 md:w-7 md:h-7 text-amber-500" />
-        </div>
-        <div>
-          <h2 className="text-2xl md:text-3xl font-bold text-gray-900">Hábitos</h2>
-          <p className="text-sm md:text-base text-gray-600 mt-1">
-            Seguimiento de hábitos diarios
-          </p>
-        </div>
-      </div>
+      <HabitsBanner onAddHabit={() => setShowAddHabit(true)} />
 
-      {/* Mis Hábitos */}
-      <div className="bg-gradient-to-br from-amber-50/80 to-orange-50/80 backdrop-blur-sm rounded-xl shadow-sm border border-amber-100/50">
-        <div className="p-4 border-b border-amber-100/50 flex items-center justify-between">
-          <div className="flex items-center space-x-2">
-            <div className="p-2 bg-gradient-to-br from-amber-400 to-orange-500 rounded-lg text-white">
-              <ListChecks className="w-5 h-5" />
-            </div>
-            <h3 className="font-semibold text-gray-900">Mis hábitos</h3>
+      {/* Today's Entry */}
+      <DailyHabitCard
+        entry={sortedEntries[0] || {
+          date: new Date().toISOString(),
+          habits: habits.map(habit => ({
+            id: habit.id,
+            isCompleted: false
+          })),
+          mood: undefined
+        }}
+        data-entry-date={sortedEntries[0]?.date || new Date().toISOString()}
+        editingEntry={editingEntry}
+        setEditingEntry={setEditingEntry}
+        habitsByTimeSlot={habitsByTimeSlot}
+        handleMoodSelect={handleMoodSelect}
+        handleCompleteHabit={handleCompleteHabit}
+        setEditingHabit={setEditingHabit}
+        isArchived={false}
+      />
+
+      {/* Add Entry Button */}
+      <motion.button
+        onClick={() => setShowAddEntry(true)}
+        whileHover={{ scale: 1.02 }}
+        whileTap={{ scale: 0.98 }}
+        className="w-full p-4 rounded-2xl bg-gradient-to-br from-amber-400/90 to-orange-500/90 text-white shadow-lg hover:shadow-xl transition-all"
+      >
+        <div className="flex items-center justify-center space-x-2">
+          <PlusCircle className="w-5 h-5" />
+          <span className="font-medium">Añadir entrada anterior</span>
+        </div>
+      </motion.button>
+
+      {/* Previous Entries */}
+      {sortedEntries.slice(1).length > 0 && (
+        <div className="space-y-4">
+          <div className="flex items-center space-x-2 px-2">
+            <History className="w-5 h-5 text-gray-400" />
+            <h3 className="text-lg font-medium text-gray-600">Entradas anteriores</h3>
           </div>
-          <div className="flex items-center space-x-2">
-            <div 
-              onClick={() => setShowCalendar(true)}
-              className="p-2 hover:bg-white/50 rounded-lg transition-colors cursor-pointer"
-            >
-              <Calendar className="w-5 h-5 text-gray-500" />
-            </div>
-            <div
-              onClick={() => setShowSettings(true)}
-              className="p-2 hover:bg-white/50 rounded-lg transition-colors cursor-pointer"
-            >
-              <Settings className="w-5 h-5 text-gray-500" />
-            </div>
-            <div
-              onClick={() => setShowAddHabit(true)}
-              className="flex items-center space-x-2 px-4 py-2 bg-gradient-to-r from-amber-400 to-orange-500 text-white rounded-lg hover:from-amber-500 hover:to-orange-600 transition-colors shadow-md hover:shadow-lg cursor-pointer"
-            >
-              <Plus className="w-5 h-5" />
-              <span>Nuevo</span>
-            </div>
-            <div
-              onClick={() => setShowMyHabits(!showMyHabits)}
-              className="p-2 hover:bg-white/50 rounded-lg transition-colors cursor-pointer"
-            >
-              <ChevronDown 
-                className={`w-5 h-5 text-gray-500 transition-transform ${
-                  showMyHabits ? 'rotate-180' : ''
-                }`}
+          <div className="space-y-6">
+            {sortedEntries.slice(1).map(entry => (
+              <DailyHabitCard
+                key={entry.date}
+                data-entry-date={entry.date}
+                entry={entry}
+                isArchived={true}
+                editingEntry={editingEntry}
+                setEditingEntry={setEditingEntry}
+                habitsByTimeSlot={habitsByTimeSlot}
+                handleMoodSelect={handleMoodSelect}
+                handleCompleteHabit={handleCompleteHabit}
+                setEditingHabit={setEditingHabit}
               />
-            </div>
+            ))}
           </div>
         </div>
-        <div className={`transition-all duration-300 ${
-          showMyHabits 
-            ? 'max-h-[2000px] opacity-100'
-            : 'max-h-0 opacity-0 overflow-hidden'
-        }`}>
-          <div className="divide-y divide-amber-100/50">
-            {Object.entries(PRESET_HABITS).map(([category, info]) => {
-              const categoryHabits = habitsByCategory[category as keyof typeof PRESET_HABITS] || [];
-              if (categoryHabits.length === 0) return null;
+      )}
 
-              return (
-                <div key={category} className="overflow-hidden">
-                  <div
-                    onClick={() => toggleCategory(category)}
-                    className={`w-full p-4 text-left hover:bg-white/30 transition-colors cursor-pointer ${
-                      expandedCategories[category] ? 'bg-white/20' : ''
-                    }`}
-                  >
-                    <div className="flex items-center justify-between">
-                      <h4 className="font-medium text-gray-900">{info.name}</h4>
-                      <ChevronDown 
-                        className={`w-5 h-5 text-gray-500 transition-transform ${
-                          expandedCategories[category] ? 'rotate-180' : ''
-                        }`}
-                      />
-                    </div>
-                  </div>
-                  <div className={`transition-all duration-300 ${
-                    expandedCategories[category] 
-                      ? 'max-h-[1000px] opacity-100'
-                      : 'max-h-0 opacity-0'
-                  }`}>
-                    <div className="p-4 pt-0 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2">
-                      {categoryHabits.map(habit => (
-                        <HabitCard
-                          key={habit.id}
-                          habit={habit}
-                          onComplete={(completed) => 
-                            handleCompleteHabit(todayEntry.date, habit.id, completed)
-                          }
-                        />
-                      ))}
-                    </div>
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-        </div>
-      </div>
-
-      {/* Entradas del día */}
-      <div className="bg-white rounded-xl shadow-sm border border-gray-100">
-        <div className="p-4 border-b border-gray-100">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-2">
-              <div className="p-2 bg-gradient-to-br from-amber-400 to-orange-500 rounded-lg text-white">
-                <Clock className="w-5 h-5" />
-              </div>
-              <div>
-                <h3 className="font-semibold text-gray-900">Entradas de hoy</h3>
-                <p className="text-sm text-gray-600 capitalize">{today}</p>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* Selector de estado de ánimo */}
-        <div className="p-4 border-b border-gray-100">
-          <MoodSelector
-            currentMood={currentMood}
-            onMoodSelect={handleMoodSelect}
-          />
-        </div>
-
-        {/* Lista de hábitos */}
-        <div className="p-4">
-          {todayEntry.habits.length > 0 ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2">
-              {habits.map(habit => (
-                <HabitCard
-                  key={habit.id}
-                  habit={habit}
-                  onComplete={(completed) => 
-                    handleCompleteHabit(todayEntry.date, habit.id, completed)
-                  }
-                  compact
-                />
-              ))}
-            </div>
-          ) : (
-            <div className="text-center py-8">
-              <div className="w-16 h-16 mx-auto mb-4 bg-gradient-to-br from-amber-100 to-orange-100 rounded-full flex items-center justify-center">
-                <ListChecks className="w-8 h-8 text-amber-500" />
-              </div>
-              <h4 className="text-lg font-medium text-gray-900 mb-2">No hay hábitos configurados</h4>
-              <p className="text-gray-600">
-                Comienza añadiendo algunos hábitos para hacer seguimiento
-              </p>
-              <div
-                onClick={() => setShowAddHabit(true)}
-                className="mt-4 px-6 py-2 bg-gradient-to-r from-amber-400 to-orange-500 text-white rounded-lg hover:from-amber-500 hover:to-orange-600 transition-colors inline-flex items-center space-x-2 cursor-pointer"
-              >
-                <Plus className="w-5 h-5" />
-                <span>Añadir hábito</span>
-              </div>
-            </div>
-          )}
-        </div>
-      </div>
-
-      {/* Modal de creación de hábito */}
+      {/* Modals */}
       {showAddHabit && (
         <HabitCreator
           onCreateHabit={handleCreateHabit}
           onClose={() => setShowAddHabit(false)}
         />
       )}
+
+      {editingHabit && (
+        <HabitEditor
+          habit={editingHabit}
+          onUpdate={handleUpdateHabit}
+          onDelete={handleDeleteHabit}
+          onClose={() => setEditingHabit(null)}
+        />
+      )}
+
+      <AnimatePresence>
+        {showAddEntry && (
+          <AddEntryModal
+            selectedDate={selectedDate}
+            onDateChange={setSelectedDate}
+            onClose={() => setShowAddEntry(false)}
+            onSubmit={handleCreateEntry}
+            existingEntries={dailyEntries}
+          />
+        )}
+      </AnimatePresence>
     </div>
   );
 }

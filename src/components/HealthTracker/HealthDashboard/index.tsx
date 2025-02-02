@@ -2,12 +2,9 @@ import React from 'react';
 import { DashboardHeader } from './components/DashboardHeader';
 import { GlobalStats } from './components/GlobalStats';
 import { Activities } from './components/Activities';
-import { LeagueProgress } from './components/LeagueProgress';
 import { EnhancedWillpowerChart } from './components/EnhancedWillpowerChart';
-import { LeagueBadges } from './components/LeagueBadges';
-import { LevelsCompetition } from '../WeightTracker/LevelsCompetition';
+import { LevelsCompetition } from '../WeightTracker/components/LevelsCompetition';
 import { useHealth } from '../contexts/HealthContext';
-import { LEAGUES } from '../contexts/HealthContext';
 
 export function HealthDashboard() {
   const { getLevel, totalXP } = useHealth();

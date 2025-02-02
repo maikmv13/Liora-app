@@ -1,4 +1,4 @@
-import React, { Suspense, lazy, useState, useEffect } from 'react';
+import React, { Suspense, lazy, useState, useEffect, useRef } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { Header } from './components/Header/Header';
 import { Navigation } from './components/Navigation';
@@ -13,12 +13,17 @@ import { useFavorites } from './hooks/useFavorites';
 import { MobileInstallButton } from './components/MobileInstallButton';
 import { ErrorBoundary } from './components/ErrorBoundary';
 import { ScrollToTop } from './components/ScrollToTop';
-import { FloatingChatButton } from './components/FloatingChatButton';
 import { Onboarding } from './components/Onboarding';
 import { RecipeDetail } from './components/RecipeDetail';
 import { LoadingFallback } from './components/LoadingFallback';
 import { HealthTracker } from './components/HealthTracker';
 import { HealthProvider } from './components/HealthTracker/contexts/HealthContext';
+import { motion, AnimatePresence } from 'framer-motion';
+import { HealthDashboard } from './components/HealthTracker/HealthDashboard';
+import { WeightTracker } from './components/HealthTracker/WeightTracker';
+import { ExerciseTracker } from './components/HealthTracker/ExerciseTracker';
+import { HabitTracker } from './components/HealthTracker/HabitTracker';
+import { NavigationDots } from './components/NavigationDots';
 
 // Lazy load components
 const WeeklyMenu2 = lazy(() => import('./components/WeeklyMenu2'));
@@ -46,6 +51,13 @@ interface FavoriteRecipe extends Recipe {
   tags: string[];
 }
 
+const HEALTH_SECTIONS = [
+  { id: 'health', label: 'Salud', gradient: 'from-violet-400 to-fuchsia-500' },
+  { id: 'weight', label: 'Peso', gradient: 'from-rose-400 to-orange-500' },
+  { id: 'exercise', label: 'Ejercicio', gradient: 'from-emerald-400 to-teal-500' },
+  { id: 'habits', label: 'Hábitos', gradient: 'from-amber-400 to-orange-500' }
+];
+
 // Componente que contiene el contenido de la app
 function AppContent() {
   const location = useLocation();
@@ -68,6 +80,13 @@ function AppContent() {
   const [onboardingCompleted, setOnboardingCompleted] = useState(() => {
     return localStorage.getItem('onboardingCompleted') === 'true';
   });
+  const containerRef = useRef<HTMLDivElement>(null);
+  const touchStartX = useRef<number>(0);
+  const [isDragging, setIsDragging] = useState(false);
+  const [dragDistance, setDragDistance] = useState(0);
+  
+  // Get current health section from URL hash
+  const healthSection = location.hash.slice(1) || 'health';
 
   useEffect(() => {
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
@@ -112,6 +131,42 @@ function AppContent() {
     const newTab = getActiveTab();
     setActiveTab(newTab);
   }, [location.pathname]);
+
+  // Touch and mouse events for lateral scroll
+  const handleTouchStart = (e: React.TouchEvent | React.MouseEvent) => {
+    setIsDragging(true);
+    if ('touches' in e) {
+      touchStartX.current = e.touches[0].clientX;
+    } else {
+      touchStartX.current = e.clientX;
+    }
+  };
+
+  const handleTouchMove = (e: React.TouchEvent | React.MouseEvent) => {
+    if (!isDragging) return;
+
+    const currentX = 'touches' in e ? e.touches[0].clientX : e.clientX;
+    const diff = currentX - touchStartX.current;
+    setDragDistance(diff);
+  };
+
+  const handleTouchEnd = () => {
+    if (!isDragging) return;
+    setIsDragging(false);
+
+    const threshold = window.innerWidth * 0.2;
+    const sections = HEALTH_SECTIONS.map(s => s.id);
+    const currentIndex = sections.indexOf(healthSection);
+
+    if (Math.abs(dragDistance) > threshold) {
+      if (dragDistance > 0 && currentIndex > 0) {
+        window.location.hash = sections[currentIndex - 1];
+      } else if (dragDistance < 0 && currentIndex < sections.length - 1) {
+        window.location.hash = sections[currentIndex + 1];
+      }
+    }
+    setDragDistance(0);
+  };
 
   const handleAddToMenu = (recipe: Recipe | null, day: string, meal: MealType) => {
     if (recipe) {
@@ -268,7 +323,42 @@ function AppContent() {
               path="/salud" 
               element={
                 <HealthProvider>
-                  <HealthTracker />
+                  <div className="min-h-screen">
+                    <div className="max-w-6xl mx-auto space-y-6">
+                      <div
+                        ref={containerRef}
+                        className="touch-pan-y"
+                        onTouchStart={handleTouchStart}
+                        onTouchMove={handleTouchMove}
+                        onTouchEnd={handleTouchEnd}
+                        onMouseDown={handleTouchStart}
+                        onMouseMove={handleTouchMove}
+                        onMouseUp={handleTouchEnd}
+                        onMouseLeave={handleTouchEnd}
+                      >
+                        <AnimatePresence mode="wait">
+                          <motion.div
+                            key={healthSection}
+                            initial={{ opacity: 0, x: dragDistance }}
+                            animate={{ opacity: 1, x: dragDistance }}
+                            exit={{ opacity: 0 }}
+                            transition={{ type: "spring", stiffness: 300, damping: 30 }}
+                            style={{
+                              transform: `translateX(${dragDistance}px)`,
+                              touchAction: 'pan-y'
+                            }}
+                          >
+                            {healthSection === 'health' && <HealthDashboard />}
+                            {healthSection === 'weight' && <WeightTracker />}
+                            {healthSection === 'exercise' && <ExerciseTracker />}
+                            {healthSection === 'habits' && <HabitTracker />}
+                          </motion.div>
+                        </AnimatePresence>
+                      </div>
+
+                      <NavigationDots sections={HEALTH_SECTIONS} />
+                    </div>
+                  </div>
                 </HealthProvider>
               } 
             />
@@ -282,7 +372,6 @@ function AppContent() {
       </main>
 
       <MobileInstallButton />
-      <FloatingChatButton />
     </div>
   );
 }

@@ -1,8 +1,8 @@
 import React from 'react';
-import { Heart, Calendar, Star, Clock, Flame, Trophy } from 'lucide-react';
+import { Heart, Calendar, Clock, Flame, Trophy } from 'lucide-react';
 import { useHealth, WEEK_DAYS } from '../../contexts/HealthContext';
-import { LevelsCompetition } from '../../WeightTracker/LevelsCompetition';
-import { MonthlyCalendar } from '../../WeightTracker/MonthlyCalendar';
+import { LevelsCompetition } from '../../WeightTracker/components/LevelsCompetition';
+import { MonthlyCalendar } from '../../WeightTracker/components/MonthlyCalendar';
 import { motion, AnimatePresence } from 'framer-motion';
 
 interface GlobalStatsProps {

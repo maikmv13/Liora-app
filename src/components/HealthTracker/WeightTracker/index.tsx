@@ -1,14 +1,12 @@
 import React, { useState, useEffect } from 'react';
-import { Scale } from 'lucide-react';
-import { WeightChart } from './WeightChart';
-import { WeightStats } from './WeightStats';
-import { WeightForm } from './WeightForm';
-import { WeightHistory } from './WeightHistory';
-import { WeightGoalModal } from './WeightGoalModal';
-import { WeightMilestones } from './WeightMilestones';
-import { WeightGoalAchievedModal } from './WeightGoalAchievedModal';
-import { WeightOnboarding } from './WeightOnboarding';
-import { WeightStreak } from './WeightStreak';
+import { WeightForm } from './components/WeightForm';
+import { WeightStats } from './components/WeightStats';
+import { WeightHistory } from './components/WeightHistory';
+import { WeightGoalModal } from './components/WeightGoalModal';
+import { WeightMilestones } from './components/WeightMilestones';
+import { WeightGoalAchievedModal } from './components/WeightGoalAchievedModal';
+import { WeightOnboarding } from './components/WeightOnboarding';
+import { WeightStreak } from './components/WeightStreak';
 import { useHealth } from '../contexts/HealthContext';
 import type { WeightEntry, CompletedGoal, SubGoal } from './types';
 
@@ -169,19 +167,6 @@ export function WeightTracker() {
 
   return (
     <div className="space-y-6">
-      {/* Título principal */}
-      <div className="flex items-center space-x-3">
-        <div className="bg-gradient-to-br from-rose-100 to-orange-100 w-12 h-12 md:w-14 md:h-14 rounded-2xl flex items-center justify-center">
-          <Scale className="w-6 h-6 md:w-7 md:h-7 text-rose-500" />
-        </div>
-        <div>
-          <h2 className="text-2xl md:text-3xl font-bold text-gray-900">Control de Peso</h2>
-          <p className="text-sm md:text-base text-gray-600 mt-1">
-            Seguimiento y objetivos de peso
-          </p>
-        </div>
-      </div>
-
       {/* Formulario de registro */}
       <WeightForm onSubmit={handleAddWeight} />
 
@@ -199,14 +184,6 @@ export function WeightTracker() {
             subGoals={subGoals}
           />
 
-          {/* Gráfico */}
-          <WeightChart 
-            data={[...entries].reverse()} 
-            targetWeight={targetWeight}
-            completedGoals={completedGoals}
-            subGoals={subGoals}
-          />
-
           {/* Historial */}
           <WeightHistory 
             entries={entries}
@@ -216,16 +193,6 @@ export function WeightTracker() {
 
         {/* Panel derecho */}
         <div className="lg:col-span-4 space-y-6 lg:space-y-8">
-          {/* Panel de racha */}
-          <WeightStreak
-            currentStreak={currentStreak}
-            lives={lives}
-            maxLives={2}
-            weekProgress={getWeekProgress()}
-            bestStreak={bestStreak}
-            lastUpdate={lastUpdate}
-            weightEntries={entries}
-          />
 
           {/* Logros y objetivos */}
           <WeightMilestones
