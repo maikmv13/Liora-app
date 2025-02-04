@@ -26,6 +26,8 @@ export function HouseholdSection({ userId, householdId, onUpdate }: HouseholdSec
   const [error, setError] = useState<string | null>(null);
   const [members, setMembers] = useState<HouseholdMember[]>([]);
   const [householdDetails, setHouseholdDetails] = useState<{ id: string; created_at: string } | null>(null);
+  const [isCreating, setIsCreating] = useState(false);
+  const [createError, setCreateError] = useState<string | null>(null);
 
   // Agregar log para ver los props
   React.useEffect(() => {
@@ -146,9 +148,12 @@ export function HouseholdSection({ userId, householdId, onUpdate }: HouseholdSec
   };
 
   const createHousehold = async () => {
+    if (!userId || isCreating) return;
+
     try {
-      setLoading(true);
-      setError(null);
+      setIsCreating(true);
+      setCreateError(null);
+      console.log('Iniciando creación de household para usuario:', userId);
 
       // 1. Crear el household
       const { data: household, error: householdError } = await supabase
@@ -157,7 +162,12 @@ export function HouseholdSection({ userId, householdId, onUpdate }: HouseholdSec
         .select()
         .single();
 
-      if (householdError) throw householdError;
+      if (householdError) {
+        console.error('Error al crear household:', householdError);
+        throw new Error(householdError.message);
+      }
+
+      console.log('Household creado:', household);
 
       // 2. Actualizar el perfil
       const { error: profileError } = await supabase
@@ -165,7 +175,12 @@ export function HouseholdSection({ userId, householdId, onUpdate }: HouseholdSec
         .update({ linked_household_id: household.id })
         .eq('user_id', userId);
 
-      if (profileError) throw profileError;
+      if (profileError) {
+        console.error('Error al actualizar perfil:', profileError);
+        throw new Error(profileError.message);
+      }
+
+      console.log('Perfil actualizado con household:', household.id);
 
       // 3. Cargar los detalles inmediatamente
       setHouseholdDetails(household);
@@ -176,12 +191,26 @@ export function HouseholdSection({ userId, householdId, onUpdate }: HouseholdSec
         await loadHouseholdDetails();
       }
 
+      // 5. Notificar al componente padre
       onUpdate();
+
     } catch (error) {
-      console.error('Error creating household:', error);
-      setError('Error al crear el hogar');
+      console.error('Error detallado al crear household:', error);
+      setCreateError(error instanceof Error ? error.message : 'Error al crear el hogar');
+      
+      // Intentar rollback si es necesario
+      if (householdDetails?.id) {
+        try {
+          await supabase
+            .from('profiles')
+            .update({ linked_household_id: null })
+            .eq('user_id', userId);
+        } catch (rollbackError) {
+          console.error('Error en rollback:', rollbackError);
+        }
+      }
     } finally {
-      setLoading(false);
+      setIsCreating(false);
     }
   };
 
@@ -291,16 +320,33 @@ export function HouseholdSection({ userId, householdId, onUpdate }: HouseholdSec
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
                 onClick={createHousehold}
-                disabled={loading}
-                className="inline-flex items-center justify-center space-x-2 px-4 py-2 bg-gradient-to-r from-rose-500 to-pink-500 text-white rounded-xl hover:opacity-90 transition-opacity shadow-md"
+                disabled={isCreating}
+                className={`inline-flex items-center justify-center space-x-2 px-4 py-2 bg-gradient-to-r from-rose-500 to-pink-500 text-white rounded-xl hover:opacity-90 transition-opacity shadow-md ${isCreating ? 'opacity-50' : ''}`}
               >
-                <UserPlus size={18} />
-                <span>Crear Hogar</span>
+                {isCreating ? (
+                  <>
+                    <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                    <span>Creando...</span>
+                  </>
+                ) : (
+                  <>
+                    <UserPlus size={18} />
+                    <span>Crear Hogar</span>
+                  </>
+                )}
               </motion.button>
+
+              {createError && (
+                <div className="mt-2 p-3 bg-red-50 text-red-600 rounded-lg text-sm">
+                  {createError}
+                </div>
+              )}
+
               <motion.button
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
                 onClick={() => setShowJoin(true)}
+                disabled={isCreating}
                 className="inline-flex items-center justify-center space-x-2 px-4 py-2 bg-rose-100 text-rose-600 rounded-xl hover:bg-rose-200 transition-colors"
               >
                 <Home size={18} />
