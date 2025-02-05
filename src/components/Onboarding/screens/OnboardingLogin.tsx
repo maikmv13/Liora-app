@@ -59,6 +59,8 @@ export function OnboardingLogin({ onNext, onLogin, isFirst }: ScreenProps) {
     setLoading(true);
 
     try {
+      console.log('Iniciando proceso de login para:', formData.email);
+
       // 1. Intentar iniciar sesión
       const { data: { user }, error: signInError } = await supabase.auth.signInWithPassword({
         email: formData.email,
@@ -66,6 +68,7 @@ export function OnboardingLogin({ onNext, onLogin, isFirst }: ScreenProps) {
       });
 
       if (signInError) {
+        console.error('Error en autenticación:', signInError);
         throw signInError;
       }
 
@@ -73,26 +76,49 @@ export function OnboardingLogin({ onNext, onLogin, isFirst }: ScreenProps) {
         throw new Error('No se pudo iniciar sesión');
       }
 
-      // 2. Verificar el tipo de usuario
+      console.log('Usuario autenticado:', user.id);
+
+      // 2. Verificar y actualizar el perfil si es necesario
       const { data: profile, error: profileError } = await supabase
         .from('profiles')
-        .select('user_type')
+        .select('*')
         .eq('user_id', user.id)
         .single();
 
       if (profileError) {
+        console.error('Error al obtener perfil:', profileError);
         throw profileError;
       }
 
+      // Si el perfil existe pero no tiene email, lo actualizamos
+      if (profile && !profile.email) {
+        console.log('Actualizando email en perfil existente');
+        const { error: updateError } = await supabase
+          .from('profiles')
+          .update({ 
+            email: formData.email,
+            updated_at: new Date().toISOString()
+          })
+          .eq('user_id', user.id);
+
+        if (updateError) {
+          console.error('Error actualizando email en perfil:', updateError);
+          // No lanzamos error aquí para no interrumpir el login
+        }
+      }
+
+      // Verificar tipo de usuario
       if (profile.user_type !== userType) {
         throw new Error(`Esta cuenta no está registrada como ${userType === 'user' ? 'usuario' : 'nutricionista'}`);
       }
 
-      // 3. Todo correcto, llamar a onLogin
+      console.log('Login exitoso, perfil verificado:', profile.user_type);
+
+      // 3. Todo correcto
       onLogin?.();
 
     } catch (error: any) {
-      console.error('Error en login:', error);
+      console.error('Error detallado en login:', error);
       
       // Manejar errores específicos
       if (error.message in ERROR_MESSAGES) {

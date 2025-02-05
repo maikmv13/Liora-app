@@ -16,6 +16,23 @@ interface RecipeSelectorSidebarProps {
   selectedMeal: MealType;
 }
 
+// Añadir el mapa de colores para categorías
+const categoryColors: Record<string, { bg: string; text: string; border: string }> = {
+  'Aves': { bg: 'bg-orange-50', text: 'text-orange-700', border: 'border-orange-100' },
+  'Carnes': { bg: 'bg-red-50', text: 'text-red-700', border: 'border-red-100' },
+  'Ensaladas': { bg: 'bg-green-50', text: 'text-green-700', border: 'border-green-100' },
+  'Fast Food': { bg: 'bg-yellow-50', text: 'text-yellow-700', border: 'border-yellow-100' },
+  'Legumbres': { bg: 'bg-amber-50', text: 'text-amber-700', border: 'border-amber-100' },
+  'Pastas y Arroces': { bg: 'bg-yellow-50', text: 'text-yellow-700', border: 'border-yellow-100' },
+  'Pescados': { bg: 'bg-blue-50', text: 'text-blue-700', border: 'border-blue-100' },
+  'Sopas y Cremas': { bg: 'bg-purple-50', text: 'text-purple-700', border: 'border-purple-100' },
+  'Vegetariano': { bg: 'bg-emerald-50', text: 'text-emerald-700', border: 'border-emerald-100' },
+  'Desayuno': { bg: 'bg-rose-50', text: 'text-rose-700', border: 'border-rose-100' },
+  'Huevos': { bg: 'bg-yellow-50', text: 'text-yellow-700', border: 'border-yellow-100' },
+  'Snack': { bg: 'bg-indigo-50', text: 'text-indigo-700', border: 'border-indigo-100' },
+  'Otros': { bg: 'bg-gray-50', text: 'text-gray-700', border: 'border-gray-100' }
+};
+
 export function RecipeSelectorSidebar({ 
   isOpen, 
   onClose, 
@@ -124,6 +141,11 @@ export function RecipeSelectorSidebar({
       default:
         return 'bg-gray-50 text-gray-700 border-gray-200';
     }
+  };
+
+  // Función para obtener los colores de la categoría
+  const getCategoryColors = (category: string) => {
+    return categoryColors[category] || { bg: 'bg-gray-50', text: 'text-gray-700', border: 'border-gray-200' };
   };
 
   return (
@@ -290,40 +312,33 @@ export function RecipeSelectorSidebar({
                           {recipe.name}
                         </h3>
                         
-                        <div className="mt-2 flex flex-wrap gap-2">
-                          {/* Category */}
-                          <span className="inline-flex items-center px-2 py-1 rounded-lg text-xs font-medium bg-gray-100 text-gray-800">
-                            {recipe.category}
-                          </span>
-
-                          {/* Servings */}
-                          <span className="inline-flex items-center space-x-1 px-2 py-1 rounded-lg text-xs font-medium bg-blue-50 text-blue-700 border border-blue-100">
-                            <Users size={12} />
-                            <span>{recipe.servings}</span>
-                          </span>
-
-                          {/* Calories */}
-                          {recipe.calories && (
-                            <span className="inline-flex items-center space-x-1 px-2 py-1 rounded-lg text-xs font-medium bg-rose-50 text-rose-700 border border-rose-100">
-                              <Flame size={12} />
-                              <span>{recipe.calories}</span>
+                        <div className="mt-2 flex flex-col space-y-1.5">
+                          <div className="flex flex-wrap gap-2">
+                            <span className={`inline-flex items-center px-2 py-1 rounded-lg text-xs font-medium border ${
+                              getCategoryColors(recipe.category).bg
+                            } ${getCategoryColors(recipe.category).text} ${
+                              getCategoryColors(recipe.category).border
+                            }`}>
+                              {recipe.category}
                             </span>
-                          )}
+                          </div>
 
-                          {/* Time */}
-                          {recipe.prep_time && (
-                            <span className="inline-flex items-center space-x-1 px-2 py-1 rounded-lg text-xs font-medium bg-amber-50 text-amber-700 border border-amber-100">
-                              <Clock size={12} />
-                              <span>{recipe.prep_time}</span>
-                            </span>
-                          )}
+                          <div className="flex flex-wrap gap-1.5">
+                            {recipe.calories && (
+                              <span className="inline-flex items-center space-x-1 px-1.5 py-0.5 rounded-md text-[11px] font-medium bg-gray-50 text-gray-600 border border-gray-200">
+                                <Flame size={10} className="text-gray-500" />
+                                <span>{recipe.calories} kcal</span>
+                              </span>
+                            )}
+
+                            {recipe.prep_time && (
+                              <span className="inline-flex items-center space-x-1 px-1.5 py-0.5 rounded-md text-[11px] font-medium bg-gray-50 text-gray-600 border border-gray-200">
+                                <Clock size={10} className="text-gray-500" />
+                                <span>{recipe.prep_time} min</span>
+                              </span>
+                            )}
+                          </div>
                         </div>
-
-                        {recipe.side_dish && (
-                          <p className="mt-1 text-sm text-gray-500 line-clamp-1">
-                            {recipe.side_dish}
-                          </p>
-                        )}
                       </div>
 
                       <ChevronRight size={20} className="text-gray-400 flex-shrink-0" />

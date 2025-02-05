@@ -19,11 +19,8 @@ interface FavoritesProps {
 export function Favorites() {
   const { id: userId, profile } = useActiveProfile();
   const isHousehold = Boolean(profile?.linked_household_id);
-  const [viewMode, setViewMode] = useState<'personal' | 'household' | 'members'>(
-    'personal'
-  );
+  const [viewMode, setViewMode] = useState<'personal' | 'members'>('personal');
 
-  // Usar el hook useFavorites para cada vista
   const {
     favorites: personalFavorites,
     loading: personalLoading,
@@ -70,15 +67,10 @@ export function Favorites() {
           </div>
           <div>
             <h2 className="text-2xl md:text-3xl font-bold text-gray-900">
-              {viewMode === 'household' 
-                ? 'Favoritos del Hogar'
-                : viewMode === 'members'
-                  ? 'Favoritos por Miembro'
-                  : '¡Mis recetas guardadas!'
-              }
+              {viewMode === 'members' ? 'Favoritos por Miembro' : '¡Mis recetas guardadas!'}
             </h2>
             <p className="text-sm md:text-base text-gray-600 mt-1">
-              ❤️ {viewMode === 'personal' ? personalFavorites.length : householdFavorites.length} recetas favoritas
+              ❤️ {personalFavorites.length} recetas favoritas
             </p>
           </div>
         </div>
@@ -101,24 +93,6 @@ export function Favorites() {
             >
               <User size={18} />
               <span className="font-medium">Mías</span>
-            </motion.button>
-
-            {/* Vista Hogar */}
-            <motion.button
-              whileHover={{ scale: 1.02 }}
-              whileTap={{ scale: 0.98 }}
-              onClick={() => setViewMode('household')}
-              className={`
-                flex-1 sm:flex-none flex items-center justify-center space-x-2 
-                px-4 py-2.5 rounded-xl transition-all duration-200
-                ${viewMode === 'household' 
-                  ? 'bg-gradient-to-r from-emerald-500 to-teal-500 text-white shadow-md' 
-                  : 'bg-white/80 backdrop-blur-sm text-gray-700 hover:bg-emerald-50 border border-emerald-100'
-                }
-              `}
-            >
-              <Users size={18} />
-              <span className="font-medium">Familiar</span>
             </motion.button>
 
             {/* Vista por Miembros */}
@@ -150,8 +124,8 @@ export function Favorites() {
         />
       ) : (
         <RecipeGrid 
-          recipes={viewMode === 'personal' ? personalFavorites : householdFavorites}
-          onRemoveFavorite={viewMode === 'personal' ? removePersonalFavorite : removeHouseholdFavorite}
+          recipes={personalFavorites}
+          onRemoveFavorite={removePersonalFavorite}
         />
       )}
     </div>

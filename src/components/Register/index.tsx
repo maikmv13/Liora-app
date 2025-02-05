@@ -77,15 +77,20 @@ export function Register({ onClose, onRegisterSuccess, preSelectedUserType, onBa
       if (signUpError) throw signUpError;
       if (!authData.user) throw new Error('No se pudo crear el usuario');
 
-      // 2. Crear el perfil con campos mínimos requeridos
+      // 2. Crear el perfil solo con los campos que existen en la tabla
       const profileData = {
         user_id: authData.user.id,
         full_name: formData.fullName,
-        user_type: userType
+        email: formData.email,
+        user_type: userType,
+        specialization: userType === 'nutritionist' ? formData.specialization : null,
+        license_number: userType === 'nutritionist' ? formData.licenseNumber : null,
+        updated_at: new Date().toISOString()
       };
 
-      console.log('Intentando crear perfil con:', profileData);
-      const { data, error: profileError } = await supabase
+      console.log('Creando perfil con datos:', profileData);
+      
+      const { data: profile, error: profileError } = await supabase
         .from('profiles')
         .insert(profileData)
         .select()
@@ -98,9 +103,17 @@ export function Register({ onClose, onRegisterSuccess, preSelectedUserType, onBa
           message: profileError.message,
           details: profileError.details
         });
-        await supabase.auth.admin.deleteUser(authData.user.id);
+        
+        try {
+          await supabase.auth.signOut();
+        } catch (rollbackError) {
+          console.error('Error en rollback:', rollbackError);
+        }
+        
         throw new Error('Error al crear el perfil: ' + profileError.message);
       }
+
+      console.log('Perfil creado exitosamente:', profile);
 
       // 3. Todo exitoso
       onRegisterSuccess?.();

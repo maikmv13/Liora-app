@@ -10,8 +10,8 @@ import { motion, AnimatePresence } from 'framer-motion';
 interface RecipeListProps {
   recipes: Recipe[];
   onRecipeSelect: (recipe: Recipe) => void;
-  favorites: { recipe_id: string }[];
-  onToggleFavorite: (recipe: Recipe) => void;
+  favorites: Array<{ recipe_id: string }>;
+  onToggleFavorite: (recipeId: string) => Promise<void>;
   loading?: boolean;
 }
 
@@ -54,6 +54,11 @@ export function RecipeList({
     }
     return 0;
   });
+
+  const handleFavoriteClick = async (e: React.MouseEvent, recipeId: string) => {
+    e.stopPropagation(); // Prevenir que se propague al contenedor
+    await onToggleFavorite(recipeId);
+  };
 
   return (
     <div className="space-y-4 md:space-y-6">
@@ -150,7 +155,7 @@ export function RecipeList({
                 recipe={recipe}
                 favorites={favorites.map(f => f.recipe_id)}
                 onClick={() => onRecipeSelect(recipe)}
-                onToggleFavorite={() => onToggleFavorite(recipe)}
+                onToggleFavorite={(e) => handleFavoriteClick(e, recipe.id)}
               />
             </motion.div>
           ))}
