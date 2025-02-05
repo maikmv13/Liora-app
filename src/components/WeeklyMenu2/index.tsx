@@ -392,7 +392,7 @@ export function WeeklyMenu2() {
           ) : (
             <>
               {/* Today's Menu */}
-              <div className="mt-4 md:mt-6">
+              <div className="md:mt-6">
                 <TodayCard
                   menuItems={menu}
                   onViewRecipe={setSelectedRecipe}

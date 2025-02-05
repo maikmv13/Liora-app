@@ -5,6 +5,7 @@ import { DayCard } from './DayCard';
 import { ChevronLeft, ChevronRight, Share2, Wand2, Loader2, History } from 'lucide-react';
 import { DAYS, WeekDay } from './constants';
 import { NextWeekCard } from './NextWeekCard';
+import { TodayCard } from './TodayCard';
 
 interface MobileViewProps {
   selectedDay: WeekDay;
@@ -171,165 +172,167 @@ export function MobileView({
   };
 
   return (
-    <div className="relative">
-      {/* Scroll Buttons */}
-      {canScrollLeft && (
-        <button
-          onClick={() => scroll('left')}
-          disabled={isScrolling}
-          className={`
-            absolute left-0 top-1/2 -translate-y-1/2 z-10 
-            p-2 bg-white/80 hover:bg-white/90 
-            rounded-full shadow-lg border border-rose-100 
-            text-rose-500 transition-all duration-300
-            ${isScrolling ? 'opacity-50 cursor-not-allowed' : 'hover:scale-105'}
-          `}
-          aria-label="Scroll left"
-        >
-          <ChevronLeft size={24} />
-        </button>
-      )}
-      {canScrollRight && (
-        <button
-          onClick={() => scroll('right')}
-          disabled={isScrolling}
-          className={`
-            absolute right-0 top-1/2 -translate-y-1/2 z-10 
-            p-2 bg-white/80 hover:bg-white/90 
-            rounded-full shadow-lg border border-rose-100 
-            text-rose-500 transition-all duration-300
-            ${isScrolling ? 'opacity-50 cursor-not-allowed' : 'hover:scale-105'}
-          `}
-          aria-label="Scroll right"
-        >
-          <ChevronRight size={24} />
-        </button>
-      )}
-
-      {/* Days Scroll Container */}
-      <div 
-        ref={scrollContainerRef}
-        className="flex overflow-x-auto snap-x snap-mandatory scrollbar-hide px-4 -mx-4 pb-4"
-        style={{ 
-          scrollbarWidth: 'none', 
-          msOverflowStyle: 'none',
-          scrollBehavior: 'smooth'
-        }}
-      >
-        {weekDays.map(day => (
-          <div 
-            key={day}
-            className="flex-none w-full snap-center px-2 first:pl-4 last:pr-2"
+    <div>
+      <div className="relative">
+        {/* Scroll Buttons */}
+        {canScrollLeft && (
+          <button
+            onClick={() => scroll('left')}
+            disabled={isScrolling}
+            className={`
+              absolute left-0 top-1/2 -translate-y-1/2 z-10 
+              p-2 bg-white/80 hover:bg-white/90 
+              rounded-full shadow-lg border border-rose-100 
+              text-rose-500 transition-all duration-300
+              ${isScrolling ? 'opacity-50 cursor-not-allowed' : 'hover:scale-105'}
+            `}
+            aria-label="Scroll left"
           >
-            <DayCard
-              day={day}
-              menuItems={weeklyMenu.filter(item => item.day === day)}
-              onMealClick={(meal) => onMealClick(day, meal)}
-              onRemoveMeal={(meal) => onRemoveMeal(day, meal)}
-              onViewRecipe={onViewRecipe}
-              onAddToMenu={onAddToMenu}
-              activeMenu={activeMenu}
-            />
-          </div>
-        ))}
-        
-        {shouldShowNextWeek && (
-          <div className="flex-none w-full snap-center px-2 pr-4">
-            <NextWeekCard />
-          </div>
+            <ChevronLeft size={24} />
+          </button>
         )}
-      </div>
+        {canScrollRight && (
+          <button
+            onClick={() => scroll('right')}
+            disabled={isScrolling}
+            className={`
+              absolute right-0 top-1/2 -translate-y-1/2 z-10 
+              p-2 bg-white/80 hover:bg-white/90 
+              rounded-full shadow-lg border border-rose-100 
+              text-rose-500 transition-all duration-300
+              ${isScrolling ? 'opacity-50 cursor-not-allowed' : 'hover:scale-105'}
+            `}
+            aria-label="Scroll right"
+          >
+            <ChevronRight size={24} />
+          </button>
+        )}
 
-      {/* Day Indicators */}
-      <div className="flex justify-center space-x-1 mt-4 mb-6 md:hidden">
-        {([...weekDays, 'next'] as DayWithNext[]).map((day, index) => {
-          const isNextWeek = day === 'next';
-          const isSelected = isNextWeek ? 
-            Math.round(scrollContainerRef.current?.scrollLeft ?? 0) === (weekDays.length * (scrollContainerRef.current?.clientWidth ?? 0)) : 
-            selectedDay === day;
-
-          return (
-            <button
+        {/* Days Scroll Container */}
+        <div 
+          ref={scrollContainerRef}
+          className="flex overflow-x-auto snap-x snap-mandatory scrollbar-hide px-4 -mx-4 pb-4"
+          style={{ 
+            scrollbarWidth: 'none', 
+            msOverflowStyle: 'none',
+            scrollBehavior: 'smooth'
+          }}
+        >
+          {weekDays.map(day => (
+            <div 
               key={day}
-              onClick={() => {
-                if (scrollContainerRef.current && !isScrolling) {
-                  setIsScrolling(true);
-                  const cardWidth = scrollContainerRef.current.clientWidth;
-                  scrollContainerRef.current.scrollTo({
-                    left: index * cardWidth,
-                    behavior: 'smooth'
-                  });
-                  if (!isNextWeek) {
-                    onDayChange(day as WeekDay);
-                  }
-                  setTimeout(() => setIsScrolling(false), 300);
-                }
-              }}
-              disabled={isScrolling}
-              className={`
-                w-2 h-2 rounded-full transition-all duration-300
-                ${isSelected
-                  ? isNextWeek 
-                    ? 'bg-orange-500 w-4'
-                    : 'bg-rose-500 w-4'
-                  : isScrolling
-                    ? 'bg-rose-200 cursor-not-allowed'
-                    : 'bg-rose-200 hover:bg-rose-300'
-                }
-              `}
-              aria-label={isNextWeek ? 'Próxima semana' : `Ir a ${day}`}
-            />
-          );
-        })}
-      </div>
-
-      {/* Action Buttons */}
-      <div className="grid grid-cols-12 gap-2 px-4 mt-6 md:hidden">
-        <button 
-          onClick={onGenerateMenu}
-          disabled={isGenerating}
-          className={`
-            col-span-6 flex items-center justify-center space-x-2 px-4 py-3
-            bg-gradient-to-r from-orange-400 via-pink-500 to-rose-500 
-            text-white rounded-xl shadow-sm
-            ${isGenerating 
-              ? 'opacity-50 cursor-not-allowed' 
-              : 'hover:from-orange-500 hover:via-pink-600 hover:to-rose-600'
-            }
-          `}
-        >
-          {isGenerating ? (
-            <>
-              <Loader2 size={18} className="animate-spin" />
-              <span>Generando...</span>
-            </>
-          ) : (
-            <>
-              <Wand2 size={18} />
-              <span>Regenerar menú</span>
-            </>
+              className="flex-none w-full snap-center px-2 first:pl-4 last:pr-2"
+            >
+              <DayCard
+                day={day}
+                menuItems={weeklyMenu.filter(item => item.day === day)}
+                onMealClick={(meal) => onMealClick(day, meal)}
+                onRemoveMeal={(meal) => onRemoveMeal(day, meal)}
+                onViewRecipe={onViewRecipe}
+                onAddToMenu={onAddToMenu}
+                activeMenu={activeMenu}
+              />
+            </div>
+          ))}
+          
+          {shouldShowNextWeek && (
+            <div className="flex-none w-full snap-center px-2 pr-4">
+              <NextWeekCard />
+            </div>
           )}
-        </button>
+        </div>
 
-        <button 
-          onClick={onToggleHistory}
-          className="col-span-3 flex items-center justify-center space-x-2 px-4 py-3 
-            bg-white/90 backdrop-blur-sm text-rose-500 rounded-xl border border-rose-100 
-            shadow-sm hover:bg-white"
-        >
-          <History size={18} />
-          <span className="hidden">Historial</span>
-        </button>
+        {/* Day Indicators */}
+        <div className="flex justify-center space-x-1 mt-4 mb-6 md:hidden">
+          {([...weekDays, 'next'] as DayWithNext[]).map((day, index) => {
+            const isNextWeek = day === 'next';
+            const isSelected = isNextWeek ? 
+              Math.round(scrollContainerRef.current?.scrollLeft ?? 0) === (weekDays.length * (scrollContainerRef.current?.clientWidth ?? 0)) : 
+              selectedDay === day;
 
-        <button 
-          onClick={onExport}
-          className="col-span-3 flex items-center justify-center space-x-2 px-4 py-3 
-            bg-white/90 backdrop-blur-sm text-rose-500 rounded-xl border border-rose-100 
-            shadow-sm hover:bg-white"
-        >
-          <Share2 size={18} />
-          <span className="hidden">Compartir</span>
-        </button>
+            return (
+              <button
+                key={day}
+                onClick={() => {
+                  if (scrollContainerRef.current && !isScrolling) {
+                    setIsScrolling(true);
+                    const cardWidth = scrollContainerRef.current.clientWidth;
+                    scrollContainerRef.current.scrollTo({
+                      left: index * cardWidth,
+                      behavior: 'smooth'
+                    });
+                    if (!isNextWeek) {
+                      onDayChange(day as WeekDay);
+                    }
+                    setTimeout(() => setIsScrolling(false), 300);
+                  }
+                }}
+                disabled={isScrolling}
+                className={`
+                  w-2 h-2 rounded-full transition-all duration-300
+                  ${isSelected
+                    ? isNextWeek 
+                      ? 'bg-orange-500 w-4'
+                      : 'bg-rose-500 w-4'
+                    : isScrolling
+                      ? 'bg-rose-200 cursor-not-allowed'
+                      : 'bg-rose-200 hover:bg-rose-300'
+                  }
+                `}
+                aria-label={isNextWeek ? 'Próxima semana' : `Ir a ${day}`}
+              />
+            );
+          })}
+        </div>
+
+        {/* Action Buttons */}
+        <div className="grid grid-cols-12 gap-2 px-4 mt-6 md:hidden">
+          <button 
+            onClick={onGenerateMenu}
+            disabled={isGenerating}
+            className={`
+              col-span-6 flex items-center justify-center space-x-2 px-4 py-3
+              bg-gradient-to-r from-orange-400 via-pink-500 to-rose-500 
+              text-white rounded-xl shadow-sm
+              ${isGenerating 
+                ? 'opacity-50 cursor-not-allowed' 
+                : 'hover:from-orange-500 hover:via-pink-600 hover:to-rose-600'
+              }
+            `}
+          >
+            {isGenerating ? (
+              <>
+                <Loader2 size={18} className="animate-spin" />
+                <span>Generando...</span>
+              </>
+            ) : (
+              <>
+                <Wand2 size={18} />
+                <span>Regenerar menú</span>
+              </>
+            )}
+          </button>
+
+          <button 
+            onClick={onToggleHistory}
+            className="col-span-3 flex items-center justify-center space-x-2 px-4 py-3 
+              bg-white/90 backdrop-blur-sm text-rose-500 rounded-xl border border-rose-100 
+              shadow-sm hover:bg-white"
+          >
+            <History size={18} />
+            <span className="hidden">Historial</span>
+          </button>
+
+          <button 
+            onClick={onExport}
+            className="col-span-3 flex items-center justify-center space-x-2 px-4 py-3 
+              bg-white/90 backdrop-blur-sm text-rose-500 rounded-xl border border-rose-100 
+              shadow-sm hover:bg-white"
+          >
+            <Share2 size={18} />
+            <span className="hidden">Compartir</span>
+          </button>
+        </div>
       </div>
     </div>
   );

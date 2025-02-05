@@ -13,7 +13,6 @@ const MENU_ITEMS = [
   { id: 'recetas', icon: ChefHat, label: 'Recetas', color: 'from-orange-400 to-rose-500' },
   { id: 'menu', icon: Calendar, label: 'Menú', color: 'from-rose-400 to-pink-500' },
   { id: 'compra', icon: ShoppingCart, label: 'Compra', color: 'from-pink-400 to-purple-500' },
-  { id: 'liora', icon: Bot, label: 'Liora AI', color: 'from-indigo-400 to-violet-500' },
   { id: 'salud', icon: Activity, label: 'Objetivos', color: 'from-purple-400 to-violet-500' }
 ];
 
@@ -75,7 +74,7 @@ export function Navigation({ activeTab, onTabChange, onHealthTabChange }: Naviga
       const currentHealthItem = HEALTH_SUBMENU.find(item => item.id === healthTab);
       return {
         Icon: currentHealthItem?.icon || Activity,
-        color: currentHealthItem?.color || MENU_ITEMS[4].color
+        color: currentHealthItem?.color || MENU_ITEMS[3].color
       };
     }
     const currentMenuItem = MENU_ITEMS.find(item => item.id === activeTab);
