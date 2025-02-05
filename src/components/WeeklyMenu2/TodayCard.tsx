@@ -4,7 +4,6 @@ import {
   Flame, Cookie, Coffee, Sun, Moon, Eye
 } from 'lucide-react';
 import { MenuItem } from '../../types';
-import { supabase } from '../../lib/supabase';
 import { useNavigate } from 'react-router-dom';
 import { useActiveProfile } from '../../hooks/useActiveProfile';
 import { useFavorites } from '../../hooks/useFavorites';
@@ -202,8 +201,8 @@ export function TodayCard({
             <Calendar size={24} className="text-rose-500" />
           </div>
           <div>
-            <h3 className="text-2xl font-bold text-gray-900 capitalize">
-              {today}
+            <h3 className="text-2xl font-bold text-gray-900">
+              Hoy, <span className="capitalize">{today}</span>
             </h3>
             <p className="text-sm font-medium text-gray-600">
               {formattedDate}

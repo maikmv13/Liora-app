@@ -60,20 +60,47 @@ export function MobileView({
     return weekDays.findIndex(day => day === tomorrow);
   };
 
-  // Scroll automático al día siguiente al montar el componente
+  // Función mejorada para determinar si mostrar NextWeekCard
+  const shouldShowNextWeek = React.useMemo(() => {
+    const now = new Date();
+    const currentDay = now.getDay();
+    const currentHour = now.getHours();
+
+    // Mostrar NextWeekCard si:
+    // 1. Es domingo después de las 18:00 (para dar tiempo a prepararse)
+    // 2. Es cualquier otro día de la semana
+    return currentDay === 0 ? currentHour >= 18 : true;
+  }, []);
+
+  // Scroll automático mejorado
   useEffect(() => {
     if (scrollContainerRef.current) {
-      const tomorrowIndex = getTomorrowIndex();
-      if (tomorrowIndex !== -1) {
-        const cardWidth = scrollContainerRef.current.clientWidth;
-        scrollContainerRef.current.scrollTo({
-          left: tomorrowIndex * cardWidth,
-          behavior: 'smooth'
-        });
-        onDayChange(weekDays[tomorrowIndex]);
+      const now = new Date();
+      const currentDay = now.getDay();
+      const currentHour = now.getHours();
+      
+      let targetIndex;
+      
+      if (currentDay === 0 && currentHour >= 18) {
+        // Domingo después de las 18:00 -> scroll a NextWeekCard
+        targetIndex = weekDays.length;
+      } else {
+        // Cualquier otro momento -> scroll al día actual o siguiente
+        const tomorrowIndex = getTomorrowIndex();
+        targetIndex = tomorrowIndex !== -1 ? tomorrowIndex : 0;
+      }
+
+      const cardWidth = scrollContainerRef.current.clientWidth;
+      scrollContainerRef.current.scrollTo({
+        left: targetIndex * cardWidth,
+        behavior: 'smooth'
+      });
+
+      if (targetIndex < weekDays.length) {
+        onDayChange(weekDays[targetIndex]);
       }
     }
-  }, []); // Solo se ejecuta al montar el componente
+  }, [weekDays.length]);
 
   // Función para actualizar el día seleccionado basado en el scroll
   const updateSelectedDay = () => {
@@ -192,7 +219,7 @@ export function MobileView({
         {weekDays.map(day => (
           <div 
             key={day}
-            className="flex-none w-full snap-center px-2 first:pl-4 last:pr-2 transition-transform duration-300"
+            className="flex-none w-full snap-center px-2 first:pl-4 last:pr-2"
           >
             <DayCard
               day={day}
@@ -206,9 +233,11 @@ export function MobileView({
           </div>
         ))}
         
-        <div className="flex-none w-full snap-center px-2 pr-4 transition-transform duration-300 md:hidden">
-          <NextWeekCard />
-        </div>
+        {shouldShowNextWeek && (
+          <div className="flex-none w-full snap-center px-2 pr-4">
+            <NextWeekCard />
+          </div>
+        )}
       </div>
 
       {/* Day Indicators */}

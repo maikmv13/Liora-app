@@ -40,30 +40,29 @@ export function DayCard({
   const { favorites, loading: favoritesLoading } = useFavorites(isHousehold);
   const { loading: menuLoading } = useActiveMenu(id, false);
 
-  // Unificar la lógica de carga
-  const isLoading = menuLoading || favoritesLoading || !favorites;
-  const hasEnoughFavorites = favorites?.length >= MIN_FAVORITES_FOR_MENU;
+  // Simplificar la lógica de carga
+  const isLoading = React.useMemo(() => 
+    menuLoading || favoritesLoading, [menuLoading, favoritesLoading]
+  );
 
-  // Obtener el día actual y el siguiente
-  const today = new Date();
-  const currentDay = new Intl.DateTimeFormat('es-ES', { weekday: 'long' }).format(today).toLowerCase();
-  const isToday = currentDay === day.toLowerCase();
-  
-  // Modificar la lógica para el "mañana"
-  const isTomorrow = React.useMemo(() => {
-    // Si es domingo después de las 21:00, el lunes es "mañana"
-    if (today.getDay() === 0 && today.getHours() >= 21 && day.toLowerCase() === 'lunes') {
-      return true;
-    }
-    
-    // Lógica original para otros días
-    if (today.getDay() === 0 || day.toLowerCase() === 'lunes') return false;
-    
+  // Mover la lógica de día actual/mañana a useMemo
+  const { isToday, isTomorrow } = React.useMemo(() => {
+    const today = new Date();
+    const currentDay = new Intl.DateTimeFormat('es-ES', { weekday: 'long' })
+      .format(today)
+      .toLowerCase();
+
+    // Calcular si es mañana
     const tomorrow = new Date(today);
     tomorrow.setDate(today.getDate() + 1);
-    const nextDay = new Intl.DateTimeFormat('es-ES', { weekday: 'long' }).format(tomorrow).toLowerCase();
-    
-    return nextDay === day.toLowerCase();
+    const nextDay = new Intl.DateTimeFormat('es-ES', { weekday: 'long' })
+      .format(tomorrow)
+      .toLowerCase();
+
+    return {
+      isToday: currentDay === day.toLowerCase(),
+      isTomorrow: nextDay === day.toLowerCase()
+    };
   }, [day]);
 
   // Scroll lateral solo en móvil
@@ -120,13 +119,26 @@ export function DayCard({
     }
   };
 
-  // Mostrar skeleton mientras cualquier dato está cargando
+  // Si está cargando, mostrar un skeleton más ligero
   if (isLoading) {
-    return <MenuSkeleton />;
+    return (
+      <div className="bg-white/95 backdrop-blur-md rounded-2xl overflow-hidden h-full border border-gray-200/50 shadow-md">
+        <div className="animate-pulse">
+          <div className="h-14 bg-gray-100"></div>
+          <div className="grid grid-rows-4 h-[calc(100%-4rem)]">
+            {[...Array(4)].map((_, i) => (
+              <div key={i} className="p-4">
+                <div className="h-12 bg-gray-100 rounded-lg"></div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+    );
   }
 
   // No mostrar nada si no hay suficientes favoritos (solo después de cargar)
-  if (!isLoading && !hasEnoughFavorites) {
+  if (!isLoading && !favorites?.length) {
     return null;
   }
 
