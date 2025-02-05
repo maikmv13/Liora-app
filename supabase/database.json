@@ -1,3 +1,4 @@
+
 [
   {
     "table_schema": "public",
@@ -48,6 +49,24 @@
     "table_schema": "public",
     "constraint_name": "chat_history_recipe_id_fkey",
     "table_name": "chat_history",
+    "column_name": "recipe_id",
+    "foreign_table_schema": "public",
+    "foreign_table_name": "recipes",
+    "foreign_column_name": "id"
+  },
+  {
+    "table_schema": "public",
+    "constraint_name": "menu_activities_linked_household_id_fkey",
+    "table_name": "menu_activities",
+    "column_name": "linked_household_id",
+    "foreign_table_schema": "public",
+    "foreign_table_name": "households",
+    "foreign_column_name": "id"
+  },
+  {
+    "table_schema": "public",
+    "constraint_name": "menu_activities_recipe_id_fkey",
+    "table_name": "menu_activities",
     "column_name": "recipe_id",
     "foreign_table_schema": "public",
     "foreign_table_name": "recipes",

@@ -18,6 +18,7 @@ import type { Recipe as DBRecipe } from '../../types/recipe';
 import { RecipeList } from '../RecipeList';
 import { ChefHat } from 'lucide-react';
 import { useFavorites } from '../../hooks/useFavorites';
+import { MenuActivityLog } from './components/MenuActivityLog';
 
 export function WeeklyMenu2() {
   const [selectedDay, setSelectedDay] = useState<string>('Lunes');
@@ -31,6 +32,7 @@ export function WeeklyMenu2() {
   } | null>(null);
   const [menuError, setMenuError] = useState<string | null>(null);
   const [isGeneratingMenu, setIsGeneratingMenu] = useState(false);
+  const [menuActivities, setMenuActivities] = useState<MenuActivity[]>([]);
 
   const { id, isHousehold, profile } = useActiveProfile();
   const { menuItems: menu, loading: menuLoading } = useActiveMenu(id, isHousehold);
@@ -43,11 +45,66 @@ export function WeeklyMenu2() {
     removeFavorite
   } = useFavorites(false);
 
+  // Cargar actividades al montar el componente
+  useEffect(() => {
+    const loadActivities = async () => {
+      if (!profile?.linked_household_id) {
+        console.log('No hay household_id para cargar actividades');
+        return;
+      }
+
+      try {
+        // Primero obtenemos las actividades
+        const { data: activities, error } = await supabase
+          .from('menu_activities')
+          .select('*')
+          .eq('linked_household_id', profile.linked_household_id)
+          .order('created_at', { ascending: false })
+          .limit(10);
+
+        if (error) throw error;
+
+        // Luego obtenemos los datos relacionados
+        const formattedActivities = await Promise.all(activities.map(async (activity) => {
+          // Obtener nombre del usuario
+          const { data: userData } = await supabase
+            .from('profiles')
+            .select('full_name')
+            .eq('user_id', activity.user_id)
+            .single();
+
+          // Obtener nombre de la receta si existe
+          let recipeName = null;
+          if (activity.recipe_id) {
+            const { data: recipeData } = await supabase
+              .from('recipes')
+              .select('name')
+              .eq('id', activity.recipe_id)
+              .single();
+            recipeName = recipeData?.name;
+          }
+
+          return {
+            ...activity,
+            user_name: userData?.full_name,
+            recipe_name: recipeName
+          };
+        }));
+
+        setMenuActivities(formattedActivities);
+      } catch (error) {
+        console.error('Error loading menu activities:', error);
+      }
+    };
+
+    loadActivities();
+  }, [profile?.linked_household_id]);
+
   // Handle menu updates
   const handleAddToMenu = async (recipe: Recipe | null, day: string, meal: MealType) => {
     try {
-      if (!id) {
-        console.error('No hay un usuario autenticado');
+      if (!id || !profile) {
+        console.error('No hay un usuario autenticado o perfil');
         return;
       }
 
@@ -129,8 +186,40 @@ export function WeeklyMenu2() {
       }
 
       console.log('Menú de household actualizado exitosamente');
-      window.location.reload();
 
+      // Registrar la actividad
+      const { error: activityError } = await supabase
+        .from('menu_activities')
+        .insert([{
+          user_id: id,
+          linked_household_id: profile.linked_household_id,
+          meal_type: meal,
+          day,
+          recipe_id: recipe?.id || null,
+          action_type: recipe ? 'add' : 'remove',
+          created_at: new Date().toISOString()
+        }]);
+
+      if (activityError) throw activityError;
+
+      // Actualizar el estado local
+      const newActivity = {
+        id: Date.now().toString(),
+        user_id: id!,
+        linked_household_id: profile.linked_household_id,
+        meal_type: meal,
+        day,
+        recipe_id: recipe?.id || null,
+        action_type: recipe ? 'add' : 'remove',
+        created_at: new Date().toISOString(),
+        user_name: profile.full_name,
+        recipe_name: recipe?.name
+      };
+
+      setMenuActivities(prev => [newActivity, ...prev]);
+
+      // Recargar la página después de todo el proceso
+      window.location.reload();
     } catch (error) {
       console.error('Error al gestionar el menú:', error);
       throw error;
@@ -327,7 +416,7 @@ export function WeeklyMenu2() {
                 </div>
                 <div className="md:hidden">
                   <MobileView
-                    selectedDay={selectedDay as 'Lunes' | 'Martes' | 'Miércoles' | 'Jueves' | 'Viernes' | 'Sábado' | 'Domingo'}
+                    selectedDay={selectedDay}
                     weekDays={weekDays}
                     weeklyMenu={menu}
                     onDayChange={setSelectedDay}
@@ -358,6 +447,11 @@ export function WeeklyMenu2() {
             />
           </div>
         )}
+
+        {/* Registro de Actividades - Ahora al final del contenedor principal */}
+        <div className="mt-8">
+          <MenuActivityLog activities={menuActivities} />
+        </div>
       </div>
     </>
   );

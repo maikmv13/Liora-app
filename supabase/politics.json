@@ -1,432 +1,422 @@
 [
-    {
-      "table_schema": "public",
-      "table_name": "profiles",
-      "policy_name": "Enable insert own profile",
-      "command": "INSERT",
-      "permissive": "PERMISSIVE",
-      "roles": "{authenticated}",
-      "condition": null,
-      "with_check": "(auth.uid() = user_id)"
-    },
-    {
-      "table_schema": "public",
-      "table_name": "favorites",
-      "policy_name": "Users can view favorites",
-      "command": "SELECT",
-      "permissive": "PERMISSIVE",
-      "roles": "{authenticated}",
-      "condition": "((auth.uid() = user_id) OR (EXISTS ( SELECT 1\n   FROM (profiles my_profile\n     JOIN profiles other_profile ON (((my_profile.linked_household_id = other_profile.linked_household_id) AND (other_profile.user_id = favorites.user_id))))\n  WHERE ((my_profile.user_id = auth.uid()) AND (my_profile.linked_household_id IS NOT NULL)))))",
-      "with_check": null
-    },
-    {
-      "table_schema": "public",
-      "table_name": "households",
-      "policy_name": "Users can view related households",
-      "command": "SELECT",
-      "permissive": "PERMISSIVE",
-      "roles": "{authenticated}",
-      "condition": "((id IN ( SELECT profiles.linked_household_id AS household_id\n   FROM profiles\n  WHERE (profiles.user_id = auth.uid()))) OR (created_by = auth.uid()))",
-      "with_check": null
-    },
-    {
-      "table_schema": "public",
-      "table_name": "shopping_list_items",
-      "policy_name": "Users can manage their own shopping list items",
-      "command": "ALL",
-      "permissive": "PERMISSIVE",
-      "roles": "{authenticated}",
-      "condition": "(auth.uid() = user_id)",
-      "with_check": null
-    },
-    {
-      "table_schema": "public",
-      "table_name": "weekly_menus",
-      "policy_name": "Users can view related menus",
-      "command": "SELECT",
-      "permissive": "PERMISSIVE",
-      "roles": "{authenticated}",
-      "condition": "((user_id IN ( SELECT p2.user_id\n   FROM (profiles p1\n     JOIN profiles p2 ON ((p1.linked_household_id = p2.linked_household_id)))\n  WHERE (p1.user_id = auth.uid()))) OR (user_id = auth.uid()))",
-      "with_check": null
-    },
-    {
-      "table_schema": "public",
-      "table_name": "favorites",
-      "policy_name": "Users can create favorites",
-      "command": "INSERT",
-      "permissive": "PERMISSIVE",
-      "roles": "{authenticated}",
-      "condition": null,
-      "with_check": "(auth.uid() = user_id)"
-    },
-    {
-      "table_schema": "public",
-      "table_name": "favorites",
-      "policy_name": "Users can delete favorites",
-      "command": "DELETE",
-      "permissive": "PERMISSIVE",
-      "roles": "{authenticated}",
-      "condition": "(auth.uid() = user_id)",
-      "with_check": null
-    },
-    {
-      "table_schema": "public",
-      "table_name": "weekly_menus",
-      "policy_name": "Users can access their own or household menus",
-      "command": "ALL",
-      "permissive": "PERMISSIVE",
-      "roles": "{authenticated}",
-      "condition": "(((auth.uid() = user_id) AND (status = 'active'::menu_status)) OR (EXISTS ( SELECT 1\n   FROM profiles p\n  WHERE ((p.user_id = auth.uid()) AND (p.linked_household_id IS NOT NULL) AND (p.linked_household_id = weekly_menus.linked_household_id)))))",
-      "with_check": "(((auth.uid() = user_id) AND (status = 'active'::menu_status)) OR (EXISTS ( SELECT 1\n   FROM profiles p\n  WHERE ((p.user_id = auth.uid()) AND (p.linked_household_id IS NOT NULL) AND (p.linked_household_id = weekly_menus.linked_household_id)))))"
-    },
-    {
-      "table_schema": "public",
-      "table_name": "weekly_menus",
-      "policy_name": "authenticated_users_policy",
-      "command": "ALL",
-      "permissive": "PERMISSIVE",
-      "roles": "{public}",
-      "condition": "true",
-      "with_check": "true"
-    },
-    {
-      "table_schema": "public",
-      "table_name": "households",
-      "policy_name": "Enable household reading",
-      "command": "SELECT",
-      "permissive": "PERMISSIVE",
-      "roles": "{authenticated}",
-      "condition": "true",
-      "with_check": null
-    },
-    {
-      "table_schema": "public",
-      "table_name": "households",
-      "policy_name": "Enable household creation",
-      "command": "INSERT",
-      "permissive": "PERMISSIVE",
-      "roles": "{authenticated}",
-      "condition": null,
-      "with_check": "(auth.uid() = created_by)"
-    },
-    {
-      "table_schema": "public",
-      "table_name": "households",
-      "policy_name": "Enable household update",
-      "command": "UPDATE",
-      "permissive": "PERMISSIVE",
-      "roles": "{authenticated}",
-      "condition": "(auth.uid() = created_by)",
-      "with_check": null
-    },
-    {
-      "table_schema": "public",
-      "table_name": "households",
-      "policy_name": "Enable household deletion",
-      "command": "DELETE",
-      "permissive": "PERMISSIVE",
-      "roles": "{authenticated}",
-      "condition": "(auth.uid() = created_by)",
-      "with_check": null
-    },
-    {
-      "table_schema": "public",
-      "table_name": "recipes",
-      "policy_name": "Permitir acceso público a recetas",
-      "command": "SELECT",
-      "permissive": "PERMISSIVE",
-      "roles": "{public}",
-      "condition": "true",
-      "with_check": null
-    },
-    {
-      "table_schema": "public",
-      "table_name": "ingredients",
-      "policy_name": "Permitir acceso público a ingredientes",
-      "command": "SELECT",
-      "permissive": "PERMISSIVE",
-      "roles": "{public}",
-      "condition": "true",
-      "with_check": null
-    },
-    {
-      "table_schema": "public",
-      "table_name": "recipe_ingredients",
-      "policy_name": "Permitir acceso público a recipe_ingredients",
-      "command": "SELECT",
-      "permissive": "PERMISSIVE",
-      "roles": "{public}",
-      "condition": "true",
-      "with_check": null
-    },
-    {
-      "table_schema": "public",
-      "table_name": "chat_history",
-      "policy_name": "Users can view their own chat history",
-      "command": "SELECT",
-      "permissive": "PERMISSIVE",
-      "roles": "{public}",
-      "condition": "(auth.uid() = user_id)",
-      "with_check": null
-    },
-    {
-      "table_schema": "public",
-      "table_name": "chat_history",
-      "policy_name": "Users can insert their own chat messages",
-      "command": "INSERT",
-      "permissive": "PERMISSIVE",
-      "roles": "{public}",
-      "condition": null,
-      "with_check": "(auth.uid() = user_id)"
-    },
-    {
-      "table_schema": "public",
-      "table_name": "recipes",
-      "policy_name": "Permitir lectura anónima de recetas",
-      "command": "SELECT",
-      "permissive": "PERMISSIVE",
-      "roles": "{anon,authenticated}",
-      "condition": "true",
-      "with_check": null
-    },
-    {
-      "table_schema": "public",
-      "table_name": "ingredients",
-      "policy_name": "Permitir lectura anónima de ingredientes",
-      "command": "SELECT",
-      "permissive": "PERMISSIVE",
-      "roles": "{anon,authenticated}",
-      "condition": "true",
-      "with_check": null
-    },
-    {
-      "table_schema": "public",
-      "table_name": "recipe_ingredients",
-      "policy_name": "Permitir lectura anónima de recipe_ingredients",
-      "command": "SELECT",
-      "permissive": "PERMISSIVE",
-      "roles": "{anon,authenticated}",
-      "condition": "true",
-      "with_check": null
-    },
-    {
-      "table_schema": "public",
-      "table_name": "recipes",
-      "policy_name": "Solo nutricionistas pueden modificar recetas",
-      "command": "ALL",
-      "permissive": "PERMISSIVE",
-      "roles": "{authenticated}",
-      "condition": "(auth.uid() IN ( SELECT profiles.user_id\n   FROM profiles\n  WHERE (profiles.user_type = 'nutritionist'::text)))",
-      "with_check": null
-    },
-    {
-      "table_schema": "public",
-      "table_name": "ingredients",
-      "policy_name": "Solo nutricionistas pueden modificar ingredientes",
-      "command": "ALL",
-      "permissive": "PERMISSIVE",
-      "roles": "{authenticated}",
-      "condition": "(auth.uid() IN ( SELECT profiles.user_id\n   FROM profiles\n  WHERE (profiles.user_type = 'nutritionist'::text)))",
-      "with_check": null
-    },
-    {
-      "table_schema": "public",
-      "table_name": "recipe_ingredients",
-      "policy_name": "Solo nutricionistas pueden modificar recipe_ingredients",
-      "command": "ALL",
-      "permissive": "PERMISSIVE",
-      "roles": "{authenticated}",
-      "condition": "(auth.uid() IN ( SELECT profiles.user_id\n   FROM profiles\n  WHERE (profiles.user_type = 'nutritionist'::text)))",
-      "with_check": null
-    },
-    {
-      "table_schema": "public",
-      "table_name": "weekly_menus",
-      "policy_name": "Enable insert for authenticated users only",
-      "command": "INSERT",
-      "permissive": "PERMISSIVE",
-      "roles": "{public}",
-      "condition": null,
-      "with_check": "(auth.uid() IS NOT NULL)"
-    },
-    {
-      "table_schema": "public",
-      "table_name": "weekly_menus",
-      "policy_name": "Enable select for authenticated users only",
-      "command": "SELECT",
-      "permissive": "PERMISSIVE",
-      "roles": "{public}",
-      "condition": "(auth.uid() IS NOT NULL)",
-      "with_check": null
-    },
-    {
-      "table_schema": "public",
-      "table_name": "weekly_menus",
-      "policy_name": "Enable read for users and nutritionists",
-      "command": "SELECT",
-      "permissive": "PERMISSIVE",
-      "roles": "{public}",
-      "condition": "((auth.uid() = user_id) OR (auth.uid() = created_by) OR (EXISTS ( SELECT 1\n   FROM profiles\n  WHERE ((profiles.user_id = auth.uid()) AND (profiles.user_type = 'nutritionist'::text)))))",
-      "with_check": null
-    },
-    {
-      "table_schema": "public",
-      "table_name": "weekly_menus",
-      "policy_name": "Enable insert for users and nutritionists",
-      "command": "INSERT",
-      "permissive": "PERMISSIVE",
-      "roles": "{public}",
-      "condition": null,
-      "with_check": "(((auth.uid() = user_id) AND (auth.uid() = created_by)) OR ((auth.uid() = created_by) AND (EXISTS ( SELECT 1\n   FROM profiles\n  WHERE ((profiles.user_id = auth.uid()) AND (profiles.user_type = 'nutritionist'::text))))))"
-    },
-    {
-      "table_schema": "public",
-      "table_name": "weekly_menus",
-      "policy_name": "Enable update for owners and nutritionists",
-      "command": "UPDATE",
-      "permissive": "PERMISSIVE",
-      "roles": "{public}",
-      "condition": "((auth.uid() = user_id) OR (auth.uid() = created_by) OR (EXISTS ( SELECT 1\n   FROM profiles\n  WHERE ((profiles.user_id = auth.uid()) AND (profiles.user_type = 'nutritionist'::text)))))",
-      "with_check": null
-    },
-    {
-      "table_schema": "public",
-      "table_name": "error_logs",
-      "policy_name": "Enable insert for authenticated users",
-      "command": "INSERT",
-      "permissive": "PERMISSIVE",
-      "roles": "{public}",
-      "condition": null,
-      "with_check": "(auth.role() = 'authenticated'::text)"
-    },
-    {
-      "table_schema": "public",
-      "table_name": "weekly_menus",
-      "policy_name": "Enable delete for owners and nutritionists",
-      "command": "DELETE",
-      "permissive": "PERMISSIVE",
-      "roles": "{public}",
-      "condition": "((auth.uid() = user_id) OR (auth.uid() = created_by) OR (EXISTS ( SELECT 1\n   FROM profiles\n  WHERE ((profiles.user_id = auth.uid()) AND (profiles.user_type = 'nutritionist'::text)))))",
-      "with_check": null
-    },
-    {
-      "table_schema": "public",
-      "table_name": "shopping_list_items",
-      "policy_name": "Users can access shopping list",
-      "command": "ALL",
-      "permissive": "PERMISSIVE",
-      "roles": "{public}",
-      "condition": "((auth.uid() = user_id) OR ((user_id IS NULL) AND (linked_household_id IN ( SELECT profiles.linked_household_id\n   FROM profiles\n  WHERE ((profiles.user_id = auth.uid()) AND (profiles.linked_household_id IS NOT NULL))))))",
-      "with_check": null
-    },
-    {
-      "table_schema": "public",
-      "table_name": "households",
-      "policy_name": "Users can create households",
-      "command": "INSERT",
-      "permissive": "PERMISSIVE",
-      "roles": "{authenticated}",
-      "condition": null,
-      "with_check": "(auth.uid() = created_by)"
-    },
-    {
-      "table_schema": "public",
-      "table_name": "households",
-      "policy_name": "Users can update own households",
-      "command": "UPDATE",
-      "permissive": "PERMISSIVE",
-      "roles": "{authenticated}",
-      "condition": "(auth.uid() = created_by)",
-      "with_check": "(auth.uid() = created_by)"
-    },
-    {
-      "table_schema": "public",
-      "table_name": "households",
-      "policy_name": "Users can delete own households",
-      "command": "DELETE",
-      "permissive": "PERMISSIVE",
-      "roles": "{authenticated}",
-      "condition": "(auth.uid() = created_by)",
-      "with_check": null
-    },
-    {
-      "table_schema": "public",
-      "table_name": "error_logs",
-      "policy_name": "Enable read for admins via profiles",
-      "command": "SELECT",
-      "permissive": "PERMISSIVE",
-      "roles": "{public}",
-      "condition": "(EXISTS ( SELECT 1\n   FROM profiles\n  WHERE ((profiles.user_id = auth.uid()) AND (profiles.user_type = 'admin'::text))))",
-      "with_check": null
-    },
-    {
-      "table_schema": "public",
-      "table_name": "error_logs",
-      "policy_name": "Enable update for admins via profiles",
-      "command": "UPDATE",
-      "permissive": "PERMISSIVE",
-      "roles": "{public}",
-      "condition": "(EXISTS ( SELECT 1\n   FROM profiles\n  WHERE ((profiles.user_id = auth.uid()) AND (profiles.user_type = 'admin'::text))))",
-      "with_check": null
-    },
-    {
-      "table_schema": "public",
-      "table_name": "households",
-      "policy_name": "Users can update their household",
-      "command": "UPDATE",
-      "permissive": "PERMISSIVE",
-      "roles": "{authenticated}",
-      "condition": "(created_by = auth.uid())",
-      "with_check": null
-    },
-    {
-      "table_schema": "public",
-      "table_name": "profiles",
-      "policy_name": "Enable basic profile read",
-      "command": "SELECT",
-      "permissive": "PERMISSIVE",
-      "roles": "{authenticated}",
-      "condition": "true",
-      "with_check": null
-    },
-    {
-      "table_schema": "public",
-      "table_name": "profiles",
-      "policy_name": "Enable update own profile",
-      "command": "UPDATE",
-      "permissive": "PERMISSIVE",
-      "roles": "{authenticated}",
-      "condition": "(auth.uid() = user_id)",
-      "with_check": "(auth.uid() = user_id)"
-    },
-    {
-      "table_schema": "public",
-      "table_name": "profiles",
-      "policy_name": "Enable delete own profile",
-      "command": "DELETE",
-      "permissive": "PERMISSIVE",
-      "roles": "{authenticated}",
-      "condition": "(auth.uid() = user_id)",
-      "with_check": null
-    },
-    {
-      "table_schema": "public",
-      "table_name": "weekly_menus",
-      "policy_name": "Users can create menus for their household",
-      "command": "INSERT",
-      "permissive": "PERMISSIVE",
-      "roles": "{authenticated}",
-      "condition": null,
-      "with_check": "((auth.uid() = user_id) OR (EXISTS ( SELECT 1\n   FROM profiles p\n  WHERE ((p.user_id = auth.uid()) AND (p.linked_household_id IS NOT NULL) AND (p.linked_household_id = weekly_menus.linked_household_id)))))"
-    },
-    {
-      "table_schema": "public",
-      "table_name": "weekly_menus",
-      "policy_name": "Users can update household menus",
-      "command": "UPDATE",
-      "permissive": "PERMISSIVE",
-      "roles": "{authenticated}",
-      "condition": "((auth.uid() = user_id) OR (EXISTS ( SELECT 1\n   FROM profiles p\n  WHERE ((p.user_id = auth.uid()) AND (p.linked_household_id IS NOT NULL) AND (p.linked_household_id = weekly_menus.linked_household_id)))))",
-      "with_check": "((auth.uid() = user_id) OR (EXISTS ( SELECT 1\n   FROM profiles p\n  WHERE ((p.user_id = auth.uid()) AND (p.linked_household_id IS NOT NULL) AND (p.linked_household_id = weekly_menus.linked_household_id)))))"
-    }
-  ]
+  {
+    "table_schema": "public",
+    "table_name": "profiles",
+    "policy_name": "Enable insert own profile",
+    "command": "INSERT",
+    "permissive": "PERMISSIVE",
+    "roles": "{authenticated}",
+    "condition": null,
+    "with_check": "(auth.uid() = user_id)"
+  },
+  {
+    "table_schema": "public",
+    "table_name": "favorites",
+    "policy_name": "Users can view favorites",
+    "command": "SELECT",
+    "permissive": "PERMISSIVE",
+    "roles": "{authenticated}",
+    "condition": "((auth.uid() = user_id) OR (EXISTS ( SELECT 1\n   FROM (profiles my_profile\n     JOIN profiles other_profile ON (((my_profile.linked_household_id = other_profile.linked_household_id) AND (other_profile.user_id = favorites.user_id))))\n  WHERE ((my_profile.user_id = auth.uid()) AND (my_profile.linked_household_id IS NOT NULL)))))",
+    "with_check": null
+  },
+  {
+    "table_schema": "public",
+    "table_name": "households",
+    "policy_name": "Users can view related households",
+    "command": "SELECT",
+    "permissive": "PERMISSIVE",
+    "roles": "{authenticated}",
+    "condition": "((id IN ( SELECT profiles.linked_household_id AS household_id\n   FROM profiles\n  WHERE (profiles.user_id = auth.uid()))) OR (created_by = auth.uid()))",
+    "with_check": null
+  },
+  {
+    "table_schema": "public",
+    "table_name": "shopping_list_items",
+    "policy_name": "Users can manage their own shopping list items",
+    "command": "ALL",
+    "permissive": "PERMISSIVE",
+    "roles": "{authenticated}",
+    "condition": "(auth.uid() = user_id)",
+    "with_check": null
+  },
+  {
+    "table_schema": "public",
+    "table_name": "weekly_menus",
+    "policy_name": "Users can view related menus",
+    "command": "SELECT",
+    "permissive": "PERMISSIVE",
+    "roles": "{authenticated}",
+    "condition": "((user_id IN ( SELECT p2.user_id\n   FROM (profiles p1\n     JOIN profiles p2 ON ((p1.linked_household_id = p2.linked_household_id)))\n  WHERE (p1.user_id = auth.uid()))) OR (user_id = auth.uid()))",
+    "with_check": null
+  },
+  {
+    "table_schema": "public",
+    "table_name": "favorites",
+    "policy_name": "Users can create favorites",
+    "command": "INSERT",
+    "permissive": "PERMISSIVE",
+    "roles": "{authenticated}",
+    "condition": null,
+    "with_check": "(auth.uid() = user_id)"
+  },
+  {
+    "table_schema": "public",
+    "table_name": "favorites",
+    "policy_name": "Users can delete favorites",
+    "command": "DELETE",
+    "permissive": "PERMISSIVE",
+    "roles": "{authenticated}",
+    "condition": "(auth.uid() = user_id)",
+    "with_check": null
+  },
+  {
+    "table_schema": "public",
+    "table_name": "weekly_menus",
+    "policy_name": "Users can access their own or household menus",
+    "command": "ALL",
+    "permissive": "PERMISSIVE",
+    "roles": "{authenticated}",
+    "condition": "(((auth.uid() = user_id) AND (status = 'active'::menu_status)) OR (EXISTS ( SELECT 1\n   FROM profiles p\n  WHERE ((p.user_id = auth.uid()) AND (p.linked_household_id IS NOT NULL) AND (p.linked_household_id = weekly_menus.linked_household_id)))))",
+    "with_check": "(((auth.uid() = user_id) AND (status = 'active'::menu_status)) OR (EXISTS ( SELECT 1\n   FROM profiles p\n  WHERE ((p.user_id = auth.uid()) AND (p.linked_household_id IS NOT NULL) AND (p.linked_household_id = weekly_menus.linked_household_id)))))"
+  },
+  {
+    "table_schema": "public",
+    "table_name": "weekly_menus",
+    "policy_name": "authenticated_users_policy",
+    "command": "ALL",
+    "permissive": "PERMISSIVE",
+    "roles": "{public}",
+    "condition": "true",
+    "with_check": "true"
+  },
+  {
+    "table_schema": "public",
+    "table_name": "households",
+    "policy_name": "Enable household reading",
+    "command": "SELECT",
+    "permissive": "PERMISSIVE",
+    "roles": "{authenticated}",
+    "condition": "true",
+    "with_check": null
+  },
+  {
+    "table_schema": "public",
+    "table_name": "households",
+    "policy_name": "Enable household creation",
+    "command": "INSERT",
+    "permissive": "PERMISSIVE",
+    "roles": "{authenticated}",
+    "condition": null,
+    "with_check": "(auth.uid() = created_by)"
+  },
+  {
+    "table_schema": "public",
+    "table_name": "households",
+    "policy_name": "Enable household update",
+    "command": "UPDATE",
+    "permissive": "PERMISSIVE",
+    "roles": "{authenticated}",
+    "condition": "(auth.uid() = created_by)",
+    "with_check": null
+  },
+  {
+    "table_schema": "public",
+    "table_name": "households",
+    "policy_name": "Enable household deletion",
+    "command": "DELETE",
+    "permissive": "PERMISSIVE",
+    "roles": "{authenticated}",
+    "condition": "(auth.uid() = created_by)",
+    "with_check": null
+  },
+  {
+    "table_schema": "public",
+    "table_name": "recipes",
+    "policy_name": "Permitir acceso público a recetas",
+    "command": "SELECT",
+    "permissive": "PERMISSIVE",
+    "roles": "{public}",
+    "condition": "true",
+    "with_check": null
+  },
+  {
+    "table_schema": "public",
+    "table_name": "ingredients",
+    "policy_name": "Permitir acceso público a ingredientes",
+    "command": "SELECT",
+    "permissive": "PERMISSIVE",
+    "roles": "{public}",
+    "condition": "true",
+    "with_check": null
+  },
+  {
+    "table_schema": "public",
+    "table_name": "recipe_ingredients",
+    "policy_name": "Permitir acceso público a recipe_ingredients",
+    "command": "SELECT",
+    "permissive": "PERMISSIVE",
+    "roles": "{public}",
+    "condition": "true",
+    "with_check": null
+  },
+  {
+    "table_schema": "public",
+    "table_name": "chat_history",
+    "policy_name": "Users can view their own chat history",
+    "command": "SELECT",
+    "permissive": "PERMISSIVE",
+    "roles": "{public}",
+    "condition": "(auth.uid() = user_id)",
+    "with_check": null
+  },
+  {
+    "table_schema": "public",
+    "table_name": "chat_history",
+    "policy_name": "Users can insert their own chat messages",
+    "command": "INSERT",
+    "permissive": "PERMISSIVE",
+    "roles": "{public}",
+    "condition": null,
+    "with_check": "(auth.uid() = user_id)"
+  },
+  {
+    "table_schema": "public",
+    "table_name": "recipes",
+    "policy_name": "Permitir lectura anónima de recetas",
+    "command": "SELECT",
+    "permissive": "PERMISSIVE",
+    "roles": "{anon,authenticated}",
+    "condition": "true",
+    "with_check": null
+  },
+  {
+    "table_schema": "public",
+    "table_name": "ingredients",
+    "policy_name": "Permitir lectura anónima de ingredientes",
+    "command": "SELECT",
+    "permissive": "PERMISSIVE",
+    "roles": "{anon,authenticated}",
+    "condition": "true",
+    "with_check": null
+  },
+  {
+    "table_schema": "public",
+    "table_name": "recipe_ingredients",
+    "policy_name": "Permitir lectura anónima de recipe_ingredients",
+    "command": "SELECT",
+    "permissive": "PERMISSIVE",
+    "roles": "{anon,authenticated}",
+    "condition": "true",
+    "with_check": null
+  },
+  {
+    "table_schema": "public",
+    "table_name": "recipes",
+    "policy_name": "Solo nutricionistas pueden modificar recetas",
+    "command": "ALL",
+    "permissive": "PERMISSIVE",
+    "roles": "{authenticated}",
+    "condition": "(auth.uid() IN ( SELECT profiles.user_id\n   FROM profiles\n  WHERE (profiles.user_type = 'nutritionist'::text)))",
+    "with_check": null
+  },
+  {
+    "table_schema": "public",
+    "table_name": "ingredients",
+    "policy_name": "Solo nutricionistas pueden modificar ingredientes",
+    "command": "ALL",
+    "permissive": "PERMISSIVE",
+    "roles": "{authenticated}",
+    "condition": "(auth.uid() IN ( SELECT profiles.user_id\n   FROM profiles\n  WHERE (profiles.user_type = 'nutritionist'::text)))",
+    "with_check": null
+  },
+  {
+    "table_schema": "public",
+    "table_name": "recipe_ingredients",
+    "policy_name": "Solo nutricionistas pueden modificar recipe_ingredients",
+    "command": "ALL",
+    "permissive": "PERMISSIVE",
+    "roles": "{authenticated}",
+    "condition": "(auth.uid() IN ( SELECT profiles.user_id\n   FROM profiles\n  WHERE (profiles.user_type = 'nutritionist'::text)))",
+    "with_check": null
+  },
+  {
+    "table_schema": "public",
+    "table_name": "weekly_menus",
+    "policy_name": "Enable insert for authenticated users only",
+    "command": "INSERT",
+    "permissive": "PERMISSIVE",
+    "roles": "{public}",
+    "condition": null,
+    "with_check": "(auth.uid() IS NOT NULL)"
+  },
+  {
+    "table_schema": "public",
+    "table_name": "weekly_menus",
+    "policy_name": "Enable select for authenticated users only",
+    "command": "SELECT",
+    "permissive": "PERMISSIVE",
+    "roles": "{public}",
+    "condition": "(auth.uid() IS NOT NULL)",
+    "with_check": null
+  },
+  {
+    "table_schema": "public",
+    "table_name": "weekly_menus",
+    "policy_name": "Enable read for users and nutritionists",
+    "command": "SELECT",
+    "permissive": "PERMISSIVE",
+    "roles": "{public}",
+    "condition": "((auth.uid() = user_id) OR (auth.uid() = created_by) OR (EXISTS ( SELECT 1\n   FROM profiles\n  WHERE ((profiles.user_id = auth.uid()) AND (profiles.user_type = 'nutritionist'::text)))))",
+    "with_check": null
+  },
+  {
+    "table_schema": "public",
+    "table_name": "weekly_menus",
+    "policy_name": "Enable insert for users and nutritionists",
+    "command": "INSERT",
+    "permissive": "PERMISSIVE",
+    "roles": "{public}",
+    "condition": null,
+    "with_check": "(((auth.uid() = user_id) AND (auth.uid() = created_by)) OR ((auth.uid() = created_by) AND (EXISTS ( SELECT 1\n   FROM profiles\n  WHERE ((profiles.user_id = auth.uid()) AND (profiles.user_type = 'nutritionist'::text))))))"
+  },
+  {
+    "table_schema": "public",
+    "table_name": "weekly_menus",
+    "policy_name": "Enable update for owners and nutritionists",
+    "command": "UPDATE",
+    "permissive": "PERMISSIVE",
+    "roles": "{public}",
+    "condition": "((auth.uid() = user_id) OR (auth.uid() = created_by) OR (EXISTS ( SELECT 1\n   FROM profiles\n  WHERE ((profiles.user_id = auth.uid()) AND (profiles.user_type = 'nutritionist'::text)))))",
+    "with_check": null
+  },
+  {
+    "table_schema": "public",
+    "table_name": "weekly_menus",
+    "policy_name": "Enable delete for owners and nutritionists",
+    "command": "DELETE",
+    "permissive": "PERMISSIVE",
+    "roles": "{public}",
+    "condition": "((auth.uid() = user_id) OR (auth.uid() = created_by) OR (EXISTS ( SELECT 1\n   FROM profiles\n  WHERE ((profiles.user_id = auth.uid()) AND (profiles.user_type = 'nutritionist'::text)))))",
+    "with_check": null
+  },
+  {
+    "table_schema": "public",
+    "table_name": "shopping_list_items",
+    "policy_name": "Users can access shopping list",
+    "command": "ALL",
+    "permissive": "PERMISSIVE",
+    "roles": "{public}",
+    "condition": "((auth.uid() = user_id) OR ((user_id IS NULL) AND (linked_household_id IN ( SELECT profiles.linked_household_id\n   FROM profiles\n  WHERE ((profiles.user_id = auth.uid()) AND (profiles.linked_household_id IS NOT NULL))))))",
+    "with_check": null
+  },
+  {
+    "table_schema": "public",
+    "table_name": "households",
+    "policy_name": "Users can create households",
+    "command": "INSERT",
+    "permissive": "PERMISSIVE",
+    "roles": "{authenticated}",
+    "condition": null,
+    "with_check": "(auth.uid() = created_by)"
+  },
+  {
+    "table_schema": "public",
+    "table_name": "households",
+    "policy_name": "Users can update own households",
+    "command": "UPDATE",
+    "permissive": "PERMISSIVE",
+    "roles": "{authenticated}",
+    "condition": "(auth.uid() = created_by)",
+    "with_check": "(auth.uid() = created_by)"
+  },
+  {
+    "table_schema": "public",
+    "table_name": "households",
+    "policy_name": "Users can delete own households",
+    "command": "DELETE",
+    "permissive": "PERMISSIVE",
+    "roles": "{authenticated}",
+    "condition": "(auth.uid() = created_by)",
+    "with_check": null
+  },
+  {
+    "table_schema": "public",
+    "table_name": "households",
+    "policy_name": "Users can update their household",
+    "command": "UPDATE",
+    "permissive": "PERMISSIVE",
+    "roles": "{authenticated}",
+    "condition": "(created_by = auth.uid())",
+    "with_check": null
+  },
+  {
+    "table_schema": "public",
+    "table_name": "menu_activities",
+    "policy_name": "menu_activities_read_policy",
+    "command": "SELECT",
+    "permissive": "PERMISSIVE",
+    "roles": "{public}",
+    "condition": "((auth.uid() = user_id) OR (linked_household_id IN ( SELECT profiles.linked_household_id\n   FROM profiles\n  WHERE (profiles.user_id = auth.uid()))))",
+    "with_check": null
+  },
+  {
+    "table_schema": "public",
+    "table_name": "menu_activities",
+    "policy_name": "menu_activities_insert_policy",
+    "command": "INSERT",
+    "permissive": "PERMISSIVE",
+    "roles": "{public}",
+    "condition": null,
+    "with_check": "(auth.uid() = user_id)"
+  },
+  {
+    "table_schema": "public",
+    "table_name": "profiles",
+    "policy_name": "Enable basic profile read",
+    "command": "SELECT",
+    "permissive": "PERMISSIVE",
+    "roles": "{authenticated}",
+    "condition": "true",
+    "with_check": null
+  },
+  {
+    "table_schema": "public",
+    "table_name": "profiles",
+    "policy_name": "Enable update own profile",
+    "command": "UPDATE",
+    "permissive": "PERMISSIVE",
+    "roles": "{authenticated}",
+    "condition": "(auth.uid() = user_id)",
+    "with_check": "(auth.uid() = user_id)"
+  },
+  {
+    "table_schema": "public",
+    "table_name": "profiles",
+    "policy_name": "Enable delete own profile",
+    "command": "DELETE",
+    "permissive": "PERMISSIVE",
+    "roles": "{authenticated}",
+    "condition": "(auth.uid() = user_id)",
+    "with_check": null
+  },
+  {
+    "table_schema": "public",
+    "table_name": "weekly_menus",
+    "policy_name": "Users can create menus for their household",
+    "command": "INSERT",
+    "permissive": "PERMISSIVE",
+    "roles": "{authenticated}",
+    "condition": null,
+    "with_check": "((auth.uid() = user_id) OR (EXISTS ( SELECT 1\n   FROM profiles p\n  WHERE ((p.user_id = auth.uid()) AND (p.linked_household_id IS NOT NULL) AND (p.linked_household_id = weekly_menus.linked_household_id)))))"
+  },
+  {
+    "table_schema": "public",
+    "table_name": "weekly_menus",
+    "policy_name": "Users can update household menus",
+    "command": "UPDATE",
+    "permissive": "PERMISSIVE",
+    "roles": "{authenticated}",
+    "condition": "((auth.uid() = user_id) OR (EXISTS ( SELECT 1\n   FROM profiles p\n  WHERE ((p.user_id = auth.uid()) AND (p.linked_household_id IS NOT NULL) AND (p.linked_household_id = weekly_menus.linked_household_id)))))",
+    "with_check": "((auth.uid() = user_id) OR (EXISTS ( SELECT 1\n   FROM profiles p\n  WHERE ((p.user_id = auth.uid()) AND (p.linked_household_id IS NOT NULL) AND (p.linked_household_id = weekly_menus.linked_household_id)))))"
+  }
+]
