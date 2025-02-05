@@ -210,7 +210,7 @@ function AppContent() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-rose-50 to-orange-50 relative">
+    <div className="min-h-[100dvh] bg-gradient-to-br from-rose-50 to-orange-50 relative pt-safe">
       <Header
         activeTab={activeTab}
         onTabChange={setActiveTab}
@@ -219,6 +219,7 @@ function AppContent() {
         user={user}
         onLogin={() => setOnboardingCompleted(false)}
         onProfile={() => setActiveTab('profile')}
+        className="top-safe"
       />
 
       <Navigation
@@ -228,7 +229,7 @@ function AppContent() {
       />
 
       <main className={`container mx-auto pb-24 md:pb-8 ${
-        location.pathname.startsWith('/recipe/') ? '' : 'px-4 pt-20'
+        location.pathname.startsWith('/recipe/') ? 'pt-safe' : 'px-4 pt-20'
       }`}>
         <Suspense fallback={<LoadingFallback />}>
           <Routes>

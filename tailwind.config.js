@@ -30,6 +30,9 @@ export default {
         shimmer: 'shimmer 3s ease-in-out infinite',
         'slide-cart': 'slide-cart 1s ease-in-out',
         explode: 'explode 0.5s ease-out forwards'
+      },
+      spacing: {
+        'safe': 'env(safe-area-inset-top)'
       }
     },
   },
