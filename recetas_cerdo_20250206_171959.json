@@ -1,0 +1,63 @@
+[
+  {
+    "name": "Solomillo de cerdo glaseado",
+    "side_dish": "con risotto de champiñones y reducción de vino tinto",
+    "short_description": "Deliciosa receta de solomillo de cerdo glaseado con risotto de champiñones y reducción de vino tinto",
+    "prep_time": "30 minutos",
+    "cuisine_type": "Internacional",
+    "meal_type": "Comida",
+    "category": "Cerdo",
+    "ingredients": [
+      {
+        "name": "Solomillo de cerdo",
+        "quantity": 1,
+        "unit": "unidad",
+        "category": "Cerdo"
+      },
+      {
+        "name": "Champiñones",
+        "quantity": 200,
+        "unit": "gramo",
+        "category": "Setas y Hongos"
+      },
+      {
+        "name": "Vino tinto",
+        "quantity": 200,
+        "unit": "mililitro",
+        "category": "Bebidas y Licores"
+      }
+    ],
+    "steps": [
+      "🔪 Corta el solomillo de cerdo en filetes",
+      "🍄 Lava y corta los champiñones en láminas",
+      "🍳 En una sartén caliente, sella los filetes de solomillo",
+      "🍷 Agrega el vino tinto a la sartén y deja reducir",
+      "🍄 Añade los champiñones a la sartén y cocina hasta que estén tiernos",
+      "🍽️ Sirve caliente y disfruta"
+    ],
+    "dietary_info": {
+      "gluten_free": true,
+      "lactose_free": true,
+      "nut_free": true,
+      "egg_free": true,
+      "shellfish_free": true,
+      "soy_free": true,
+      "yeast_free": true,
+      "sugar_free": false,
+      "vegan": false,
+      "vegetarian": false,
+      "keto": false,
+      "paleo": false
+    },
+    "nutrition_info": {
+      "energy_kj": 1000,
+      "calories": 240,
+      "fats": 10.5,
+      "saturated_fats": 2.3,
+      "carbohydrates": 30.2,
+      "sugars": 5.1,
+      "fiber": 3.2,
+      "proteins": 8.4
+    }
+  }
+]

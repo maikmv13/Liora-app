@@ -1,0 +1,71 @@
+[
+  {
+    "name": "Costillas de cerdo a la BBQ",
+    "side_dish": "con puré de batata y crujientes de maíz",
+    "short_description": "Deliciosa receta de costillas de cerdo a la bbq con puré de batata y crujientes de maíz",
+    "prep_time": "30 minutos",
+    "cuisine_type": "Internacional",
+    "meal_type": "Comida",
+    "category": "Cerdo",
+    "ingredients": [
+      {
+        "name": "Solomillo de cerdo",
+        "quantity": 1,
+        "unit": "unidad",
+        "category": "Cerdo"
+      },
+      {
+        "name": "Pimiento rojo",
+        "quantity": 2,
+        "unit": "unidades",
+        "category": "Verduras Básicas"
+      },
+      {
+        "name": "Ajo",
+        "quantity": 3,
+        "unit": "dientes",
+        "category": "Verduras Básicas"
+      },
+      {
+        "name": "Aceite de oliva",
+        "quantity": 2,
+        "unit": "cucharadas",
+        "category": "Aceites y Grasas"
+      }
+    ],
+    "steps": [
+      "🔪 Corta el solomillo de cerdo en tiras delgadas",
+      "🌶️ Corta los pimientos rojos en tiras",
+      "🧄 Pica los dientes de ajo",
+      "🔥 Calienta {quantity_4} {ingredient_4} en una sartén a fuego medio-alto",
+      "🍳 Saltea el ajo picado en el aceite caliente",
+      "🥩 Agrega las tiras de solomillo a la sartén y cocina hasta que estén doradas",
+      "🌶️ Añade las tiras de pimiento rojo a la sartén y cocina por unos minutos hasta que estén tiernos",
+      "🍽️ Sirve caliente y disfruta"
+    ],
+    "dietary_info": {
+      "gluten_free": true,
+      "lactose_free": true,
+      "nut_free": true,
+      "egg_free": true,
+      "shellfish_free": true,
+      "soy_free": true,
+      "yeast_free": true,
+      "sugar_free": true,
+      "vegan": false,
+      "vegetarian": false,
+      "keto": true,
+      "paleo": true
+    },
+    "nutrition_info": {
+      "energy_kj": 1000,
+      "calories": 240,
+      "fats": 10.5,
+      "saturated_fats": 2.3,
+      "carbohydrates": 30.2,
+      "sugars": 5.1,
+      "fiber": 3.2,
+      "proteins": 8.4
+    }
+  }
+]

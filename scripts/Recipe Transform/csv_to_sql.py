@@ -161,9 +161,9 @@ def csv_to_sql(csv_file_path, sql_file_path):
         for row in tqdm(rows, desc="Procesando recetas"):
             ingredientes = []
             for i in range(1, 21):
-                ingrediente = row.get(f'Ingrediente_{i}', '').strip()
-                cantidad_raw = row.get(f'Cantidad_{i}', '').strip()
-                tipo_alimento = row.get(f'Tipo_{i}', '').strip()
+                ingrediente = row.get(f'ingredient_{i}', '').strip()
+                cantidad_raw = row.get(f'quantity_{i}', '').strip()
+                tipo_alimento = row.get(f'type_{i}', '').strip()
 
                 if ingrediente:
                     cantidad, unidad = parse_cantidad(cantidad_raw)
@@ -176,28 +176,27 @@ def csv_to_sql(csv_file_path, sql_file_path):
                     # Recopilar ingredientes únicos con su categoría
                     unique_ingredients[ingrediente] = map_ingredient_category(tipo_alimento) if tipo_alimento else 'Otras Categorías'
             
-            instrucciones = {f"Paso {j}": row.get(f'Paso {j}', '').strip() for j in range(1, 7)}
+            instrucciones = {f"Paso {j}": row.get(f'step_{j}', '').strip() for j in range(1, 7)}
 
             recipes.append({
-                'Plato': row['Titulo'].replace("'", "''"),
-                'Acompañamiento': row.get('Descripcion', '').replace("'", "''"),
-                'Tipo': row.get('Tipo de comida', 'Comida'),
-                'Categoria': row.get('Categoria', 'Otros'),
-                'Comensales': 4,
-                'Calorias': row.get('Valor energético (kcal)', '0'),
-                'Valor energético (kJ)': row.get('Valor energético (kJ)', '0'),
-                'Grasas': row.get('Grasas', '0'),
-                'Saturadas': row.get('de las cuales saturadas', '0'),
-                'Carbohidratos': row.get('Carbohidratos', '0'),
-                'Azúcares': row.get('de los cuales azúcares', '0'),
-                'Fibra': row.get('Fibra', '0'),
-                'Proteínas': row.get('Proteínas', '0'),
-                'Tiempo de preparación': row.get('Tiempo de preparación', '45'),
-                'Instrucciones': instrucciones,
-                'Ingredientes': ingredientes,
-                'Url': row.get('URL', '').replace("'", "''"),
-                'PDF_Url': row.get('PDF_URL', '').replace("'", "''"),
-                'image_url': row.get('Image_url', '').replace("'", "''"),
+                'name': row['name'].replace("'", "''"),
+                'side_dish': row.get('side_dish', '').replace("'", "''"),
+                'meal_type': row.get('meal_type', 'comida'),
+                'category': row.get('category', 'Otros'),
+                'servings': 4,
+                'calories': row.get('calories', '0'),
+                'energy_kj': row.get('energy_kj', '0'),
+                'fats': row.get('fats', '0'),
+                'saturated_fats': row.get('saturated_fats', '0'),
+                'carbohydrates': row.get('carbohydrates', '0'),
+                'sugars': row.get('sugars', '0'),
+                'fiber': row.get('fiber', '0'),
+                'proteins': row.get('proteins', '0'),
+                'prep_time': row.get('prep_time', '45'),
+                'instructions': instrucciones,
+                'url': row.get('url', '').replace("'", "''"),
+                'pdf_url': row.get('pdf_url', '').replace("'", "''"),
+                'image_url': row.get('image_url', '').replace("'", "''"),
                 'cuisine_type': row.get('cuisine_type', '').strip()
             })
 
@@ -227,24 +226,24 @@ INSERT INTO recipes (
     for recipe in recipes:
         cuisine = map_cuisine_type(recipe.get('cuisine_type', '').strip())
         sql += f"""(
-    '{recipe['Plato']}',
-    '{recipe['Acompañamiento']}',
-    '{recipe['Tipo'].lower()}',
-    '{map_category(recipe['Categoria'])}',
-    {recipe['Comensales']},
-    '{get_numeric_value(recipe['Calorias'])}',
-    '{get_numeric_value(recipe['Valor energético (kJ)'])}',
-    '{get_numeric_value(recipe['Grasas'])}',
-    '{get_numeric_value(recipe['Saturadas'])}',
-    '{get_numeric_value(recipe['Carbohidratos'])}',
-    '{get_numeric_value(recipe['Azúcares'])}',
-    '{get_numeric_value(recipe['Fibra'])}',
-    '{get_numeric_value(recipe['Proteínas'])}',
+    '{recipe['name']}',
+    '{recipe['side_dish']}',
+    '{recipe['meal_type'].lower()}',
+    '{map_category(recipe['category'])}',
+    {recipe['servings']},
+    '{get_numeric_value(recipe['calories'])}',
+    '{get_numeric_value(recipe['energy_kj'])}',
+    '{get_numeric_value(recipe['fats'])}',
+    '{get_numeric_value(recipe['saturated_fats'])}',
+    '{get_numeric_value(recipe['carbohydrates'])}',
+    '{get_numeric_value(recipe['sugars'])}',
+    '{get_numeric_value(recipe['fiber'])}',
+    '{get_numeric_value(recipe['proteins'])}',
     '0',
-    '{recipe['Tiempo de preparación'] or '45'}',
-    '{json.dumps(recipe['Instrucciones'])}'::jsonb,
-    '{recipe['Url']}',
-    '{recipe['PDF_Url']}',
+    '{recipe['prep_time'] or '45'}',
+    '{json.dumps(recipe['instructions'])}'::jsonb,
+    '{recipe['url']}',
+    '{recipe['pdf_url']}',
     '{recipe.get('image_url', '')}',
     '{cuisine}'
 ),\n"""
@@ -255,7 +254,7 @@ INSERT INTO recipes (
     for recipe in recipes:
         # Eliminar ingredientes duplicados usando un diccionario
         unique_ingredients = {}
-        for ingredient in recipe['Ingredientes']:
+        for ingredient in recipe['ingredientes']:
             key = (ingredient['Nombre'], ingredient['Unidad'])
             if key not in unique_ingredients:
                 unique_ingredients[key] = ingredient
@@ -263,12 +262,12 @@ INSERT INTO recipes (
                 # Si el ingrediente ya existe, sumamos las cantidades
                 unique_ingredients[key]['Cantidad'] += ingredient['Cantidad']
 
-        sql += f"""WITH recipe_{recipe['Plato'].replace(' ', '_')} AS (
-            SELECT id FROM recipes WHERE name = '{recipe['Plato']}'
+        sql += f"""WITH recipe_{recipe['name'].replace(' ', '_')} AS (
+            SELECT id FROM recipes WHERE name = '{recipe['name']}'
         )
         INSERT INTO recipe_ingredients (recipe_id, ingredient_id, quantity, unit)
         SELECT 
-            (SELECT id FROM recipe_{recipe['Plato'].replace(' ', '_')}),
+            (SELECT id FROM recipe_{recipe['name'].replace(' ', '_')}),
             i.id,
             ing.quantity,
             ing.unit::unit_type
