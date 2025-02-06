@@ -46,31 +46,26 @@ class RecipeCreator:
             try:
                 print_progress(f"Intento {attempt + 1} de {max_attempts}")
                 
-                # 1. Generar nombre completo
+                # Generar nombre y descripción
                 print_progress("Generando nombre de la receta...")
                 name_response = self.client.chat.completions.create(
                     model=OPENAI_CONFIG['MODEL'],
-                    messages=[{"role": "user", "content": get_recipe_name_prompt(recipe_type)}],
-                    temperature=0.9,
+                    messages=[
+                        {"role": "system", "content": "Eres un chef creativo experto en nombres de platos."},
+                        {"role": "user", "content": get_recipe_name_prompt(recipe_type)}
+                    ],
+                    temperature=0.7,
                     max_tokens=OPENAI_CONFIG['MAX_TOKENS']
                 )
                 
-                # Validar y limpiar respuesta del nombre
-                if not name_response.choices or not name_response.choices[0].message.content:
-                    raise ValueError("No se recibió respuesta válida para el nombre de la receta")
-                    
-                full_name = self.clean_json_response(name_response.choices[0].message.content)
                 print_progress("Nombre completo recibido:")
-                print(full_name)
-
-                try:
-                    name, side_dish = full_name.split(" | con ")
-                    side_dish = "con " + side_dish
-                    print_success(f"Nombre del plato: {name}")
-                    print_success(f"Acompañamiento: {side_dish}")
-                except ValueError:
-                    raise ValueError(f"Formato de nombre inválido: {full_name}")
-
+                print(name_response.choices[0].message.content)
+                
+                # Parsear nombre y descripción
+                name, side_dish, short_description = self.parse_recipe_name(
+                    name_response.choices[0].message.content
+                )
+                
                 # 2. Seleccionar ingredientes
                 print_progress("Seleccionando ingredientes...")
                 ingredients_response = self.client.chat.completions.create(
@@ -80,7 +75,13 @@ class RecipeCreator:
                             "role": "system",
                             "content": "Eres un chef experto. Tu tarea es seleccionar ingredientes que correspondan exactamente con la receta solicitada."
                         },
-                        {"role": "user", "content": get_ingredients_prompt(recipe_type, name, side_dish, INGREDIENTS_BY_TYPE)}
+                        {"role": "user", "content": get_ingredients_prompt(
+                            recipe_type, 
+                            name, 
+                            side_dish, 
+                            short_description,
+                            INGREDIENTS_BY_TYPE
+                        )}
                     ],
                     temperature=0.3,
                     max_tokens=OPENAI_CONFIG['MAX_TOKENS']
@@ -203,7 +204,7 @@ class RecipeCreator:
                 recipe_data = {
                     "name": name,
                     "side_dish": side_dish,
-                    "short_description": f"Deliciosa receta de {name.lower()} {side_dish}",
+                    "short_description": short_description,
                     "prep_time": "30 minutos",
                     "cuisine_type": "Internacional",
                     "meal_type": "Comida",
@@ -220,7 +221,7 @@ class RecipeCreator:
                 return formatted_recipe
 
             except Exception as e:
-                print_error(f"Error en intento {attempt + 1}: {str(e)}")
+                print_error(f"Error en intento {attempt + 1}: {e}")
                 if attempt == max_attempts - 1:
                     print_error("Se alcanzó el número máximo de intentos")
                     return None
@@ -313,7 +314,12 @@ class RecipeCreator:
                 "hojas": "hoja",
                 "ramitas": "ramita",
                 "latas": "lata",
-                "paquetes": "paquete"
+                "paquetes": "paquete",
+                "manojos": "manojo",
+                "filetes": "filete",
+                "medallones": "medallón",
+                "rodajas": "rodaja",
+                "lonchas": "loncha"
             }
 
             formatted_recipe = {
@@ -409,3 +415,33 @@ class RecipeCreator:
             except Exception as e:
                 print_error(f"Error al parsear información nutricional: {e}")
                 raise ValueError("Formato de información nutricional inválido")
+
+    def parse_recipe_name(self, content: str) -> tuple:
+        """Parsea el nombre de la receta del formato JSON"""
+        try:
+            # Limpiar la respuesta
+            content = self.clean_json_response(content)
+            
+            # Parsear el JSON
+            recipe_data = json.loads(content)
+            
+            # Extraer los campos
+            name = recipe_data.get('name', '').strip()
+            side_dish = recipe_data.get('side_dish', '').strip()
+            short_description = recipe_data.get('short_description', '').strip()
+            
+            # Validar que tenemos todos los campos necesarios
+            if not all([name, side_dish, short_description]):
+                raise ValueError("Faltan campos requeridos en la respuesta")
+            
+            print_success(f"Nombre del plato: {name}")
+            print_success(f"Acompañamiento: {side_dish}")
+            
+            return name, side_dish, short_description
+            
+        except json.JSONDecodeError:
+            print_error("Error al decodificar JSON del nombre de la receta")
+            raise ValueError("Formato de nombre inválido")
+        except Exception as e:
+            print_error(f"Error al parsear nombre de receta: {e}")
+            raise ValueError(f"Formato de nombre inválido: {content}")

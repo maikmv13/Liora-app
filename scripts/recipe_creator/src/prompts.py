@@ -2,28 +2,49 @@ from typing import Dict, List
 import json
 
 def get_recipe_name_prompt(recipe_type: str) -> str:
-    return f'''Crea un nombre completo para una receta de {recipe_type} que incluya:
-    1. Plato principal (name)
-    2. Acompañamiento especial (side_dish)
+    return f'''Crea un nombre simple y directo para una receta de {recipe_type} que incluya:
+    1. Plato principal (name): Usa nombres claros y directos del ingrediente principal y método de cocción
+    2. Acompañamiento (side_dish): Máximo 2-3 guarniciones simples
+    3. Descripción (short_description): Describe de forma técnica y precisa:
+       - Método exacto de cocción y temperatura/tiempo
+       - Ingredientes principales y su preparación
+       - Técnicas culinarias utilizadas
+       - Resultado final esperado
     
-    El formato debe ser: "name | con side_dish"
+    El formato debe ser: 
+    {{
+        "name": "name",
+        "side_dish": "con side_dish",
+        "short_description": "Descripción técnica y precisa"
+    }}
     
     Ejemplos:
-    - "Macarrones con tomate | con mejillones en escabeche"
-    - "Arroz negro | con calamares y alioli casero"
-    - "Pechuga de pavo rellena | con puré de boniato y nueces"
-    - "Solomillo de cerdo al whisky | con champiñones salteados y patatas asadas"
-    - "Bacalao confitado | con pimientos del piquillo y crema de ajo"
+    {{
+        "name": "Solomillo de ternera a la plancha",
+        "side_dish": "con puré de patatas y espárragos verdes",
+        "short_description": "Solomillo de ternera marcado a fuego alto (200°C) durante 3-4 minutos por cada lado para lograr un punto medio. Servido con puré de patatas elaborado con mantequilla y nata, y espárragos verdes salteados brevemente en aceite de oliva con un toque de ajo."
+    }}
+    
+    {{
+        "name": "Merluza al horno",
+        "side_dish": "con patatas panadera y pimientos",
+        "short_description": "Lomos de merluza horneados a 180°C durante 15 minutos sobre base de patatas cortadas en rodajas finas y pimientos asados. La patata se precocina 25 minutos antes de añadir el pescado, consiguiendo una textura crujiente por fuera y tierna por dentro."
+    }}
     
     NO generes:
-    ❌ "Arroz con pollo" (demasiado simple)
-    ❌ "Ensalada mixta | con atún" (poco descriptivo)
-    ❌ "Pasta | con salsa" (genérico)
+    ❌ Nombres rebuscados o poéticos
+    ❌ Más de 3 elementos en el acompañamiento
+    ❌ Descripciones subjetivas o floridas
+    ❌ Técnicas de cocción ambiguas
     
-    La receta debe ser creativa y descriptiva, detallando tanto el plato principal como su acompañamiento.'''
+    La descripción debe ser técnica, específica y enfocada en el método de preparación.'''
 
-def get_ingredients_prompt(recipe_type: str, recipe_name: str, side_dish: str, ingredients_by_type: dict) -> str:
-    return f'''Genera una lista de ingredientes para la receta "{recipe_name} {side_dish}".
+def get_ingredients_prompt(recipe_type: str, name: str, side_dish: str, short_description: str, ingredients_by_type: dict) -> str:
+    return f'''Genera una lista de ingredientes para esta receta:
+
+    Nombre: "{name}"
+    Acompañamiento: "{side_dish}"
+    Descripción: "{short_description}"
     
     Usa ÚNICAMENTE ingredientes de estas categorías, respetando EXACTAMENTE sus nombres y categorías:
     {json.dumps(ingredients_by_type, indent=2, ensure_ascii=False)}
@@ -33,6 +54,8 @@ def get_ingredients_prompt(recipe_type: str, recipe_name: str, side_dish: str, i
     2. No agregues palabras como "filetes de" o "rodajas de" al nombre del ingrediente
     3. La cantidad y unidad deben ir separadas del nombre del ingrediente
     4. Si necesitas especificar el corte o preparación, hazlo en los pasos de la receta
+    5. Incluye TODOS los ingredientes mencionados en la descripción
+    6. Añade los ingredientes básicos necesarios aunque no estén en la descripción (sal, aceite, etc.)
     
     La respuesta debe ser un array JSON válido con este formato exacto:
     [
@@ -41,7 +64,7 @@ def get_ingredients_prompt(recipe_type: str, recipe_name: str, side_dish: str, i
     ]
     
     Reglas:
-    1. Los ingredientes deben corresponder EXACTAMENTE con el nombre de la receta y su acompañamiento
+    1. Los ingredientes deben corresponder con la descripción detallada de la receta
     2. El nombre del ingrediente debe existir EXACTAMENTE en la lista proporcionada
     3. La categoría debe coincidir EXACTAMENTE con la categoría del ingrediente en la lista
     4. La cantidad debe ser un número

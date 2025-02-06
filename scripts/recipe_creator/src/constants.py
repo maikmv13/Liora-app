@@ -113,11 +113,12 @@ INGREDIENTS_BY_TYPE = {
         'Pistachos molidos', 'Harina de almendra'
     ],
     
-    'Hierbas Aromáticas Frescas': [
-        'Perejil fresco', 'Cilantro fresco', 'Albahaca fresca',
-        'Romero fresco', 'Tomillo fresco', 'Orégano fresco',
-        'Menta fresca', 'Hierbabuena', 'Eneldo fresco',
-        'Cebollino fresco', 'Salvia fresca', 'Laurel fresco'
+    'Hierbas Frescas': [
+        'Albahaca fresca', 'Perejil fresco', 'Cilantro fresco', 'Menta fresca',
+        'Orégano fresco', 'Tomillo fresco', 'Romero fresco', 'Eneldo fresco',
+        'Estragón fresco', 'Salvia fresca', 'Laurel fresco', 'Cebollino fresco',
+        'Hierbabuena fresca', 'Melisa fresca', 'Ajedrea fresca',
+        'Mezcla de hierbas frescas', 'Bouquet garni fresco'
     ],
     
     'Aceites y Grasas': [
@@ -148,8 +149,10 @@ INGREDIENTS_BY_TYPE = {
     ],
     'Ternera y Vacuno': [
         'Solomillo de ternera', 'Entrecot', 'Chuletón', 'Lomo bajo', 'Lomo alto',
+        'Filete de ternera', 'Medallones de ternera', 'Redondo de ternera',
         'Cadera', 'Redondo', 'Tapa', 'Contra', 'Babilla', 'Morcillo', 'Carrillera',
-        'Rabo de toro', 'Osobuco', 'Falda', 'Pecho', 'Aguja', 'Espaldilla'
+        'Rabo de toro', 'Osobuco', 'Falda', 'Pecho', 'Aguja', 'Espaldilla',
+        'Carne para estofar', 'Carne para guisar', 'Ternera picada'
     ],
     'Cordero': [
         'Cordero', 'Chuletas de cordero', 'Pierna de cordero', 'Paletilla de cordero'
@@ -233,7 +236,9 @@ INGREDIENTS_BY_TYPE = {
     
     # --- Panadería y Repostería ---
     'Panes Tradicionales': [
-        'Pan de barra', 'Pan rústico', 'Baguette', 'Pan integral', 'Pan de molde'
+        'Pan de barra', 'Pan rústico', 'Baguette', 'Pan integral', 'Pan de molde',
+        'Pan naan', 'Pan pita', 'Pan de centeno', 'Pan focaccia', 'Pan ciabatta',
+        'Pan chapata', 'Pan de pueblo', 'Pan tostado', 'Pan rallado'
     ],
     'Panes Especiales': [
         'Pan sin gluten', 'Pan de centeno', 'Pan de espelta', 'Pan artesanal'
@@ -287,11 +292,10 @@ INGREDIENTS_BY_TYPE = {
     ],
     'Verduras de Raíz': [
         'Zanahoria', 'Remolacha', 'Nabo', 'Rábano', 'Chirivía',
-        'Boniato', 'Jengibre fresco', 'Cúrcuma fresca', 'Patata', 'Patata nueva',
-        'Patata roja', 'Yuca', 'Malanga', 'Ñame', 'Topinambur',
-        'Rábano daikon', 'Rábano negro', 'Colinabo', 'Apionabo', 'Remolacha dorada',
-        'Remolacha rayada', 'Salsifí', 'Escorzonera', 'Galanga', 'Wasabi fresco',
-        'Rábano picante'
+        'Boniato', 'Batata', 'Jengibre fresco', 'Cúrcuma fresca', 
+        'Patata', 'Patata nueva', 'Patata roja',
+        'Yuca', 'Malanga', 'Ñame', 'Topinambur',
+        'Rábano daikon', 'Rábano negro', 'Colinabo', 'Apionabo'
     ],
     'Setas y Hongos': [
         'Champiñones', 'Portobello', 'Setas de ostra', 'Shiitake',
@@ -303,42 +307,31 @@ INGREDIENTS_BY_TYPE = {
     ],
     
     # --- Condimentos ---
-    'Especias': [
-        'Azafrán', 'Pimentón', 'Comino', 'Pimienta negra',
-        'Nuez moscada', 'Canela', 'Cardamomo', 'Clavo',
-        'Canela en rama', 'Canela molida', 'Canela de Ceilán', 'Vainilla en vaina',
-        'Extracto de vainilla', 'Pasta de vainilla', 'Vainilla bourbon', 'Tonka',
-        'Flor de azahar', 'Pétalos de rosa secos', 'Lavanda culinaria',
-        'Jengibre en polvo', 'Jengibre cristalizado', 'Jengibre en rama',
-        'Pimienta de Jamaica', 'Regaliz en polvo', 'Vainilla bourbon', 'Regaliz',
-        'Pimentón dulce', 'Pimentón picante', 'Pimentón ahumado', 'Pimentón de la Vera',
-        'Comino en grano', 'Comino molido', 'Semillas de mostaza', 'Mostaza en polvo',
-        'Curry en polvo', 'Curry Madras', 'Garam masala', 'Cúrcuma',
-        'Cilantro molido', 'Semillas de cilantro', 'Ajo en polvo', 'Ajo negro',
-        'Ajo granulado', 'Cebolla en polvo', 'Cebolla granulada', 'Chalota deshidratada',
-        'Orégano seco', 'Tomillo seco', 'Romero seco', 'Mejorana', 'Ajedrea',
-        'Chile en polvo', 'Cayena', 'Chili en escamas', 'Ras el hanout', 'Baharat',
-        "Za'atar", 'Sal', 'Pimienta', 'Wasabi en polvo', 'Achiote',
-        'Encurtidos y Salazones': [
-            'Alcaparras', 'Alcaparrones',
-            'Aceitunas verdes', 'Aceitunas negras', 'Aceitunas rellenas',
-            'Pepinillos', 'Cebollitas encurtidas', 'Guindillas encurtidas',
-            'Pimientos encurtidos', 'Berenjenas encurtidas',
-            'Anchoas en salazón', 'Anchoas en aceite'
-        ]
+    'Especias y Condimentos': [
+        # Especias básicas
+        'Sal', 'Pimienta', 'Pimentón', 'Comino', 'Curry en polvo',
+        'Azafrán', 'Nuez moscada', 'Canela', 'Cardamomo', 'Clavo',
+        'Cúrcuma', 'Jengibre en polvo', 'Ajo en polvo', 'Cebolla en polvo',
+        # Mezclas de especias
+        'Garam masala', 'Ras el hanout', 'Cinco especias chinas', 'Hierbas provenzales',
+        # Condimentos
+        'Vinagre de vino', 'Vinagre balsámico', 'Salsa de soja', 'Mostaza',
+        'Tabasco', 'Worcestershire', 'Mirin', 'Sake de cocina'
+    ],
+    'Encurtidos y Salazones': [
+        'Alcaparras', 'Alcaparrones',
+        'Aceitunas verdes', 'Aceitunas negras', 'Aceitunas rellenas',
+        'Pepinillos', 'Cebollitas encurtidas', 'Guindillas encurtidas',
+        'Pimientos encurtidos', 'Berenjenas encurtidas',
+        'Anchoas en salazón', 'Anchoas en aceite'
     ],
     'Mezclas de Especias': [
-        'Hierbas provenzales', 'Finas hierbas', 'Bouquet garni', 'Curry tikka masala',
+        'Finas hierbas', 'Bouquet garni', 'Curry tikka masala',
         'Curry verde tailandés', 'Curry rojo tailandés', 'Tandoori masala', 'Chaat masala',
         'Panch phoron', 'Dukkah', 'Harissa', 'Chermoula', 'Advieh', 'Berbere',
         'Cajun', 'Criollo', 'Jerk', 'Piri-piri', 'Togarashi', 'Furikake', 'Sansho',
         'Sazonador italiano', 'Sazonador mexicano', 'Sazonador griego', 'Sal de hierbas',
         'Sal de ajo', 'Sal de cebolla', 'Sal ahumada', 'Sal de curry', 'Sal de trufa'
-    ],
-    'Hierbas Frescas': [
-        'Albahaca fresca', 'Perejil fresco', 'Cilantro fresco', 'Menta fresca',
-        'Orégano fresco', 'Tomillo fresco', 'Romero fresco', 'Eneldo fresco',
-        'Estragón fresco', 'Salvia', 'Laurel fresco'
     ],
     'Salsas y Aderezos': [
         'Salsa barbacoa', 'Salsa de soja', 'Salsa teriyaki',
@@ -397,7 +390,8 @@ INGREDIENTS_BY_TYPE = {
     ],
     'Arroces y Cereales': [
         'Arroz redondo', 'Arroz bomba', 'Arroz basmati', 'Arroz integral',
-        'Arroz carnaroli', 'Arroz arborio', 'Arroz salvaje',
+        'Arroz carnaroli', 'Arroz arborio', 'Arroz salvaje', 'Arroz jazmín',
+        'Arroz negro', 'Arroz rojo', 'Arroz glutinoso', 'Arroz para sushi',
         'Quinoa', 'Cuscús', 'Bulgur', 'Mijo', 'Polenta',
         'Trigo sarraceno', 'Amaranto', 'Avena'
     ],
@@ -411,7 +405,8 @@ INGREDIENTS_BY_TYPE = {
     'Caldos y Fondos': [
         'Caldo de pollo', 'Caldo de verduras', 'Caldo de pescado',
         'Caldo de carne', 'Fondo oscuro', 'Fumet', 'Dashi',
-        'Consomé', 'Caldo de cocido', 'Caldo de jamón'
+        'Consomé', 'Caldo de cocido', 'Caldo de jamón',
+        'Caldo de vegetales'
     ],
     'Condimentos Especiales': [
         'Aceite de trufa', 'Aceite de trufa blanca', 'Aceite de trufa negra',
