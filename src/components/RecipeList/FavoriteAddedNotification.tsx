@@ -27,7 +27,7 @@ export function FavoriteAddedNotification({ recipeName, onClose }: FavoriteAdded
         damping: 40,
         duration: 0.6
       }}
-      className="fixed top-4 left-1/2 z-[9999] transform -translate-x-1/2"
+      className="fixed top-4 left-1/2 z-[9999] transform -translate-x-1/2 w-[90%] max-w-md"
     >
       <div className="bg-white rounded-xl shadow-lg p-4 flex items-center space-x-3 border border-rose-100">
         <div className="relative">

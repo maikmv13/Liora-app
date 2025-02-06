@@ -169,20 +169,21 @@ function AppContent() {
     }
     
     try {
-      const isFavorite = favorites.some(fav => fav.id === recipe.id);
+      const isFavorite = favorites.some(fav => fav.recipe_id === recipe.id);
       
       if (isFavorite) {
-        const favoriteRecipe = favorites.find(f => f.id === recipe.id);
+        const favoriteRecipe = favorites.find(f => f.recipe_id === recipe.id);
         if (favoriteRecipe) {
           await removeFavorite(favoriteRecipe);
         }
       } else {
-        const newFavorite: FavoriteRecipe = {
-          ...recipe,
-          last_cooked: '',
-          notes: '',
-          rating: 0,
-          tags: []
+        const newFavorite = {
+          user_id: user.id,
+          recipe_id: recipe.id,
+          notes: null,
+          last_cooked: null,
+          tags: [],
+          rating: 0
         };
         await addFavorite(newFavorite);
       }

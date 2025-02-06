@@ -3,6 +3,17 @@ import { supabase } from '../lib/supabase';
 import type { FavoriteRecipe } from '../types';
 import { useActiveProfile } from './useActiveProfile';
 
+interface FavoriteRecipe {
+  id?: string;           // uuid
+  user_id: string;       // uuid
+  recipe_id: string;     // uuid
+  notes: string | null;  // text
+  last_cooked: string | null;  // timestamptz
+  tags: string[];        // _text
+  created_at?: string;   // timestamptz
+  rating: number;        // int4
+}
+
 export function useFavorites(isHouseholdView?: boolean) {
   const [favorites, setFavorites] = useState<FavoriteRecipe[]>([]);
   const [loading, setLoading] = useState(true);
@@ -102,36 +113,25 @@ export function useFavorites(isHouseholdView?: boolean) {
     };
   }, [userId, isHouseholdView, profile?.linked_household_id]);
 
-  const addFavorite = async (recipe: FavoriteRecipe) => {
+  const addFavorite = async (favorite: Omit<FavoriteRecipe, 'id' | 'created_at'>) => {
     try {
-      if (!userId) throw new Error('No authenticated user');
-
-      const favoriteData = {
-        user_id: userId,
-        recipe_id: recipe.id,
-        created_at: new Date().toISOString()
-      };
-
-      const { data, error: insertError } = await supabase
+      const { data, error } = await supabase
         .from('favorites')
-        .insert(favoriteData)
-        .select()
-        .single();
+        .insert([{
+          user_id: favorite.user_id,
+          recipe_id: favorite.recipe_id,
+          notes: favorite.notes,
+          last_cooked: favorite.last_cooked,
+          tags: favorite.tags,
+          rating: favorite.rating
+        }])
+        .select('*');
 
-      if (insertError) throw insertError;
-
-      const transformedFavorite = {
-        ...recipe,
-        favorite_id: data.id,
-        created_at: data.created_at,
-        user_id: data.user_id
-      };
-
-      setFavorites(prev => [...prev, transformedFavorite]);
-
-    } catch (e) {
-      console.error('Error adding favorite:', e);
-      throw e;
+      if (error) throw error;
+      return data;
+    } catch (error) {
+      console.error('Error adding favorite:', error);
+      throw error;
     }
   };
 
