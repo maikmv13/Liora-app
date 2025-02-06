@@ -2,7 +2,7 @@ import json
 import re
 from typing import Dict, List
 from openai import OpenAI
-from .constants import OPENAI_CONFIG, INGREDIENTS_BY_TYPE
+from .constants import OPENAI_CONFIG, INGREDIENTS_BY_TYPE, INGREDIENT_ALIASES
 from .formatters import QuantityFormatter
 from .units import NUTRITION_UNITS
 from .console_utils import print_error, print_progress, print_success
@@ -13,6 +13,7 @@ from .prompts import (
     get_dietary_info_prompt,
     get_nutrition_prompt
 )
+from difflib import get_close_matches
 
 class RecipeCreator:
     def __init__(self):
@@ -93,12 +94,12 @@ class RecipeCreator:
                 print(content)
 
                 try:
+                    content = self.clean_ingredients_response(content)
                     ingredients = json.loads(content)
                     if not isinstance(ingredients, list):
                         raise ValueError("La respuesta no es una lista de ingredientes")
-                except json.JSONDecodeError as e:
-                    print_error(f"Error al decodificar JSON: {e}")
-                    print_error(f"Contenido recibido: {content}")
+                except Exception as e:
+                    print_error(f"Error al procesar ingredientes: {e}")
                     raise ValueError("Formato de ingredientes inválido")
 
                 # Validar estructura de ingredientes
@@ -230,39 +231,49 @@ class RecipeCreator:
 
         return None
 
-    def validate_ingredients(self, ingredients: List[Dict]) -> bool:
-        """Verifica que todos los ingredientes existan en el diccionario"""
-        # Crear un diccionario invertido para buscar ingredientes y sus categorías
-        ingredient_categories = {}
-        for category, items in INGREDIENTS_BY_TYPE.items():
-            for ingredient in items:
-                ingredient_lower = ingredient.lower().strip()
-                ingredient_categories[ingredient_lower] = category
+    def normalize_ingredient(self, ingredient_name: str) -> str:
+        """Normaliza el nombre del ingrediente usando aliases y reglas básicas"""
+        # Convertir a minúsculas
+        normalized = ingredient_name.lower()
+        
+        # Eliminar plurales básicos
+        if normalized.endswith('s') and not normalized.endswith('as'):
+            normalized = normalized[:-1]
+        
+        # Buscar en aliases
+        if normalized in INGREDIENT_ALIASES:
+            normalized = INGREDIENT_ALIASES[normalized]
+        
+        # Eliminar prefijos comunes
+        for prefix in ['rodajas de ', 'filetes de ', 'trozos de ', 'picado de ', 'rallado de ']:
+            if normalized.startswith(prefix):
+                normalized = normalized[len(prefix):]
+        
+        return normalized.capitalize()
 
-        # Validar los ingredientes de la receta
-        for ingredient in ingredients:
-            name = ingredient["name"].strip()
-            name_lower = name.lower()
-            category = ingredient.get("category", "")
-
-            if name_lower not in ingredient_categories:
-                print(f"\nError: Ingrediente '{name}' no encontrado en ninguna categoría")
-                # Buscar ingredientes similares
-                similar = [ing for ing in ingredient_categories.keys() if name_lower in ing or ing in name_lower]
-                if similar:
-                    print("Ingredientes similares disponibles:")
-                    for s in similar:
-                        print(f"- '{s}' en categoría '{ingredient_categories[s]}'")
-                return False
-
-            correct_category = ingredient_categories[name_lower]
-            if category != correct_category:
-                print(f"\nError: Categoría incorrecta para '{name}'")
-                print(f"Categoría recibida: '{category}'")
-                print(f"Categoría correcta: '{correct_category}'")
-                return False
-
-        return True
+    def validate_ingredients(self, ingredients: List[Dict]) -> List[str]:
+        """Valida los ingredientes y retorna lista de errores"""
+        errors = []
+        for ing in ingredients:
+            normalized_name = self.normalize_ingredient(ing['name'])
+            found = False
+            
+            # Buscar en todas las categorías
+            for category, items in INGREDIENTS_BY_TYPE.items():
+                if normalized_name in items:
+                    ing['name'] = normalized_name  # Actualizar al nombre normalizado
+                    found = True
+                    break
+                
+            if not found:
+                similar = self.find_similar_ingredients(normalized_name)
+                errors.append({
+                    'ingredient': ing['name'],
+                    'normalized': normalized_name,
+                    'similar_suggestions': similar
+                })
+        
+        return errors
 
     def validate_steps_ingredients(self, steps: List[str], ingredients: List[Dict]) -> bool:
         """Verifica que los pasos solo usen ingredientes listados y en el formato correcto"""
@@ -445,3 +456,94 @@ class RecipeCreator:
         except Exception as e:
             print_error(f"Error al parsear nombre de receta: {e}")
             raise ValueError(f"Formato de nombre inválido: {content}")
+
+    def find_similar_ingredients(self, ingredient_name: str, n=3) -> List[str]:
+        """Encuentra ingredientes similares usando fuzzy matching"""
+        all_ingredients = []
+        for category, items in INGREDIENTS_BY_TYPE.items():
+            all_ingredients.extend([(item, category) for item in items])
+        
+        # Obtener nombres similares
+        ingredient_names = [item[0] for item in all_ingredients]
+        matches = get_close_matches(ingredient_name, ingredient_names, n=n, cutoff=0.6)
+        
+        # Retornar matches con sus categorías
+        return [
+            {'name': match, 'category': next(cat for name, cat in all_ingredients if name == match)}
+            for match in matches
+        ]
+
+    def auto_correct_ingredients(self, ingredients: List[Dict]) -> List[Dict]:
+        """Intenta corregir automáticamente ingredientes inválidos"""
+        corrected = []
+        for ing in ingredients:
+            normalized_name = self.normalize_ingredient(ing['name'])
+            found = False
+            
+            # Buscar el ingrediente normalizado
+            for category, items in INGREDIENTS_BY_TYPE.items():
+                if normalized_name in items:
+                    ing['name'] = normalized_name
+                    ing['category'] = category
+                    found = True
+                    corrected.append(ing)
+                    break
+                
+            if not found:
+                # Buscar alternativas similares
+                similar = self.find_similar_ingredients(normalized_name, n=1)
+                if similar:
+                    ing['name'] = similar[0]['name']
+                    ing['category'] = similar[0]['category']
+                    corrected.append(ing)
+        
+        return corrected
+
+    def clean_ingredients_response(self, content: str) -> str:
+        """Intenta limpiar y convertir respuestas mal formateadas a JSON válido"""
+        try:
+            # Si ya es JSON válido, retornarlo
+            json.loads(content)
+            return content
+        except json.JSONDecodeError:
+            ingredients = []
+            # Buscar patrones comunes en texto
+            lines = content.split('\n')
+            current_category = None
+            
+            for line in lines:
+                line = line.strip()
+                # Ignorar líneas vacías y encabezados
+                if not line or 'ingredientes para' in line.lower():
+                    continue
+                    
+                # Buscar ingredientes en formato lista
+                if line.startswith('-') or line.startswith('*'):
+                    ingredient = line.lstrip('- *').strip()
+                    # Intentar extraer cantidad y unidad si están presentes
+                    parts = ingredient.split('(')[0].strip().split()
+                    if len(parts) >= 1:
+                        name = parts[-1]
+                        quantity = 1
+                        unit = "unidad"
+                        # Buscar la categoría correcta
+                        category = self.find_ingredient_category(name)
+                        if category:
+                            ingredients.append({
+                                "name": name,
+                                "quantity": quantity,
+                                "unit": unit,
+                                "category": category
+                            })
+            
+            if ingredients:
+                return json.dumps(ingredients)
+            raise ValueError("No se pudieron extraer ingredientes del texto")
+
+    def find_ingredient_category(self, ingredient_name: str) -> str:
+        """Busca la categoría correcta para un ingrediente"""
+        normalized_name = self.normalize_ingredient(ingredient_name)
+        for category, items in INGREDIENTS_BY_TYPE.items():
+            if normalized_name in items:
+                return category
+        return None

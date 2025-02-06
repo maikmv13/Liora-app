@@ -85,7 +85,8 @@ INGREDIENTS_BY_TYPE = {
         'Tomate', 'Tomate cherry', 'Tomate pera',
         'Berenjena', 'Calabacín', 'Calabaza', 'Pepino',
         'Espárragos trigueros', 'Espárragos blancos', 'Espárragos verdes',
-        'Judías verdes', 'Guisantes frescos', 'Habas frescas'
+        'Judías verdes', 'Guisantes frescos', 'Habas frescas',
+        'Tallo de apio', 'Apio', 'Puerro', 'Nabo'
     ],
     
     'Frutas y Cítricos': [
@@ -416,4 +417,25 @@ INGREDIENTS_BY_TYPE = {
         'Reducción de Pedro Ximénez', 'Reducción de Módena',
         'Perlas de yuzu', 'Perlas de wasabi'
     ]
+}
+
+INGREDIENT_ALIASES = {
+    # Plurales
+    'zanahorias': 'zanahoria',
+    'cebollas': 'cebolla',
+    'ajos': 'ajo',
+    'pimientos': 'pimiento rojo',
+    
+    # Variaciones comunes
+    'apio': 'tallo de apio',
+    'cebolleta': 'cebolla',
+    'ajo picado': 'ajo',
+    'zanahoria rallada': 'zanahoria',
+    
+    # Cortes específicos
+    'rodajas de': '',
+    'filetes de': '',
+    'trozos de': '',
+    'picado de': '',
+    'rallado de': ''
 }

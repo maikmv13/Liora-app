@@ -46,34 +46,27 @@ def get_ingredients_prompt(recipe_type: str, name: str, side_dish: str, short_de
     Acompañamiento: "{side_dish}"
     Descripción: "{short_description}"
     
-    Usa ÚNICAMENTE ingredientes de estas categorías, respetando EXACTAMENTE sus nombres y categorías:
-    {json.dumps(ingredients_by_type, indent=2, ensure_ascii=False)}
+    REGLAS ESTRICTAS PARA NOMBRES DE INGREDIENTES:
+    1. Usa SIEMPRE el singular (zanahoria, no zanahorias)
+    2. No incluyas el tipo de corte en el nombre (usa "zanahoria", no "zanahoria rallada")
+    3. Usa el nombre más básico del ingrediente (usa "ajo", no "diente de ajo")
+    4. Si un ingrediente no está en la lista, busca una alternativa válida
+    5. Especifica la preparación en los pasos de la receta, no en el nombre
     
-    IMPORTANTE:
-    1. Usa EXACTAMENTE los nombres de los ingredientes como aparecen en la lista
-    2. No agregues palabras como "filetes de" o "rodajas de" al nombre del ingrediente
-    3. La cantidad y unidad deben ir separadas del nombre del ingrediente
-    4. Si necesitas especificar el corte o preparación, hazlo en los pasos de la receta
-    5. Incluye TODOS los ingredientes mencionados en la descripción
-    6. Añade los ingredientes básicos necesarios aunque no estén en la descripción (sal, aceite, etc.)
-    
-    La respuesta debe ser un array JSON válido con este formato exacto:
+    FORMATO DE RESPUESTA OBLIGATORIO:
+    Debes responder ÚNICAMENTE con un array JSON con este formato exacto:
     [
-        {{"name": "Cebolla", "quantity": 1, "unit": "unidad", "category": "Verduras Básicas"}},
-        {{"name": "Zanahoria", "quantity": 2, "unit": "unidad", "category": "Verduras de Raíz"}}
+        {{"name": "Zanahoria", "quantity": 2, "unit": "unidad", "category": "Verduras de Raíz"}},
+        {{"name": "Calabacín", "quantity": 1, "unit": "unidad", "category": "Verduras Básicas"}},
+        {{"name": "Pan de barra", "quantity": 1, "unit": "unidad", "category": "Panes Tradicionales"}}
     ]
     
-    Reglas:
-    1. Los ingredientes deben corresponder con la descripción detallada de la receta
-    2. El nombre del ingrediente debe existir EXACTAMENTE en la lista proporcionada
-    3. La categoría debe coincidir EXACTAMENTE con la categoría del ingrediente en la lista
-    4. La cantidad debe ser un número
-    5. La unidad debe estar SIEMPRE en singular:
-       - "unidad" (no "unidades")
-       - "diente" (no "dientes")
-       - "cucharada" (no "cucharadas")
-       - "taza" (no "tazas")
-       - "pizca" (no "pizcas")
+    NO INCLUYAS ningún texto adicional, solo el array JSON.
+    NO USES formato de lista con guiones.
+    NO AGREGUES comentarios ni explicaciones.
+    
+    Lista de ingredientes permitidos por categoría:
+    {json.dumps(ingredients_by_type, indent=2, ensure_ascii=False)}
     '''
 
 def get_steps_prompt(ingredients: List[Dict]) -> str:
