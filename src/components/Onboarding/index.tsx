@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence, PanInfo } from 'framer-motion';
 import { WelcomeScreen } from './screens/WelcomeScreen';
 import { FeaturesScreen } from './screens/FeaturesScreen';
@@ -10,7 +10,16 @@ interface OnboardingProps {
 }
 
 export function Onboarding({ onComplete, onLogin }: OnboardingProps) {
-  const [currentScreen, setCurrentScreen] = useState(0);
+  // Persistir el currentScreen en localStorage
+  const [currentScreen, setCurrentScreen] = useState(() => {
+    const saved = localStorage.getItem('onboardingScreen');
+    return saved ? parseInt(saved, 10) : 0;
+  });
+
+  // Guardar el currentScreen cada vez que cambie
+  useEffect(() => {
+    localStorage.setItem('onboardingScreen', currentScreen.toString());
+  }, [currentScreen]);
 
   const SCREENS = [
     { id: 'welcome', Component: WelcomeScreen },
@@ -28,6 +37,18 @@ export function Onboarding({ onComplete, onLogin }: OnboardingProps) {
     if (currentScreen > 0) {
       setCurrentScreen(prev => prev - 1);
     }
+  };
+
+  // Manejar la finalización del onboarding
+  const handleComplete = () => {
+    localStorage.removeItem('onboardingScreen'); // Limpiar el estado guardado
+    onComplete();
+  };
+
+  // Manejar el login exitoso
+  const handleLogin = () => {
+    localStorage.removeItem('onboardingScreen'); // Limpiar el estado guardado
+    onLogin();
   };
 
   const handleDragEnd = (_: MouseEvent | TouchEvent | PointerEvent, info: PanInfo) => {
@@ -52,6 +73,14 @@ export function Onboarding({ onComplete, onLogin }: OnboardingProps) {
   const handleDotClick = (index: number) => {
     setCurrentScreen(index);
   };
+
+  // Prevenir scroll del body
+  useEffect(() => {
+    document.body.style.overflow = 'hidden';
+    return () => {
+      document.body.style.overflow = 'unset';
+    };
+  }, []);
 
   return (
     <div className="fixed inset-0 z-50 overflow-hidden">
@@ -120,8 +149,8 @@ export function Onboarding({ onComplete, onLogin }: OnboardingProps) {
                   <Component
                     onNext={handleNext}
                     onPrev={handlePrev}
-                    onComplete={onComplete}
-                    onLogin={onLogin}
+                    onComplete={handleComplete}
+                    onLogin={handleLogin}
                     isLast={index === SCREENS.length - 1}
                     isFirst={index === 0}
                   />

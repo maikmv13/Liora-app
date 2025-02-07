@@ -286,71 +286,89 @@ export function TodayCard({
                   )}
                 </div>
 
-                {menuItem ? (
+                {menuItem?.recipe ? (
                   <div className="relative">
                     {/* Mobile Layout */}
-                    <div className="sm:hidden flex space-x-3">
-                      {/* Square Image - Reduced size */}
-                      {menuItem.recipe.image_url ? (
-                        <div className="relative w-16 h-16 flex-shrink-0 rounded-lg overflow-hidden">
-                          <img
-                            src={menuItem.recipe.image_url}
-                            alt={menuItem.recipe.name}
-                            className="w-full h-full object-cover"
-                          />
-                          <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent" />
+                    <div className="sm:hidden">
+                      <div className="flex space-x-3">
+                        {/* Square Image - Small size with Eye button overlay */}
+                        <div 
+                          onClick={() => navigate(`/recipe/${menuItem.recipe.id}`)}
+                          className="relative w-16 h-16 flex-shrink-0 rounded-lg overflow-hidden cursor-pointer"
+                        >
+                          {menuItem.recipe.image_url ? (
+                            <>
+                              <img
+                                src={menuItem.recipe.image_url}
+                                alt={menuItem.recipe.name}
+                                className="w-full h-full object-cover"
+                              />
+                              {/* Eye overlay */}
+                              <div className="absolute inset-0 flex items-center justify-center opacity-0 hover:opacity-100 bg-black/40 transition-all duration-200">
+                                <Eye size={16} className="text-white" />
+                              </div>
+                            </>
+                          ) : (
+                            <div className="w-full h-full bg-rose-50 flex items-center justify-center">
+                              <ChefHat size={20} className="text-rose-300" />
+                            </div>
+                          )}
                         </div>
-                      ) : (
-                        <div className="w-16 h-16 flex-shrink-0 bg-gray-100 rounded-lg flex items-center justify-center">
-                          <ChefHat size={20} className="text-gray-400" />
-                        </div>
-                      )}
 
-                      {/* Recipe Info */}
-                      <div className="flex-1 min-w-0">
-                        <h4 className="font-medium text-base text-gray-900 group-hover:text-rose-600 transition-colors line-clamp-2">
-                          {menuItem.recipe.name}
-                        </h4>
-                        {menuItem.recipe.side_dish && (
-                          <p className="text-sm text-gray-500 mt-0.5 line-clamp-1">
-                            {menuItem.recipe.side_dish}
+                        {/* Recipe Info */}
+                        <div className="flex-1 min-w-0">
+                          <h4 
+                            onClick={() => navigate(`/recipe/${menuItem.recipe.id}`)}
+                            className="font-medium text-base text-gray-900 hover:text-rose-600 transition-colors cursor-pointer line-clamp-2"
+                          >
+                            {menuItem.recipe.name}
+                          </h4>
+                          {menuItem.recipe.side_dish && (
+                            <p 
+                              onClick={() => navigate(`/recipe/${menuItem.recipe.id}`)}
+                              className="text-sm text-gray-500 mt-0.5 cursor-pointer hover:text-rose-500 transition-colors line-clamp-1"
+                            >
+                              {menuItem.recipe.side_dish}
+                            </p>
+                          )}
+                          <p className="text-xs text-gray-400 mt-0.5">
+                            {menuItem.recipe.category}
                           </p>
-                        )}
-                        <p className="text-xs text-gray-400 mt-0.5">
-                          {menuItem.recipe.category}
-                        </p>
+                        </div>
                       </div>
-
-                      {/* Botón Ver siempre visible */}
-                      <button
-                        onClick={() => navigate(`/recipe/${menuItem.recipe.id}`)}
-                        className="absolute top-2 right-2 p-2 bg-white/90 text-rose-500 rounded-lg hover:bg-rose-50 transition-colors border border-rose-200"
-                        title="Ver receta"
-                      >
-                        <Eye size={16} />
-                      </button>
                     </div>
 
                     {/* Desktop Layout */}
                     <div className="hidden sm:block">
                       <div className="flex space-x-3">
+                        {/* Imagen clicable */}
                         {menuItem.recipe.image_url && (
-                          <div className="relative w-20 h-20 flex-shrink-0 rounded-lg overflow-hidden">
+                          <div 
+                            onClick={() => navigate(`/recipe/${menuItem.recipe.id}`)}
+                            className="relative w-20 h-20 flex-shrink-0 rounded-lg overflow-hidden cursor-pointer group"
+                          >
                             <img
                               src={menuItem.recipe.image_url}
                               alt={menuItem.recipe.name}
-                              className="w-full h-full object-cover"
+                              className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
                             />
                             <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent" />
                           </div>
                         )}
 
+                        {/* Contenido clicable */}
                         <div className="flex-1 min-w-0">
-                          <h4 className="font-medium text-base text-gray-900 group-hover:text-rose-600 transition-colors line-clamp-2">
+                          <h4 
+                            onClick={() => navigate(`/recipe/${menuItem.recipe.id}`)}
+                            className="font-medium text-base text-gray-900 hover:text-rose-600 transition-colors cursor-pointer line-clamp-2"
+                          >
                             {menuItem.recipe.name}
                           </h4>
                           {menuItem.recipe.side_dish && (
-                            <p className="text-sm text-gray-500 mt-0.5 line-clamp-1">
+                            <p 
+                              onClick={() => navigate(`/recipe/${menuItem.recipe.id}`)}
+                              className="text-sm text-gray-500 mt-0.5 cursor-pointer hover:text-rose-500 transition-colors line-clamp-1"
+                            >
                               {menuItem.recipe.side_dish}
                             </p>
                           )}

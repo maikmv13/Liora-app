@@ -8,10 +8,7 @@ import { useNavigate } from 'react-router-dom';
 import { useActiveProfile } from '../../hooks/useActiveProfile';
 import { supabase } from "../../lib/supabase";
 import { useFavorites } from '../../hooks/useFavorites';
-import { Card, CardContent, Typography, Skeleton } from '@mui/material';
 import { useActiveMenu } from '../../hooks/useActiveMenu';
-import { MIN_FAVORITES_FOR_MENU } from './constants';
-import { MenuSkeleton } from './MenuSkeleton';
 
 interface DayCardProps {
   day: WeekDay;

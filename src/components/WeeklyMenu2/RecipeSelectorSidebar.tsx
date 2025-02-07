@@ -53,13 +53,6 @@ export function RecipeSelectorSidebar({
     setSelectedIndex(0);
   }, [searchTerm, selectedCategory]);
 
-  // Focus search input when sidebar opens
-  useEffect(() => {
-    if (isOpen && searchInputRef.current) {
-      searchInputRef.current.focus();
-    }
-  }, [isOpen]);
-
   // Filter recipes
   const filteredRecipes = recipes.filter(recipe => {
     const matchesSearch = recipe.name.toLowerCase().includes(searchTerm.toLowerCase());
