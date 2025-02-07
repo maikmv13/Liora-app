@@ -46,54 +46,75 @@ def get_ingredients_prompt(recipe_type: str, name: str, side_dish: str, short_de
     Acompañamiento: "{side_dish}"
     Descripción: "{short_description}"
     
-    REGLAS ESTRICTAS PARA NOMBRES DE INGREDIENTES:
-    1. Usa SIEMPRE el singular (zanahoria, no zanahorias)
-    2. No incluyas el tipo de corte en el nombre (usa "zanahoria", no "zanahoria rallada")
-    3. Usa el nombre más básico del ingrediente (usa "ajo", no "diente de ajo")
-    4. Si un ingrediente no está en la lista, busca una alternativa válida
-    5. Especifica la preparación en los pasos de la receta, no en el nombre
+    REGLAS ESTRICTAS:
+    1. Usa SIEMPRE el nombre más básico y conciso del ingrediente
+    2. NO incluyas:
+       - Formas de preparación (rallado, picado, en rodajas, etc.)
+       - Adjetivos innecesarios (fresco, natural, etc.)
+       - Palabras redundantes (queso parmesano → parmesano)
+    3. Usa SOLO ingredientes de la lista proporcionada
+    4. Mantén el formato en singular
     
-    FORMATO DE RESPUESTA OBLIGATORIO:
-    Debes responder ÚNICAMENTE con un array JSON con este formato exacto:
+    FORMATO DE RESPUESTA:
     [
-        {{"name": "Zanahoria", "quantity": 2, "unit": "unidad", "category": "Verduras de Raíz"}},
-        {{"name": "Calabacín", "quantity": 1, "unit": "unidad", "category": "Verduras Básicas"}},
-        {{"name": "Pan de barra", "quantity": 1, "unit": "unidad", "category": "Panes Tradicionales"}}
+        {{"name": "Parmesano", "quantity": 100, "unit": "gramos", "category": "Quesos Curados"}},
+        {{"name": "Espagueti", "quantity": 1, "unit": "paquete", "category": "Pastas"}},
+        {{"name": "Ajo", "quantity": 2, "unit": "dientes", "category": "Verduras Básicas"}}
     ]
     
-    NO INCLUYAS ningún texto adicional, solo el array JSON.
-    NO USES formato de lista con guiones.
-    NO AGREGUES comentarios ni explicaciones.
+    Ejemplos correctos:
+    ✅ "Parmesano" (no "Queso parmesano rallado")
+    ✅ "Ajo" (no "Dientes de ajo picados")
+    ✅ "Zanahoria" (no "Zanahorias en rodajas")
     
-    Lista de ingredientes permitidos por categoría:
+    Ejemplos incorrectos:
+    ❌ "Queso parmesano rallado"
+    ❌ "Dientes de ajo picados"
+    ❌ "Zanahorias frescas en rodajas"
+    
+    Lista de ingredientes permitidos:
     {json.dumps(ingredients_by_type, indent=2, ensure_ascii=False)}
     '''
 
 def get_steps_prompt(ingredients: List[Dict]) -> str:
-    ingredient_list = "\n".join([f"{i+1}. {ing['name']} ({ing['quantity']} {ing['unit']})" for i, ing in enumerate(ingredients)])
+    """Genera el prompt para los pasos de la receta"""
+    ingredient_list = "\n".join([
+        f"{i+1}. {ing['name']} ({ing['quantity']} {ing['unit']})" 
+        for i, ing in enumerate(ingredients)
+    ])
     
     return f'''Crea los pasos de preparación usando ÚNICAMENTE estos ingredientes numerados:
     {ingredient_list}
     
-    Reglas:
-    1. Para referirte a un ingrediente usa EXACTAMENTE el formato: "{{quantity_X}} {{ingredient_X}}"
-       donde X es el número del ingrediente en la lista anterior
-    2. Cada paso debe comenzar con un emoji relevante
-    3. Los pasos deben ser claros y concisos
-    4. NO menciones ingredientes que no estén en la lista
-    5. IMPORTANTE: Usa las llaves {{ }} en el texto, NO intentes evaluar las variables
+    REGLAS ESTRICTAS:
+    1. Usa EXACTAMENTE este formato para cada ingrediente:
+       "{{quantity_X}} {{unit_X}} {{ingredient_X}}"
+       donde X es el número del ingrediente en la lista
+    2. Las variables deben ser texto literal, NO código Python
+    3. NUNCA intentes evaluar o reemplazar las variables
+    4. Cada paso debe comenzar con un emoji
+    5. NO uses los valores directamente, solo las variables
     
-    Ejemplo de formato correcto:
+    Ejemplo correcto:
     [
-        "🥄 Mezcla {{quantity_1}} {{ingredient_1}} con {{quantity_2}} {{ingredient_2}} en un bol",
-        "🔥 Hornea a 180°C durante 30 minutos"
+        "🥄 Mezcla {{quantity_1}} {{unit_1}} {{ingredient_1}} en un bol",
+        "🔪 Añade {{quantity_2}} {{unit_2}} {{ingredient_2}} y {{quantity_3}} {{unit_3}} {{ingredient_3}}",
+        "🍳 Incorpora {{quantity_4}} {{unit_4}} {{ingredient_4}} y cocina"
     ]
     
     Ejemplo incorrecto (NO hagas esto):
     [
-        "🥄 Mezcla quantity_1 ingredient_1 con quantity_2 ingredient_2",
-        "🔥 Hornea quantity_3 ingredient_3"
-    ]'''
+        "🥄 Mezcla quantity_1 unit_1 ingredient_1",
+        "🔪 Añade 2 cucharadas de harina",
+        "🍳 Incorpora los ingredientes restantes"
+    ]
+    
+    IMPORTANTE:
+    - Las variables son texto literal, NO código Python
+    - SIEMPRE usa las tres variables juntas: {{quantity_X}} {{unit_X}} {{ingredient_X}}
+    - NO intentes evaluar o reemplazar las variables
+    - NO uses los ingredientes directamente
+    '''
 
 def get_dietary_info_prompt(ingredients: List[Dict]) -> str:
     return f'''Analiza estos ingredientes y determina las restricciones dietéticas:
@@ -139,4 +160,36 @@ def get_nutrition_prompt(ingredients: List[Dict]) -> str:
     2. Todos los valores deben ser números
     3. No incluyas unidades en los valores
     4. Calcula los valores para una porción
-    ''' 
+    '''
+
+def get_image_prompt(name: str, short_description: str) -> str:
+    return f'''Genera una fotografía hiperrealista de este plato:
+
+    Plato: "{name}"
+    Descripción: "{short_description}"
+    
+    ESTILO:
+    - Fotografía de libro de recetas profesional
+    - Aspecto apetitoso y natural
+    - Luz suave y natural, como de ventana lateral
+    - Colores vivos pero realistas
+    - Texturas detalladas y definidas
+    
+    COMPOSICIÓN:
+    - Plato principal centrado y bien presentado
+    - Vista en ángulo de 45° para mostrar profundidad
+    - Fondo limpio y desenfocado con elementos decorativos
+    - Vajilla elegante pero sencilla
+    
+    AMBIENTE:
+    - Mesa de madera clara o superficie neutra
+    - Iluminación brillante y natural
+    - Estilo minimalista y limpio
+    - Aspecto fresco y contemporáneo
+    
+    NO INCLUIR:
+    - Fondos oscuros o dramáticos
+    - Efectos artificiales o sobreproducidos
+    - Ángulos extremos o artísticos
+
+    La imagen debe parecer una fotografía profesional de un libro de recetas moderno.''' 

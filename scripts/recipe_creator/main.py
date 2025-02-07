@@ -12,97 +12,118 @@ from src.console_utils import (
 OUTPUT_DIR = os.path.join(os.path.dirname(__file__), 'output')
 os.makedirs(OUTPUT_DIR, exist_ok=True)
 
-def main():
-    print_header("¡Bienvenido al Generador de Recetas!")
-    recipe_creator = RecipeCreator()
+def print_welcome():
+    print("\n" + "="*50)
+    print("       ¡Bienvenido al Generador de Recetas!       ")
+    print("="*50 + "\n")
 
+def print_categories():
+    print("Categorías disponibles:")
+    for i, (category, subcategories) in enumerate(RECIPE_CATEGORIES.items(), 1):
+        print(f"{i}. {category}")
+        for j, subcategory in enumerate(subcategories, 1):
+            print(f"   {i}.{j} • {subcategory}")
+
+def get_recipe_type_from_input() -> str:
+    """Obtiene el tipo de receta desde la entrada del usuario"""
     while True:
-        # Mostrar categorías
-        print_categories(RECIPE_CATEGORIES)
-
         try:
-            # Obtener selección del usuario
-            user_input = get_user_input("\nSelecciona una categoría (ejemplo: 1 o 1.2): ").strip()
-            
-            # Procesar selección
-            if '.' in user_input:
-                category_num, subcategory_num = map(int, user_input.split('.'))
-                if 1 <= category_num <= len(RECIPE_CATEGORIES):
-                    main_category = list(RECIPE_CATEGORIES.keys())[category_num - 1]
-                    subcategories = RECIPE_CATEGORIES[main_category]
-                    if 1 <= subcategory_num <= len(subcategories):
-                        recipe_type = subcategories[subcategory_num - 1]
-                    else:
-                        print_error("Número de subcategoría inválido")
-                        continue
-                else:
-                    print_error("Número de categoría inválido")
-                    continue
-            else:
-                # Selección por pasos
-                category_num = int(user_input)
-                if 1 <= category_num <= len(RECIPE_CATEGORIES):
-                    main_category = list(RECIPE_CATEGORIES.keys())[category_num - 1]
-                    subcategories = RECIPE_CATEGORIES[main_category]
-                    
-                    # Mostrar subcategorías
-                    print(f"\nSubcategorías de {main_category}:")
-                    for i, subcategory in enumerate(subcategories, 1):
-                        icon = SUBCATEGORY_ICONS.get(subcategory, '•')
-                        print(f"{i}. {icon} {subcategory}")
-                    
-                    subcategory_num = int(get_user_input("\nSelecciona el número de la subcategoría: "))
-                    if 1 <= subcategory_num <= len(subcategories):
-                        recipe_type = subcategories[subcategory_num - 1]
-                    else:
-                        print_error("Número de subcategoría inválido")
-                        continue
-                else:
-                    print_error("Número de categoría inválido")
-                    continue
-
-            # Obtener número de recetas
-            while True:
-                try:
-                    num_recipes = int(get_user_input("\n¿Cuántas recetas quieres generar? "))
-                    if num_recipes > 0:
-                        break
-                    print_error("Por favor, introduce un número mayor que 0")
-                except ValueError:
-                    print_error("Por favor, introduce un número válido")
-
-            # Generar recetas
-            recipes = []
-            print_progress(f"\nGenerando {num_recipes} receta{'s' if num_recipes > 1 else ''}...")
-            
-            for i in range(num_recipes):
-                print_progress(f"\nGenerando receta {i + 1} de {num_recipes}...")
-                recipe = recipe_creator.generate_recipe(recipe_type)
-                if recipe:
-                    recipes.append(recipe)
-                    print_success(f"Receta generada: {recipe['name']}")
-
-            # Guardar recetas
-            if recipes:
-                timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-                filename = f"recetas_{recipe_type.lower().replace(' ', '_')}_{timestamp}.json"
-                filepath = os.path.join(OUTPUT_DIR, filename)
+            choice = input("\nSelecciona una categoría (ejemplo: 1 o 1.2): ").strip()
+            if '.' in choice:
+                main_cat, sub_cat = map(int, choice.split('.'))
+                main_cat -= 1  # Ajustar a índice base 0
+                sub_cat -= 1
                 
-                with open(filepath, 'w', encoding='utf-8') as f:
-                    json.dump(recipes, f, ensure_ascii=False, indent=2)
-                
-                print_success(f"\n¡Listo! Se han guardado {len(recipes)} recetas en '{filename}'")
+                category = list(RECIPE_CATEGORIES.keys())[main_cat]
+                return RECIPE_CATEGORIES[category][sub_cat]
             else:
-                print_error("\nNo se pudieron generar recetas. Por favor, intenta de nuevo.")
+                main_cat = int(choice) - 1
+                category = list(RECIPE_CATEGORIES.keys())[main_cat]
+                return list(RECIPE_CATEGORIES[category])[0]
+        except (ValueError, IndexError):
+            print_error("Selección inválida. Por favor, intenta de nuevo.")
 
-            # Preguntar si quiere generar más
-            if get_user_input("\n¿Quieres generar más recetas? (s/n): ").lower() != 's':
-                break
+def get_manual_recipe_input() -> tuple:
+    """Obtiene el nombre y acompañamiento de la receta manualmente"""
+    name = input("\nIntroduce el nombre del plato principal: ").strip()
+    side_dish = input("Introduce el acompañamiento: ").strip()
+    if not side_dish.startswith("con "):
+        side_dish = "con " + side_dish
+    return name, side_dish
 
-        except ValueError:
-            print_error("Por favor, introduce un número válido (ejemplo: 1 o 1.2)")
-        except Exception as e:
-            print_error(f"Error inesperado: {e}")
+def save_recipes(recipes: list, recipe_type: str) -> str:
+    """Guarda las recetas en un archivo JSON y retorna el nombre del archivo"""
+    if not recipes:
+        return None
+        
+    timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
+    category_slug = recipe_type.lower().replace(' ', '_')
+    filename = f"recetas_{category_slug}_{timestamp}.json"
+    filepath = os.path.join(OUTPUT_DIR, filename)
+    
+    try:
+        # Asegurar que el directorio existe
+        os.makedirs(OUTPUT_DIR, exist_ok=True)
+        
+        # Guardar el archivo
+        with open(filepath, 'w', encoding='utf-8') as f:
+            json.dump(recipes, f, indent=2, ensure_ascii=False)
+            
+        print_success(f"Recetas guardadas en: {filepath}")
+        return filename
+        
+    except Exception as e:
+        print_error(f"Error al guardar las recetas: {e}")
+        return None
+
+def main():
+    try:
+        # Mostrar categorías disponibles
+        print("\nCategorías de recetas disponibles:")
+        print_categories()
+        
+        # Obtener selección del usuario
+        category = input("\nSelecciona una categoría (ejemplo: 1 o 1.2): ")
+        recipe_type = get_recipe_type_from_input()
+        
+        if not recipe_type:
+            print_error("Categoría no válida")
+            return
+            
+        # Preguntar si quiere generar imágenes
+        generate_images = input("\n¿Deseas generar imágenes para las recetas? (s/n): ").lower() == 's'
+        
+        # Obtener número de recetas
+        num_recipes = int(input("\n¿Cuántas recetas quieres generar? "))
+        if num_recipes < 1:
+            print_error("El número de recetas debe ser mayor que 0")
+            return
+            
+        print_progress(f"\nGenerando {num_recipes} recetas...")
+        
+        # Crear instancia de RecipeCreator
+        creator = RecipeCreator()
+        
+        # Generar recetas
+        recipes = []
+        for i in range(num_recipes):
+            print_progress(f"\nGenerando receta {i + 1} de {num_recipes}...")
+            recipe = creator.generate_recipe(recipe_type, generate_images=generate_images)
+            if recipe:
+                recipes.append(recipe)
+            else:
+                print_error(f"\nNo se pudo generar la receta {i + 1}")
+        
+        # Guardar recetas
+        if recipes:
+            filename = save_recipes(recipes, recipe_type)
+            if filename:
+                print_success(f"\nSe han guardado {len(recipes)} recetas en '{filename}'")
+        else:
+            print_error("\nNo se pudieron generar recetas. Por favor, intenta de nuevo.")
+            
+    except Exception as e:
+        print_error(f"\nError inesperado: {str(e)}")
 
 if __name__ == "__main__":
     main() 
