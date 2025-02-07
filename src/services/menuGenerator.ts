@@ -152,13 +152,8 @@ export async function generateCompleteMenu(
       ).values()
     );
 
-    if (uniqueFavorites.length === 0) {
-      throw new Error(
-        isHousehold 
-          ? 'No hay suficientes recetas favoritas en el hogar. ¡Añadan más recetas favoritas!'
-          : 'Necesitas añadir algunas recetas a tus favoritos antes de generar un menú.'
-      );
-    }
+    // Combinar favoritos con todas las recetas disponibles
+    const availableRecipes = uniqueFavorites.length > 0 ? uniqueFavorites : recipes;
 
     // 4. Generar el menú
     const weekDays = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domingo'];
@@ -174,7 +169,7 @@ export async function generateCompleteMenu(
 
     for (const day of weekDays) {
       for (const meal of mealTypes) {
-        let validRecipes = uniqueFavorites.filter(recipe => 
+        let validRecipes = availableRecipes.filter(recipe => 
           isValidSelection(
             recipe,
             meal,
@@ -186,7 +181,7 @@ export async function generateCompleteMenu(
         );
 
         if (validRecipes.length === 0) {
-          validRecipes = uniqueFavorites.filter(r => r.meal_type === meal);
+          validRecipes = availableRecipes.filter(r => r.meal_type === meal);
         }
 
         if (validRecipes.length > 0) {
@@ -214,9 +209,7 @@ export async function generateCompleteMenu(
 
     if (newMenu.length === 0) {
       throw new Error(
-        isHousehold
-          ? 'No se pudo generar un menú completo para el hogar. Revisen sus recetas favoritas.'
-          : 'No hay suficientes recetas para generar un menú completo. ¡Añade más recetas a tus favoritos!'
+        'No hay suficientes recetas válidas para generar un menú completo. Por favor, revisa los criterios de selección.'
       );
     }
 
