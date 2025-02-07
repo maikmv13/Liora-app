@@ -139,13 +139,16 @@ async function generateRecipeGPTText(
   userMessage: string,
   recipe: Recipe
 ): Promise<string> {
-  // Creamos un prompt de sistema que describe la receta
+  // Modificamos el prompt de sistema para ser más flexible
   const systemPrompt = `
 Eres un asistente culinario experto.
-Tienes los datos de UNA receta específica, y solo puedes responder sobre ella.
-Si el usuario pregunta sobre otra receta o algo que no está en esta, indica que no tienes información.
-No menciones tu proceso interno.
-Receta disponible:
+Tu foco principal es esta receta, pero puedes:
+- Sugerir alternativas para sus ingredientes
+- Recomendar recetas similares o variaciones
+- Dar consejos de preparación y técnicas
+- Responder preguntas nutricionales
+
+Receta principal:
 - Nombre: ${recipe.name}
 - Guarnición: ${recipe.side_dish ?? ''}
 - Categoría: ${recipe.category ?? ''}
@@ -161,7 +164,7 @@ Receta disponible:
       ? recipe.instructions.slice(0, 300)
       : JSON.stringify(recipe.instructions).slice(0, 300)
   }...
-  `;
+`;
 
   const lastMessages = conversation.slice(-4).map((msg) => ({
     role: msg.role,
@@ -380,42 +383,50 @@ export function useAI(recipe?: Recipe) {
           }
         } else {
           // =======================
-          // MODO RECIPE CONCRETA
+          // MODO RECIPE CONCRETA (modificado para ser más flexible)
           // =======================
-          // (Podemos ignorar búsquedas de recetas extra si queremos)
           switch (intent.type) {
             case 'recipe_search':
             case 'ingredient_based_search':
             case 'meal_type_search':
-              // Si NO quieres permitir búsquedas de otras recetas 
-              // cuando estás en la página de una en concreto:
-              await addAssistantMessage(
-                'Actualmente estoy concentrado en esta receta. Para buscar otras, ve al chat general.'
+              // Ahora permitimos búsquedas relacionadas
+              const recipeReply = await generateRecipeGPTText(
+                messages,
+                `Basándote en ${recipe.name}, ${content}`,
+                recipe
               );
+              await addAssistantMessage(recipeReply);
+              break;
+
+            case 'ingredient_info':
+              // Permitimos preguntas sobre alternativas de ingredientes
+              const ingredientReply = await generateRecipeGPTText(
+                messages,
+                `Sobre los ingredientes de ${recipe.name}: ${content}`,
+                recipe
+              );
+              await addAssistantMessage(ingredientReply);
               break;
 
             case 'recipe_step':
-              // Si el intent dice que hay un "step"
               if (intent.entities?.step) {
                 const stepNumber = intent.entities.step;
-                // Generar la pregunta "enriquecida" y llamar a GPT con la receta
                 const stepQuestion = `
-                  Revisando el paso ${stepNumber}. 
-                  ¿Podrías dar más detalles o sugerencias?
+                  Revisando el paso ${stepNumber} de ${recipe.name}. 
+                  ${content}
                 `;
-                const recipeReply = await generateRecipeGPTText(messages, stepQuestion, recipe);
-                await addAssistantMessage(recipeReply);
+                const stepReply = await generateRecipeGPTText(messages, stepQuestion, recipe);
+                await addAssistantMessage(stepReply);
               } else {
-                // Sin step específico, generamos texto normal
-                const recipeReply = await generateRecipeGPTText(messages, content, recipe);
-                await addAssistantMessage(recipeReply);
+                const generalStepReply = await generateRecipeGPTText(messages, content, recipe);
+                await addAssistantMessage(generalStepReply);
               }
               break;
 
             default:
-              // Cualquier otro tipo => respondemos sobre la misma receta
-              const recipeReply = await generateRecipeGPTText(messages, content, recipe);
-              await addAssistantMessage(recipeReply);
+              // Cualquier otro tipo de pregunta
+              const generalReply = await generateRecipeGPTText(messages, content, recipe);
+              await addAssistantMessage(generalReply);
               break;
           }
         }
