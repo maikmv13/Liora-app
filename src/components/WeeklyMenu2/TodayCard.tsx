@@ -212,18 +212,38 @@ export function TodayCard({
   return (
     <div className="bg-white/95 backdrop-blur-sm rounded-2xl border border-rose-200 shadow-lg overflow-hidden mt-2">
       {/* Header Mejorado */}
-      <div className="px-6 py-4 border-b border-rose-200 bg-gradient-to-r from-orange-100 to-rose-100">
-        <div className="flex items-center space-x-4">
-          <div className="bg-white/80 p-3 rounded-xl shadow-sm border border-rose-200">
-            <Calendar size={24} className="text-rose-500" />
-          </div>
-          <div>
-            <h3 className="text-2xl font-bold text-gray-900">
-              Hoy, <span className="capitalize">{today}</span>
+      <div className="relative h-32">
+        {/* Imagen de fondo */}
+        <div className="absolute inset-0">
+          <img 
+            src="https://images.unsplash.com/photo-1606787366850-de6330128bfc?auto=format&fit=crop&w=1200&q=80" 
+            alt="Food pattern" 
+            className="w-full h-full object-cover opacity-20"
+          />
+          {/* Overlay con gradiente suave */}
+          <div className="absolute inset-0 bg-gradient-to-r from-orange-50 to-rose-50" />
+        </div>
+
+        {/* Contenido del header */}
+        <div className="relative h-full px-6 py-4 flex flex-col justify-between">
+          {/* Pregunta principal */}
+          <h2 className="text-base text-gray-500 font-medium">
+            ¿Qué como hoy?
+          </h2>
+
+          {/* Fecha y día */}
+          <div className="space-y-0.5">
+            <h3 className="text-2xl font-bold text-gray-900 capitalize">
+              {today}
             </h3>
-            <p className="text-sm font-medium text-gray-600">
+            <p className="text-sm text-gray-600">
               {formattedDate}
             </p>
+          </div>
+
+          {/* Decoración */}
+          <div className="absolute top-4 right-4 text-rose-200">
+            <Calendar size={80} />
           </div>
         </div>
       </div>

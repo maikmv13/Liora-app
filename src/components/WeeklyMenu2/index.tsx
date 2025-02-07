@@ -14,7 +14,6 @@ import { RecipeSelectorSidebar } from './RecipeSelectorSidebar';
 import { MenuSkeleton } from './MenuSkeleton';
 import { useActiveProfile } from '../../hooks/useActiveProfile';
 import { MenuErrorNotification } from './MenuErrorNotification';
-import type { Recipe as DBRecipe } from '../../types/recipe';
 import { RecipeList } from '../RecipeList';
 import { ChefHat } from 'lucide-react';
 import { useFavorites } from '../../hooks/useFavorites';

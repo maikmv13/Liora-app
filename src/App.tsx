@@ -24,6 +24,7 @@ import { WeightTracker } from './components/HealthTracker/WeightTracker';
 import { ExerciseTracker } from './components/HealthTracker/ExerciseTracker';
 import { HabitTracker } from './components/HealthTracker/HabitTracker';
 import { NavigationDots } from './components/NavigationDots';
+import { Copyright } from 'lucide-react';
 
 // Lazy load components
 const WeeklyMenu2 = lazy(() => import('./components/WeeklyMenu2'));
@@ -229,7 +230,7 @@ function AppContent() {
         user={user}
       />
 
-      <main className={`container mx-auto pb-24 md:pb-8 ${
+      <main className={`container mx-auto pb-8 ${
         location.pathname.startsWith('/recipe/') ? 'pt-safe' : 'px-4 pt-20'
       }`}>
         <Suspense fallback={<LoadingFallback />}>
@@ -355,6 +356,15 @@ function AppContent() {
           </Routes>
         </Suspense>
       </main>
+
+      {/* Footer minimalista */}
+      <footer className="py-4 px-6 text-center text-sm text-gray-500 border-t border-rose-100/20 bg-white/50 backdrop-blur-sm">
+        <div className="flex items-center justify-center space-x-2">
+          <span>Liora</span>
+          <Copyright size={14} className="text-rose-400" />
+          <span>{new Date().getFullYear()}</span>
+        </div>
+      </footer>
 
       <MobileInstallButton />
     </div>

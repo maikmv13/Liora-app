@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Clock, User } from 'lucide-react';
 import { motion } from 'framer-motion';
 
@@ -18,9 +18,16 @@ interface MenuActivity {
 
 interface MenuActivityLogProps {
   activities: MenuActivity[];
+  menuId: string;
 }
 
-export function MenuActivityLog({ activities }: MenuActivityLogProps) {
+export function MenuActivityLog({ activities: initialActivities, menuId }: MenuActivityLogProps) {
+  const [activities, setActivities] = useState<MenuActivity[]>(initialActivities);
+
+  useEffect(() => {
+    setActivities([]);
+  }, [menuId]);
+
   const getActionText = (activity: MenuActivity) => {
     if (activity.action_type === 'add') {
       return `ha añadido ${activity.recipe_name} al`;
@@ -38,9 +45,18 @@ export function MenuActivityLog({ activities }: MenuActivityLogProps) {
 
       <div className="space-y-3">
         {activities.length === 0 ? (
-          <p className="text-sm text-gray-500 text-center py-4">
-            No hay actividad reciente
-          </p>
+          <div className="text-center py-8 px-4">
+            <div className="mb-4">
+              <Clock className="w-12 h-12 text-gray-300 mx-auto" />
+            </div>
+            <h4 className="text-base font-medium text-gray-700 mb-2">
+              No hay actividad reciente
+            </h4>
+            <p className="text-sm text-gray-500 max-w-md mx-auto">
+              Aquí podrás ver un registro de todos los cambios realizados en el menú, 
+              incluyendo cuando tú u otros miembros del hogar añadan o eliminen recetas.
+            </p>
+          </div>
         ) : (
           activities.map((activity) => (
             <motion.div
