@@ -10,8 +10,8 @@ interface NavigationProps {
 }
 
 const MENU_ITEMS = [
-  { id: 'recetas', icon: ChefHat, label: 'Recetas', color: 'from-orange-400 to-rose-500' },
   { id: 'menu', icon: Calendar, label: 'Menú', color: 'from-rose-400 to-pink-500' },
+  { id: 'recetas', icon: ChefHat, label: 'Recetas', color: 'from-orange-400 to-rose-500' },
   { id: 'compra', icon: ShoppingCart, label: 'Compra', color: 'from-pink-400 to-purple-500' },
   { id: 'salud', icon: Activity, label: 'Objetivos', color: 'from-purple-400 to-violet-500' }
 ];
@@ -177,7 +177,7 @@ export function Navigation({ activeTab, onTabChange, onHealthTabChange }: Naviga
                   animate="open"
                   exit="closed"
                   onClick={() => {
-                    navigate('/recetas');
+                    navigate('/menu');
                     setIsOpen(false);
                   }}
                   className="flex items-center space-x-3 p-3 bg-white rounded-xl shadow-lg min-w-[160px] hover:bg-gray-50 transition-colors"

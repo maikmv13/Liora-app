@@ -109,7 +109,7 @@ function AppContent() {
     if (path.startsWith('recipe/')) {
       setActiveTab('recetas');
     } else if (path === '') {
-      setActiveTab('recetas');
+      setActiveTab('menu');
     } else {
       setActiveTab(path);
     }
@@ -351,7 +351,7 @@ function AppContent() {
               path="/liora" 
               element={<LioraChat />} 
             />
-            <Route path="/" element={<Navigate to="/recetas" replace />} />
+            <Route path="/" element={<Navigate to="/menu" replace />} />
           </Routes>
         </Suspense>
       </main>

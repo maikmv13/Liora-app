@@ -14,7 +14,7 @@ import { MenuSkeleton } from './MenuSkeleton';
 interface TodayCardProps {
   menuItems: MenuItem[];
   onViewRecipe: (menuItem: MenuItem) => void;
-  activeMenu: any;
+  activeMenu: ExtendedWeeklyMenuDB | null;
   onOpenOnboarding?: () => void;
 }
 
@@ -137,6 +137,23 @@ export function TodayCard({
   const totalFavorites = isHousehold ? householdFavorites.length : personalFavorites.length;
   const hasEnoughFavorites = hasActiveMenu || totalFavorites >= MIN_FAVORITES_FOR_MENU;
 
+  // Asegurarse de que menuItems tenga la estructura correcta
+  const todayMenuItems = React.useMemo(() => {
+    if (!menuItems?.length) return [];
+    
+    // Filtrar solo las comidas de hoy
+    return menuItems.filter(item => {
+      const menuDay = new Intl.DateTimeFormat('es-ES', { 
+        weekday: 'long'
+      }).format(new Date())
+        .toLowerCase()
+        .normalize("NFD")
+        .replace(/[\u0300-\u036f]/g, "");
+      
+      return item.day?.toLowerCase() === menuDay;
+    });
+  }, [menuItems]);
+
   // Mostrar skeleton mientras cualquier dato está cargando
   if (isLoading) {
     return <MenuSkeleton />;
@@ -214,7 +231,7 @@ export function TodayCard({
       {/* Meals Grid */}
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 divide-y sm:divide-y-0 sm:divide-x divide-rose-200">
         {mealTypes.map((mealType) => {
-          const menuItem = menuItems.find(item => item.meal === mealType);
+          const menuItem = todayMenuItems.find(item => item.meal === mealType);
           
           return (
             <div
