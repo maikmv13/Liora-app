@@ -1,0 +1,1792 @@
+{
+  "Vegetales y Frutas": {
+    "Verduras": {
+      "Raíces y Tubérculos": {
+        "patata": {
+          "alternativas": [
+            "papa"
+          ],
+          "unidad_medida": "unidad",
+          "tipo": "fresco"
+        },
+        "zanahoria": {
+          "alternativas": [],
+          "unidad_medida": "unidad",
+          "tipo": "fresco"
+        },
+        "remolacha": {
+          "alternativas": [
+            "betabel"
+          ],
+          "unidad_medida": "unidad",
+          "tipo": "fresco"
+        },
+        "nabo": {
+          "alternativas": [
+            "colinabo"
+          ],
+          "unidad_medida": "unidad",
+          "tipo": "fresco"
+        },
+        "yuca": {
+          "alternativas": [
+            "mandioca"
+          ],
+          "unidad_medida": "unidad",
+          "tipo": "fresco"
+        },
+        "boniato": {
+          "alternativas": [
+            "batata"
+          ],
+          "unidad_medida": "unidad",
+          "tipo": "fresco"
+        },
+        "chirivía": {
+          "alternativas": [
+            "pastinaca"
+          ],
+          "unidad_medida": "unidad",
+          "tipo": "fresco"
+        },
+        "taro": {
+          "alternativas": [
+            "malanga"
+          ],
+          "unidad_medida": "unidad",
+          "tipo": "fresco"
+        },
+        "calabaza": {
+          "alternativas": [
+            "zapallo"
+          ],
+          "unidad_medida": "unidad",
+          "tipo": "fresco"
+        },
+        "Zanahoria": {
+          "alternativas": [],
+          "unidad_medida": "unidad",
+          "tipo": "fresco"
+        },
+        "Remolacha": {
+          "alternativas": [],
+          "unidad_medida": "unidad",
+          "tipo": "fresco"
+        },
+        "Nabo": {
+          "alternativas": [],
+          "unidad_medida": "unidad",
+          "tipo": "fresco"
+        },
+        "Apio": {
+          "alternativas": [],
+          "unidad_medida": "rama",
+          "tipo": "fresco"
+        },
+        "Ajo": {
+          "alternativas": [],
+          "unidad_medida": "diente",
+          "tipo": "fresco"
+        },
+        "Puerro": {
+          "alternativas": [],
+          "unidad_medida": "rama",
+          "tipo": "fresco"
+        },
+        "Chirivía": {
+          "alternativas": [],
+          "unidad_medida": "unidad",
+          "tipo": "fresco"
+        }
+      },
+      "Hojas": {
+        "Espinacas": {
+          "alternativas": [
+            "espinacas frescas",
+            "espinacas congeladas"
+          ],
+          "unidad_medida": "g",
+          "tipo": "fresco"
+        },
+        "Acelgas": {
+          "alternativas": [],
+          "unidad_medida": "manojo",
+          "tipo": "fresco"
+        },
+        "Lechuga": {
+          "alternativas": [],
+          "unidad_medida": "unidad",
+          "tipo": "fresco"
+        },
+        "Rúcula": {
+          "alternativas": [
+            "rucola"
+          ],
+          "unidad_medida": "g",
+          "tipo": "fresco"
+        },
+        "Escarola": {
+          "alternativas": [],
+          "unidad_medida": "unidad",
+          "tipo": "fresco"
+        },
+        "Berros": {
+          "alternativas": [],
+          "unidad_medida": "manojo",
+          "tipo": "fresco"
+        },
+        "Col rizada": {
+          "alternativas": [
+            "kale"
+          ],
+          "unidad_medida": "g",
+          "tipo": "fresco"
+        },
+        "Espinacas Baby": {
+          "alternativas": [
+            "baby spinach"
+          ],
+          "unidad_medida": "g",
+          "tipo": "fresco"
+        },
+        "Canónigos": {
+          "alternativas": [
+            "lambs lettuce"
+          ],
+          "unidad_medida": "g",
+          "tipo": "fresco"
+        },
+        "Berza": {
+          "alternativas": [
+            "col crespa"
+          ],
+          "unidad_medida": "g",
+          "tipo": "fresco"
+        },
+        "Kale": {
+          "alternativas": [
+            "col rizada"
+          ],
+          "unidad_medida": "g",
+          "tipo": "fresco"
+        },
+        "Col crespa": {
+          "alternativas": [
+            "berza"
+          ],
+          "unidad_medida": "g",
+          "tipo": "fresco"
+        }
+      },
+      "Bulbos": {
+        "chalota": {
+          "alternativas": [
+            "escalonia"
+          ],
+          "unidad_medida": "unidad",
+          "tipo": "fresco"
+        }
+      },
+      "Tallos": {
+        "espárragos": {
+          "alternativas": [
+            "espárragos trigueros",
+            "espárragos verdes"
+          ],
+          "unidad_medida": "manojo",
+          "tipo": "fresco"
+        },
+        "cardo": {
+          "alternativas": [],
+          "unidad_medida": "unidad",
+          "tipo": "fresco"
+        }
+      },
+      "Frutos": {
+        "tomate": {
+          "alternativas": [
+            "jitomate",
+            "tomate rojo"
+          ],
+          "unidad_medida": "unidad",
+          "tipo": "fresco"
+        },
+        "pepino": {
+          "alternativas": [
+            "cohombro",
+            "cucumber"
+          ],
+          "unidad_medida": "unidad",
+          "tipo": "fresco"
+        },
+        "berenjena": {
+          "alternativas": [
+            "aubergine",
+            "melanzane"
+          ],
+          "unidad_medida": "unidad",
+          "tipo": "fresco"
+        },
+        "pimiento": {
+          "alternativas": [
+            "pimentón",
+            "bell pepper"
+          ],
+          "unidad_medida": "unidad",
+          "tipo": "fresco"
+        },
+        "aguacate": {
+          "alternativas": [
+            "palta",
+            "avocado"
+          ],
+          "unidad_medida": "unidad",
+          "tipo": "fresco"
+        },
+        "alcachofa": {
+          "alternativas": [
+            "artichoke",
+            "alcaucil"
+          ],
+          "unidad_medida": "unidad",
+          "tipo": "fresco"
+        },
+        "judía verde": {
+          "alternativas": [
+            "habichuela",
+            "green bean"
+          ],
+          "unidad_medida": "unidad",
+          "tipo": "fresco"
+        },
+        "guisante": {
+          "alternativas": [
+            "chícharo",
+            "pea"
+          ],
+          "unidad_medida": "unidad",
+          "tipo": "fresco"
+        },
+        "maíz": {
+          "alternativas": [
+            "choclo",
+            "corn"
+          ],
+          "unidad_medida": "unidad",
+          "tipo": "fresco"
+        },
+        "palmito": {
+          "alternativas": [],
+          "unidad_medida": "unidad",
+          "tipo": "conserva"
+        }
+      },
+      "Brotos y Germinados": {
+        "Brotes de soja": {
+          "alternativas": [
+            "Brotes de soja",
+            "Brotes de soya"
+          ],
+          "unidad_medida": "unidad",
+          "tipo": "fresco"
+        },
+        "Brotes de alfalfa": {
+          "alternativas": [
+            "Brotes de alfalfa"
+          ],
+          "unidad_medida": "unidad",
+          "tipo": "fresco"
+        },
+        "Brotes de lentejas": {
+          "alternativas": [
+            "Brotes de lentejas"
+          ],
+          "unidad_medida": "unidad",
+          "tipo": "fresco"
+        },
+        "Brotes de rábano": {
+          "alternativas": [
+            "Brotes de rábano"
+          ],
+          "unidad_medida": "unidad",
+          "tipo": "fresco"
+        },
+        "Brotes de brócoli": {
+          "alternativas": [
+            "Brotes de brócoli"
+          ],
+          "unidad_medida": "unidad",
+          "tipo": "fresco"
+        },
+        "Brotes de remolacha": {
+          "alternativas": [],
+          "unidad_medida": "g",
+          "tipo": "fresco"
+        },
+        "Brotes de cilantro": {
+          "alternativas": [],
+          "unidad_medida": "g",
+          "tipo": "fresco"
+        },
+        "Brotes de trigo": {
+          "alternativas": [],
+          "unidad_medida": "g",
+          "tipo": "fresco"
+        }
+      }
+    },
+    "Setas y Hongos": {
+      "Setas Frescas": {
+        "Champiñones": {
+          "alternativas": [
+            "hongos blancos",
+            "setas de París"
+          ],
+          "unidad_medida": "unidad",
+          "tipo": "fresco"
+        },
+        "Setas Shiitake": {
+          "alternativas": [],
+          "unidad_medida": "unidad",
+          "tipo": "fresco"
+        },
+        "Boletus edulis": {
+          "alternativas": [
+            "Cep",
+            "Boletus"
+          ],
+          "unidad_medida": "unidad",
+          "tipo": "fresco"
+        },
+        "Setas Portobello": {
+          "alternativas": [
+            "Portobellos"
+          ],
+          "unidad_medida": "unidad",
+          "tipo": "fresco"
+        },
+        "Rebozuelos": {
+          "alternativas": [
+            "Camagroc",
+            "Níscalo"
+          ],
+          "unidad_medida": "unidad",
+          "tipo": "fresco"
+        },
+        "Colmenillas": {
+          "alternativas": [
+            "Morilla negra"
+          ],
+          "unidad_medida": "unidad",
+          "tipo": "fresco"
+        }
+      },
+      "Hongos Frescos": {
+        "Portobello": {
+          "alternativas": [
+            "Seta de Portobello",
+            "Seta grande"
+          ],
+          "unidad_medida": "unidad",
+          "tipo": "fresco"
+        },
+        "Shiitake": {
+          "alternativas": [
+            "Seta Shiitake",
+            "Seta china"
+          ],
+          "unidad_medida": "unidad",
+          "tipo": "fresco"
+        }
+      },
+      "Setas Deshidratadas": {
+        "Setas deshidratadas": {
+          "alternativas": [
+            "Setas secas",
+            "Hongos deshidratados"
+          ],
+          "unidad_medida": "g",
+          "tipo": "seco"
+        },
+        "Boletus deshidratados": {
+          "alternativas": [
+            "Boletus secos",
+            "Cepes deshidratados"
+          ],
+          "unidad_medida": "g",
+          "tipo": "seco"
+        },
+        "Champiñones deshidratados": {
+          "alternativas": [
+            "Champiñones secos"
+          ],
+          "unidad_medida": "g",
+          "tipo": "seco"
+        },
+        "Shiitake deshidratado": {
+          "alternativas": [
+            "Shiitake seco"
+          ],
+          "unidad_medida": "g",
+          "tipo": "seco"
+        }
+      },
+      "Hongos Deshidratados": {
+        "Setas y Hongos": {
+          "Hongos Deshidratados": {
+            "nombre_ingrediente": {
+              "alternativas": [
+                "Boletus deshidratados",
+                "Shiitake deshidratados",
+                "Champiñones deshidratados"
+              ],
+              "unidad_medida": "g",
+              "tipo": "seco"
+            }
+          }
+        },
+        "Hongos deshidratados": {
+          "alternativas": [
+            "Setas deshidratadas",
+            "Champiñones deshidratados"
+          ],
+          "unidad_medida": "g",
+          "tipo": "seco"
+        }
+      }
+    },
+    "Frutas": {
+      "Frutas Citricas": {
+        "naranja": {
+          "alternativas": [
+            "mandarina"
+          ],
+          "unidad_medida": "unidad",
+          "tipo": "fresco"
+        },
+        "bergamota": {
+          "alternativas": [
+            "bergamota amarga"
+          ],
+          "unidad_medida": "unidad",
+          "tipo": "fresco"
+        },
+        "mandarina": {
+          "alternativas": [
+            "naranja"
+          ],
+          "unidad_medida": "unidad",
+          "tipo": "fresco"
+        }
+      },
+      "Frutas de Hueso": {
+        "Melocotón": {
+          "alternativas": [
+            "Durazno"
+          ],
+          "unidad_medida": "unidad",
+          "tipo": "fresco"
+        },
+        "Nectarina": {
+          "alternativas": [
+            "Pelón"
+          ],
+          "unidad_medida": "unidad",
+          "tipo": "fresco"
+        },
+        "Ciruela": {
+          "alternativas": [
+            "Plum"
+          ],
+          "unidad_medida": "unidad",
+          "tipo": "fresco"
+        },
+        "Albaricoque": {
+          "alternativas": [
+            "Damasco"
+          ],
+          "unidad_medida": "unidad",
+          "tipo": "fresco"
+        },
+        "Cereza": {
+          "alternativas": [],
+          "unidad_medida": "unidad",
+          "tipo": "fresco"
+        },
+        "Uva": {
+          "alternativas": [],
+          "unidad_medida": "racimo",
+          "tipo": "fresco"
+        },
+        "melocotón": {
+          "alternativas": [
+            "durazno"
+          ],
+          "unidad_medida": "unidad",
+          "tipo": "fresco"
+        },
+        "albaricoque": {
+          "alternativas": [
+            "chabacano"
+          ],
+          "unidad_medida": "unidad",
+          "tipo": "fresco"
+        },
+        "ciruela": {
+          "alternativas": [
+            "pruna"
+          ],
+          "unidad_medida": "unidad",
+          "tipo": "fresco"
+        },
+        "nectarina": {
+          "alternativas": [
+            "paraguayo"
+          ],
+          "unidad_medida": "unidad",
+          "tipo": "fresco"
+        }
+      },
+      "Frutas de Pepita": {
+        "Manzana": {
+          "alternativas": [
+            "Manzana roja",
+            "Manzana verde"
+          ],
+          "unidad_medida": "unidad",
+          "tipo": "fresco"
+        },
+        "Pera": {
+          "alternativas": [
+            "Pera conferencia",
+            "Pera de agua"
+          ],
+          "unidad_medida": "unidad",
+          "tipo": "fresco"
+        },
+        "Membrillo": {
+          "alternativas": [
+            "Dulce de membrillo"
+          ],
+          "unidad_medida": "unidad",
+          "tipo": "procesado"
+        },
+        "Calabaza": {
+          "alternativas": [
+            "Calabaza moscada",
+            "Calabaza butternut"
+          ],
+          "unidad_medida": "unidad",
+          "tipo": "fresco"
+        },
+        "Aguacate": {
+          "alternativas": [
+            "Palta"
+          ],
+          "unidad_medida": "unidad",
+          "tipo": "fresco"
+        },
+        "Pepino": {
+          "alternativas": [],
+          "unidad_medida": "unidad",
+          "tipo": "fresco"
+        },
+        "Pepita de calabaza": {
+          "alternativas": [
+            "Semillas de calabaza"
+          ],
+          "unidad_medida": "g",
+          "tipo": "seco"
+        },
+        "Pepita de sandía": {
+          "alternativas": [
+            "Semillas de sandía"
+          ],
+          "unidad_medida": "g",
+          "tipo": "fresco"
+        },
+        "Pepita de melón": {
+          "alternativas": [
+            "Semillas de melón"
+          ],
+          "unidad_medida": "g",
+          "tipo": "fresco"
+        }
+      },
+      "Frutas Tropicales": {
+        "Plátano": {
+          "alternativas": [
+            "Banana"
+          ],
+          "unidad_medida": "unidad",
+          "tipo": "fresco"
+        },
+        "Papaya": {
+          "alternativas": [
+            "Fruta bomba",
+            "Lechosa"
+          ],
+          "unidad_medida": "unidad",
+          "tipo": "fresco"
+        },
+        "Mango": {
+          "alternativas": [],
+          "unidad_medida": "unidad",
+          "tipo": "fresco"
+        },
+        "Piña": {
+          "alternativas": [
+            "Ananá"
+          ],
+          "unidad_medida": "unidad",
+          "tipo": "fresco"
+        },
+        "Coco": {
+          "alternativas": [],
+          "unidad_medida": "unidad",
+          "tipo": "fresco"
+        },
+        "Guayaba": {
+          "alternativas": [],
+          "unidad_medida": "unidad",
+          "tipo": "fresco"
+        },
+        "Maracuyá": {
+          "alternativas": [
+            "Fruta de la pasión"
+          ],
+          "unidad_medida": "unidad",
+          "tipo": "fresco"
+        },
+        "Lichi": {
+          "alternativas": [
+            "Litchi"
+          ],
+          "unidad_medida": "unidad",
+          "tipo": "fresco"
+        },
+        "Mangostán": {
+          "alternativas": [
+            "Mangostino"
+          ],
+          "unidad_medida": "unidad",
+          "tipo": "fresco"
+        },
+        "Carambola": {
+          "alternativas": [
+            "fruta estrella"
+          ],
+          "unidad_medida": "unidad",
+          "tipo": "fresco"
+        }
+      },
+      "Bayas": {
+        "Fresas": {
+          "alternativas": [
+            "Frutillas",
+            "Moras"
+          ],
+          "unidad_medida": "unidad",
+          "tipo": "fresco"
+        },
+        "Arándanos": {
+          "alternativas": [
+            "Blueberries"
+          ],
+          "unidad_medida": "g",
+          "tipo": "fresco"
+        },
+        "Frambuesas": {
+          "alternativas": [
+            "Mora",
+            "Zarzamora"
+          ],
+          "unidad_medida": "g",
+          "tipo": "fresco"
+        },
+        "Moras": {
+          "alternativas": [
+            "Blackberries"
+          ],
+          "unidad_medida": "g",
+          "tipo": "fresco"
+        },
+        "Grosellas": {
+          "alternativas": [],
+          "unidad_medida": "g",
+          "tipo": "fresco"
+        },
+        "Cerezas": {
+          "alternativas": [
+            "Guindas"
+          ],
+          "unidad_medida": "g",
+          "tipo": "fresco"
+        },
+        "Frambuesas amarillas": {
+          "alternativas": [],
+          "unidad_medida": "g",
+          "tipo": "fresco"
+        },
+        "Zarzamoras": {
+          "alternativas": [
+            "Brambles"
+          ],
+          "unidad_medida": "g",
+          "tipo": "fresco"
+        },
+        "Endrinas": {
+          "alternativas": [
+            "Ciruelas silvestres"
+          ],
+          "unidad_medida": "unidad",
+          "tipo": "fresco"
+        },
+        "Madroños": {
+          "alternativas": [],
+          "unidad_medida": "unidad",
+          "tipo": "fresco"
+        }
+      },
+      "Frutos del Bosque": {}
+    }
+  },
+  "Carnes y Pescados": {
+    "Carnes": {
+      "Vacuno": {
+        "carne de vacuno": {
+          "alternativas": [
+            "carne de res",
+            "carne de buey"
+          ],
+          "unidad_medida": "gramo",
+          "tipo": "fresco"
+        },
+        "solomillo de ternera": {
+          "alternativas": [
+            "solomillo de buey"
+          ],
+          "unidad_medida": "unidad",
+          "tipo": "fresco"
+        },
+        "filete de ternera": {
+          "alternativas": [
+            "filete de buey"
+          ],
+          "unidad_medida": "unidad",
+          "tipo": "fresco"
+        },
+        "chuletón de vacuno": {
+          "alternativas": [
+            "chuletón de buey"
+          ],
+          "unidad_medida": "unidad",
+          "tipo": "fresco"
+        },
+        "entrecot de ternera": {
+          "alternativas": [
+            "entrecot de buey"
+          ],
+          "unidad_medida": "unidad",
+          "tipo": "fresco"
+        },
+        "hamburguesa de ternera": {
+          "alternativas": [
+            "hamburguesa de buey"
+          ],
+          "unidad_medida": "unidad",
+          "tipo": "procesado"
+        },
+        "carne picada de vacuno": {
+          "alternativas": [
+            "carne picada de res",
+            "carne picada de buey"
+          ],
+          "unidad_medida": "gramo",
+          "tipo": "fresco"
+        },
+        "morcillo de ternera": {
+          "alternativas": [
+            "morcillo de buey"
+          ],
+          "unidad_medida": "unidad",
+          "tipo": "fresco"
+        }
+      },
+      "Ternera": {
+        "ternera": {
+          "alternativas": [
+            "carne de res",
+            "carne de vacuno"
+          ],
+          "unidad_medida": "gramo",
+          "tipo": "fresco"
+        },
+        "filete de ternera": {
+          "alternativas": [
+            "filete de res",
+            "filete de vaca"
+          ],
+          "unidad_medida": "unidad",
+          "tipo": "fresco"
+        },
+        "picada de ternera": {
+          "alternativas": [
+            "picadillo de res",
+            "picadillo de vacuno"
+          ],
+          "unidad_medida": "gramo",
+          "tipo": "fresco"
+        },
+        "hamburguesa de ternera": {
+          "alternativas": [
+            "hamburguesa de res",
+            "hamburguesa de vaca"
+          ],
+          "unidad_medida": "unidad",
+          "tipo": "procesado"
+        },
+        "ternera en conserva": {
+          "alternativas": [
+            "res enlatada",
+            "vacuno en conserva"
+          ],
+          "unidad_medida": "lata",
+          "tipo": "conserva"
+        }
+      },
+      "Cerdo": {
+        "lomo de cerdo": {
+          "alternativas": [
+            "solomillo de cerdo"
+          ],
+          "unidad_medida": "filete",
+          "tipo": "fresco"
+        },
+        "costillas de cerdo": {
+          "alternativas": [
+            "chuletas de cerdo"
+          ],
+          "unidad_medida": "unidad",
+          "tipo": "fresco"
+        },
+        "magro de cerdo": {
+          "alternativas": [],
+          "unidad_medida": "trozo",
+          "tipo": "fresco"
+        },
+        "tocino de cerdo": {
+          "alternativas": [
+            "panceta de cerdo"
+          ],
+          "unidad_medida": "loncha",
+          "tipo": "fresco"
+        },
+        "jamón ibérico": {
+          "alternativas": [],
+          "unidad_medida": "loncha",
+          "tipo": "fresco"
+        },
+        "butifarra": {
+          "alternativas": [],
+          "unidad_medida": "unidad",
+          "tipo": "fresco"
+        }
+      },
+      "Aves de Corral": {
+        "pollo": {
+          "alternativas": [
+            "gallina"
+          ],
+          "unidad_medida": "unidad",
+          "tipo": "fresco"
+        },
+        "pavo": {
+          "alternativas": [
+            "pavita"
+          ],
+          "unidad_medida": "unidad",
+          "tipo": "fresco"
+        },
+        "gallina": {
+          "alternativas": [
+            "pollo"
+          ],
+          "unidad_medida": "unidad",
+          "tipo": "fresco"
+        },
+        "pavita": {
+          "alternativas": [
+            "pavo"
+          ],
+          "unidad_medida": "unidad",
+          "tipo": "fresco"
+        },
+        "muslos de pollo": {
+          "alternativas": [
+            "muslos de gallina"
+          ],
+          "unidad_medida": "unidad",
+          "tipo": "fresco"
+        },
+        "alas de pollo": {
+          "alternativas": [
+            "alas de gallina"
+          ],
+          "unidad_medida": "unidad",
+          "tipo": "fresco"
+        },
+        "pechuga de pavo": {
+          "alternativas": [],
+          "unidad_medida": "unidad",
+          "tipo": "fresco"
+        },
+        "carne picada de pollo": {
+          "alternativas": [
+            "carne molida de pollo"
+          ],
+          "unidad_medida": "g",
+          "tipo": "fresco"
+        },
+        "hígado de pollo": {
+          "alternativas": [],
+          "unidad_medida": "g",
+          "tipo": "fresco"
+        },
+        "corazón de pollo": {
+          "alternativas": [],
+          "unidad_medida": "unidad",
+          "tipo": "fresco"
+        }
+      },
+      "Caza": {
+        "conejo": {
+          "alternativas": [
+            "liebre"
+          ],
+          "unidad_medida": "unidad",
+          "tipo": "fresco"
+        },
+        "faisán": {
+          "alternativas": [],
+          "unidad_medida": "unidad",
+          "tipo": "fresco"
+        },
+        "perdiz": {
+          "alternativas": [],
+          "unidad_medida": "unidad",
+          "tipo": "fresco"
+        },
+        "venado": {
+          "alternativas": [],
+          "unidad_medida": "unidad",
+          "tipo": "fresco"
+        },
+        "jabalí": {
+          "alternativas": [],
+          "unidad_medida": "unidad",
+          "tipo": "fresco"
+        },
+        "carnes de caza variadas": {
+          "alternativas": [
+            "caza mayor",
+            "caza menor"
+          ],
+          "unidad_medida": "unidad",
+          "tipo": "fresco"
+        }
+      },
+      "Aves Silvestres": {
+        "pavo": {
+          "alternativas": [
+            "pavo salvaje",
+            "pavo cimarrón"
+          ],
+          "unidad_medida": "unidad",
+          "tipo": "fresco"
+        },
+        "faisán": {
+          "alternativas": [],
+          "unidad_medida": "unidad",
+          "tipo": "fresco"
+        },
+        "codorniz": {
+          "alternativas": [],
+          "unidad_medida": "unidad",
+          "tipo": "fresco"
+        },
+        "perdiz": {
+          "alternativas": [],
+          "unidad_medida": "unidad",
+          "tipo": "fresco"
+        }
+      },
+      "Casquería": {
+        "callos": {
+          "alternativas": [
+            "mondongo",
+            "tripas"
+          ],
+          "unidad_medida": "gramo",
+          "tipo": "fresco"
+        },
+        "morcilla": {
+          "alternativas": [
+            "blood sausage",
+            "black pudding"
+          ],
+          "unidad_medida": "unidad",
+          "tipo": "fresco"
+        },
+        "lengua de ternera": {
+          "alternativas": [
+            "beef tongue"
+          ],
+          "unidad_medida": "unidad",
+          "tipo": "fresco"
+        },
+        "manitas de cerdo": {
+          "alternativas": [
+            "pigs' trotters"
+          ],
+          "unidad_medida": "unidad",
+          "tipo": "fresco"
+        },
+        "hígado de cordero": {
+          "alternativas": [
+            "lamb liver"
+          ],
+          "unidad_medida": "gramo",
+          "tipo": "fresco"
+        },
+        "mollejas de cordero": {
+          "alternativas": [
+            "lamb sweetbreads"
+          ],
+          "unidad_medida": "gramo",
+          "tipo": "fresco"
+        }
+      },
+      "Vísceras": {
+        "hígado de ternera": {
+          "alternativas": [
+            "hígado de buey",
+            "hígado de vaca"
+          ],
+          "unidad_medida": "gramo",
+          "tipo": "fresco"
+        },
+        "hígado de pollo": {
+          "alternativas": [],
+          "unidad_medida": "unidad",
+          "tipo": "fresco"
+        },
+        "riñones de cerdo": {
+          "alternativas": [],
+          "unidad_medida": "unidad",
+          "tipo": "fresco"
+        },
+        "corazón de cordero": {
+          "alternativas": [],
+          "unidad_medida": "unidad",
+          "tipo": "fresco"
+        },
+        "mollejas de ternera": {
+          "alternativas": [],
+          "unidad_medida": "gramo",
+          "tipo": "fresco"
+        },
+        "callos de cerdo": {
+          "alternativas": [],
+          "unidad_medida": "gramo",
+          "tipo": "fresco"
+        }
+      }
+    },
+    "Pescados y Mariscos": {
+      "Pescados Blancos": {
+        "merluza": {
+          "alternativas": [
+            "pescadilla"
+          ],
+          "unidad_medida": "filete",
+          "tipo": "fresco"
+        },
+        "lubina": {
+          "alternativas": [],
+          "unidad_medida": "filete",
+          "tipo": "fresco"
+        },
+        "bacalao": {
+          "alternativas": [],
+          "unidad_medida": "filete",
+          "tipo": "fresco"
+        },
+        "lenguado": {
+          "alternativas": [],
+          "unidad_medida": "filete",
+          "tipo": "fresco"
+        },
+        "rape": {
+          "alternativas": [
+            "pez espada"
+          ],
+          "unidad_medida": "filete",
+          "tipo": "fresco"
+        }
+      },
+      "Pescados Azules": {
+        "sardina": {
+          "alternativas": [
+            "pilchard",
+            "sardineta"
+          ],
+          "unidad_medida": "unidad",
+          "tipo": "fresco"
+        },
+        "boquerón": {
+          "alternativas": [
+            "anchoa",
+            "bocarte"
+          ],
+          "unidad_medida": "unidad",
+          "tipo": "fresco"
+        },
+        "caballa": {
+          "alternativas": [
+            "jurel",
+            "verdel"
+          ],
+          "unidad_medida": "filete",
+          "tipo": "fresco"
+        },
+        "arenque": {
+          "alternativas": [
+            "harinado",
+            "arenca"
+          ],
+          "unidad_medida": "filete",
+          "tipo": "fresco"
+        },
+        "aguja": {
+          "alternativas": [
+            "pez limón",
+            "picudo"
+          ],
+          "unidad_medida": "filete",
+          "tipo": "fresco"
+        },
+        "jurel": {
+          "alternativas": [
+            "jurel común",
+            "jurel chileno"
+          ],
+          "unidad_medida": "filete",
+          "tipo": "fresco"
+        },
+        "atún": {
+          "alternativas": [
+            "bonito",
+            "ventresca"
+          ],
+          "unidad_medida": "filete",
+          "tipo": "fresco"
+        },
+        "bacalao": {
+          "alternativas": [
+            "bacalao fresco",
+            "bacalao desalado"
+          ],
+          "unidad_medida": "filete",
+          "tipo": "fresco"
+        },
+        "salmonete": {
+          "alternativas": [
+            "salmonete de roca",
+            "salmonete de fango"
+          ],
+          "unidad_medida": "filete",
+          "tipo": "fresco"
+        }
+      },
+      "Crustáceos": {
+        "langostinos": {
+          "alternativas": [
+            "gambas",
+            "camarones"
+          ],
+          "unidad_medida": "unidad",
+          "tipo": "fresco"
+        },
+        "camarones": {
+          "alternativas": [
+            "gambas",
+            "langostinos"
+          ],
+          "unidad_medida": "unidad",
+          "tipo": "fresco"
+        },
+        "gambas": {
+          "alternativas": [
+            "camarones",
+            "langostinos"
+          ],
+          "unidad_medida": "unidad",
+          "tipo": "fresco"
+        },
+        "cangrejo": {
+          "alternativas": [
+            "centollo",
+            "buey de mar"
+          ],
+          "unidad_medida": "unidad",
+          "tipo": "fresco"
+        },
+        "centollo": {
+          "alternativas": [
+            "cangrejo",
+            "buey de mar"
+          ],
+          "unidad_medida": "unidad",
+          "tipo": "fresco"
+        },
+        "buey de mar": {
+          "alternativas": [
+            "cangrejo",
+            "centollo"
+          ],
+          "unidad_medida": "unidad",
+          "tipo": "fresco"
+        },
+        "bogavante": {
+          "alternativas": [
+            "langosta"
+          ],
+          "unidad_medida": "unidad",
+          "tipo": "fresco"
+        },
+        "langosta": {
+          "alternativas": [
+            "bogavante"
+          ],
+          "unidad_medida": "unidad",
+          "tipo": "fresco"
+        },
+        "nécoras": {
+          "alternativas": [
+            "cangrejos de mar",
+            "camarón de mar"
+          ],
+          "unidad_medida": "unidad",
+          "tipo": "fresco"
+        },
+        "bocas de mar": {
+          "alternativas": [
+            "percebes"
+          ],
+          "unidad_medida": "unidad",
+          "tipo": "fresco"
+        },
+        "percebes": {
+          "alternativas": [
+            "bocas de mar"
+          ],
+          "unidad_medida": "unidad",
+          "tipo": "fresco"
+        }
+      },
+      "Moluscos": {
+        "calamar": {
+          "alternativas": [
+            "calamares",
+            "chipirón",
+            "choco"
+          ],
+          "unidad_medida": "unidad",
+          "tipo": "fresco"
+        },
+        "pulpo": {
+          "alternativas": [],
+          "unidad_medida": "unidad",
+          "tipo": "fresco"
+        },
+        "mejillón": {
+          "alternativas": [
+            "choro"
+          ],
+          "unidad_medida": "unidad",
+          "tipo": "fresco"
+        },
+        "almeja": {
+          "alternativas": [
+            "chirla",
+            "berberecho"
+          ],
+          "unidad_medida": "unidad",
+          "tipo": "fresco"
+        },
+        "ostra": {
+          "alternativas": [],
+          "unidad_medida": "unidad",
+          "tipo": "fresco"
+        },
+        "vieira": {
+          "alternativas": [],
+          "unidad_medida": "unidad",
+          "tipo": "fresco"
+        }
+      },
+      "Cefalópodos": {
+        "pulpo": {
+          "alternativas": [
+            "octopus",
+            "jibia",
+            "choco"
+          ],
+          "unidad_medida": "unidad",
+          "tipo": "fresco"
+        },
+        "calamar": {
+          "alternativas": [
+            "squid",
+            "chipirón",
+            "jibia"
+          ],
+          "unidad_medida": "unidad",
+          "tipo": "fresco"
+        },
+        "sepia": {
+          "alternativas": [
+            "cuttlefish",
+            "jibia"
+          ],
+          "unidad_medida": "unidad",
+          "tipo": "fresco"
+        },
+        "chipirón": {
+          "alternativas": [
+            "squid",
+            "calamar"
+          ],
+          "unidad_medida": "unidad",
+          "tipo": "fresco"
+        },
+        "jibia": {
+          "alternativas": [
+            "squid",
+            "calamar",
+            "sepia"
+          ],
+          "unidad_medida": "unidad",
+          "tipo": "fresco"
+        }
+      }
+    }
+  },
+  "Lácteos y Huevos": {
+    "Lácteos": {
+      "Leches": {
+        "leche": {
+          "alternativas": [
+            "lácteo"
+          ],
+          "unidad_medida": "ml",
+          "tipo": "fresco"
+        },
+        "leche desnatada": {
+          "alternativas": [
+            "leche descremada"
+          ],
+          "unidad_medida": "ml",
+          "tipo": "fresco"
+        },
+        "leche semidesnatada": {
+          "alternativas": [
+            "leche semidescremada"
+          ],
+          "unidad_medida": "ml",
+          "tipo": "fresco"
+        },
+        "leche entera": {
+          "alternativas": [
+            "leche completa"
+          ],
+          "unidad_medida": "ml",
+          "tipo": "fresco"
+        },
+        "leche evaporada": {
+          "alternativas": [],
+          "unidad_medida": "ml",
+          "tipo": "conserva"
+        },
+        "leche condensada": {
+          "alternativas": [],
+          "unidad_medida": "ml",
+          "tipo": "conserva"
+        }
+      },
+      "Quesos": {
+        "queso fresco": {
+          "alternativas": [
+            "queso blanco",
+            "queso de burgos"
+          ],
+          "unidad_medida": "unidad",
+          "tipo": "fresco"
+        },
+        "queso semicurado": {
+          "alternativas": [
+            "queso de mezcla"
+          ],
+          "unidad_medida": "g",
+          "tipo": "fresco"
+        },
+        "queso curado": {
+          "alternativas": [
+            "queso manchego",
+            "queso de oveja"
+          ],
+          "unidad_medida": "g",
+          "tipo": "fresco"
+        },
+        "queso azul": {
+          "alternativas": [
+            "roquefort",
+            "gorgonzola"
+          ],
+          "unidad_medida": "g",
+          "tipo": "fresco"
+        },
+        "queso rallado": {
+          "alternativas": [
+            "queso parmesano",
+            "queso cheddar rallado"
+          ],
+          "unidad_medida": "g",
+          "tipo": "procesado"
+        }
+      },
+      "Yogures": {
+        "leche": {
+          "alternativas": [
+            "leche entera",
+            "leche desnatada",
+            "leche semidesnatada"
+          ],
+          "unidad_medida": "ml",
+          "tipo": "fresco"
+        },
+        "nata": {
+          "alternativas": [
+            "crema de leche"
+          ],
+          "unidad_medida": "ml",
+          "tipo": "fresco"
+        },
+        "yogur": {
+          "alternativas": [
+            "yogurt"
+          ],
+          "unidad_medida": "unidad",
+          "tipo": "fresco"
+        },
+        "azúcar": {
+          "alternativas": [
+            "azúcar blanco",
+            "azúcar moreno"
+          ],
+          "unidad_medida": "g",
+          "tipo": "procesado"
+        },
+        "fruta": {
+          "alternativas": [
+            "fruta fresca",
+            "fruta congelada"
+          ],
+          "unidad_medida": "unidad",
+          "tipo": "fresco"
+        },
+        "miel": {
+          "alternativas": [],
+          "unidad_medida": "cucharada",
+          "tipo": "fresco"
+        },
+        "cereal": {
+          "alternativas": [
+            "cereales"
+          ],
+          "unidad_medida": "g",
+          "tipo": "procesado"
+        },
+        "frutos secos": {
+          "alternativas": [
+            "frutos secos variados"
+          ],
+          "unidad_medida": "g",
+          "tipo": "fresco"
+        }
+      },
+      "Natas y Cremas": {
+        "nata": {
+          "alternativas": [
+            "crema de leche"
+          ],
+          "unidad_medida": "ml",
+          "tipo": "fresco"
+        },
+        "crema agria": {
+          "alternativas": [
+            "sour cream"
+          ],
+          "unidad_medida": "ml",
+          "tipo": "fresco"
+        },
+        "crema de leche espesa": {
+          "alternativas": [
+            "heavy cream"
+          ],
+          "unidad_medida": "ml",
+          "tipo": "fresco"
+        },
+        "crema doble": {
+          "alternativas": [
+            "double cream"
+          ],
+          "unidad_medida": "ml",
+          "tipo": "fresco"
+        },
+        "crema fraiche": {
+          "alternativas": [
+            "creme fraiche"
+          ],
+          "unidad_medida": "ml",
+          "tipo": "fresco"
+        }
+      },
+      "Huevos": {
+        "huevo": {
+          "alternativas": [
+            "huevos de gallina",
+            "clara de huevo",
+            "yema de huevo",
+            "huevo de codorniz"
+          ],
+          "unidad_medida": "unidad",
+          "tipo": "fresco"
+        }
+      }
+    },
+    "Huevos": {
+      "Huevos de Gallina": {
+        "huevo": {
+          "alternativas": [
+            "huevo de gallina",
+            "clara de huevo",
+            "yema de huevo"
+          ],
+          "unidad_medida": "unidad",
+          "tipo": "fresco"
+        },
+        "sal": {
+          "alternativas": [
+            "sal común",
+            "sal de mesa"
+          ],
+          "unidad_medida": "pizca",
+          "tipo": "seco"
+        },
+        "pimienta": {
+          "alternativas": [
+            "pimienta negra",
+            "pimienta molida"
+          ],
+          "unidad_medida": "pizca",
+          "tipo": "seco"
+        },
+        "aceite de oliva": {
+          "alternativas": [
+            "aceite de oliva virgen extra",
+            "aceite de oliva suave"
+          ],
+          "unidad_medida": "cucharada",
+          "tipo": "fresco"
+        },
+        "mantequilla": {
+          "alternativas": [
+            "margarina",
+            "mantequilla sin sal"
+          ],
+          "unidad_medida": "cucharada",
+          "tipo": "fresco"
+        }
+      },
+      "Huevos de Otras Aves": {
+        "huevo de codorniz": {
+          "alternativas": [
+            "huevo de caille",
+            "huevo de ave pequeña"
+          ],
+          "unidad_medida": "unidad",
+          "tipo": "fresco"
+        },
+        "huevo de pato": {
+          "alternativas": [
+            "huevo de ánade"
+          ],
+          "unidad_medida": "unidad",
+          "tipo": "fresco"
+        },
+        "huevo de avestruz": {
+          "alternativas": [
+            "huevo de avestruz"
+          ],
+          "unidad_medida": "unidad",
+          "tipo": "fresco"
+        },
+        "huevo de gallina de corral": {
+          "alternativas": [
+            "huevo campero"
+          ],
+          "unidad_medida": "unidad",
+          "tipo": "fresco"
+        }
+      },
+      "Ovoproductos": {
+        "huevo": {
+          "alternativas": [
+            "huevo de gallina",
+            "huevo de pato"
+          ],
+          "unidad_medida": "unidad",
+          "tipo": "fresco"
+        },
+        "clara de huevo": {
+          "alternativas": [
+            "albúmina"
+          ],
+          "unidad_medida": "unidad",
+          "tipo": "fresco"
+        },
+        "yema de huevo": {
+          "alternativas": [],
+          "unidad_medida": "unidad",
+          "tipo": "fresco"
+        },
+        "polvo de huevo": {
+          "alternativas": [
+            "huevo en polvo"
+          ],
+          "unidad_medida": "g",
+          "tipo": "procesado"
+        },
+        "huevo líquido": {
+          "alternativas": [
+            "huevo pasteurizado"
+          ],
+          "unidad_medida": "ml",
+          "tipo": "procesado"
+        }
+      }
+    }
+  },
+  "Grasas y Aceites": {
+    "Aceites": {
+      "Aceites de Oliva": {},
+      "Aceites Vegetales": {},
+      "Aceites Especiales": {}
+    },
+    "Grasas": {
+      "Grasas Animales": {},
+      "Mantequillas": {},
+      "Margarinas": {}
+    }
+  },
+  "Cereales, Pastas y Legumbres": {
+    "Cereales": {
+      "Avena": {},
+      "Centeno": {},
+      "Quinoa": {},
+      "Mijo": {},
+      "Cebada": {},
+      "Amaranto": {},
+      "Espelta": {}
+    },
+    "Legumbres": {
+      "Legumbres Secas": {},
+      "Legumbres Cocidas": {},
+      "Derivados de Legumbres": {}
+    },
+    "Pastas": {
+      "Pasta Fresca": {},
+      "Pasta Seca": {},
+      "Pasta Rellena": {}
+    }
+  },
+  "Frutos Secos, Semillas y Superalimentos": {
+    "Frutos Secos": {
+      "Frutos Secos Crudos": {},
+      "Frutos Secos Tostados": {},
+      "Frutos Secos Procesados": {}
+    },
+    "Semillas": {
+      "Semillas Comestibles": {},
+      "Semillas Germinadas": {}
+    },
+    "Superalimentos": {
+      "Superalimentos en Polvo": {},
+      "Superalimentos Enteros": {},
+      "Suplementos Naturales": {}
+    }
+  },
+  "Endulzantes y Repostería": {
+    "Endulzantes": {
+      "Azúcares": {},
+      "Edulcorantes Naturales": {},
+      "Edulcorantes Artificiales": {}
+    },
+    "Repostería": {
+      "Harinas y Féculas": {},
+      "Levaduras y Impulsores": {},
+      "Decoración y Coberturas": {}
+    },
+    "Chocolates": {}
+  },
+  "Salsas, Condimentos y Fermentados": {
+    "Salsas": {
+      "Salsas Preparadas": {},
+      "Salsas Base": {},
+      "Salsas Especiales": {}
+    },
+    "Condimentos": {
+      "Especias": {},
+      "Hierbas Aromáticas": {},
+      "Mezclas de Especias": {}
+    },
+    "Fermentados": {
+      "Encurtidos": {},
+      "Fermentados Vegetales": {},
+      "Fermentados Lácteos": {}
+    }
+  },
+  "Bebidas": {
+    "No Alcohólicas": {},
+    "Alcohólicas": {}
+  },
+  "Conservas y Procesados": {
+    "Conservas": {
+      "Conservas Vegetales": {},
+      "Conservas de Pescado": {},
+      "Conservas de Carne": {}
+    },
+    "Procesados": {
+      "Snacks": {},
+      "Precocinados": {},
+      "Deshidratados": {}
+    },
+    "Bases de Cocina": {
+      "Caldos y Fondos": {},
+      "Preparados en Polvo": {},
+      "Bases Concentradas": {}
+    }
+  }
+}
