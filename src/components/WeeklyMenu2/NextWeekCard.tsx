@@ -1,9 +1,28 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Calendar, Clock } from 'lucide-react';
 
 export function NextWeekCard() {
-  const [timeLeft, setTimeLeft] = React.useState<string>('');
-  const [shouldShow, setShouldShow] = React.useState(true);
+  const [timeLeft, setTimeLeft] = useState<string>('');
+  const [shouldShow, setShouldShow] = useState(true);
+
+  // Determinar si mostrar la tarjeta
+  const shouldShowCard = () => {
+    const now = new Date();
+    const currentDay = now.getDay();
+    const currentHour = now.getHours();
+
+    // No mostrar si es domingo después de las 21:00 o lunes antes de las 00:00
+    if ((currentDay === 0 && currentHour >= 21) || 
+        (currentDay === 1 && currentHour < 0)) {
+      return false;
+    }
+
+    return true;
+  };
+
+  useEffect(() => {
+    setShouldShow(shouldShowCard());
+  }, []);
 
   React.useEffect(() => {
     const calculateTimeLeft = () => {

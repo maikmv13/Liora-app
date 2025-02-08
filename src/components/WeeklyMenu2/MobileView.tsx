@@ -1,4 +1,4 @@
-import React, { useRef, useEffect } from 'react';
+import React, { useRef, useEffect, useState } from 'react';
 import { MenuItem, MealType, Recipe } from '../../types';
 import { ExtendedWeeklyMenuDB } from '../../services/weeklyMenu';
 import { DayCard } from './DayCard';
@@ -42,53 +42,45 @@ export function MobileView({
   isGenerating
 }: MobileViewProps) {
   const scrollContainerRef = useRef<HTMLDivElement>(null);
-  const [canScrollLeft, setCanScrollLeft] = React.useState(false);
-  const [canScrollRight, setCanScrollRight] = React.useState(false);
-  const [isScrolling, setIsScrolling] = React.useState(false);
+  const [canScrollLeft, setCanScrollLeft] = useState(false);
+  const [canScrollRight, setCanScrollRight] = useState(false);
+  const [isScrolling, setIsScrolling] = useState(false);
 
-  // Función para obtener el día siguiente al actual
-  const getTomorrowDay = () => {
-    const today = new Date();
-    const tomorrow = new Date(today);
-    tomorrow.setDate(today.getDate() + 1);
-    return new Intl.DateTimeFormat('es-ES', { weekday: 'long' }).format(tomorrow)
-      .replace(/^\w/, c => c.toUpperCase()); // Capitalizar primera letra
-  };
-
-  // Función para obtener el índice del día siguiente
-  const getTomorrowIndex = () => {
-    const tomorrow = getTomorrowDay();
-    return weekDays.findIndex(day => day === tomorrow);
-  };
-
-  // Función mejorada para determinar si mostrar NextWeekCard
-  const shouldShowNextWeek = React.useMemo(() => {
+  // Determinar el día al que hacer scroll
+  const getTargetScrollDay = () => {
     const now = new Date();
-    const currentDay = now.getDay();
+    const currentDay = now.getDay(); // 0 = domingo, 1 = lunes, ...
     const currentHour = now.getHours();
 
-    // Mostrar NextWeekCard si:
-    // 1. Es domingo después de las 18:00 (para dar tiempo a prepararse)
-    // 2. Es cualquier otro día de la semana
-    return currentDay === 0 ? currentHour >= 18 : true;
-  }, []);
+    // Si es domingo después de las 21:00, scroll al lunes
+    if (currentDay === 0 && currentHour >= 21) {
+      return 'Lunes';
+    }
+    
+    // Si es domingo antes de las 21:00, scroll a NextWeekCard
+    if (currentDay === 0 && currentHour < 21) {
+      return 'next';
+    }
 
-  // Scroll automático mejorado
+    // Para otros días, obtener el día siguiente
+    const tomorrow = new Date(now);
+    tomorrow.setDate(now.getDate() + 1);
+    return new Intl.DateTimeFormat('es-ES', { weekday: 'long' })
+      .format(tomorrow)
+      .replace(/^\w/, c => c.toUpperCase());
+  };
+
+  // Scroll inicial
   useEffect(() => {
     if (scrollContainerRef.current) {
-      const now = new Date();
-      const currentDay = now.getDay();
-      const currentHour = now.getHours();
-      
+      const targetDay = getTargetScrollDay();
       let targetIndex;
-      
-      if (currentDay === 0 && currentHour >= 18) {
-        // Domingo después de las 18:00 -> scroll a NextWeekCard
-        targetIndex = weekDays.length;
+
+      if (targetDay === 'next') {
+        targetIndex = weekDays.length; // Índice de NextWeekCard
       } else {
-        // Cualquier otro momento -> scroll al día actual o siguiente
-        const tomorrowIndex = getTomorrowIndex();
-        targetIndex = tomorrowIndex !== -1 ? tomorrowIndex : 0;
+        targetIndex = weekDays.findIndex(day => day === targetDay);
+        if (targetIndex === -1) targetIndex = 0;
       }
 
       const cardWidth = scrollContainerRef.current.clientWidth;
@@ -97,11 +89,11 @@ export function MobileView({
         behavior: 'smooth'
       });
 
-      if (targetIndex < weekDays.length) {
+      if (targetDay !== 'next') {
         onDayChange(weekDays[targetIndex]);
       }
     }
-  }, [weekDays.length]);
+  }, [weekDays]);
 
   // Función para actualizar el día seleccionado basado en el scroll
   const updateSelectedDay = () => {
@@ -235,7 +227,7 @@ export function MobileView({
             </div>
           ))}
           
-          {shouldShowNextWeek && (
+          {getTargetScrollDay() === 'next' && (
             <div className="flex-none w-full snap-center px-2 pr-4">
               <NextWeekCard />
             </div>

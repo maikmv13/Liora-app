@@ -44,14 +44,13 @@ export function DayCard({
 
   // Mover la lógica de día actual/mañana a useMemo
   const { isToday, isTomorrow } = React.useMemo(() => {
-    const today = new Date();
+    const now = new Date();
     const currentDay = new Intl.DateTimeFormat('es-ES', { weekday: 'long' })
-      .format(today)
+      .format(now)
       .toLowerCase();
-
-    // Calcular si es mañana
-    const tomorrow = new Date(today);
-    tomorrow.setDate(today.getDate() + 1);
+    
+    const tomorrow = new Date(now);
+    tomorrow.setDate(now.getDate() + 1);
     const nextDay = new Intl.DateTimeFormat('es-ES', { weekday: 'long' })
       .format(tomorrow)
       .toLowerCase();
@@ -61,30 +60,6 @@ export function DayCard({
       isTomorrow: nextDay === day.toLowerCase()
     };
   }, [day]);
-
-  // Scroll lateral solo en móvil
-  React.useEffect(() => {
-    const handleScroll = () => {
-      const isMobile = window.innerWidth < 768;
-      if (!isMobile) return;
-
-      try {
-        if (isToday) {
-          // Solo hacer scroll lateral al día actual
-          const dayCard = document.getElementById(`day-card-${day}`);
-          if (dayCard) {
-            dayCard.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
-          }
-        }
-      } catch (error) {
-        console.error('Error en scroll automático:', error);
-      }
-    };
-
-    // Pequeño delay para asegurar que los elementos están renderizados
-    const timeoutId = setTimeout(handleScroll, 500);
-    return () => clearTimeout(timeoutId);
-  }, [day, isToday]);
 
   const mealTypes: MealType[] = ['desayuno', 'comida', 'snack', 'cena'];
 
