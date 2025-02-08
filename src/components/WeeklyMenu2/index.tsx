@@ -13,7 +13,6 @@ import { weekDays } from './utils';
 import { RecipeSelectorSidebar } from './RecipeSelectorSidebar';
 import { MenuSkeleton } from './MenuSkeleton';
 import { useActiveProfile } from '../../hooks/useActiveProfile';
-import { MenuErrorNotification } from './MenuErrorNotification';
 import { RecipeList } from '../RecipeList';
 import { ChefHat } from 'lucide-react';
 import { useFavorites } from '../../hooks/useFavorites';
@@ -29,7 +28,6 @@ export function WeeklyMenu2() {
     day: string;
     meal: MealType;
   } | null>(null);
-  const [menuError, setMenuError] = useState<string | null>(null);
   const [isGeneratingMenu, setIsGeneratingMenu] = useState(false);
   const [menuActivities, setMenuActivities] = useState<MenuActivity[]>([]);
 
@@ -221,7 +219,6 @@ export function WeeklyMenu2() {
       window.location.reload();
     } catch (error) {
       console.error('Error al gestionar el menú:', error);
-      throw error;
     }
   };
 
@@ -247,13 +244,6 @@ export function WeeklyMenu2() {
       await handleGenerateMenu(recipes as unknown as Recipe[]);
     } catch (error) {
       console.error('Error al generar menú:', error);
-      let errorMessage = 'No se pudo generar el menú.';
-      
-      if (error instanceof Error) {
-        errorMessage = error.message;
-      }
-      
-      setMenuError(errorMessage);
       setIsGeneratingMenu(false);
     }
   };
@@ -279,7 +269,6 @@ export function WeeklyMenu2() {
       window.location.reload();
     } catch (error) {
       console.error('Error restoring menu:', error);
-      setMenuError('Error al restaurar el menú');
     }
   };
 
@@ -360,13 +349,6 @@ export function WeeklyMenu2() {
 
   return (
     <>
-      {menuError && (
-        <MenuErrorNotification
-          message={menuError}
-          onClose={() => setMenuError(null)}
-        />
-      )}
-
       {/* Recipe Selector Sidebar */}
       <RecipeSelectorSidebar 
         isOpen={showRecipeSelector}
