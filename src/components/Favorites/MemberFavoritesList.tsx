@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { Heart, ChevronRight, User, ChevronLeft } from 'lucide-react';
 import type { FavoriteRecipe } from '../../types';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useNavigate } from 'react-router-dom';
 
 interface MemberFavoritesListProps {
   favorites: FavoriteRecipe[];
@@ -9,6 +10,7 @@ interface MemberFavoritesListProps {
 }
 
 export function MemberFavoritesList({ favorites, onUpdateFavorite }: MemberFavoritesListProps) {
+  const navigate = useNavigate();
   const [selectedMember, setSelectedMember] = useState<string | null>(null);
   const [canScrollLeft, setCanScrollLeft] = useState(false);
   const [canScrollRight, setCanScrollRight] = useState(false);
@@ -69,6 +71,10 @@ export function MemberFavoritesList({ favorites, onUpdateFavorite }: MemberFavor
         behavior: 'smooth'
       });
     }
+  };
+
+  const handleRecipeClick = (recipeId: string) => {
+    navigate(`/recipe/${recipeId}`);
   };
 
   if (Object.keys(recipesByMember).length === 0) {
@@ -164,12 +170,13 @@ export function MemberFavoritesList({ favorites, onUpdateFavorite }: MemberFavor
               transition={{ duration: 0.2 }}
               className="divide-y divide-rose-100/10"
             >
-              {recipesByMember[selectedMember].map((recipe) => (
+              {recipesByMember[selectedMember].map((recipe: FavoriteRecipe) => (
                 <motion.div
                   key={`${recipe.id}-${recipe.favorite_id}`}
                   initial={{ opacity: 0, x: -20 }}
                   animate={{ opacity: 1, x: 0 }}
-                  className="flex items-center justify-between p-4 hover:bg-rose-50/50 transition-colors group"
+                  onClick={() => handleRecipeClick(recipe.id)}
+                  className="flex items-center justify-between p-4 hover:bg-rose-50/50 transition-colors group cursor-pointer"
                 >
                   <div className="flex items-center space-x-4">
                     {recipe.image_url && (
@@ -187,23 +194,11 @@ export function MemberFavoritesList({ favorites, onUpdateFavorite }: MemberFavor
                         <span className="text-xs font-medium px-2 py-0.5 rounded-full bg-gray-100 text-gray-600">
                           {recipe.category}
                         </span>
-                        {recipe.rating && (
-                          <div className="flex items-center space-x-1 text-amber-500">
-                            <span className="text-xs">★</span>
-                            <span className="text-xs">{recipe.rating}</span>
-                          </div>
-                        )}
                       </div>
                     </div>
                   </div>
                   
-                  <div className="flex items-center space-x-2">
-                    <button
-                      onClick={() => onUpdateFavorite(recipe)}
-                      className="p-2 text-rose-500 hover:bg-rose-100 rounded-lg transition-colors opacity-0 group-hover:opacity-100"
-                    >
-                      <Heart className="w-5 h-5" />
-                    </button>
+                  <div className="flex items-center">
                     <ChevronRight className="w-5 h-5 text-gray-400 group-hover:text-rose-400 transition-colors" />
                   </div>
                 </motion.div>
