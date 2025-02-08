@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { 
   Clock, Users, ChefHat, Heart, Calendar, 
   Flame, Cookie, Coffee, Sun, Moon, Eye
@@ -6,9 +6,8 @@ import {
 import { MenuItem } from '../../types';
 import { useNavigate } from 'react-router-dom';
 import { useActiveProfile } from '../../hooks/useActiveProfile';
-import { useFavorites } from '../../hooks/useFavorites';
 import { useActiveMenu } from '../../hooks/useActiveMenu';
-import { MIN_FAVORITES_FOR_MENU } from './constants';
+import { ExtendedWeeklyMenuDB } from '../../services/weeklyMenu';
 import { MenuSkeleton } from './MenuSkeleton';
 
 interface TodayCardProps {
@@ -26,20 +25,11 @@ export function TodayCard({
 }: TodayCardProps) {
   const navigate = useNavigate();
   const { id, isHousehold } = useActiveProfile();
-  
-  // Obtener tanto favoritos personales como del household
-  const { 
-    favorites: personalFavorites, 
-    loading: personalLoading 
-  } = useFavorites(false);
-  
-  const { 
-    favorites: householdFavorites, 
-    loading: householdLoading 
-  } = useFavorites(true);
-  
   const { menuItems: activeMenuItems, loading: menuLoading } = useActiveMenu(id, isHousehold);
-  const [expanded, setExpanded] = useState(false);
+  
+  // Debug logs
+  console.log('TodayCard - Props menuItems:', menuItems);
+  console.log('TodayCard - ActiveMenuItems:', activeMenuItems);
   
   // Formatear el día y la fecha
   const today = new Intl.DateTimeFormat('es-ES', { 
@@ -47,6 +37,8 @@ export function TodayCard({
   }).format(new Date())
     .toLowerCase()
     .normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+
+  console.log('TodayCard - Today:', today);
 
   const formattedDate = new Intl.DateTimeFormat('es-ES', {
     day: 'numeric',
@@ -116,87 +108,37 @@ export function TodayCard({
     }
   };
 
-  const handleFavoriteClick = async (recipe: Recipe) => {
-    try {
-      if (recipe.user_id && recipe.user_id !== id) {
-        return;
-      }
-    } catch (error) {
-      console.error('Error toggling favorite:', error);
-    }
-  };
+  // Simplificar la lógica de carga
+  const isLoading = menuLoading;
 
-  // Unificar la lógica de carga
-  const isLoading = menuLoading || personalLoading || householdLoading || 
-    !personalFavorites || !householdFavorites || !activeMenuItems;
-  
-  // Si hay menú activo, significa que el household ya tiene suficientes favoritos
-  const hasActiveMenu = menuItems?.length > 0;
-  
-  // Verificar si hay suficientes favoritos solo si no hay menú activo
-  const totalFavorites = isHousehold ? householdFavorites.length : personalFavorites.length;
-  const hasEnoughFavorites = hasActiveMenu || totalFavorites >= MIN_FAVORITES_FOR_MENU;
-
-  // Asegurarse de que menuItems tenga la estructura correcta
+  // Usar los menuItems de props en lugar de activeMenuItems
   const todayMenuItems = React.useMemo(() => {
     if (!menuItems?.length) return [];
     
-    // Filtrar solo las comidas de hoy
-    return menuItems.filter(item => {
-      const menuDay = new Intl.DateTimeFormat('es-ES', { 
-        weekday: 'long'
-      }).format(new Date())
-        .toLowerCase()
-        .normalize("NFD")
-        .replace(/[\u0300-\u036f]/g, "");
-      
-      return item.day?.toLowerCase() === menuDay;
+    const filtered = menuItems.filter(item => {
+      const itemDay = item.day.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+      console.log('Comparing days:', { itemDay, today });
+      return itemDay === today;
     });
-  }, [menuItems]);
 
-  // Mostrar skeleton mientras cualquier dato está cargando
+    console.log('TodayCard - Filtered items:', filtered);
+    return filtered;
+  }, [menuItems, today]);
+
+  // Mostrar skeleton mientras carga
   if (isLoading) {
     return <MenuSkeleton />;
   }
 
-  // Solo mostrar mensaje de favoritos insuficientes si:
-  // 1. No hay menú activo Y
-  // 2. No hay suficientes favoritos Y
-  // 3. (No es household O no hay menú activo)
-  if (!hasActiveMenu && !hasEnoughFavorites && (!isHousehold || !hasActiveMenu)) {
-    return (
-      <div className="bg-white/95 backdrop-blur-sm rounded-2xl border border-rose-100 overflow-hidden p-6">
-        <h3 className="text-xl font-semibold text-gray-900 mb-2">
-          ¡Crea tu primer menú!
-        </h3>
-        <p className="text-gray-600 mb-4">
-          {isHousehold 
-            ? `Tu household necesita al menos ${MIN_FAVORITES_FOR_MENU} recetas favoritas para generar un menú. Actualmente tienen ${totalFavorites}.`
-            : `Necesitas al menos ${MIN_FAVORITES_FOR_MENU} recetas favoritas para generar un menú. Actualmente tienes ${totalFavorites}.`
-          }
-        </p>
-        <button
-          onClick={() => navigate('/recipes')}
-          className="w-full px-4 py-2 bg-rose-500 text-white rounded-xl hover:bg-rose-600 transition-colors"
-        >
-          Ir a Recetas
-        </button>
-      </div>
-    );
-  }
-
-  // Solo mostrar mensaje de generar menú si no hay menú activo pero hay suficientes favoritos
-  if (!hasActiveMenu && hasEnoughFavorites) {
+  // Si no hay menú activo, mostrar botón para generar
+  if (!menuItems?.length) {
     return (
       <div className="bg-white/95 backdrop-blur-sm rounded-2xl border border-rose-100 overflow-hidden p-6">
         <h3 className="text-xl font-semibold text-gray-900 mb-2">
           ¡Genera tu menú semanal!
         </h3>
         <p className="text-gray-600 mb-4">
-          {isHousehold 
-            ? 'Tu household tiene suficientes recetas favoritas para generar un menú.'
-            : 'Tienes suficientes recetas favoritas para generar un menú.'
-          }
+          Planifica tus comidas de la semana de forma fácil y rápida.
         </p>
         <button
           onClick={() => navigate('/menu/generate')}
@@ -208,7 +150,6 @@ export function TodayCard({
     );
   }
 
-  // Si hay menú activo, mostrar el menú sin importar el número de favoritos
   return (
     <div className="bg-white/95 backdrop-blur-sm rounded-2xl border border-rose-200 shadow-lg overflow-hidden mt-2">
       {/* Header Mejorado */}
@@ -252,6 +193,7 @@ export function TodayCard({
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 divide-y sm:divide-y-0 sm:divide-x divide-rose-200">
         {mealTypes.map((mealType) => {
           const menuItem = todayMenuItems.find(item => item.meal === mealType);
+          console.log(`TodayCard - MealType: ${mealType}, MenuItem:`, menuItem);
           
           return (
             <div
