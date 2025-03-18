@@ -3,15 +3,35 @@ import { supabase } from '../lib/supabase';
 import type { FavoriteRecipe } from '../types';
 import { useActiveProfile } from './useActiveProfile';
 
-interface FavoriteRecipe {
-  id?: string;           // uuid
-  user_id: string;       // uuid
-  recipe_id: string;     // uuid
-  notes: string | null;  // text
-  last_cooked: string | null;  // timestamptz
-  tags: string[];        // _text
-  created_at?: string;   // timestamptz
-  rating: number;        // int4
+// Interfaces para los datos anidados que devuelve la consulta
+interface RawRecipe {
+  id: string;
+  name: string;
+  servings: number;
+  image_url?: string;
+  calories?: string | number;
+  category?: string;
+  prep_time?: string;
+}
+
+interface RawProfile {
+  id: string;
+  full_name?: string;
+  user_type?: string;
+  linked_household_id?: string;
+}
+
+interface RawFavorite {
+  id: string;
+  created_at: string;
+  last_cooked: string | null;
+  notes: string | null;
+  rating: number;
+  tags: string[] | null;
+  user_id: string;
+  recipe_id: string;
+  recipes: RawRecipe;
+  profiles: RawProfile;
 }
 
 export function useFavorites(isHouseholdView?: boolean) {
@@ -62,18 +82,34 @@ export function useFavorites(isHouseholdView?: boolean) {
 
       console.log('Raw favorites data:', favoritesData?.[0]);
 
-      const transformedFavorites = favoritesData?.map(fav => ({
-        ...fav.recipes,
-        favorite_id: fav.id,
-        created_at: fav.created_at,
-        last_cooked: fav.last_cooked,
-        notes: fav.notes,
-        rating: fav.rating,
-        tags: fav.tags,
-        user_id: fav.user_id,
-        member_name: fav.profiles?.full_name,
-        recipe_id: fav.recipe_id
-      })) || [];
+      // Transformar datos utilizando tipado adecuado
+      const transformedFavorites: FavoriteRecipe[] = [];
+      
+      favoritesData?.forEach(fav => {
+        // Verificamos que los objetos anidados existan
+        if (fav) {
+          const recipe = fav.recipes || {};
+          const profile = fav.profiles || {};
+          
+          transformedFavorites.push({
+            id: fav.id,
+            created_at: fav.created_at,
+            last_cooked: fav.last_cooked,
+            notes: fav.notes,
+            rating: fav.rating,
+            tags: fav.tags || [],
+            user_id: fav.user_id,
+            member_name: profile.full_name,
+            recipe_id: fav.recipe_id,
+            name: recipe.name,
+            servings: recipe.servings,
+            image_url: recipe.image_url,
+            calories: recipe.calories,
+            category: recipe.category,
+            prep_time: recipe.prep_time
+          });
+        }
+      });
 
       console.log('Transformed favorites:', transformedFavorites);
       setFavorites(transformedFavorites);
@@ -137,10 +173,6 @@ export function useFavorites(isHouseholdView?: boolean) {
 
   const removeFavorite = async (recipe: FavoriteRecipe) => {
     try {
-      if (!recipe.favorite_id) {
-        throw new Error('No favorite ID provided');
-      }
-
       // Verificar que el usuario sea el dueño del favorito
       if (recipe.user_id !== userId) {
         throw new Error('No tienes permiso para eliminar este favorito');
@@ -148,13 +180,13 @@ export function useFavorites(isHouseholdView?: boolean) {
 
       // Actualizar el estado inmediatamente para la UI
       setFavorites(prev => 
-        prev.filter(f => f.favorite_id !== recipe.favorite_id)
+        prev.filter(f => f.id !== recipe.id)
       );
 
       const { error } = await supabase
         .from('favorites')
         .delete()
-        .eq('id', recipe.favorite_id)
+        .eq('id', recipe.id)
         .eq('user_id', userId); // Asegurar que solo se elimine si el usuario es el dueño
 
       if (error) {

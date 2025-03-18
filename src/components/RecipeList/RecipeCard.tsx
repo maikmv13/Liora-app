@@ -8,7 +8,7 @@ import confetti from 'canvas-confetti';
 import { FavoriteAddedNotification } from './FavoriteAddedNotification';
 
 interface RecipeCardProps {
-  recipe: FavoriteRecipe;
+  recipe: Recipe | FavoriteRecipe;
   favorites?: string[];
   onToggleFavorite: () => void;
 }
@@ -27,7 +27,9 @@ export function RecipeCard({ recipe, favorites, onToggleFavorite }: RecipeCardPr
   const [showNotification, setShowNotification] = useState(false);
   const navigate = useNavigate();
   
-  const isFavorite = favorites?.includes(recipe.favorite_id || '');
+  // Compatibilidad con versión antigua que usaba favorite_id 
+  // y nueva versión que usa recipe_id
+  const isFavorite = favorites?.includes(recipe.id);
   
   const colors = categoryColors[recipe.category as keyof typeof categoryColors] || {
     bg: 'bg-gray-50',

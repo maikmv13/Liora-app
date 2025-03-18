@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { ChefHat } from 'lucide-react';
-import type { Recipe } from '../../types';
+import type { Recipe, FavoriteRecipe } from '../../types';
 import { HeroImage } from './components/HeroImage';
 import { QuickInfo } from './components/QuickInfo';
 import { NutritionalInfo } from './components/NutritionalInfo';
@@ -13,7 +13,7 @@ import { supabase } from '../../lib/supabase';
 interface RecipeDetailProps {
   recipes: Recipe[];
   onToggleFavorite: (recipe: Recipe) => void;
-  favorites: Recipe[];
+  favorites: FavoriteRecipe[];
 }
 
 export function RecipeDetail({ recipes, onToggleFavorite, favorites }: RecipeDetailProps) {
@@ -21,7 +21,7 @@ export function RecipeDetail({ recipes, onToggleFavorite, favorites }: RecipeDet
   const navigate = useNavigate();
   const [recipe, setRecipe] = useState<Recipe | null>(null);
   const [loading, setLoading] = useState(true);
-  const isFavorite = favorites.some(f => f.id === id);
+  const isFavorite = favorites.some(f => f.recipe_id === id);
   const [expandedSection, setExpandedSection] = useState<'ingredients' | 'instructions' | 'nutrition' | null>('ingredients');
 
   useEffect(() => {

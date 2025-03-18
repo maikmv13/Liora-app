@@ -1,17 +1,35 @@
 import React, { useState } from 'react';
 import { Carrot, Fish, Wheat } from 'lucide-react';
 
+interface LabelPosition {
+  left?: string;
+  right?: string;
+  top?: string;
+  bottom?: string;
+  transform?: string;
+}
+
+interface PlateSection {
+  title: string;
+  percentage: string;
+  icon: React.ReactNode;
+  gradient: string;
+  path: string;
+  labelPosition: LabelPosition;
+  color: string;
+}
+
 export function StaticPlate() {
   const [activeSection, setActiveSection] = useState<'vegetables' | 'proteins' | 'carbs' | null>(null);
 
-  const sections = {
+  const sections: Record<string, PlateSection> = {
     vegetables: {
       title: 'Verduras',
       percentage: '50%',
       icon: <Carrot className="w-4 h-4 md:w-5 md:h-5 text-rose-500" />,
       gradient: 'url(#vegetablesGradient)',
       path: 'M 50,50 L 50,0 A 50,50 0 0,0 50,100 Z',
-      labelPosition: { left: '-5%', top: '50%', transform: '-translate-y-1/2' },
+      labelPosition: { left: '-5%', top: '50%', transform: 'translateY(-50%)' },
       color: 'emerald'
     },
     proteins: {
@@ -93,7 +111,7 @@ export function StaticPlate() {
             className={`absolute transition-all duration-300 ${
               activeSection === key ? 'scale-110 z-10' : 'scale-100'
             }`}
-            style={section.labelPosition as any}
+            style={section.labelPosition}
           >
             <div className={`flex items-center space-x-2 bg-white/95 backdrop-blur-sm px-3 md:px-4 py-2 md:py-3 rounded-xl shadow-lg border-2 border-${section.color}-200 hover:scale-105 transition-transform cursor-pointer`}
                  onMouseEnter={() => setActiveSection(key as 'vegetables' | 'proteins' | 'carbs')}

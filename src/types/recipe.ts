@@ -1,5 +1,7 @@
 import type { Database } from './supabase';
 import type { IngredientCategory } from './index';
+// Importamos FavoriteRecipe de types.ts principal
+import type { FavoriteRecipe } from '../types';
 
 type DbRecipe = Database['public']['Tables']['recipes']['Row'];
 type DbIngredient = Database['public']['Tables']['ingredients']['Row'];
@@ -44,16 +46,20 @@ export interface Recipe {
   isFavorite?: boolean;
 }
 
-export interface FavoriteRecipe extends Recipe {
-  favorite_id?: string;
-  created_at?: string;
-  last_cooked?: string;
-  notes?: string;
-  rating?: number;
-  tags?: string[];
-  user_id?: string;
-  member_name?: string;
-}
+// Eliminamos la definición duplicada de FavoriteRecipe
+// export interface FavoriteRecipe extends Recipe {
+//   favorite_id?: string;
+//   created_at?: string;
+//   last_cooked?: string;
+//   notes?: string;
+//   rating?: number;
+//   tags?: string[];
+//   user_id?: string;
+//   member_name?: string;
+// }
+
+// Re-exportamos FavoriteRecipe de types.ts para mantener compatibilidad
+export { FavoriteRecipe };
 
 export type MealCategory = Database['public']['Enums']['meal_category'];
 export type MealType = Database['public']['Enums']['meal_type'];

@@ -5,6 +5,11 @@ interface BeforeInstallPromptEvent extends Event {
   userChoice: Promise<{ outcome: 'accepted' | 'dismissed' }>;
 }
 
+// Interfaz para el objeto navigator en iOS
+interface NavigatorStandalone extends Navigator {
+  standalone?: boolean;
+}
+
 declare global {
   interface WindowEventMap {
     beforeinstallprompt: BeforeInstallPromptEvent;
@@ -21,7 +26,7 @@ export function usePWA() {
     // Verificar si la app ya está instalada
     const checkInstallState = () => {
       const isStandalone = window.matchMedia('(display-mode: standalone)').matches ||
-                          (window.navigator as any).standalone ||
+                          (window.navigator as NavigatorStandalone).standalone ||
                           document.referrer.includes('android-app://');
 
       // Verificar también el localStorage

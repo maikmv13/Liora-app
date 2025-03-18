@@ -192,11 +192,15 @@ await refreshList();
 
 - React 18
 - TypeScript
-- Vite
+- Vite 6.2.2
 - Tailwind CSS
 - Supabase
 - Lucide React (iconos)
 - TanStack Virtual (virtualización)
+
+## Notas de Actualización
+
+Se han actualizado las dependencias del proyecto para abordar vulnerabilidades de seguridad. Se recomienda probar la aplicación para asegurar que todas las funcionalidades operan correctamente tras la actualización de Vite a la versión 6.2.2.
 
 ## Documentación Adicional
 

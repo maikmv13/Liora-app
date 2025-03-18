@@ -8,26 +8,25 @@ interface RecipeGridProps {
 }
 
 export function RecipeGrid({ recipes, onRemoveFavorite }: RecipeGridProps) {
-  if (!recipes?.length) {
+  if (recipes.length === 0) {
     return (
-      <div className="text-center py-12 bg-white/80 backdrop-blur-sm rounded-2xl border border-rose-100/20">
-        <div className="bg-rose-50 w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-4">
-          <Heart size={32} className="text-rose-500" />
-        </div>
-        <p className="text-gray-900 font-medium">
-          No hay recetas favoritas
+      <div className="flex flex-col items-center justify-center py-8 px-4 text-center">
+        <Heart className="h-10 w-10 text-gray-300" />
+        <h3 className="mt-4 text-base font-medium text-gray-900">No hay recetas favoritas</h3>
+        <p className="mt-1 text-sm text-gray-500">
+          Explora recetas y añade tus favoritas para verlas aquí.
         </p>
       </div>
     );
   }
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 p-4">
       {recipes.map(recipe => (
         <RecipeCard
-          key={`${recipe.id}-${recipe.favorite_id}`}
+          key={recipe.id}
           recipe={recipe}
-          favorites={recipes.map(f => f.favorite_id)}
+          favorites={recipes.map(f => f.id)}
           onToggleFavorite={() => onRemoveFavorite(recipe)}
         />
       ))}

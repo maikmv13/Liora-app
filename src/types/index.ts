@@ -1,5 +1,6 @@
 import type { Database } from './supabase';
 import type { Recipe } from './recipe';
+import type { FavoriteRecipe } from '../types';
 
 export type MealType = 'desayuno' | 'comida' | 'cena' | 'snack';
 export type UnitType = Database['public']['Enums']['unit_type'];
@@ -48,17 +49,6 @@ export interface RecipeIngredient {
   ingredient: Ingredient;
 }
 
-export interface FavoriteRecipe extends Recipe {
-  favorite_id?: string;
-  created_at?: string;
-  last_cooked?: string;
-  notes?: string;
-  rating?: number;
-  tags?: string[];
-  user_id?: string;
-  member_name?: string;
-}
-
 export interface Favorite {
   id: string;
   user_id: string;
@@ -94,3 +84,4 @@ export interface RecipeCardProps {
 
 export * from './profile';
 export type { Recipe } from './recipe';
+export { FavoriteRecipe };

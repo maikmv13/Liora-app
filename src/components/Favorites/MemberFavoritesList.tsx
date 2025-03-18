@@ -172,10 +172,10 @@ export function MemberFavoritesList({ favorites, onUpdateFavorite }: MemberFavor
             >
               {recipesByMember[selectedMember].map((recipe: FavoriteRecipe) => (
                 <motion.div
-                  key={`${recipe.id}-${recipe.favorite_id}`}
+                  key={recipe.id}
                   initial={{ opacity: 0, x: -20 }}
                   animate={{ opacity: 1, x: 0 }}
-                  onClick={() => handleRecipeClick(recipe.id)}
+                  onClick={() => handleRecipeClick(recipe.recipe_id)}
                   className="flex items-center justify-between p-4 hover:bg-rose-50/50 transition-colors group cursor-pointer"
                 >
                   <div className="flex items-center space-x-4">

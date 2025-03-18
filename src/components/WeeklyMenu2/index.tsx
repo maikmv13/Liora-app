@@ -18,7 +18,20 @@ import { ChefHat } from 'lucide-react';
 import { useFavorites } from '../../hooks/useFavorites';
 import { MenuActivityLog } from './components/MenuActivityLog';
 
-export function WeeklyMenu2() {
+// Interfaz para props de WeeklyMenu2
+interface WeeklyMenu2Props {
+  weeklyMenu: MenuItem[];
+  onRecipeSelect: () => void;
+  onAddToMenu: (recipe: Recipe | null, day: string, meal: MealType) => void;
+  forUserId?: string;
+}
+
+export function WeeklyMenu2({
+  weeklyMenu,
+  onRecipeSelect: externalRecipeSelect,
+  onAddToMenu: externalAddToMenu,
+  forUserId
+}: WeeklyMenu2Props) {
   const [selectedDay, setSelectedDay] = useState<string>('Lunes');
   const [showHistory, setShowHistory] = useState(false);
   const [menuHistory, setMenuHistory] = useState<ExtendedWeeklyMenuDB[]>([]);
@@ -32,7 +45,7 @@ export function WeeklyMenu2() {
   const [menuActivities, setMenuActivities] = useState<MenuActivity[]>([]);
 
   const { id, isHousehold, profile } = useActiveProfile();
-  const { menuItems: menu, loading: menuLoading } = useActiveMenu(id, isHousehold);
+  const { menuItems: menu, loading: menuLoading } = useActiveMenu(id || forUserId, isHousehold);
   const { recipes, loading, error } = useRecipes();
   const {
     favorites: personalFavorites,

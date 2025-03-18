@@ -2,9 +2,8 @@ import { useState, useEffect, useCallback, useRef } from 'react';
 import { MenuItem, Recipe } from '../types';
 import { supabase } from '../lib/supabase';
 import { useRecipes } from './useRecipes';
-import { transformWeeklyMenuToMenuItems } from '../utils/menuTransforms';
 
-export function useActiveMenu(userId: string | undefined, isHousehold: boolean) {
+export function useActiveMenu(userId?: string, isHousehold: boolean = false) {
   const [state, setState] = useState({
     menuItems: [] as MenuItem[],
     loading: true,
@@ -184,11 +183,14 @@ function transformWeeklyMenuToMenuItems(
       const recipeId = weeklyMenu[recipeKey];
       
       if (recipeId && recipes.find(r => r.id === recipeId)) {
-        menuItems.push({
-          day: displayDay,
-          meal: translateMeal(meal),
-          recipe: recipes.find(r => r.id === recipeId)
-        });
+        const recipe = recipes.find(r => r.id === recipeId);
+        if (recipe) {
+          menuItems.push({
+            day: displayDay,
+            meal: translateMeal(meal),
+            recipe: recipe
+          });
+        }
       }
     });
   });

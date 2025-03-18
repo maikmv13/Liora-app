@@ -14,6 +14,7 @@
     "@emoji-mart/react": "^1.1.1",
     "@supabase/supabase-js": "^2.39.7",
     "@tanstack/react-virtual": "^3.0.1",
+    "canvas-confetti": "^1.9.2",
     "chart.js": "^4.4.1",
     "framer-motion": "^11.0.8",
     "lucide-react": "^0.344.0",
@@ -24,11 +25,11 @@
     "react-hot-toast": "^2.5.1",
     "react-markdown": "^9.0.3",
     "react-router-dom": "^6.22.3",
-    "remark-gfm": "^4.0.0",
-    "canvas-confetti": "^1.9.2"
+    "remark-gfm": "^4.0.0"
   },
   "devDependencies": {
     "@eslint/js": "^9.9.1",
+    "@types/canvas-confetti": "^1.6.4",
     "@types/react": "^18.3.5",
     "@types/react-dom": "^18.3.0",
     "@vitejs/plugin-react": "^4.3.1",
@@ -41,8 +42,7 @@
     "tailwindcss": "^3.4.1",
     "typescript": "^5.5.3",
     "typescript-eslint": "^8.3.0",
-    "vite": "^5.4.2",
-    "vite-plugin-pwa": "^0.21.1",
-    "@types/canvas-confetti": "^1.6.4"
+    "vite": "^6.2.2",
+    "vite-plugin-pwa": "^0.21.1"
   }
 }

@@ -8,7 +8,8 @@ interface RecipeContentProps {
   recipes: Recipe[];
   onRecipeSelect: (recipe: Recipe) => void;
   favorites: string[];
-  onToggleFavorite: (recipe: Recipe) => void;
+  onToggleFavorite: (recipe: Recipe) => Promise<void>;
+  loadingFallback?: React.ComponentType<any> | (() => JSX.Element);
 }
 
 export const RecipeContent = ({
@@ -17,9 +18,13 @@ export const RecipeContent = ({
   recipes,
   onRecipeSelect,
   favorites,
-  onToggleFavorite
+  onToggleFavorite,
+  loadingFallback: LoadingComponent
 }: RecipeContentProps) => {
   if (loading) {
+    if (LoadingComponent) {
+      return <LoadingComponent />;
+    }
     return (
       <div className="flex items-center justify-center p-8">
         <div className="text-center">
@@ -44,7 +49,7 @@ export const RecipeContent = ({
     <RecipeList
       recipes={recipes}
       onRecipeSelect={onRecipeSelect}
-      favorites={favorites.map(f => ({ recipe_id: f }))}
+      favorites={favorites.map(f => ({ id: f, recipe_id: f }))}
       onToggleFavorite={onToggleFavorite}
     />
   );

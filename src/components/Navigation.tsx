@@ -1,26 +1,17 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { ChefHat, Calendar, ShoppingCart, Activity, Menu, X, ArrowLeft, Heart, Scale, Dumbbell, CheckSquare, Bot } from 'lucide-react';
+import { ChefHat, Calendar, ShoppingCart, Menu, X, ArrowLeft, Heart } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 interface NavigationProps {
   activeTab: string;
   onTabChange: (tab: string) => void;
-  onHealthTabChange?: (tab: string) => void;
 }
 
 const MENU_ITEMS = [
   { id: 'menu', icon: Calendar, label: 'Menú', color: 'from-rose-400 to-pink-500' },
   { id: 'recetas', icon: ChefHat, label: 'Recetas', color: 'from-orange-400 to-rose-500' },
-  { id: 'compra', icon: ShoppingCart, label: 'Compra', color: 'from-pink-400 to-purple-500' },
-  { id: 'salud', icon: Activity, label: 'Objetivos', color: 'from-purple-400 to-violet-500' }
-];
-
-const HEALTH_SUBMENU = [
-  { id: 'health', icon: Heart, label: 'Salud', color: 'from-violet-400 to-fuchsia-500' },
-  { id: 'weight', icon: Scale, label: 'Peso', color: 'from-rose-400 to-orange-500' },
-  { id: 'exercise', icon: Dumbbell, label: 'Ejercicio', color: 'from-emerald-400 to-teal-500' },
-  { id: 'habits', icon: CheckSquare, label: 'Hábitos', color: 'from-amber-400 to-orange-500' }
+  { id: 'compra', icon: ShoppingCart, label: 'Compra', color: 'from-pink-400 to-purple-500' }
 ];
 
 // Animation variants for menu items
@@ -43,21 +34,10 @@ const menuVariants = {
   })
 };
 
-export function Navigation({ activeTab, onTabChange, onHealthTabChange }: NavigationProps) {
+export function Navigation({ activeTab, onTabChange }: NavigationProps) {
   const [isOpen, setIsOpen] = useState(false);
   const location = useLocation();
   const navigate = useNavigate();
-
-  // Determinar si estamos en la sección de salud y qué subsección
-  const isHealthSection = location.pathname === '/salud';
-  const healthTab = location.hash.slice(1) || 'health';
-
-  // Mover el useEffect aquí, antes de cualquier return
-  useEffect(() => {
-    if (isHealthSection && onHealthTabChange) {
-      onHealthTabChange(healthTab);
-    }
-  }, [healthTab, isHealthSection, onHealthTabChange]);
 
   // No mostrar en páginas de recetas individuales
   if (location.pathname.startsWith('/recipe/')) return null;
@@ -70,13 +50,6 @@ export function Navigation({ activeTab, onTabChange, onHealthTabChange }: Naviga
 
   // Obtener el icono y color correctos para el botón flotante
   const getCurrentIconAndColor = () => {
-    if (isHealthSection) {
-      const currentHealthItem = HEALTH_SUBMENU.find(item => item.id === healthTab);
-      return {
-        Icon: currentHealthItem?.icon || Activity,
-        color: currentHealthItem?.color || MENU_ITEMS[3].color
-      };
-    }
     const currentMenuItem = MENU_ITEMS.find(item => item.id === activeTab);
     return {
       Icon: isOpen ? X : (currentMenuItem?.icon || Menu),
@@ -141,7 +114,7 @@ export function Navigation({ activeTab, onTabChange, onHealthTabChange }: Naviga
         <AnimatePresence>
           {isOpen && (
             <div className="absolute bottom-full right-0 mb-4 space-y-2">
-              {(isHealthSection ? HEALTH_SUBMENU : MENU_ITEMS).map((item, index) => (
+              {MENU_ITEMS.map((item, index) => (
                 <motion.button
                   key={item.id}
                   custom={MENU_ITEMS.length - 1 - index}
@@ -150,14 +123,7 @@ export function Navigation({ activeTab, onTabChange, onHealthTabChange }: Naviga
                   animate="open"
                   exit="closed"
                   onClick={() => {
-                    if (isHealthSection) {
-                      navigate(`/salud#${item.id}`);
-                      if (onHealthTabChange) {
-                        onHealthTabChange(item.id);
-                      }
-                    } else {
-                      handleTabChange(item.id);
-                    }
+                    handleTabChange(item.id);
                     setIsOpen(false);
                   }}
                   className="flex items-center space-x-3 p-3 bg-white rounded-xl shadow-lg min-w-[160px] hover:bg-gray-50 transition-colors"
@@ -168,26 +134,6 @@ export function Navigation({ activeTab, onTabChange, onHealthTabChange }: Naviga
                   <span className="font-medium text-gray-900">{item.label}</span>
                 </motion.button>
               ))}
-
-              {/* Back button for health section */}
-              {isHealthSection && (
-                <motion.button
-                  variants={menuVariants}
-                  initial="closed"
-                  animate="open"
-                  exit="closed"
-                  onClick={() => {
-                    navigate('/menu');
-                    setIsOpen(false);
-                  }}
-                  className="flex items-center space-x-3 p-3 bg-white rounded-xl shadow-lg min-w-[160px] hover:bg-gray-50 transition-colors"
-                >
-                  <div className="p-2 rounded-lg bg-gradient-to-br from-gray-400 to-gray-500 text-white">
-                    <ArrowLeft size={20} />
-                  </div>
-                  <span className="font-medium text-gray-900">Volver</span>
-                </motion.button>
-              )}
             </div>
           )}
         </AnimatePresence>

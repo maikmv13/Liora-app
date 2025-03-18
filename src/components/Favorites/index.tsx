@@ -16,7 +16,13 @@ interface FavoritesProps {
   onUpdateFavorite: (recipe: FavoriteRecipe) => Promise<void>;
 }
 
-export function Favorites() {
+export function Favorites({
+  favorites: externalFavorites,
+  loading: externalLoading,
+  error: externalError,
+  onRemoveFavorite: externalRemoveFavorite,
+  onUpdateFavorite: externalUpdateFavorite
+}: FavoritesProps) {
   const { id: userId, profile } = useActiveProfile();
   const isHousehold = Boolean(profile?.linked_household_id);
   const [viewMode, setViewMode] = useState<'personal' | 'members'>('personal');
@@ -35,22 +41,31 @@ export function Favorites() {
     removeFavorite: removeHouseholdFavorite
   } = useFavorites(true);
 
+  // Usar los favoritos pasados como props si están disponibles, de lo contrario usar los obtenidos por el hook
+  const displayedFavorites = externalFavorites && externalFavorites.length > 0 
+    ? externalFavorites 
+    : personalFavorites;
+  
+  const isLoading = externalLoading !== undefined ? externalLoading : personalLoading;
+  const displayedError = externalError || personalError;
+  const handleRemoveFavorite = externalRemoveFavorite || removePersonalFavorite;
+
   useEffect(() => {
     console.log('Favorites props updated:', {
-      favorites: personalFavorites,
+      favorites: displayedFavorites,
       householdFavorites,
-      loading: personalLoading,
-      error: personalError,
+      loading: isLoading,
+      error: displayedError,
       isHousehold,
       viewMode
     });
-  }, [personalFavorites, householdFavorites, personalLoading, personalError, isHousehold, viewMode]);
+  }, [displayedFavorites, householdFavorites, isLoading, displayedError, isHousehold, viewMode]);
 
-  if (personalLoading || householdLoading) {
+  if (isLoading) {
     return <LoadingFallback />;
   }
 
-  if (personalError || householdError) {
+  if (displayedError) {
     return (
       <div className="text-center py-12">
         <p className="text-red-500">Error al cargar los favoritos</p>
@@ -70,7 +85,7 @@ export function Favorites() {
               {viewMode === 'members' ? 'Favoritos por Miembro' : '¡Mis recetas guardadas!'}
             </h2>
             <p className="text-sm md:text-base text-gray-600 mt-1">
-              ❤️ {personalFavorites.length} recetas favoritas
+              ❤️ {displayedFavorites.length} recetas favoritas
             </p>
           </div>
         </div>
@@ -124,8 +139,8 @@ export function Favorites() {
         />
       ) : (
         <RecipeGrid 
-          recipes={personalFavorites}
-          onRemoveFavorite={removePersonalFavorite}
+          recipes={displayedFavorites}
+          onRemoveFavorite={handleRemoveFavorite}
         />
       )}
     </div>
