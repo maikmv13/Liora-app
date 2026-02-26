@@ -262,12 +262,10 @@ function AppContent() {
 //   { action: 'navigate', path: '/recetas' }
 //   { action: 'scroll',   y: 300 }
 //   { action: 'search',   term: 'pollo' }
-const ALLOWED_ORIGINS = [
-  'https://vizoso.io',
-  'https://www.vizoso.io',
-  'http://localhost:4321',  // Astro dev server
-  'http://localhost:3000',
-];
+const isAllowedOrigin = (origin: string) =>
+  origin === 'https://vizoso.io' ||
+  origin === 'https://www.vizoso.io' ||
+  origin.startsWith('http://localhost'); // cualquier puerto local
 
 function PostMessageBridge() {
   const navigate = useNavigate();
@@ -282,7 +280,7 @@ function PostMessageBridge() {
       console.log('[PostMessageBridge] Message received:', event.origin, event.data);
 
       // Security: only accept messages from ATLAS
-      if (!ALLOWED_ORIGINS.includes(event.origin)) {
+      if (!isAllowedOrigin(event.origin)) {
         console.warn('[PostMessageBridge] Rejected origin:', event.origin);
         return;
       }
