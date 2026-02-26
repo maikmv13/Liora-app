@@ -273,11 +273,22 @@ function PostMessageBridge() {
   const navigate = useNavigate();
 
   useEffect(() => {
+    // ── Handshake: notify parent (ATLAS) that the bridge is active and ready ──
+    window.parent.postMessage({ type: 'menuliora-ready' }, '*');
+    console.log('[PostMessageBridge] Ready signal sent to parent ✅');
+
     const handler = (event: MessageEvent) => {
+      // Debug: log everything that arrives so ATLAS can verify delivery
+      console.log('[PostMessageBridge] Message received:', event.origin, event.data);
+
       // Security: only accept messages from ATLAS
-      if (!ALLOWED_ORIGINS.includes(event.origin)) return;
+      if (!ALLOWED_ORIGINS.includes(event.origin)) {
+        console.warn('[PostMessageBridge] Rejected origin:', event.origin);
+        return;
+      }
 
       const { action, selector, path, y, term } = event.data ?? {};
+      console.log('[PostMessageBridge] Executing action:', action, event.data);
 
       switch (action) {
         case 'click': {
@@ -285,8 +296,9 @@ function PostMessageBridge() {
             const el = document.querySelector<HTMLElement>(selector);
             if (el) {
               el.click();
+              console.log('[PostMessageBridge] Clicked:', selector);
             } else {
-              console.warn('[PostMessage] No element found for selector:', selector);
+              console.warn('[PostMessageBridge] No element found for selector:', selector);
             }
           }
           break;
@@ -294,6 +306,7 @@ function PostMessageBridge() {
         case 'navigate': {
           if (path) {
             navigate(path);
+            console.log('[PostMessageBridge] Navigated to:', path);
           }
           break;
         }
@@ -302,7 +315,6 @@ function PostMessageBridge() {
           break;
         }
         case 'search': {
-          // Directly set value on the search input and dispatch an input event
           const input = document.querySelector<HTMLInputElement>('input[type="text"]');
           if (input) {
             const nativeInputSetter = Object.getOwnPropertyDescriptor(
@@ -314,6 +326,7 @@ function PostMessageBridge() {
           break;
         }
         default:
+          console.warn('[PostMessageBridge] Unknown action:', action);
           break;
       }
     };
