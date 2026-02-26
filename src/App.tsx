@@ -21,7 +21,7 @@
  */
 
 import { Suspense, lazy, useState, useEffect } from 'react';
-import { BrowserRouter as Router, Routes, Route, Navigate, useLocation } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Navigate, useLocation, useNavigate } from 'react-router-dom';
 import { Header } from './components/Header/Header';
 import { Navigation } from './components/Navigation';
 import { Profile } from './components/Profile';
@@ -255,12 +255,84 @@ function AppContent() {
   );
 }
 
+// ─── PostMessage Bridge ──────────────────────────────────────────────────────
+// Allows ATLAS (vizoso.io) to control this app inside an iframe via postMessage.
+// Supported actions:
+//   { action: 'click',    selector: '[data-filter="meal-type"][data-value="desayuno"]' }
+//   { action: 'navigate', path: '/recetas' }
+//   { action: 'scroll',   y: 300 }
+//   { action: 'search',   term: 'pollo' }
+const ALLOWED_ORIGINS = [
+  'https://vizoso.io',
+  'https://www.vizoso.io',
+  'http://localhost:4321',  // Astro dev server
+  'http://localhost:3000',
+];
+
+function PostMessageBridge() {
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    const handler = (event: MessageEvent) => {
+      // Security: only accept messages from ATLAS
+      if (!ALLOWED_ORIGINS.includes(event.origin)) return;
+
+      const { action, selector, path, y, term } = event.data ?? {};
+
+      switch (action) {
+        case 'click': {
+          if (selector) {
+            const el = document.querySelector<HTMLElement>(selector);
+            if (el) {
+              el.click();
+            } else {
+              console.warn('[PostMessage] No element found for selector:', selector);
+            }
+          }
+          break;
+        }
+        case 'navigate': {
+          if (path) {
+            navigate(path);
+          }
+          break;
+        }
+        case 'scroll': {
+          window.scrollTo({ top: y ?? 0, behavior: 'smooth' });
+          break;
+        }
+        case 'search': {
+          // Directly set value on the search input and dispatch an input event
+          const input = document.querySelector<HTMLInputElement>('input[type="text"]');
+          if (input) {
+            const nativeInputSetter = Object.getOwnPropertyDescriptor(
+              window.HTMLInputElement.prototype, 'value'
+            )?.set;
+            nativeInputSetter?.call(input, term ?? '');
+            input.dispatchEvent(new Event('input', { bubbles: true }));
+          }
+          break;
+        }
+        default:
+          break;
+      }
+    };
+
+    window.addEventListener('message', handler);
+    return () => window.removeEventListener('message', handler);
+  }, [navigate]);
+
+  return null;
+}
+// ────────────────────────────────────────────────────────────────────────────
+
 // Componente principal que solo maneja el Router
 function App() {
   return (
     <Router>
       <ErrorBoundary>
         <ScrollToTop />
+        <PostMessageBridge />
         <AppContent />
       </ErrorBoundary>
     </Router>

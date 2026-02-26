@@ -84,20 +84,20 @@ export function RecipeFilters({
   const scroll = (ref: React.RefObject<HTMLDivElement>, direction: 'left' | 'right') => {
     if (!ref.current) return;
     const scrollAmount = 200;
-    const newScrollLeft = direction === 'left' 
+    const newScrollLeft = direction === 'left'
       ? ref.current.scrollLeft - scrollAmount
       : ref.current.scrollLeft + scrollAmount;
-    
+
     ref.current.scrollTo({
       left: newScrollLeft,
       behavior: 'smooth'
     });
   };
 
-  const ScrollButtons = ({ 
-    scrollRef, 
-    canScroll 
-  }: { 
+  const ScrollButtons = ({
+    scrollRef,
+    canScroll
+  }: {
     scrollRef: React.RefObject<HTMLDivElement>;
     canScroll: { left: boolean; right: boolean };
   }) => (
@@ -134,7 +134,7 @@ export function RecipeFilters({
   );
 
   const getMealTypeIcon = (mealType: string) => {
-    switch(mealType) {
+    switch (mealType) {
       case 'desayuno':
         return <Coffee size={16} className="text-orange-500" />;
       case 'comida':
@@ -150,8 +150,8 @@ export function RecipeFilters({
 
   const getMealTypeColors = (mealType: string, isSelected: boolean) => {
     if (!isSelected) return 'bg-white/80 text-gray-600 hover:bg-rose-50 border border-rose-100/50';
-    
-    switch(mealType) {
+
+    switch (mealType) {
       case 'desayuno':
         return 'bg-orange-100/80 text-orange-600 shadow-sm border border-orange-200/50';
       case 'comida':
@@ -172,7 +172,7 @@ export function RecipeFilters({
     }
 
     // Filtrar recetas por tipo de comida
-    const filteredRecipes = recipes.filter(recipe => 
+    const filteredRecipes = recipes.filter(recipe =>
       recipe.meal_type === selectedMealType
     );
 
@@ -182,7 +182,7 @@ export function RecipeFilters({
     )];
 
     // Mantener solo las categorías que existen en nuestro array de categorías predefinidas
-    return categories.filter(cat => 
+    return categories.filter(cat =>
       uniqueCategories.includes(cat.id)
     );
   }, [selectedMealType, recipes]);
@@ -231,11 +231,12 @@ export function RecipeFilters({
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
               onClick={() => handleMealTypeChange('all')}
-              className={`flex-none px-3 py-2 rounded-lg text-sm font-medium transition-all duration-200 whitespace-nowrap ${
-                selectedMealType === 'all'
+              data-filter="meal-type"
+              data-value="all"
+              className={`flex-none px-3 py-2 rounded-lg text-sm font-medium transition-all duration-200 whitespace-nowrap ${selectedMealType === 'all'
                   ? 'bg-rose-100/80 text-rose-600 shadow-sm border border-rose-200/50'
                   : 'bg-white/80 text-gray-600 hover:bg-rose-50 border border-rose-100/50'
-              }`}
+                }`}
             >
               <span className="flex items-center space-x-1.5">
                 <span>🍽️</span>
@@ -248,9 +249,10 @@ export function RecipeFilters({
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
                 onClick={() => handleMealTypeChange(id)}
-                className={`flex-none px-3 py-2 rounded-lg text-sm font-medium transition-all duration-200 whitespace-nowrap ${
-                  getMealTypeColors(id, selectedMealType === id)
-                }`}
+                data-filter="meal-type"
+                data-value={id}
+                className={`flex-none px-3 py-2 rounded-lg text-sm font-medium transition-all duration-200 whitespace-nowrap ${getMealTypeColors(id, selectedMealType === id)
+                  }`}
               >
                 <span className="flex items-center space-x-1.5">
                   {getMealTypeIcon(id)}
@@ -275,11 +277,12 @@ export function RecipeFilters({
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
                 onClick={() => onCategoryChange(id)}
-                className={`flex-none px-3 py-2 rounded-lg text-sm font-medium transition-all duration-200 whitespace-nowrap ${
-                  selectedCategory === id
+                data-filter="category"
+                data-value={id}
+                className={`flex-none px-3 py-2 rounded-lg text-sm font-medium transition-all duration-200 whitespace-nowrap ${selectedCategory === id
                     ? 'bg-rose-100/80 text-rose-600 shadow-sm border border-rose-200/50'
                     : 'bg-white/80 text-gray-600 hover:bg-rose-50 border border-rose-100/50'
-                }`}
+                  }`}
               >
                 <span className="flex items-center space-x-1.5">
                   <span>{emoji}</span>
@@ -309,11 +312,10 @@ export function RecipeFilters({
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
                 onClick={() => onSortChange(id as 'popular' | 'calories' | 'time' | null)}
-                className={`flex-none px-3 py-2 rounded-lg text-sm font-medium transition-all duration-200 whitespace-nowrap ${
-                  sortBy === id
+                className={`flex-none px-3 py-2 rounded-lg text-sm font-medium transition-all duration-200 whitespace-nowrap ${sortBy === id
                     ? 'bg-rose-100/80 text-rose-600 shadow-sm border border-rose-200/50'
                     : 'bg-white/80 text-gray-600 hover:bg-rose-50 border border-rose-100/50'
-                }`}
+                  }`}
               >
                 <span className="flex items-center space-x-1.5">
                   <span>{emoji}</span>
