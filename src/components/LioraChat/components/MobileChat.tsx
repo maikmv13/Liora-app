@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { MobileChatHeader } from './MobileChatHeader';
 import { MobileChatInput } from './MobileChatInput';
 import { ChatMessage } from './ChatMessage';
@@ -41,11 +41,11 @@ export function MobileChat() {
 
   const handleSubmit = async () => {
     if (!input.trim()) return;
-    
+
     const message = input;
     setInput('');
     setIsThinking(true);
-    
+
     try {
       await Promise.all([
         sendMessage(message),
@@ -63,17 +63,17 @@ export function MobileChat() {
   };
 
   return (
-    <div className="flex flex-col min-h-screen bg-gradient-to-br from-rose-50/50 to-purple-50/50">
+    <div className="flex flex-col min-h-[100dvh] bg-gradient-to-br from-rose-50/50 to-purple-50/50">
       <FallingEmojis />
       <MobileChatHeader />
-      
-      <div className="flex-1 overflow-y-auto pt-4 px-0 space-y-4 custom-scrollbar">
-        <WelcomeMessage 
-          welcomeIndex={welcomeIndex} 
-          isMobile 
+
+      <div className="flex-1 overflow-y-auto overscroll-behavior-contain pt-4 px-0 space-y-4 custom-scrollbar">
+        <WelcomeMessage
+          welcomeIndex={welcomeIndex}
+          isMobile
           onSelectQuery={handleQuerySelect}
         />
-        
+
         {messages.map((message) => (
           <ChatMessage key={message.id} message={message} />
         ))}
@@ -89,7 +89,7 @@ export function MobileChat() {
             </div>
           </div>
         )}
-        
+
         <div ref={messagesEndRef} />
       </div>
 

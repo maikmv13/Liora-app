@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
-import { 
-  Clock, Users, ChefHat, Heart, Calendar, 
+import {
+  Clock, Users, ChefHat, Heart, Calendar,
   Flame, Cookie, Coffee, Sun, Moon, Eye
 } from 'lucide-react';
 import { MenuItem } from '../../types';
@@ -9,6 +9,7 @@ import { useActiveProfile } from '../../hooks/useActiveProfile';
 import { useActiveMenu } from '../../hooks/useActiveMenu';
 import { ExtendedWeeklyMenuDB } from '../../services/weeklyMenu';
 import { MenuSkeleton } from './MenuSkeleton';
+import { getOptimizedUnsplashUrl } from '../../utils/imageUtils';
 
 interface TodayCardProps {
   menuItems: MenuItem[];
@@ -17,22 +18,22 @@ interface TodayCardProps {
   onOpenOnboarding?: () => void;
 }
 
-export function TodayCard({ 
-  menuItems, 
-  onViewRecipe, 
+export function TodayCard({
+  menuItems,
+  onViewRecipe,
   activeMenu,
-  onOpenOnboarding 
+  onOpenOnboarding
 }: TodayCardProps) {
   const navigate = useNavigate();
   const { id, isHousehold } = useActiveProfile();
   const { menuItems: activeMenuItems, loading: menuLoading } = useActiveMenu(id, isHousehold);
-  
+
   // Debug logs
   console.log('TodayCard - Props menuItems:', menuItems);
   console.log('TodayCard - ActiveMenuItems:', activeMenuItems);
-  
+
   // Formatear el día y la fecha
-  const today = new Intl.DateTimeFormat('es-ES', { 
+  const today = new Intl.DateTimeFormat('es-ES', {
     weekday: 'long'
   }).format(new Date())
     .toLowerCase()
@@ -114,7 +115,7 @@ export function TodayCard({
   // Usar los menuItems de props en lugar de activeMenuItems
   const todayMenuItems = React.useMemo(() => {
     if (!menuItems?.length) return [];
-    
+
     const filtered = menuItems.filter(item => {
       const itemDay = item.day.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
       console.log('Comparing days:', { itemDay, today });
@@ -156,9 +157,9 @@ export function TodayCard({
       <div className="relative h-32">
         {/* Imagen de fondo */}
         <div className="absolute inset-0">
-          <img 
-            src="https://images.unsplash.com/photo-1606787366850-de6330128bfc?auto=format&fit=crop&w=1200&q=80" 
-            alt="Food pattern" 
+          <img
+            src={getOptimizedUnsplashUrl("https://images.unsplash.com/photo-1606787366850-de6330128bfc", 800, 60)}
+            alt="Food pattern"
             className="w-full h-full object-cover opacity-20"
           />
           {/* Overlay con gradiente suave */}
@@ -194,13 +195,12 @@ export function TodayCard({
         {mealTypes.map((mealType) => {
           const menuItem = todayMenuItems.find(item => item.meal === mealType);
           console.log(`TodayCard - MealType: ${mealType}, MenuItem:`, menuItem);
-          
+
           return (
             <div
               key={mealType}
-              className={`relative ${
-                menuItem ? getMealColor(mealType) : 'hover:bg-gray-50'
-              }`}
+              className={`relative ${menuItem ? getMealColor(mealType) : 'hover:bg-gray-50'
+                }`}
             >
               <div className="p-3">
                 {/* Time and Icon */}
@@ -234,14 +234,14 @@ export function TodayCard({
                     <div className="sm:hidden">
                       <div className="flex space-x-3">
                         {/* Square Image - Small size with Eye button overlay */}
-                        <div 
+                        <div
                           onClick={() => navigate(`/recipe/${menuItem.recipe.id}`)}
                           className="relative w-16 h-16 flex-shrink-0 rounded-lg overflow-hidden cursor-pointer"
                         >
                           {menuItem.recipe.image_url ? (
                             <>
                               <img
-                                src={menuItem.recipe.image_url}
+                                src={getOptimizedUnsplashUrl(menuItem.recipe.image_url, 200, 60)}
                                 alt={menuItem.recipe.name}
                                 className="w-full h-full object-cover"
                               />
@@ -259,14 +259,14 @@ export function TodayCard({
 
                         {/* Recipe Info */}
                         <div className="flex-1 min-w-0">
-                          <h4 
+                          <h4
                             onClick={() => navigate(`/recipe/${menuItem.recipe.id}`)}
                             className="font-medium text-base text-gray-900 hover:text-rose-600 transition-colors cursor-pointer line-clamp-2"
                           >
                             {menuItem.recipe.name}
                           </h4>
                           {menuItem.recipe.side_dish && (
-                            <p 
+                            <p
                               onClick={() => navigate(`/recipe/${menuItem.recipe.id}`)}
                               className="text-sm text-gray-500 mt-0.5 cursor-pointer hover:text-rose-500 transition-colors line-clamp-1"
                             >
@@ -285,12 +285,12 @@ export function TodayCard({
                       <div className="flex space-x-3">
                         {/* Imagen clicable */}
                         {menuItem.recipe.image_url && (
-                          <div 
+                          <div
                             onClick={() => navigate(`/recipe/${menuItem.recipe.id}`)}
                             className="relative w-20 h-20 flex-shrink-0 rounded-lg overflow-hidden cursor-pointer group"
                           >
                             <img
-                              src={menuItem.recipe.image_url}
+                              src={getOptimizedUnsplashUrl(menuItem.recipe.image_url, 300, 60)}
                               alt={menuItem.recipe.name}
                               className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
                             />
@@ -300,14 +300,14 @@ export function TodayCard({
 
                         {/* Contenido clicable */}
                         <div className="flex-1 min-w-0">
-                          <h4 
+                          <h4
                             onClick={() => navigate(`/recipe/${menuItem.recipe.id}`)}
                             className="font-medium text-base text-gray-900 hover:text-rose-600 transition-colors cursor-pointer line-clamp-2"
                           >
                             {menuItem.recipe.name}
                           </h4>
                           {menuItem.recipe.side_dish && (
-                            <p 
+                            <p
                               onClick={() => navigate(`/recipe/${menuItem.recipe.id}`)}
                               className="text-sm text-gray-500 mt-0.5 cursor-pointer hover:text-rose-500 transition-colors line-clamp-1"
                             >

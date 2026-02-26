@@ -1,21 +1,13 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { 
-  ChefHat, User, Heart, Scale, Dumbbell, CheckSquare, Activity,
+import {
+  ChefHat, Heart, Scale, Dumbbell, CheckSquare, Activity,
   ArrowLeft, Sparkles, Menu
 } from 'lucide-react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
 import { MobileMenu } from '../MobileMenu';
 
-interface HeaderProps {
-  activeTab: string;
-  onTabChange: (tab: string) => void;
-  onSearch?: (term: string) => void;
-  searchTerm?: string;
-  user?: User | null;
-  onLogin?: () => void;
-  onProfile?: () => void;
-}
+// Header component for showcase mode
 
 const HEALTH_TABS = [
   { id: 'health', icon: Activity, label: 'Salud', gradient: 'from-violet-400 to-fuchsia-500' },
@@ -31,7 +23,7 @@ const ROUTE_STYLES = {
   'salud': { gradient: 'from-purple-400 to-violet-500' }
 };
 
-export function Header({ activeTab, onTabChange, user, onLogin, onProfile }: HeaderProps) {
+export function Header({ activeTab }: { activeTab: string }) {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const location = useLocation();
   const navigate = useNavigate();
@@ -43,7 +35,7 @@ export function Header({ activeTab, onTabChange, user, onLogin, onProfile }: Hea
 
   // Función para manejar el regreso
   const handleBack = () => {
-    navigate(-1); // Esto nos llevará a la página anterior
+    navigate(-1);
   };
 
   // Obtener el estilo correcto basado en la ruta o pestaña de salud
@@ -64,7 +56,7 @@ export function Header({ activeTab, onTabChange, user, onLogin, onProfile }: Hea
     if (isHealthSection) {
       return HEALTH_TABS.find(tab => tab.id === healthTab)?.label;
     }
-    
+
     switch (activeTab) {
       case 'menu':
         return 'Menú';
@@ -82,7 +74,7 @@ export function Header({ activeTab, onTabChange, user, onLogin, onProfile }: Hea
     <>
       <header className="fixed top-0 inset-x-0 z-50">
         <div className="px-4 py-2">
-          <motion.div 
+          <motion.div
             className="mx-auto max-w-7xl bg-white/90 backdrop-blur-lg rounded-2xl border border-white/30"
             style={{
               boxShadow: `
@@ -105,16 +97,17 @@ export function Header({ activeTab, onTabChange, user, onLogin, onProfile }: Hea
                       <ArrowLeft className="w-6 h-6 text-gray-600" />
                     </button>
                   ) : (
-                    <motion.div 
-                      className={`p-2 rounded-xl bg-gradient-to-br ${gradient}`}
+                    <motion.div
+                      className={`p-2 rounded-xl bg-gradient-to-br ${gradient} cursor-pointer`}
                       whileHover={{ scale: 1.05 }}
                       whileTap={{ scale: 0.95 }}
+                      onClick={() => navigate('/menu')}
                     >
                       <ChefHat className="w-6 h-6 text-white" />
                     </motion.div>
                   )}
                   <div className="flex flex-col">
-                    <motion.h1 
+                    <motion.h1
                       className="text-lg font-bold bg-gradient-to-r from-gray-900 to-gray-600 bg-clip-text text-transparent"
                       initial={{ opacity: 0, y: -10 }}
                       animate={{ opacity: 1, y: 0 }}
@@ -122,7 +115,7 @@ export function Header({ activeTab, onTabChange, user, onLogin, onProfile }: Hea
                       {isRecipeDetail ? 'Receta' : getTitle()}
                     </motion.h1>
                     {isHealthSection && (
-                      <motion.div 
+                      <motion.div
                         className="flex items-center space-x-1"
                         initial={{ opacity: 0, x: -10 }}
                         animate={{ opacity: 1, x: 0 }}
@@ -163,9 +156,6 @@ export function Header({ activeTab, onTabChange, user, onLogin, onProfile }: Hea
       <MobileMenu
         isOpen={isMobileMenuOpen}
         onClose={() => setIsMobileMenuOpen(false)}
-        user={user}
-        onLogin={onLogin || (() => {})}
-        onProfile={onProfile || (() => {})}
         activeTab={activeTab}
       />
     </>

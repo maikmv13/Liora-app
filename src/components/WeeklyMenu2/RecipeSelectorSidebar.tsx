@@ -1,12 +1,13 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { 
+import { useState, useEffect, useRef } from 'react';
+import {
   X, Search, ChevronRight, Filter, Flame, Clock, ChefHat, Command,
-  Users, Sun, Moon, Cookie, Star, Heart
+  Sun, Moon, Cookie
 } from 'lucide-react';
 import { Recipe, MealType } from '../../types';
 import { useRecipes } from '../../hooks/useRecipes';
 import { useVirtualizer } from '@tanstack/react-virtual';
 import { categories } from '../../types/categories';
+import { getOptimizedUnsplashUrl } from '../../utils/imageUtils';
 
 interface RecipeSelectorSidebarProps {
   isOpen: boolean;
@@ -33,9 +34,9 @@ const categoryColors: Record<string, { bg: string; text: string; border: string 
   'Otros': { bg: 'bg-gray-50', text: 'text-gray-700', border: 'border-gray-100' }
 };
 
-export function RecipeSelectorSidebar({ 
-  isOpen, 
-  onClose, 
+export function RecipeSelectorSidebar({
+  isOpen,
+  onClose,
   onSelectRecipe,
   selectedDay,
   selectedMeal
@@ -76,7 +77,7 @@ export function RecipeSelectorSidebar({
       switch (e.key) {
         case 'ArrowDown':
           e.preventDefault();
-          setSelectedIndex(prev => 
+          setSelectedIndex(prev =>
             prev < filteredRecipes.length - 1 ? prev + 1 : prev
           );
           break;
@@ -101,10 +102,7 @@ export function RecipeSelectorSidebar({
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [isOpen, selectedIndex, onSelectRecipe, onClose, filteredRecipes]);
 
-  const getImageUrl = (url: string, options: { width?: number, quality?: number, format?: string } = {}) => {
-    const { width = 400, quality = 80, format = 'webp' } = options;
-    return `${url}?quality=${quality}&width=${width}&format=${format}`;
-  };
+
 
   const getMealIcon = () => {
     switch (selectedMeal) {
@@ -145,17 +143,16 @@ export function RecipeSelectorSidebar({
     <>
       {/* Overlay */}
       {isOpen && (
-        <div 
+        <div
           className="fixed inset-0 bg-black/20 backdrop-blur-sm z-40"
           onClick={onClose}
         />
       )}
 
       {/* Sidebar */}
-      <div 
-        className={`fixed inset-y-0 right-0 w-full md:w-[450px] bg-white shadow-2xl transform transition-transform duration-300 ease-in-out z-50 flex flex-col ${
-          isOpen ? 'translate-x-0' : 'translate-x-full'
-        }`}
+      <div
+        className={`fixed inset-y-0 right-0 w-full md:w-[450px] bg-white shadow-2xl transform transition-transform duration-300 ease-in-out z-50 flex flex-col ${isOpen ? 'translate-x-0' : 'translate-x-full'
+          }`}
       >
         {/* Header */}
         <div className="flex-shrink-0 border-b border-gray-200">
@@ -174,14 +171,14 @@ export function RecipeSelectorSidebar({
                   </div>
                 </div>
               </div>
-              <button 
+              <button
                 onClick={onClose}
                 className="p-2 hover:bg-gray-100 rounded-xl transition-colors"
               >
                 <X size={20} className="text-gray-500" />
               </button>
             </div>
-            
+
             <div className="relative">
               <input
                 ref={searchInputRef}
@@ -209,11 +206,10 @@ export function RecipeSelectorSidebar({
                   <button
                     key={id}
                     onClick={() => setSelectedCategory(id)}
-                    className={`px-3 py-1.5 rounded-xl text-sm font-medium transition-colors ${
-                      selectedCategory === id
-                        ? 'bg-rose-100 text-rose-700 border border-rose-200'
-                        : 'bg-gray-50 text-gray-600 hover:bg-gray-100 border border-gray-200'
-                    }`}
+                    className={`px-3 py-1.5 rounded-xl text-sm font-medium transition-colors ${selectedCategory === id
+                      ? 'bg-rose-100 text-rose-700 border border-rose-200'
+                      : 'bg-gray-50 text-gray-600 hover:bg-gray-100 border border-gray-200'
+                      }`}
                   >
                     {emoji} {label}
                   </button>
@@ -240,9 +236,9 @@ export function RecipeSelectorSidebar({
         </div>
 
         {/* Recipe list */}
-        <div 
+        <div
           ref={parentRef}
-          className="flex-1 overflow-y-auto"
+          className="flex-1 overflow-y-auto overscroll-behavior-contain"
         >
           <div
             className="relative w-full"
@@ -264,28 +260,19 @@ export function RecipeSelectorSidebar({
                       setSelectedIndex(virtualRow.index);
                       onSelectRecipe(recipe);
                     }}
-                    className={`w-full p-4 text-left transition-colors ${
-                      virtualRow.index === selectedIndex
-                        ? 'bg-rose-50'
-                        : 'hover:bg-gray-50'
-                    }`}
+                    className={`w-full p-4 text-left transition-colors ${virtualRow.index === selectedIndex
+                      ? 'bg-rose-50'
+                      : 'hover:bg-gray-50'
+                      }`}
                   >
                     <div className="flex items-start gap-4">
                       {/* Recipe image or placeholder */}
                       <div className="w-20 h-20 rounded-lg bg-gray-100 flex-shrink-0 overflow-hidden">
                         {recipe.image_url ? (
                           <picture>
-                            {/* WebP version */}
-                            <source
-                              type="image/webp"
-                              srcSet={`
-                                ${getImageUrl(recipe.image_url, { width: 80, format: 'webp' })} 1x,
-                                ${getImageUrl(recipe.image_url, { width: 160, format: 'webp' })} 2x
-                              `}
-                            />
-                            {/* Fallback version */}
+                            {/* Optimized version */}
                             <img
-                              src={getImageUrl(recipe.image_url, { width: 80 })}
+                              src={getOptimizedUnsplashUrl(recipe.image_url, 80, 60)}
                               alt={recipe.name}
                               className="w-full h-full object-cover"
                               loading="lazy"
@@ -304,15 +291,13 @@ export function RecipeSelectorSidebar({
                         <h3 className="font-medium text-gray-900 truncate">
                           {recipe.name}
                         </h3>
-                        
+
                         <div className="mt-2 flex flex-col space-y-1.5">
                           <div className="flex flex-wrap gap-2">
-                            <span className={`inline-flex items-center px-2 py-1 rounded-lg text-xs font-medium border ${
-                              getCategoryColors(recipe.category).bg
-                            } ${getCategoryColors(recipe.category).text} ${
-                              getCategoryColors(recipe.category).border
-                            }`}>
-                              {recipe.category}
+                            <span className={`inline-flex items-center px-2 py-1 rounded-lg text-xs font-medium border ${getCategoryColors(recipe.category || 'Otros').bg
+                              } ${getCategoryColors(recipe.category || 'Otros').text} ${getCategoryColors(recipe.category || 'Otros').border
+                              }`}>
+                              {recipe.category || 'Sin categoría'}
                             </span>
                           </div>
 

@@ -20,7 +20,7 @@
  * 4. Restaurar la estricticidad en tsconfig.app.json
  */
 
-import React, { Suspense, lazy, useState, useEffect } from 'react';
+import { Suspense, lazy, useState, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { Header } from './components/Header/Header';
 import { Navigation } from './components/Navigation';
@@ -35,10 +35,10 @@ import { useFavorites } from './hooks/useFavorites';
 import { MobileInstallButton } from './components/MobileInstallButton';
 import { ErrorBoundary } from './components/ErrorBoundary';
 import { ScrollToTop } from './components/ScrollToTop';
-import { Onboarding } from './components/Onboarding';
+// import { Onboarding } from './components/Onboarding';
 import { RecipeDetail } from './components/RecipeDetail';
 import { LoadingFallback } from './components/LoadingFallback';
-import { Copyright, Calendar, ChefHat, ShoppingCart } from 'lucide-react';
+import { Copyright } from 'lucide-react';
 
 // Lazy load components
 const WeeklyMenu2 = lazy(() => import('./components/WeeklyMenu2'));
@@ -46,17 +46,6 @@ const Favorites = lazy(() => import('./components/Favorites'));
 const ShoppingList = lazy(() => import('./components/ShoppingList'));
 const RecipeContent = lazy(() => import('./components/RecipeList/RecipeContext'));
 const LioraChat = lazy(() => import('./components/LioraChat'));
-
-// Actualizar la interfaz de RecipeContentProps
-interface RecipeContentProps {
-  loading: boolean;
-  error: Error | null;
-  recipes: Recipe[];
-  onRecipeSelect: () => void;
-  favorites: string[];
-  onToggleFavorite: (recipe: Recipe) => Promise<void>;
-  loadingFallback: () => JSX.Element;
-}
 
 // Actualizar la definición de MenuItem para incluir el día
 interface AppMenuItem extends MenuItem {
@@ -66,29 +55,30 @@ interface AppMenuItem extends MenuItem {
 // Componente que contiene el contenido de la app
 function AppContent() {
   const location = useLocation();
-  const [searchTerm, setSearchTerm] = useState('');
+  // const [searchTerm, setSearchTerm] = useState('');
   const [activeTab, setActiveTab] = useState('recetas');
   const [weeklyMenu, setWeeklyMenu] = useState<AppMenuItem[]>([]);
-  const [user, setUser] = useState<User | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [user, setUser] = useState<User | null>({ id: 'showcase-user' } as any);
+  const [loading, setLoading] = useState(false);
   // @ts-ignore
   const { menuItems: activeMenuItems, loading: menuLoading } = useActiveMenu();
   const { shoppingList, toggleItem } = useShoppingList();
   const { recipes, loading: recipesLoading } = useRecipes();
-  const { 
-    favorites, 
-    addFavorite, 
-    removeFavorite, 
+  const {
+    favorites,
+    addFavorite,
+    removeFavorite,
     loading: favoritesLoading,
-    error: favoritesError 
+    error: favoritesError
   } = useFavorites();
-  const [onboardingCompleted, setOnboardingCompleted] = useState(() => {
-    return localStorage.getItem('onboardingCompleted') === 'true';
-  });
+  // const [onboardingCompleted, setOnboardingCompleted] = useState(true);
 
   useEffect(() => {
+    // Escuchar cambios de autenticación pero no sobreescribir si estamos en modo showcase
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-      setUser(session?.user ?? null);
+      if (session?.user) {
+        setUser(session.user);
+      }
       setLoading(false);
     });
 
@@ -134,13 +124,12 @@ function AppContent() {
 
   const handleToggleFavorite = async (recipe: Recipe) => {
     if (!user) {
-      setOnboardingCompleted(false);
       return;
     }
-    
+
     try {
       const isFavorite = favorites.some(fav => fav.recipe_id === recipe.id);
-      
+
       if (isFavorite) {
         const favoriteRecipe = favorites.find(f => f.recipe_id === recipe.id);
         if (favoriteRecipe) {
@@ -162,40 +151,15 @@ function AppContent() {
     }
   };
 
-  const handleOnboardingComplete = () => {
-    localStorage.setItem('onboardingCompleted', 'true');
-    setOnboardingCompleted(true);
-  };
-
-  if (loading) {
-    return <LoadingFallback />;
-  }
-
-  if (!user && !onboardingCompleted) {
-    return (
-      <Onboarding 
-        onComplete={handleOnboardingComplete}
-        onLogin={() => {}}
-      />
-    );
-  }
-
   // Función placeholder para updateFavorite
   const updateFavorite = async (favorite: FavoriteRecipe) => {
     console.log('Updating favorite:', favorite);
-    // Implementar lógica real aquí
   };
 
   return (
-    <div className="min-h-[100dvh] bg-gradient-to-br from-rose-50 to-orange-50 relative pt-safe">
+    <div className="h-full flex flex-col relative bg-gradient-to-br from-rose-50 to-orange-50 pt-safe overflow-hidden">
       <Header
         activeTab={activeTab}
-        onTabChange={setActiveTab}
-        searchTerm={searchTerm}
-        onSearch={setSearchTerm}
-        user={user}
-        onLogin={() => setOnboardingCompleted(false)}
-        onProfile={() => setActiveTab('profile')}
       />
 
       <Navigation
@@ -203,59 +167,58 @@ function AppContent() {
         onTabChange={setActiveTab}
       />
 
-      <main className={`container mx-auto pb-8 ${
-        location.pathname.startsWith('/recipe/') ? 'pt-safe' : 'px-4 pt-20'
-      }`}>
-        <Suspense fallback={<LoadingFallback />}>
-          <Routes>
-            <Route 
-              path="/recetas" 
-              element={
-                <RecipeContent
-                  loading={recipesLoading}
-                  error={null}
-                  recipes={recipes}
-                  onRecipeSelect={() => {}}
-                  favorites={favorites.map(f => f.id)}
-                  onToggleFavorite={handleToggleFavorite}
-                  loadingFallback={LoadingFallback}
-                />
-              } 
-            />
-            <Route 
-              path="/recipe/:id" 
-              element={
-                <RecipeDetail 
-                  recipes={recipes}
-                  onToggleFavorite={handleToggleFavorite}
-                  favorites={favorites}
-                />
-              } 
-            />
-            <Route 
-              path="/menu" 
-              element={
-                <WeeklyMenu2
-                  weeklyMenu={weeklyMenu}
-                  onRecipeSelect={() => {}}
-                  onAddToMenu={handleAddToMenu}
-                  forUserId={user?.id}
-                />
-              } 
-            />
-            <Route 
-              path="/compra" 
-              element={
-                <ShoppingList
-                  items={shoppingList}
-                  onToggleItem={toggleItem}
-                />
-              } 
-            />
-            <Route 
-              path="/favoritos" 
-              element={
-                user ? (
+      <main className={`flex-1 overflow-y-auto overflow-x-hidden custom-scrollbar ${location.pathname.startsWith('/recipe/') ? '' : 'px-4 pt-20 pb-24'
+        }`}>
+        <div className="container mx-auto pb-8">
+          <Suspense fallback={<LoadingFallback />}>
+            <Routes>
+              <Route
+                path="/recetas"
+                element={
+                  <RecipeContent
+                    loading={recipesLoading}
+                    error={null}
+                    recipes={recipes}
+                    onRecipeSelect={() => { }}
+                    favorites={favorites.map(f => f.id)}
+                    onToggleFavorite={handleToggleFavorite}
+                    loadingFallback={LoadingFallback}
+                  />
+                }
+              />
+              <Route
+                path="/recipe/:id"
+                element={
+                  <RecipeDetail
+                    recipes={recipes}
+                    onToggleFavorite={handleToggleFavorite}
+                    favorites={favorites}
+                  />
+                }
+              />
+              <Route
+                path="/menu"
+                element={
+                  <WeeklyMenu2
+                    weeklyMenu={weeklyMenu}
+                    onRecipeSelect={() => { }}
+                    onAddToMenu={handleAddToMenu}
+                    forUserId={user?.id}
+                  />
+                }
+              />
+              <Route
+                path="/compra"
+                element={
+                  <ShoppingList
+                    items={shoppingList}
+                    onToggleItem={toggleItem}
+                  />
+                }
+              />
+              <Route
+                path="/favoritos"
+                element={
                   <Favorites
                     favorites={favorites}
                     onRemoveFavorite={removeFavorite}
@@ -263,38 +226,29 @@ function AppContent() {
                     loading={favoritesLoading}
                     error={favoritesError}
                   />
-                ) : (
-                  <Navigate to="/menu" replace />
-                )
-              } 
-            />
-            <Route 
-              path="/profile" 
-              element={
-                user ? (
-                  <Profile />
-                ) : (
-                  <Navigate to="/menu" replace />
-                )
-              } 
-            />
-            <Route 
-              path="/liora" 
-              element={<LioraChat />} 
-            />
-            <Route path="/" element={<Navigate to="/menu" replace />} />
-          </Routes>
-        </Suspense>
-      </main>
-
-      {/* Footer minimalista */}
-      <footer className="py-4 px-6 text-center text-sm text-gray-500 border-t border-rose-100/20 bg-white/50 backdrop-blur-sm">
-        <div className="flex items-center justify-center space-x-2">
-          <span>Liora</span>
-          <Copyright size={14} className="text-rose-400" />
-          <span>{new Date().getFullYear()}</span>
+                }
+              />
+              <Route
+                path="/profile"
+                element={<Profile />}
+              />
+              <Route
+                path="/liora"
+                element={<LioraChat />}
+              />
+              <Route path="/" element={<Navigate to="/recetas" replace />} />
+            </Routes>
+          </Suspense>
         </div>
-      </footer>
+
+        <footer className="py-4 px-6 text-center text-sm text-gray-500 border-t border-rose-100/20 bg-white/50 backdrop-blur-sm mt-auto">
+          <div className="flex items-center justify-center space-x-2">
+            <span>Liora</span>
+            <Copyright size={14} className="text-rose-400" />
+            <span>{new Date().getFullYear()}</span>
+          </div>
+        </footer>
+      </main>
 
       <MobileInstallButton />
     </div>

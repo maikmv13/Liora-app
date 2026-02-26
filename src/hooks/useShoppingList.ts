@@ -21,6 +21,14 @@ export function useShoppingList(userId?: string, isHousehold = false) {
     }
 
     try {
+      // Mock data for showcase mode
+      const isPlaceholder = true; // Showcase Mode VITE_SUPABASE_URL
+      if (isPlaceholder) {
+        setShoppingList(generateShoppingList(menuItems as any));
+        setLoading(false);
+        return;
+      }
+
       // 1. Obtener el perfil y verificar si pertenece a un household
       const { data: profile } = await supabase
         .from('profiles')
@@ -186,7 +194,10 @@ export function useShoppingList(userId?: string, isHousehold = false) {
 
     const menuId = menuItems[0]?.menu_id;
     const householdId = menuItems[0]?.linked_household_id;
-    
+
+    const isPlaceholder = true; // Showcase Mode
+    if (isPlaceholder) return;
+
     if (!menuId && !householdId) return;
 
     const channel = supabase
@@ -197,8 +208,8 @@ export function useShoppingList(userId?: string, isHousehold = false) {
           event: '*',
           schema: 'public',
           table: 'shopping_list_items',
-          filter: isHousehold 
-            ? `linked_household_id=eq.${householdId}` 
+          filter: isHousehold
+            ? `linked_household_id=eq.${householdId}`
             : `user_id=eq.${userId}`
         },
         (payload) => {
@@ -229,6 +240,17 @@ export function useShoppingList(userId?: string, isHousehold = false) {
       const item = shoppingList.find(i => i.name.toLowerCase() === name.toLowerCase());
       if (!item) return;
 
+      const isPlaceholder = true; // Showcase Mode VITE_SUPABASE_URL
+      if (isPlaceholder) {
+        setShoppingList(prev => prev.map(i => {
+          if (i.name.toLowerCase() === name.toLowerCase()) {
+            return { ...i, checked: !item.checked };
+          }
+          return i;
+        }));
+        return;
+      }
+
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) return;
 
@@ -247,11 +269,11 @@ export function useShoppingList(userId?: string, isHousehold = false) {
 
       const { data: activeMenu } = profile?.linked_household_id
         ? await menuQuery
-            .eq('linked_household_id', profile.linked_household_id)
-            .maybeSingle()
+          .eq('linked_household_id', profile.linked_household_id)
+          .maybeSingle()
         : await menuQuery
-            .eq('user_id', user.id)
-            .maybeSingle();
+          .eq('user_id', user.id)
+          .maybeSingle();
 
       if (!activeMenu?.id) {
         console.error('No menu ID found');
@@ -270,15 +292,15 @@ export function useShoppingList(userId?: string, isHousehold = false) {
         checked: newChecked,
         days: daysArray,
         updated_at: new Date().toISOString(),
-        ...(profile?.linked_household_id 
+        ...(profile?.linked_household_id
           ? {
-              user_id: null,
-              linked_household_id: profile.linked_household_id
-            }
+            user_id: null,
+            linked_household_id: profile.linked_household_id
+          }
           : {
-              user_id: user.id,
-              linked_household_id: null
-            }
+            user_id: user.id,
+            linked_household_id: null
+          }
         )
       };
 
@@ -289,7 +311,7 @@ export function useShoppingList(userId?: string, isHousehold = false) {
         .eq('menu_id', activeMenu.id)
         .eq('item_name', name)
         .eq(profile?.linked_household_id ? 'linked_household_id' : 'user_id',
-            profile?.linked_household_id || user.id)
+          profile?.linked_household_id || user.id)
         .is('user_id', profile?.linked_household_id ? null : user.id)
         .single();
 
@@ -326,7 +348,14 @@ export function useShoppingList(userId?: string, isHousehold = false) {
   const refreshList = async () => {
     setLoading(true);
     try {
-      const menuId = menuItems[0]?.menu_id;
+      const isPlaceholder = true; // Showcase Mode VITE_SUPABASE_URL
+      if (isPlaceholder) {
+        setShoppingList(generateShoppingList(menuItems as any));
+        setLoading(false);
+        return;
+      }
+
+      const menuId = (menuItems[0] as any)?.menu_id;
       if (!menuId) {
         console.error('No menu ID found');
         return;
@@ -345,9 +374,9 @@ export function useShoppingList(userId?: string, isHousehold = false) {
     }
   };
 
-  return { 
-    shoppingList, 
-    loading, 
+  return {
+    shoppingList,
+    loading,
     toggleItem,
     refreshList
   };

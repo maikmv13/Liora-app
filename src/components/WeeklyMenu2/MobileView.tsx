@@ -26,9 +26,9 @@ interface MobileViewProps {
 // Definir un tipo para los días incluyendo 'next'
 type DayWithNext = WeekDay | 'next';
 
-export function MobileView({ 
-  selectedDay, 
-  weekDays, 
+export function MobileView({
+  selectedDay,
+  weekDays,
   weeklyMenu,
   onDayChange,
   onMealClick,
@@ -56,7 +56,7 @@ export function MobileView({
     if (currentDay === 0 && currentHour >= 21) {
       return 'Lunes';
     }
-    
+
     // Si es domingo antes de las 21:00, scroll a NextWeekCard
     if (currentDay === 0 && currentHour < 21) {
       return 'next';
@@ -122,7 +122,7 @@ export function MobileView({
     const scrollContainer = scrollContainerRef.current;
     if (scrollContainer) {
       let scrollTimeout: NodeJS.Timeout;
-      
+
       const handleScroll = () => {
         checkScroll();
         clearTimeout(scrollTimeout);
@@ -146,10 +146,10 @@ export function MobileView({
     if (scrollContainerRef.current && !isScrolling) {
       setIsScrolling(true);
       const scrollAmount = scrollContainerRef.current.clientWidth;
-      const newScrollLeft = direction === 'left' 
+      const newScrollLeft = direction === 'left'
         ? scrollContainerRef.current.scrollLeft - scrollAmount
         : scrollContainerRef.current.scrollLeft + scrollAmount;
-      
+
       scrollContainerRef.current.scrollTo({
         left: newScrollLeft,
         behavior: 'smooth'
@@ -201,19 +201,19 @@ export function MobileView({
         )}
 
         {/* Days Scroll Container */}
-        <div 
+        <div
           ref={scrollContainerRef}
-          className="flex overflow-x-auto snap-x snap-mandatory scrollbar-hide px-4 -mx-4 pb-4"
-          style={{ 
-            scrollbarWidth: 'none', 
+          className="flex overflow-x-auto snap-x snap-mandatory scrollbar-hide -mx-4 pb-4"
+          style={{
+            scrollbarWidth: 'none',
             msOverflowStyle: 'none',
             scrollBehavior: 'smooth'
           }}
         >
           {weekDays.map(day => (
-            <div 
+            <div
               key={day}
-              className="flex-none w-full snap-center px-2 first:pl-4 last:pr-2"
+              className="flex-none w-full snap-center px-4"
             >
               <DayCard
                 day={day}
@@ -226,25 +226,25 @@ export function MobileView({
               />
             </div>
           ))}
-          
+
           {getTargetScrollDay() === 'next' && (
-            <div className="flex-none w-full snap-center px-2 pr-4">
+            <div className="flex-none w-full snap-center px-4">
               <NextWeekCard />
             </div>
           )}
         </div>
 
-        {/* Day Indicators */}
-        <div className="flex justify-center space-x-1 mt-4 mb-6 md:hidden">
-          {([...weekDays, 'next'] as DayWithNext[]).map((day, index) => {
+        {/* Day Indicators - Centrados perfectamente en el marco */}
+        <div className="relative w-full flex justify-center items-center space-x-2 mt-4 mb-8 -mx-4 px-4 md:hidden">
+          {(getTargetScrollDay() === 'next' ? [...weekDays, 'next'] : weekDays).map((day, index) => {
             const isNextWeek = day === 'next';
-            const isSelected = isNextWeek ? 
-              Math.round(scrollContainerRef.current?.scrollLeft ?? 0) === (weekDays.length * (scrollContainerRef.current?.clientWidth ?? 0)) : 
-              selectedDay === day;
+            const isSelected = isNextWeek
+              ? Math.round(scrollContainerRef.current?.scrollLeft ?? 0) >= ((weekDays.length) * (scrollContainerRef.current?.clientWidth ?? 0) - 10)
+              : selectedDay === day;
 
             return (
               <button
-                key={day}
+                key={day as string}
                 onClick={() => {
                   if (scrollContainerRef.current && !isScrolling) {
                     setIsScrolling(true);
@@ -261,14 +261,12 @@ export function MobileView({
                 }}
                 disabled={isScrolling}
                 className={`
-                  w-2 h-2 rounded-full transition-all duration-300
+                  h-2 rounded-full transition-all duration-500
                   ${isSelected
-                    ? isNextWeek 
-                      ? 'bg-orange-500 w-4'
-                      : 'bg-rose-500 w-4'
-                    : isScrolling
-                      ? 'bg-rose-200 cursor-not-allowed'
-                      : 'bg-rose-200 hover:bg-rose-300'
+                    ? isNextWeek
+                      ? 'bg-orange-500 w-8 shadow-sm shadow-orange-200'
+                      : 'bg-rose-500 w-8 shadow-sm shadow-rose-200'
+                    : 'bg-rose-200 w-2 hover:bg-rose-300'
                   }
                 `}
                 aria-label={isNextWeek ? 'Próxima semana' : `Ir a ${day}`}
@@ -279,15 +277,15 @@ export function MobileView({
 
         {/* Action Buttons */}
         <div className="grid grid-cols-12 gap-2 px-4 mt-6 md:hidden">
-          <button 
+          <button
             onClick={onGenerateMenu}
             disabled={isGenerating}
             className={`
               col-span-6 flex items-center justify-center space-x-2 px-4 py-3
               bg-gradient-to-r from-orange-400 via-pink-500 to-rose-500 
               text-white rounded-xl shadow-sm
-              ${isGenerating 
-                ? 'opacity-50 cursor-not-allowed' 
+              ${isGenerating
+                ? 'opacity-50 cursor-not-allowed'
                 : 'hover:from-orange-500 hover:via-pink-600 hover:to-rose-600'
               }
             `}
@@ -305,7 +303,7 @@ export function MobileView({
             )}
           </button>
 
-          <button 
+          <button
             onClick={onToggleHistory}
             className="col-span-3 flex items-center justify-center space-x-2 px-4 py-3 
               bg-white/90 backdrop-blur-sm text-rose-500 rounded-xl border border-rose-100 
@@ -315,7 +313,7 @@ export function MobileView({
             <span className="hidden">Historial</span>
           </button>
 
-          <button 
+          <button
             onClick={onExport}
             className="col-span-3 flex items-center justify-center space-x-2 px-4 py-3 
               bg-white/90 backdrop-blur-sm text-rose-500 rounded-xl border border-rose-100 

@@ -6,6 +6,7 @@ import { categoryColors } from '../../utils/categoryColors';
 import { motion, AnimatePresence } from 'framer-motion';
 import confetti from 'canvas-confetti';
 import { FavoriteAddedNotification } from './FavoriteAddedNotification';
+import { getOptimizedUnsplashUrl } from '../../utils/imageUtils';
 
 interface RecipeCardProps {
   recipe: Recipe | FavoriteRecipe;
@@ -26,11 +27,11 @@ export function RecipeCard({ recipe, favorites, onToggleFavorite }: RecipeCardPr
   const [isRemoving, setIsRemoving] = useState(false);
   const [showNotification, setShowNotification] = useState(false);
   const navigate = useNavigate();
-  
+
   // Compatibilidad con versión antigua que usaba favorite_id 
   // y nueva versión que usa recipe_id
   const isFavorite = favorites?.includes(recipe.id);
-  
+
   const colors = categoryColors[recipe.category as keyof typeof categoryColors] || {
     bg: 'bg-gray-50',
     text: 'text-gray-600',
@@ -39,7 +40,11 @@ export function RecipeCard({ recipe, favorites, onToggleFavorite }: RecipeCardPr
 
   const handleImageLoad = () => setImageLoaded(true);
   const handleImageError = () => setImageError(true);
-  const handleCardClick = () => navigate(`/recipe/${recipe.id}`);
+  const handleCardClick = () => {
+    // Si es un favorito, el ID real de la receta es recipe_id
+    const recipeId = (recipe as FavoriteRecipe).recipe_id || recipe.id;
+    navigate(`/recipe/${recipeId}`);
+  };
 
   const handleToggleFavorite = async (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -109,12 +114,12 @@ export function RecipeCard({ recipe, favorites, onToggleFavorite }: RecipeCardPr
             >
               <motion.div
                 initial={{ scale: 1, opacity: 1 }}
-                animate={{ 
+                animate={{
                   scale: [1, 1.5, 0.5],
                   opacity: [1, 1, 0],
                   rotate: [0, 0, 45]
                 }}
-                transition={{ 
+                transition={{
                   duration: 0.8,
                   times: [0, 0.5, 1],
                   ease: "easeInOut"
@@ -130,18 +135,16 @@ export function RecipeCard({ recipe, favorites, onToggleFavorite }: RecipeCardPr
         <div className="relative aspect-[16/9] w-full overflow-hidden bg-gradient-to-br from-rose-50 to-orange-50">
           {recipe.image_url && !imageError ? (
             <>
-              <div 
-                className={`absolute inset-0 bg-cover bg-center blur-lg scale-110 transition-opacity duration-300 ${
-                  imageLoaded ? 'opacity-0' : 'opacity-100'
-                }`}
-                style={{ backgroundImage: `url(${recipe.image_url}?quality=10&width=50)` }}
+              <div
+                className={`absolute inset-0 bg-cover bg-center blur-lg scale-110 transition-opacity duration-300 ${imageLoaded ? 'opacity-0' : 'opacity-100'
+                  }`}
+                style={{ backgroundImage: `url(${getOptimizedUnsplashUrl(recipe.image_url, 50, 10)})` }}
               />
               <img
-                src={`${recipe.image_url}?quality=80&width=400`}
+                src={getOptimizedUnsplashUrl(recipe.image_url, 500, 60)}
                 alt={recipe.name}
-                className={`w-full h-full object-cover transition-opacity duration-300 ${
-                  imageLoaded ? 'opacity-100' : 'opacity-0'
-                }`}
+                className={`w-full h-full object-cover transition-opacity duration-300 ${imageLoaded ? 'opacity-100' : 'opacity-0'
+                  }`}
                 loading="lazy"
                 onLoad={handleImageLoad}
                 onError={handleImageError}
@@ -161,7 +164,7 @@ export function RecipeCard({ recipe, favorites, onToggleFavorite }: RecipeCardPr
             disabled={isAnimating}
             className={`
               absolute top-2 right-2 p-2 rounded-xl transition-all duration-500
-              ${isFavorite 
+              ${isFavorite
                 ? 'bg-rose-500 shadow-lg text-white'
                 : 'bg-black/20 text-white hover:bg-rose-500 hover:text-white'
               }
@@ -178,8 +181,8 @@ export function RecipeCard({ recipe, favorites, onToggleFavorite }: RecipeCardPr
                 ease: "easeInOut"
               }}
             >
-              <Heart 
-                size={20} 
+              <Heart
+                size={20}
                 className={`transition-all duration-500 transform
                   ${isFavorite ? 'fill-current scale-110' : 'scale-100'}
                 `}
@@ -201,7 +204,7 @@ export function RecipeCard({ recipe, favorites, onToggleFavorite }: RecipeCardPr
               </div>
             )}
           </div>
-          
+
           <div className="flex items-center space-x-4 text-sm text-gray-600 mb-3">
             <div className="flex items-center">
               <Users size={14} className="mr-1" />

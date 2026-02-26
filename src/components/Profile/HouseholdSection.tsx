@@ -84,10 +84,13 @@ export function HouseholdSection({ userId, householdId, onUpdate }: HouseholdSec
 
   // Modificamos la suscripción para ser más precisa
   useEffect(() => {
+    const isPlaceholder = true; // Showcase Mode
+    if (isPlaceholder) return;
+
     if (!householdId) return;
 
     console.log('Iniciando suscripción para household:', householdId);
-    
+
     // Cargar miembros iniciales
     fetchHouseholdMembers();
 
@@ -107,9 +110,9 @@ export function HouseholdSection({ userId, householdId, onUpdate }: HouseholdSec
           // Verificamos si el cambio afecta a nuestro household
           const record = payload.new as { linked_household_id: string } | null;
           console.log('Nuevo estado del registro:', record);
-          
-          if (record?.linked_household_id === householdId || 
-              (payload.old as { linked_household_id: string })?.linked_household_id === householdId) {
+
+          if (record?.linked_household_id === householdId ||
+            (payload.old as { linked_household_id: string })?.linked_household_id === householdId) {
             console.log('Cambio relevante detectado, actualizando miembros...');
             fetchHouseholdMembers();
           }
@@ -138,7 +141,7 @@ export function HouseholdSection({ userId, householdId, onUpdate }: HouseholdSec
         console.error('Error fetching household:', error);
         throw error;
       }
-      
+
       console.log('Household details loaded:', data);
       setHouseholdDetails(data);
     } catch (error) {
@@ -184,7 +187,7 @@ export function HouseholdSection({ userId, householdId, onUpdate }: HouseholdSec
 
       // 3. Cargar los detalles inmediatamente
       setHouseholdDetails(household);
-      
+
       // 4. Actualizar el estado local
       if (household.id) {
         await fetchHouseholdMembers();
@@ -197,7 +200,7 @@ export function HouseholdSection({ userId, householdId, onUpdate }: HouseholdSec
     } catch (error) {
       console.error('Error detallado al crear household:', error);
       setCreateError(error instanceof Error ? error.message : 'Error al crear el hogar');
-      
+
       // Intentar rollback si es necesario
       if (householdDetails?.id) {
         try {
@@ -411,8 +414,8 @@ export function HouseholdSection({ userId, householdId, onUpdate }: HouseholdSec
                   Miembros ({members.length}):
                 </div>
                 {members.map(member => (
-                  <div 
-                    key={member.id} 
+                  <div
+                    key={member.id}
                     className="flex items-center justify-between p-2 bg-white/50 rounded-lg"
                   >
                     <div className="flex items-center space-x-2">

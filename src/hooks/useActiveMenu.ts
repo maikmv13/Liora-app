@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback, useRef } from 'react';
 import { MenuItem, Recipe } from '../types';
 import { supabase } from '../lib/supabase';
 import { useRecipes } from './useRecipes';
+import { MOCK_WEEKLY_MENU } from '../data/mockData';
 
 export function useActiveMenu(userId?: string, isHousehold: boolean = false) {
   const [state, setState] = useState({
@@ -10,6 +11,17 @@ export function useActiveMenu(userId?: string, isHousehold: boolean = false) {
     error: null as Error | null
   });
   const { recipes } = useRecipes();
+  // ... rest of state stays same ...
+  // ... (ignoring some lines to reach the fetchMenu logic) ...
+  // Inside fetchMenu, after all Supabase checks:
+  /*
+        // Si no encontramos ningún menú, devolvemos mock data en modo showcase
+        setState({
+          menuItems: MOCK_WEEKLY_MENU,
+          loading: false,
+          error: null
+        });
+  */
   const mounted = useRef(true);
   const lastFetch = useRef<number>(0);
   const CACHE_DURATION = 60 * 1000; // 1 minuto de caché
@@ -20,9 +32,22 @@ export function useActiveMenu(userId?: string, isHousehold: boolean = false) {
       return;
     }
 
-    if (!userId || !recipes.length || !mounted.current) return;
+    if (!recipes.length || !mounted.current) return;
 
     try {
+      // Mock data for showcase mode
+      const isPlaceholder = true; // Showcase Mode VITE_SUPABASE_URL
+      if (isPlaceholder) {
+        if (mounted.current) {
+          setState({
+            menuItems: MOCK_WEEKLY_MENU,
+            loading: false,
+            error: null
+          });
+        }
+        return;
+      }
+
       // 1. Obtener perfil y verificar si pertenece a un household
       const { data: profile } = await supabase
         .from('profiles')
@@ -108,9 +133,9 @@ export function useActiveMenu(userId?: string, isHousehold: boolean = false) {
         }
       }
 
-      // Si no encontramos ningún menú, devolvemos array vacío
+      // Si no encontramos ningún menú, devolvemos mock data en modo showcase
       setState({
-        menuItems: [],
+        menuItems: MOCK_WEEKLY_MENU,
         loading: false,
         error: null
       });
@@ -133,6 +158,9 @@ export function useActiveMenu(userId?: string, isHousehold: boolean = false) {
 
     mounted.current = true;
     fetchMenu();
+
+    const isPlaceholder = true; // Showcase Mode
+    if (isPlaceholder) return;
 
     const channel = supabase
       .channel('menu_changes')
@@ -181,7 +209,7 @@ function transformWeeklyMenuToMenuItems(
     meals.forEach(meal => {
       const recipeKey = `${dbDay}_${meal}_id`;
       const recipeId = weeklyMenu[recipeKey];
-      
+
       if (recipeId && recipes.find(r => r.id === recipeId)) {
         const recipe = recipes.find(r => r.id === recipeId);
         if (recipe) {

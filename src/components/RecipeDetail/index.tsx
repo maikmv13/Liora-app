@@ -29,6 +29,16 @@ export function RecipeDetail({ recipes, onToggleFavorite, favorites }: RecipeDet
       if (!id) return;
 
       try {
+        const isPlaceholder = true; // Showcase Mode VITE_SUPABASE_URL
+        if (isPlaceholder) {
+          const mockRecipe = recipes.find(r => r.id === id);
+          if (mockRecipe) {
+            setRecipe(mockRecipe);
+          }
+          setLoading(false);
+          return;
+        }
+
         const { data: recipeData, error } = await supabase
           .from('recipes')
           .select(`
@@ -89,7 +99,7 @@ export function RecipeDetail({ recipes, onToggleFavorite, favorites }: RecipeDet
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-rose-50/50 to-orange-50/50">
-      <HeroImage 
+      <HeroImage
         recipe={recipe}
         onToggleFavorite={() => onToggleFavorite(recipe)}
         isFavorite={isFavorite}
@@ -98,7 +108,7 @@ export function RecipeDetail({ recipes, onToggleFavorite, favorites }: RecipeDet
       <div className="max-w-5xl mx-auto px-4 py-6 space-y-6">
         <QuickInfo recipe={recipe} />
 
-        <NutritionalInfo 
+        <NutritionalInfo
           recipe={recipe}
           isExpanded={expandedSection === 'nutrition'}
           onToggle={() => setExpandedSection(

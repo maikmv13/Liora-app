@@ -1,10 +1,8 @@
-import React from 'react';
-import { Filter, Share2, ShoppingCart, Calendar, CalendarDays, Users } from 'lucide-react';
+import { Filter, Share2, Calendar, CalendarDays, Users } from 'lucide-react';
 import { ShoppingItem } from '../../types';
 import { CategoryGroup } from './components/CategoryGroup';
 import { Progress } from './components/Progress';
 import { EmptyState } from './components/EmptyState';
-import { weekDays } from '../WeeklyMenu2/utils';
 import { useShoppingListState } from './hooks/useShoppingListState';
 import { filterAndSortItems, generateExportContent } from './utils/listUtils';
 import { useActiveProfile } from '../../hooks/useActiveProfile';
@@ -28,7 +26,6 @@ export function ShoppingList({ items, onToggleItem }: ShoppingListProps) {
     viewMode,
     setViewMode,
     selectedDay,
-    setSelectedDay,
     servings,
     setServings,
   } = useShoppingListState();
@@ -42,7 +39,6 @@ export function ShoppingList({ items, onToggleItem }: ShoppingListProps) {
   );
 
   const completedCount = filteredItems.filter(item => item.checked).length;
-  const totalCount = filteredItems.length;
 
   const handleExport = () => {
     const content = generateExportContent(
@@ -57,27 +53,11 @@ export function ShoppingList({ items, onToggleItem }: ShoppingListProps) {
   };
 
   const toggleCategory = (categoria: string) => {
-    setExpandedCategories(prev => 
+    setExpandedCategories(prev =>
       prev.includes(categoria)
         ? prev.filter(c => c !== categoria)
         : [...prev, categoria]
     );
-  };
-
-  const handleToggleItem = (nombre: string, cantidad?: number) => {
-    // Si estamos en vista diaria, la cantidad será la porción diaria
-    if (viewMode === 'daily') {
-      const item = items.find(i => i.name === nombre);
-      if (item) {
-        // Calcular la cantidad diaria basada en los días totales
-        const diasTotales = item.days.length;
-        const cantidadDiaria = item.quantity / diasTotales;
-        onToggleItem(nombre, selectedDay, cantidad || cantidadDiaria);
-      }
-    } else {
-      // En vista semanal, toggle normal
-      onToggleItem(nombre);
-    }
   };
 
   // Loading state
@@ -113,11 +93,10 @@ export function ShoppingList({ items, onToggleItem }: ShoppingListProps) {
         {/* Botones de vista */}
         <button
           onClick={() => setViewMode('weekly')}
-          className={`flex items-center justify-center space-x-2 px-3 py-2.5 rounded-xl transition-colors ${
-            viewMode === 'weekly'
+          className={`flex items-center justify-center space-x-2 px-3 py-2.5 rounded-xl transition-colors ${viewMode === 'weekly'
               ? 'bg-rose-100 text-rose-700 border-2 border-rose-200'
               : 'bg-white/90 backdrop-blur-sm text-gray-600 hover:bg-white border border-rose-100'
-          }`}
+            }`}
         >
           <Calendar size={16} />
           <span>Semanal</span>
@@ -125,27 +104,25 @@ export function ShoppingList({ items, onToggleItem }: ShoppingListProps) {
 
         <button
           onClick={() => setViewMode('daily')}
-          className={`flex items-center justify-center space-x-2 px-3 py-2.5 rounded-xl transition-colors ${
-            viewMode === 'daily'
+          className={`flex items-center justify-center space-x-2 px-3 py-2.5 rounded-xl transition-colors ${viewMode === 'daily'
               ? 'bg-rose-100 text-rose-700 border-2 border-rose-200'
               : 'bg-white/90 backdrop-blur-sm text-gray-600 hover:bg-white border border-rose-100'
-          }`}
+            }`}
         >
           <CalendarDays size={16} />
           <span>Diario</span>
         </button>
 
         {/* Botón de filtro - ocupa 2 columnas en mobile */}
-        <button 
+        <button
           onClick={() => setShowCompleted(!showCompleted)}
-          className={`col-span-2 flex items-center justify-center space-x-2 px-3 py-2.5 rounded-xl transition-colors ${
-            showCompleted
+          className={`col-span-2 flex items-center justify-center space-x-2 px-3 py-2.5 rounded-xl transition-colors ${showCompleted
               ? 'bg-rose-100 text-rose-700 border-2 border-rose-200'
               : 'bg-white/90 backdrop-blur-sm text-gray-600 hover:bg-white border border-rose-100'
-          }`}
+            }`}
         >
           <Filter size={16} />
-          <span>{showCompleted ? 'Mostrar todos' : 'Ocultar comprados'}</span>
+          <span>{showCompleted ? 'Ocultar comprados' : 'Mostrar todos'}</span>
         </button>
       </div>
 
@@ -174,7 +151,7 @@ export function ShoppingList({ items, onToggleItem }: ShoppingListProps) {
 
           {/* Botón de compartir al final */}
           <div className="flex justify-center pt-4">
-            <button 
+            <button
               onClick={handleExport}
               className="flex items-center justify-center space-x-2 px-6 py-3 bg-gradient-to-r from-orange-400 via-pink-500 to-rose-500 text-white rounded-xl hover:from-orange-500 hover:via-pink-600 hover:to-rose-600 transition-colors shadow-sm"
             >

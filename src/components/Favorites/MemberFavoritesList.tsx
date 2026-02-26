@@ -3,6 +3,7 @@ import { Heart, ChevronRight, User, ChevronLeft } from 'lucide-react';
 import type { FavoriteRecipe } from '../../types';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
+import { getOptimizedUnsplashUrl } from '../../utils/imageUtils';
 
 interface MemberFavoritesListProps {
   favorites: FavoriteRecipe[];
@@ -62,10 +63,10 @@ export function MemberFavoritesList({ favorites, onUpdateFavorite }: MemberFavor
   const scroll = (direction: 'left' | 'right') => {
     if (tabsRef.current) {
       const scrollAmount = 200;
-      const newScrollLeft = direction === 'left' 
+      const newScrollLeft = direction === 'left'
         ? tabsRef.current.scrollLeft - scrollAmount
         : tabsRef.current.scrollLeft + scrollAmount;
-      
+
       tabsRef.current.scrollTo({
         left: newScrollLeft,
         behavior: 'smooth'
@@ -180,8 +181,8 @@ export function MemberFavoritesList({ favorites, onUpdateFavorite }: MemberFavor
                 >
                   <div className="flex items-center space-x-4">
                     {recipe.image_url && (
-                      <img 
-                        src={recipe.image_url} 
+                      <img
+                        src={getOptimizedUnsplashUrl(recipe.image_url, 150, 60)}
                         alt={recipe.name}
                         className="w-12 h-12 rounded-lg object-cover"
                       />
@@ -197,7 +198,7 @@ export function MemberFavoritesList({ favorites, onUpdateFavorite }: MemberFavor
                       </div>
                     </div>
                   </div>
-                  
+
                   <div className="flex items-center">
                     <ChevronRight className="w-5 h-5 text-gray-400 group-hover:text-rose-400 transition-colors" />
                   </div>

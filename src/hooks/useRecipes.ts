@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '../lib/supabase';
 import type { Recipe } from '../types/recipe';
+import { MOCK_RECIPES } from '../data/mockData';
 
 export function useRecipes(weeklyMenu: any | null = null) {
   const [recipes, setRecipes] = useState<Recipe[]>([]);
@@ -12,6 +13,15 @@ export function useRecipes(weeklyMenu: any | null = null) {
 
     async function fetchRecipes() {
       try {
+        // En modo showcase, usamos mock data directamente para evitar cuelgues de red
+        const isPlaceholder = true; // Showcase Mode VITE_SUPABASE_URL
+
+        if (isPlaceholder && !weeklyMenu) {
+          setRecipes(MOCK_RECIPES as any);
+          setLoading(false);
+          return;
+        }
+
         if (!weeklyMenu) {
           // Si no hay menú, obtenemos todas las recetas
           const { data, error } = await supabase
@@ -22,17 +32,22 @@ export function useRecipes(weeklyMenu: any | null = null) {
           if (error) throw error;
 
           if (!ignore) {
-            const transformedRecipes = data?.map(recipe => ({
+            let transformedRecipes = data?.map(recipe => ({
               ...recipe,
-              description: Array.isArray(recipe.instructions) 
-                ? recipe.instructions[0] 
-                : typeof recipe.instructions === 'object' 
-                  ? recipe.instructions.description || ''
+              description: Array.isArray(recipe.instructions)
+                ? recipe.instructions[0]
+                : typeof recipe.instructions === 'object'
+                  ? (recipe.instructions as any).description || ''
                   : '',
               inHouseholdMenu: false
             })) || [];
 
-            setRecipes(transformedRecipes);
+            // Fallback a MOCK_RECIPES si no hay datos en Supabase
+            if (transformedRecipes.length === 0) {
+              transformedRecipes = MOCK_RECIPES as any;
+            }
+
+            setRecipes(transformedRecipes as any);
           }
           return;
         }
@@ -50,6 +65,7 @@ export function useRecipes(weeklyMenu: any | null = null) {
 
         if (recipeIds.length === 0) {
           setRecipes([]);
+          setLoading(false);
           return;
         }
 
@@ -77,20 +93,22 @@ export function useRecipes(weeklyMenu: any | null = null) {
         if (!ignore) {
           const transformedRecipes = data?.map(recipe => ({
             ...recipe,
-            description: Array.isArray(recipe.instructions) 
-              ? recipe.instructions[0] 
-              : typeof recipe.instructions === 'object' 
-                ? recipe.instructions.description || ''
+            description: Array.isArray(recipe.instructions)
+              ? recipe.instructions[0]
+              : typeof recipe.instructions === 'object'
+                ? (recipe.instructions as any).description || ''
                 : '',
             inHouseholdMenu: Boolean(weeklyMenu.linked_household_id)
           })) || [];
 
-          setRecipes(transformedRecipes);
+          setRecipes(transformedRecipes as any);
         }
       } catch (e) {
         console.error('Error fetching recipes:', e);
         if (!ignore) {
           setError(e as Error);
+          // Fallback final a mock data en caso de error crítico de red
+          setRecipes(MOCK_RECIPES as any);
         }
       } finally {
         if (!ignore) {

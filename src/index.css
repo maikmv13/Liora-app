@@ -2,11 +2,142 @@
 @tailwind components;
 @tailwind utilities;
 
+html,
+body {
+  overscroll-behavior: none;
+  height: 100dvh;
+  width: 100%;
+  overflow: hidden;
+  -webkit-tap-highlight-color: transparent;
+  margin: 0;
+  padding: 0;
+  background-color: #0f172a;
+  /* Slate 900 */
+}
+
+body {
+  position: fixed;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* 
+ * MARCO DE SIMULACIÓN MÓVIL
+ * Este es el "Viewport" de nuestra app.
+ */
+#root {
+  height: 100dvh;
+  width: 100%;
+  max-width: 480px;
+  margin: 0 auto;
+  overflow: hidden;
+  /* El scroll ahora sucede dentro de App.tsx */
+  background-color: white;
+  position: relative;
+
+  /* Sombra y bordes premium */
+  box-shadow: 0 0 100px rgba(0, 0, 0, 0.5);
+  border-left: 1px solid rgba(255, 255, 255, 0.05);
+  border-right: 1px solid rgba(255, 255, 255, 0.05);
+
+  /* 
+   * Crea un bloque contenedor para elementos fijos.
+   * IMPORTANTE: No usar 'transform' si causa problemas de renderizado, 
+   * pero aquí lo usamos para atrapar modales y sidebars.
+   */
+  transform: translateZ(0);
+  container-type: inline-size;
+}
+
+/* 
+ * Corrección para elementos 'fixed' dentro del marco.
+ * Al estar dentro de #root con transform, top/bottom/left/right son relativos a #root.
+ */
+#root .fixed {
+  max-width: 480px;
+}
+
+/* 
+ * FORCE MOBILE RESPONSIVENESS IN CONTAINER
+ * Anulamos las clases responsive de Tailwind para que siempre se vea como móvil 
+ * dentro de nuestro marco de 480px, ignorando el ancho real de la ventana del navegador.
+ */
+@container (max-width: 499px) {
+
+  /* Forzar visibilidad de elementos marcados como mobile-only por Tailwind */
+  .sm\:hidden,
+  .md\:hidden,
+  .lg\:hidden,
+  .xl\:hidden {
+    display: block !important;
+  }
+
+  /* Forzar que se oculten elementos marcados para escritorio */
+  .hidden.sm\:block,
+  .hidden.md\:block,
+  .hidden.lg\:block,
+  .hidden.xl\:block,
+  .sm\:flex,
+  .md\:flex,
+  .lg\:flex,
+  .sm\:grid,
+  .md\:grid,
+  .lg\:grid {
+    display: none !important;
+  }
+
+  /* Excepciones para elementos que deben ser flex o grid en móvil */
+  div.flex.sm\:hidden,
+  div.flex.md\:hidden {
+    display: flex !important;
+  }
+
+  div.grid.sm\:hidden,
+  div.grid.md\:hidden {
+    display: grid !important;
+  }
+
+  /* Reset de Grids a 1 columna */
+  .md\:grid-cols-2,
+  .md\:grid-cols-3,
+  .md\:grid-cols-4,
+  .lg\:grid-cols-3,
+  .lg\:grid-cols-4,
+  .sm\:grid-cols-2 {
+    grid-template-columns: repeat(1, minmax(0, 1fr)) !important;
+  }
+
+  /* Ajustes de layout para forzar verticalidad */
+  .md\:flex-row {
+    flex-direction: column !important;
+  }
+
+  .md\:mt-6 {
+    margin-top: 1rem !important;
+  }
+
+  .md\:px-6 {
+    padding-left: 1rem !important;
+    padding-right: 1rem !important;
+  }
+
+  .md\:p-6 {
+    padding: 1rem !important;
+  }
+
+  /* Forzar ancho completo para elementos con anchos fijos de escritorio */
+  .md\:w-\[450px\],
+  .lg\:w-\[500px\] {
+    width: 100% !important;
+  }
+}
+
+/* Animaciones globales */
 @keyframes fade-up {
   from {
     opacity: 0;
     transform: translateY(20px);
   }
+
   to {
     opacity: 1;
     transform: translateY(0);
@@ -17,48 +148,9 @@
   animation: fade-up 0.3s ease-out;
 }
 
-@keyframes loading {
-  0% {
-    width: 0%;
-    margin-left: 0;
-  }
-  50% {
-    width: 100%;
-    margin-left: 0;
-  }
-  100% {
-    width: 0%;
-    margin-left: 100%;
-  }
-}
-
-@keyframes backgroundMove {
-  from {
-    background-position: 0 0;
-  }
-  to {
-    background-position: 100% 100%;
-  }
-}
-
-/* Hide scrollbar but keep functionality */
-.no-scrollbar {
-  -ms-overflow-style: none;  /* IE and Edge */
-  scrollbar-width: none;  /* Firefox */
-}
-
-.no-scrollbar::-webkit-scrollbar {
-  display: none; /* Chrome, Safari and Opera */
-}
-
-/* Custom scrollbar for chat */
-.custom-scrollbar {
-  scrollbar-width: thin;
-  scrollbar-color: rgba(244, 63, 94, 0.3) transparent;
-}
-
+/* Scrollbar personalizada para el contenedor interno */
 .custom-scrollbar::-webkit-scrollbar {
-  width: 6px;
+  width: 5px;
 }
 
 .custom-scrollbar::-webkit-scrollbar-track {
@@ -66,7 +158,20 @@
 }
 
 .custom-scrollbar::-webkit-scrollbar-thumb {
-  background-color: rgba(244, 63, 94, 0.3);
-  border-radius: 20px;
-  border: transparent;
+  background: rgba(244, 63, 94, 0.2);
+  border-radius: 10px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: rgba(244, 63, 94, 0.4);
+}
+
+/* Ocultar scrollbar pero mantener funcionalidad */
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
 }

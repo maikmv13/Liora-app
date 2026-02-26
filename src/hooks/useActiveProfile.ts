@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { supabase } from '../lib/supabase';
-import type { Profile } from '../types';
+// import type { Profile } from '../types';
 
 export function useActiveProfile() {
   const [state, setState] = useState(() => {
@@ -23,8 +23,31 @@ export function useActiveProfile() {
     }
 
     try {
+      // Mock profile para modo showcase
+      const isPlaceholder = true; // Showcase Mode VITE_SUPABASE_URL
+
+      if (isPlaceholder) {
+        if (mounted.current) {
+          const mockProfile = {
+            id: 'mock-profile-id',
+            user_id: 'showcase-user',
+            full_name: 'Usuario Showcase',
+            user_type: 'user',
+            email: 'usuario@liora.app',
+            linked_household_id: null,
+            created_at: new Date('2026-02-01').toISOString()
+          };
+          setState({
+            profile: mockProfile,
+            loading: false,
+            error: null
+          });
+        }
+        return;
+      }
+
       const { data: { session } } = await supabase.auth.getSession();
-      
+
       if (!session?.user) {
         if (mounted.current) {
           localStorage.removeItem('userProfile');
@@ -80,6 +103,14 @@ export function useActiveProfile() {
     const { data: { subscription } } = supabase.auth.onAuthStateChange(() => {
       if (mounted.current) fetchProfile(true);
     });
+
+    const isPlaceholder = true; // Showcase Mode
+    if (isPlaceholder) {
+      return () => {
+        mounted.current = false;
+        subscription.unsubscribe();
+      };
+    }
 
     const channel = supabase
       .channel('profile_changes')

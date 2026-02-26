@@ -1,12 +1,12 @@
 import { createClient } from '@supabase/supabase-js';
 import type { Database } from '../types/supabase';
 
-const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
-const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
+const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || 'https://placeholder.supabase.co';
+const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY || 'placeholder-key';
 
-if (!supabaseUrl || !supabaseAnonKey) {
-  throw new Error('Missing Supabase environment variables');
-}
+// if (!supabaseUrl || !supabaseAnonKey) {
+//   throw new Error('Missing Supabase environment variables');
+// }
 
 // Create Supabase client with retries
 export const supabase = createClient<Database>(supabaseUrl, supabaseAnonKey, {
@@ -23,6 +23,13 @@ export const supabase = createClient<Database>(supabaseUrl, supabaseAnonKey, {
   },
   db: {
     schema: 'public'
+  },
+  // Realtime configuration to avoid infinite loop of connection errors
+  realtime: {
+    params: {
+      eventsPerSecond: 1
+    },
+    timeout: 20000
   }
 });
 
@@ -33,30 +40,30 @@ export async function retryOperation<T>(
   delay = 1000
 ): Promise<T> {
   let lastError: any;
-  
+
   for (let i = 0; i < maxRetries; i++) {
     try {
       return await operation();
     } catch (error) {
       lastError = error;
       console.warn(`Operation failed (attempt ${i + 1}/${maxRetries}):`, error);
-      
+
       if (i < maxRetries - 1) {
         await new Promise(resolve => setTimeout(resolve, delay * Math.pow(2, i)));
       }
     }
   }
-  
+
   throw lastError;
 }
 
 // Health check function
 export const checkSupabaseConnection = async (): Promise<boolean> => {
   try {
-    const { data, error } = await retryOperation(async () => 
+    const { error } = await retryOperation(async () =>
       await supabase.from('recipes').select('id').limit(1)
     );
-    
+
     return !error;
   } catch (error) {
     console.error('Supabase health check failed:', error);

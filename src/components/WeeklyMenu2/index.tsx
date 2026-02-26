@@ -18,6 +18,19 @@ import { ChefHat } from 'lucide-react';
 import { useFavorites } from '../../hooks/useFavorites';
 import { MenuActivityLog } from './components/MenuActivityLog';
 
+interface MenuActivity {
+  id: string;
+  user_id: string;
+  linked_household_id: string | null;
+  meal_type: string;
+  day: string;
+  recipe_id: string | null;
+  action_type: 'add' | 'remove';
+  created_at: string;
+  user_name?: string;
+  recipe_name?: string;
+}
+
 // Interfaz para props de WeeklyMenu2
 interface WeeklyMenu2Props {
   weeklyMenu: MenuItem[];
@@ -113,6 +126,12 @@ export function WeeklyMenu2({
   // Handle menu updates
   const handleAddToMenu = async (recipe: Recipe | null, day: string, meal: MealType) => {
     try {
+      const isPlaceholder = true; // Showcase Mode VITE_SUPABASE_URL
+      if (isPlaceholder) {
+        console.log('Showcase mode: Add to menu bypassed', { recipe, day, meal });
+        return;
+      }
+
       if (!id || !profile) {
         console.error('No hay un usuario autenticado o perfil');
         return;
@@ -213,14 +232,14 @@ export function WeeklyMenu2({
       if (activityError) throw activityError;
 
       // Actualizar el estado local
-      const newActivity = {
+      const newActivity: MenuActivity = {
         id: Date.now().toString(),
         user_id: id!,
         linked_household_id: profile.linked_household_id,
         meal_type: meal,
         day,
         recipe_id: recipe?.id || null,
-        action_type: recipe ? 'add' : 'remove',
+        action_type: (recipe ? 'add' : 'remove') as 'add' | 'remove',
         created_at: new Date().toISOString(),
         user_name: profile.full_name,
         recipe_name: recipe?.name
@@ -235,11 +254,11 @@ export function WeeklyMenu2({
     }
   };
 
-  const { 
-    isGenerating, 
-    lastGenerated, 
-    handleGenerateMenu, 
-    handleExport 
+  const {
+    isGenerating,
+    lastGenerated,
+    handleGenerateMenu,
+    handleExport
   } = useMenuActions(
     id,
     isHousehold,
@@ -309,11 +328,11 @@ export function WeeklyMenu2({
   const handleToggleFavorite = async (recipeId: string) => {
     try {
       const isFavorite = personalFavorites.some(f => f.recipe_id === recipeId);
-      
+
       if (isFavorite) {
-        await removeFavorite({ recipe_id: recipeId });
+        await removeFavorite({ recipe_id: recipeId } as any);
       } else {
-        await addFavorite({ recipe_id: recipeId });
+        await addFavorite({ recipe_id: recipeId } as any);
       }
 
       // Abrir el selector después de toggle
@@ -363,7 +382,7 @@ export function WeeklyMenu2({
   return (
     <>
       {/* Recipe Selector Sidebar */}
-      <RecipeSelectorSidebar 
+      <RecipeSelectorSidebar
         isOpen={showRecipeSelector}
         onClose={() => {
           console.log('Closing recipe selector');
@@ -437,14 +456,14 @@ export function WeeklyMenu2({
               history={menuHistory}
               onRestore={handleRestoreMenu}
               onHistoryChange={setMenuHistory}
-              onMenuArchived={() => {}}
+              onMenuArchived={() => { }}
             />
           </div>
         )}
 
         {/* Registro de Actividades - Ahora al final del contenedor principal */}
         <div className="mt-8">
-          <MenuActivityLog activities={menuActivities} />
+          <MenuActivityLog activities={menuActivities} menuId="showcase-menu" />
         </div>
       </div>
     </>

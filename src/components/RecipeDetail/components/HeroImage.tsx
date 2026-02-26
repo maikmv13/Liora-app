@@ -4,6 +4,7 @@ import type { Recipe } from '../../../types';
 import { motion, AnimatePresence } from 'framer-motion';
 import confetti from 'canvas-confetti';
 import { FavoriteAddedNotification } from '../../RecipeList/FavoriteAddedNotification';
+import { getOptimizedUnsplashUrl } from '../../../utils/imageUtils';
 
 interface HeroImageProps {
   recipe: Recipe;
@@ -74,12 +75,12 @@ export function HeroImage({ recipe, onToggleFavorite, isFavorite }: HeroImagePro
             >
               <motion.div
                 initial={{ scale: 1, opacity: 1 }}
-                animate={{ 
+                animate={{
                   scale: [1, 1.5, 0.5],
                   opacity: [1, 1, 0],
                   rotate: [0, 0, 45]
                 }}
-                transition={{ 
+                transition={{
                   duration: 0.8,
                   times: [0, 0.5, 1],
                   ease: "easeInOut"
@@ -93,7 +94,7 @@ export function HeroImage({ recipe, onToggleFavorite, isFavorite }: HeroImagePro
 
         {recipe.image_url ? (
           <img
-            src={recipe.image_url}
+            src={getOptimizedUnsplashUrl(recipe.image_url, 800, 75)}
             alt={recipe.name}
             className="w-full h-full object-cover"
           />
@@ -108,7 +109,7 @@ export function HeroImage({ recipe, onToggleFavorite, isFavorite }: HeroImagePro
         <div className="absolute bottom-0 left-0 right-0 p-4">
           <div className="leading-tight">
             <h1 className="text-2xl font-bold text-white inline">{recipe.name}</h1>
-            
+
             {recipe.side_dish && (
               <span className="text-lg text-white/90"> {recipe.side_dish}</span>
             )}
@@ -127,7 +128,7 @@ export function HeroImage({ recipe, onToggleFavorite, isFavorite }: HeroImagePro
               </span>
             )}
           </div>
-          
+
           {/* Segunda línea: Botones de acción */}
           <div className="flex items-center gap-2 mt-2">
             <motion.button
@@ -137,8 +138,8 @@ export function HeroImage({ recipe, onToggleFavorite, isFavorite }: HeroImagePro
               disabled={isAnimating}
               className={`
                 flex items-center space-x-1 px-2 py-1 backdrop-blur-sm rounded-lg transition-all duration-500
-                ${isFavorite 
-                  ? 'bg-rose-500 text-white hover:bg-rose-600' 
+                ${isFavorite
+                  ? 'bg-rose-500 text-white hover:bg-rose-600'
                   : 'bg-white/20 text-white hover:bg-rose-500'
                 }
                 ${isAnimating ? 'opacity-50 cursor-not-allowed' : ''}
@@ -154,8 +155,8 @@ export function HeroImage({ recipe, onToggleFavorite, isFavorite }: HeroImagePro
                   ease: "easeInOut"
                 }}
               >
-                <Heart 
-                  size={14} 
+                <Heart
+                  size={14}
                   className={`transition-all duration-500 transform
                     ${isFavorite ? 'fill-current scale-110' : 'scale-100'}
                   `}
@@ -203,7 +204,7 @@ export function HeroImage({ recipe, onToggleFavorite, isFavorite }: HeroImagePro
               onClick={() => setShowImageModal(false)}
               className="fixed inset-0 bg-black/80 backdrop-blur-sm z-[60]"
             />
-            
+
             {/* Modal - Aumentado el z-index a 61 */}
             <motion.div
               initial={{ opacity: 0, scale: 0.95 }}
@@ -221,7 +222,7 @@ export function HeroImage({ recipe, onToggleFavorite, isFavorite }: HeroImagePro
 
               {/* Imagen */}
               <img
-                src={recipe.image_url}
+                src={getOptimizedUnsplashUrl(recipe.image_url, 1200, 80)}
                 alt={recipe.name}
                 className="max-w-full max-h-[calc(100vh-2rem)] object-contain rounded-lg"
               />

@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { supabase } from '../lib/supabase';
 import type { FavoriteRecipe } from '../types';
 import { useActiveProfile } from './useActiveProfile';
+import { MOCK_FAVORITES } from '../data/mockData';
 
 // Interfaces para los datos anidados que devuelve la consulta
 interface RawRecipe {
@@ -42,8 +43,18 @@ export function useFavorites(isHouseholdView?: boolean) {
 
   const fetchFavorites = async () => {
     try {
+      /*
       if (!userId) {
         setLoading(false);
+        return;
+      }
+      */
+
+      const isPlaceholder = true; // Showcase Mode VITE_SUPABASE_URL
+      if (isPlaceholder) {
+        setFavorites(MOCK_FAVORITES);
+        setLoading(false);
+        setError(null);
         return;
       }
 
@@ -80,17 +91,15 @@ export function useFavorites(isHouseholdView?: boolean) {
 
       if (favoritesError) throw favoritesError;
 
-      console.log('Raw favorites data:', favoritesData?.[0]);
-
       // Transformar datos utilizando tipado adecuado
-      const transformedFavorites: FavoriteRecipe[] = [];
-      
+      let transformedFavorites: FavoriteRecipe[] = [];
+
       favoritesData?.forEach(fav => {
-        // Verificamos que los objetos anidados existan
+        // ... transformation logic ...
         if (fav) {
-          const recipe = fav.recipes || {};
-          const profile = fav.profiles || {};
-          
+          const recipe = (fav as any).recipes || {};
+          const profile = (fav as any).profiles || {};
+
           transformedFavorites.push({
             id: fav.id,
             created_at: fav.created_at,
@@ -111,7 +120,11 @@ export function useFavorites(isHouseholdView?: boolean) {
         }
       });
 
-      console.log('Transformed favorites:', transformedFavorites);
+      // Fallback a MOCK_FAVORITES
+      if (transformedFavorites.length === 0) {
+        transformedFavorites = MOCK_FAVORITES;
+      }
+
       setFavorites(transformedFavorites);
       setLoading(false);
       setError(null);
@@ -126,9 +139,12 @@ export function useFavorites(isHouseholdView?: boolean) {
   useEffect(() => {
     fetchFavorites();
 
+    const isPlaceholder = true; // Showcase Mode
+    if (isPlaceholder) return;
+
     // Suscribirse a cambios en tiempo real
     const channel = supabase.channel('favorites_changes');
-    
+
     const subscription = channel
       .on(
         'postgres_changes',
@@ -179,7 +195,7 @@ export function useFavorites(isHouseholdView?: boolean) {
       }
 
       // Actualizar el estado inmediatamente para la UI
-      setFavorites(prev => 
+      setFavorites(prev =>
         prev.filter(f => f.id !== recipe.id)
       );
 
