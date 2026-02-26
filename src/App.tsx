@@ -21,6 +21,7 @@
  */
 
 import { Suspense, lazy, useState, useEffect } from 'react';
+import { AnimatePresence, motion } from 'framer-motion';
 import { BrowserRouter as Router, Routes, Route, Navigate, useLocation, useNavigate } from 'react-router-dom';
 import { Header } from './components/Header/Header';
 import { Navigation } from './components/Navigation';
@@ -170,75 +171,79 @@ function AppContent() {
       <main className={`flex-1 overflow-y-auto overflow-x-hidden custom-scrollbar ${location.pathname.startsWith('/recipe/') ? '' : 'px-4 pt-20 pb-24'
         }`}>
         <div className="container mx-auto pb-8">
-          <Suspense fallback={<LoadingFallback />}>
-            <Routes>
-              <Route
-                path="/recetas"
-                element={
-                  <RecipeContent
-                    loading={recipesLoading}
-                    error={null}
-                    recipes={recipes}
-                    onRecipeSelect={() => { }}
-                    favorites={favorites.map(f => f.id)}
-                    onToggleFavorite={handleToggleFavorite}
-                    loadingFallback={LoadingFallback}
+          <AnimatePresence mode="wait" initial={false}>
+            <motion.div
+              key={location.key}
+              initial={{ opacity: 0, y: 8 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -8 }}
+              transition={{ duration: 0.22, ease: 'easeInOut' }}
+            >
+              <Suspense fallback={<LoadingFallback />}>
+                <Routes location={location}>
+                  <Route
+                    path="/recetas"
+                    element={
+                      <RecipeContent
+                        loading={recipesLoading}
+                        error={null}
+                        recipes={recipes}
+                        onRecipeSelect={() => { }}
+                        favorites={favorites.map(f => f.id)}
+                        onToggleFavorite={handleToggleFavorite}
+                        loadingFallback={LoadingFallback}
+                      />
+                    }
                   />
-                }
-              />
-              <Route
-                path="/recipe/:id"
-                element={
-                  <RecipeDetail
-                    recipes={recipes}
-                    onToggleFavorite={handleToggleFavorite}
-                    favorites={favorites}
+                  <Route
+                    path="/recipe/:id"
+                    element={
+                      <RecipeDetail
+                        recipes={recipes}
+                        onToggleFavorite={handleToggleFavorite}
+                        favorites={favorites}
+                      />
+                    }
                   />
-                }
-              />
-              <Route
-                path="/menu"
-                element={
-                  <WeeklyMenu2
-                    weeklyMenu={weeklyMenu}
-                    onRecipeSelect={() => { }}
-                    onAddToMenu={handleAddToMenu}
-                    forUserId={user?.id}
+                  <Route
+                    path="/menu"
+                    element={
+                      <WeeklyMenu2
+                        weeklyMenu={weeklyMenu}
+                        onRecipeSelect={() => { }}
+                        onAddToMenu={handleAddToMenu}
+                        forUserId={user?.id}
+                      />
+                    }
                   />
-                }
-              />
-              <Route
-                path="/compra"
-                element={
-                  <ShoppingList
-                    items={shoppingList}
-                    onToggleItem={toggleItem}
+                  <Route
+                    path="/compra"
+                    element={
+                      <ShoppingList
+                        items={shoppingList}
+                        onToggleItem={toggleItem}
+                      />
+                    }
                   />
-                }
-              />
-              <Route
-                path="/favoritos"
-                element={
-                  <Favorites
-                    favorites={favorites}
-                    onRemoveFavorite={removeFavorite}
-                    onUpdateFavorite={updateFavorite}
-                    loading={favoritesLoading}
-                    error={favoritesError}
+                  <Route
+                    path="/favoritos"
+                    element={
+                      <Favorites
+                        favorites={favorites}
+                        onRemoveFavorite={removeFavorite}
+                        onUpdateFavorite={updateFavorite}
+                        loading={favoritesLoading}
+                        error={favoritesError}
+                      />
+                    }
                   />
-                }
-              />
-              <Route
-                path="/profile"
-                element={<Profile />}
-              />
-              <Route
-                path="/liora"
-                element={<LioraChat />}
-              />
-              <Route path="/" element={<Navigate to="/recetas" replace />} />
-            </Routes>
-          </Suspense>
+                  <Route path="/profile" element={<Profile />} />
+                  <Route path="/liora" element={<LioraChat />} />
+                  <Route path="/" element={<Navigate to="/recetas" replace />} />
+                </Routes>
+              </Suspense>
+            </motion.div>
+          </AnimatePresence>
         </div>
 
         <footer className="py-4 px-6 text-center text-sm text-gray-500 border-t border-rose-100/20 bg-white/50 backdrop-blur-sm mt-auto">
