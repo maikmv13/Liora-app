@@ -98,7 +98,7 @@ export function RecipeDetail({ recipes, onToggleFavorite, favorites }: RecipeDet
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-rose-50/50 to-orange-50/50">
+    <div className="min-h-screen w-full overflow-x-hidden bg-gradient-to-br from-rose-50/50 to-orange-50/50">
       <HeroImage
         recipe={recipe}
         onToggleFavorite={() => onToggleFavorite(recipe)}

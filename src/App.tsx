@@ -170,7 +170,7 @@ function AppContent() {
 
       <main className={`flex-1 overflow-y-auto overflow-x-hidden custom-scrollbar ${location.pathname.startsWith('/recipe/') ? '' : 'px-4 pt-20 pb-24'
         }`}>
-        <div className="container mx-auto pb-8">
+        <div className={location.pathname.startsWith('/recipe/') ? '' : 'container mx-auto pb-8'}>
           <AnimatePresence mode="wait" initial={false}>
             <motion.div
               key={location.key}
@@ -178,6 +178,7 @@ function AppContent() {
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -8 }}
               transition={{ duration: 0.22, ease: 'easeInOut' }}
+              className="w-full"
             >
               <Suspense fallback={<LoadingFallback />}>
                 <Routes location={location}>
@@ -299,9 +300,17 @@ function PostMessageBridge() {
             const el = document.querySelector<HTMLElement>(selector);
             if (el) {
               el.click();
-              console.log('[PostMessageBridge] Clicked:', selector);
+              const r = el.getBoundingClientRect();
+              window.parent.postMessage({
+                type: 'action-executed',
+                action: 'click',
+                selector,
+                rect: { left: r.left, top: r.top, width: r.width, height: r.height }
+              }, '*');
+              console.log('[PostMessageBridge] Clicked:', selector, r);
             } else {
               console.warn('[PostMessageBridge] No element found for selector:', selector);
+              window.parent.postMessage({ type: 'action-executed', action: 'click', selector, rect: null }, '*');
             }
           }
           break;
@@ -309,6 +318,8 @@ function PostMessageBridge() {
         case 'navigate': {
           if (path) {
             navigate(path);
+            // No element to measure on navigate — send confirmation only
+            window.parent.postMessage({ type: 'action-executed', action: 'navigate', path, rect: null }, '*');
             console.log('[PostMessageBridge] Navigated to:', path);
           }
           break;
