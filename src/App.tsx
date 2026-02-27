@@ -298,9 +298,21 @@ function PostMessageBridge() {
         case 'click': {
           if (selector) {
             const el = document.querySelector<HTMLElement>(selector);
-            if (el) {
+            if (!el) {
+              console.warn('[PostMessageBridge] No element found for selector:', selector);
+              window.parent.postMessage({ type: 'action-executed', action: 'click', selector, rect: null }, '*');
+              break;
+            }
+            const r = el.getBoundingClientRect();
+            // 1️⃣ Primero: avisar a ATLAS dónde mover el cursor (antes del click real)
+            window.parent.postMessage({
+              type: 'pre-click',
+              selector,
+              rect: { left: r.left, top: r.top, width: r.width, height: r.height }
+            }, '*');
+            // 2️⃣ Después: esperar a que el cursor llegue y ENTONCES hacer el click
+            setTimeout(() => {
               el.click();
-              const r = el.getBoundingClientRect();
               window.parent.postMessage({
                 type: 'action-executed',
                 action: 'click',
@@ -308,10 +320,7 @@ function PostMessageBridge() {
                 rect: { left: r.left, top: r.top, width: r.width, height: r.height }
               }, '*');
               console.log('[PostMessageBridge] Clicked:', selector, r);
-            } else {
-              console.warn('[PostMessageBridge] No element found for selector:', selector);
-              window.parent.postMessage({ type: 'action-executed', action: 'click', selector, rect: null }, '*');
-            }
+            }, 850);
           }
           break;
         }
